@@ -746,6 +746,7 @@
 .kb-colh .n { background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 0 9px; font-size: 12px; }
 .kb-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
 .kb-card:hover, .kb-card:focus { border-color: #2E427B; outline: none; }
+.kb-card.sel { border-color: #2E427B; background: var(--info-bg); box-shadow: 0 0 0 2px rgba(46,66,123,.25); }
 .kb-t { font-weight: 600; font-size: 13.5px; }
 .kb-w { font-size: 12.5px; color: #5B606D; margin-top: 2px; }
 .kb-m { font-size: 13px; margin-top: 6px; font-variant-numeric: tabular-nums; }
@@ -3787,6 +3788,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
         <!-- Liste et contrôle -->
         <div class="ppane on" id="co-list">
+          <div class="actionbar"><div class="row-toolbar" id="co-rowbar"></div><div class="actions" id="co-bar-right"></div></div>
           <div class="kb-sum"><span id="co-prog"></span><span id="co-rights" hidden></span></div>
         <div class="kanban" id="co-kanban"></div>
 
@@ -10375,10 +10377,28 @@ function fmAxes() {
     coMsg('Relance envoyée à ' + p.who + ' pour « ' + p.p + ' ».', 'ok');
     renderCoList();
   }
+  var coSel = null;
+  /* Barre d'actions de la collecte : alignée avec « Consolider », activée par la carte sélectionnée */
+  function coRenderBar(c) {
+    var bar = document.getElementById('co-rowbar'); bar.innerHTML = '';
+    var p = c && coSel ? c.perims.filter(function (x) { return x.p === coSel; })[0] : null;
+    if (!p) coSel = null;
+    var col = p ? kbCol(p) : null;
+    [['Détails', !!p, function () { openCtrl(p.p); }],
+     ['Relancer', col === 'new' || col === 'draft', function () { coRelance(p); }],
+     ['Vérifier', col === 'subm', function () { openCtrl(p.p); }],
+     ['Clôturer', col === 'subm', function () { coQuickClose(p); }],
+     ['Retourner', col === 'subm', function () { openCtrl(p.p); ctrlDec = 'Retourner'; renderCtrl(); document.getElementById('co-motif').focus(); }]].forEach(function (a) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'btn' + (a[0] === 'Clôturer' && a[1] ? ' primary' : ''); b.textContent = a[0]; b.disabled = !a[1];
+      b.addEventListener('click', a[2]); bar.appendChild(b);
+    });
+    var h = document.createElement('span'); h.className = 'rt-hint'; h.hidden = !!p; h.textContent = 'Sélectionnez un périmètre'; bar.appendChild(h);
+  }
   function renderCoList() {
     var c = coCamp();
     var box = document.getElementById('co-kanban');
     box.innerHTML = '';
+    coRenderBar(c);
     var cb = document.getElementById('co-consolider'), ct = document.querySelector('#v-collecte .tabs .ptab[data-ptab-target="co-consol"]');
     if (!c) { cb.disabled = true; return; }
     var counts = {};
@@ -10395,32 +10415,12 @@ function fmAxes() {
         card.setAttribute('role', 'button'); card.setAttribute('aria-label', 'Ouvrir le détail de ' + p.p);
         var t = document.createElement('div'); t.className = 'kb-t'; t.textContent = p.p; card.appendChild(t);
         var w = document.createElement('div'); w.className = 'kb-w'; w.textContent = p.who || 'Aucun contributeur affecté'; card.appendChild(w);
-        if (p.amt) { var m = document.createElement('div'); m.className = 'kb-m'; m.textContent = fmt(p.amt) + ' MGA'; card.appendChild(m); }
-        if (p.min != null || p.env != null) { var rg = document.createElement('div'); rg.className = 'kb-w'; rg.textContent = (p.min != null ? 'Min ' + fmt(p.min) : '') + (p.min != null && p.env != null ? ' · ' : '') + (p.env != null ? 'Max ' + fmt(p.env) : ''); card.appendChild(rg); }
-                var fl = document.createElement('div'); fl.className = 'kb-flags';
-        if (p.amt && p.env != null && p.amt > p.env) fl.appendChild(badge('Au-dessus du maximum', 'b-ko'));
-        else if (p.amt && p.min != null && p.amt < p.min) fl.appendChild(badge('Sous le minimum', 'b-warn'));
-        if (kbReturned(p)) { var rb = badge('Retourné', 'b-ko'); rb.title = p.motif ? 'Retourné au brouillon : ' + p.motif : 'Retourné au brouillon'; fl.appendChild(rb); }
-        if (p.pj && p.pj.length) { var pb = badge('📎 ' + p.pj.length, 'b-neutral'); pb.title = pl(p.pj.length, 'pièce jointe'); fl.appendChild(pb); }
-        if (p.relance) { var rl = badge('Relancé', 'b-info'); rl.title = 'Dernière relance : ' + p.relance; fl.appendChild(rl); }
-        if (fl.children.length) card.appendChild(fl);
-        if (col.id === 'new' || col.id === 'draft') {
-          var ac = document.createElement('div'); ac.className = 'kb-act';
-          var br = document.createElement('button'); br.className = 'btn small'; br.type = 'button'; br.textContent = 'Relancer';
-          br.addEventListener('click', function (ev) { ev.stopPropagation(); coRelance(p); });
-          ac.appendChild(br); card.appendChild(ac);
-        }
-        if (col.id === 'subm') {
-          var as = document.createElement('div'); as.className = 'kb-act';
-          [['Vérifier', function () { openCtrl(p.p); }], ['Clôturer', function () { coQuickClose(p); }], ['Retourner', function () { openCtrl(p.p); ctrlDec = 'Retourner'; renderCtrl(); document.getElementById('co-motif').focus(); }]].forEach(function (a, k) {
-            var b = document.createElement('button'); b.className = 'btn small' + (k === 1 ? ' primary' : ''); b.type = 'button'; b.textContent = a[0];
-            b.addEventListener('click', function (ev) { ev.stopPropagation(); a[1](); });
-            as.appendChild(b);
-          });
-          card.appendChild(as);
-        }
-        card.addEventListener('click', function () { openCtrl(p.p); });
-        card.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCtrl(p.p); } });
+        /* La carte n'affiche que le périmètre et le contributeur ; les actions sont dans la barre du haut */
+        card.dataset.p = p.p; card.setAttribute('aria-label', 'Sélectionner ' + p.p);
+        if (coSel === p.p) card.classList.add('sel');
+        card.addEventListener('click', function () { coSel = p.p; renderCoList(); });
+        card.addEventListener('dblclick', function () { openCtrl(p.p); });
+        card.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); coSel = p.p; renderCoList(); } });
         cd.appendChild(card);
       });
       box.appendChild(cd);
@@ -19856,6 +19856,9 @@ function pcRenderEnv(){
   function init() { [].forEach.call(document.querySelectorAll('tbody'), queue); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window.rowActionsRefresh = init;
+  /* Collecte : « Consolider » rejoint la barre d'actions, sur la même ligne que les boutons de la carte sélectionnée */
+  var cons = document.getElementById('co-consolider'), consBox = document.getElementById('co-bar-right');
+  if (cons && consBox) consBox.appendChild(cons);
   /* Liste Configuration : les boutons de ligne passent en haut à gauche, sous le titre */
   var host = document.getElementById('bl-actions'), flt = document.querySelector('#v-list .filters');
   if (host && flt) {
