@@ -3797,14 +3797,18 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="body">
             <div id="co-d-head" class="co-kpis"></div>
             <div class="callout" id="co-d-ret" hidden style="margin-bottom:14px;background:var(--warn-bg);color:#B45309"></div>
+            <section class="co-blk" id="co-d-env">
+              <div class="kb-h">Enveloppe et montant demandé</div>
+              <div class="co-env3" id="co-d-env3"></div>
+              <div class="track co-envbar"><div class="fill" id="co-d-envfill" style="width:0"></div></div>
+              <div id="co-d-envst" style="margin-top:8px"></div>
+            </section>
             <section class="co-blk">
               <div class="kb-h">Lignes de la contribution</div>
-              <div class="scroll"><table style="min-width:760px"><thead><tr><th>Ligne</th><th>Nature</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Justification</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
+              <div class="scroll"><table style="min-width:980px"><thead><tr><th>Ligne</th><th>Nature</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire du contributeur</th><th>Pièces jointes</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
             </section>
-            <div class="co-two">
-              <section class="co-blk"><div class="kb-h">Pièces jointes</div><div id="co-d-pj"></div></section>
-              <section class="co-blk"><div class="kb-h">Contrôles</div><div id="co-ctrl-list"></div></section>
-            </div>
+            <section class="co-blk"><div class="kb-h">Pièces jointes de la contribution</div><div id="co-d-pj"></div></section>
+            <section class="co-blk"><div class="kb-h">Contrôles</div><div id="co-ctrl-list"></div></section>
             <section class="co-blk" id="co-d-dec">
               <div class="kb-h">Validation de collecte</div>
               <div class="co-dec-grid">
@@ -3850,7 +3854,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="card" style="margin-bottom:12px">
             <div class="scroll">
               <table style="min-width:1180px">
-                <thead><tr><th>Ligne</th><th>Axes</th><th class="num">Montant (MGA)</th><th>Répartition</th><th>Justification</th><th>Contrôle</th><th></th></tr></thead>
+                <thead><tr><th>Ligne</th><th>Axes</th><th class="num">Montant (MGA)</th><th>Répartition</th><th>Commentaire / justification</th><th>Contrôle</th><th>Pièces jointes</th><th></th></tr></thead>
                 <tbody id="cs-body"></tbody>
                 <tfoot><tr><td colspan="2">Total du périmètre</td><td class="num" id="cs-t3"></td><td colspan="4"></td></tr><tr id="cs-min-row" hidden><td colspan="2">Enveloppe minimale du périmètre</td><td class="num" id="cs-min"></td><td colspan="4" id="cs-min-st"></td></tr><tr id="cs-env-row" hidden><td colspan="2">Enveloppe maximale du périmètre</td><td class="num" id="cs-env"></td><td colspan="4" id="cs-env-st"></td></tr><tr hidden><td id="cs-t1"></td><td id="cs-t2"></td><td id="cs-t4"></td></tr></tfoot>
               </table>
@@ -10250,12 +10254,12 @@ function fmAxes() {
   var COL = {
     'Direction de l’Enseignement fondamental': [
       { c: 'P1.1', l: 'Salaires du personnel enseignant', nat: '61', ref: 6800000000, dem: 6900000000, just: 'Revalorisation indiciaire 2027' },
-      { c: 'P1.2', l: 'Fournitures et manuels scolaires', nat: '60', ref: 900000000, dem: 920000000, just: '' },
+      { c: 'P1.2', l: 'Fournitures et manuels scolaires', nat: '60', ref: 900000000, dem: 920000000, q: 460000, p: 2000, just: 'Manuels du primaire à renouveler', pj: ['Devis_manuels.pdf'] },
       { c: 'P1.3', l: 'Centres d’alphabétisation', nat: '65', ref: 420000000, dem: 380000000, just: '' }
     ],
     'Direction de l’Enseignement supérieur': [
-      { c: 'P2.1', l: 'Bourses d’études', nat: '65', ref: 2600000000, dem: 2700000000, just: '' },
-      { c: 'P2.2', l: 'Fonctionnement des universités', nat: '62', ref: 1300000000, dem: 1400000000, just: '' }
+      { c: 'P2.1', l: 'Bourses d’études', nat: '65', ref: 2600000000, dem: 2700000000, q: 1350000, p: 2000, just: '50 000 boursiers supplémentaires prévus à la rentrée', pj: ['Liste_boursiers_2027.xlsx'] },
+      { c: 'P2.2', l: 'Fonctionnement des universités', nat: '62', ref: 1300000000, dem: 1400000000, q: 14, p: 100000000, just: 'Hausse des coûts d’énergie et de maintenance (14 établissements)', pj: ['Facture_JIRAMA.pdf', 'Devis_maintenance.pdf'] }
     ],
     'Direction des Infrastructures': [
       { c: 'P3.1', l: 'Construction et réhabilitation', nat: '21', ref: 3000000000, dem: 3400000000, just: '' },
@@ -10439,21 +10443,36 @@ function fmAxes() {
     document.getElementById('co-ctrl-title').textContent = 'Détail — ' + name;
     var hd = document.getElementById('co-d-head'); hd.innerHTML = '';
     function kpi(label, node) { var k = document.createElement('div'); k.className = 'co-kpi'; var l = document.createElement('div'); l.className = 'l'; l.textContent = label; var v = document.createElement('div'); v.className = 'v'; if (typeof node === 'string') v.textContent = node; else v.appendChild(node); k.appendChild(l); k.appendChild(v); hd.appendChild(k); }
+    var dlAll = getLines(name).filter(function (l) { return l.dem != null; });
     kpi('Statut', perimBadge(p.st));
     kpi('Contributeur', p.who || 'Non affecté');
-    kpi('Montant demandé', p.amt ? fmt(p.amt) + ' MGA' : '—');
-    kpi('Enveloppe min / max', (p.min != null ? fmt(p.min) : '—') + ' / ' + (p.env != null ? fmt(p.env) : '—'));
+    kpi('Lignes saisies', String(dlAll.length));
+    /* Enveloppe minimale / maximale et montant demandé */
+    var tot = dlAll.reduce(function (s, l) { return s + (l.dem || 0); }, 0), e3 = document.getElementById('co-d-env3'); e3.innerHTML = '';
+    [['Minimum', p.min != null ? fmt(p.min) + ' MGA' : 'Sans minimum'], ['Montant demandé', fmt(tot) + ' MGA'], ['Maximum', p.env != null ? fmt(p.env) + ' MGA' : 'Sans plafond']].forEach(function (x) {
+      var k = document.createElement('div'); k.className = 'co-kpi'; k.innerHTML = '<div class="l">' + x[0] + '</div><div class="v">' + x[1] + '</div>'; e3.appendChild(k);
+    });
+    var ref100 = p.env != null ? p.env : Math.max(tot, p.min || 0, 1);
+    document.getElementById('co-d-envfill').style.width = Math.min(100, Math.round(100 * tot / ref100)) + '%';
+    var est = document.getElementById('co-d-envst'); est.innerHTML = '';
+    if (p.env != null && tot > p.env) est.appendChild(badge('Au-dessus du maximum de ' + fmt(tot - p.env) + ' MGA', 'b-ko'));
+    else if (p.min != null && tot < p.min) est.appendChild(badge('Sous le minimum : il manque ' + fmt(p.min - tot) + ' MGA', 'b-warn'));
+    else est.appendChild(badge(p.env != null ? 'Dans l’enveloppe : reste ' + fmt(p.env - tot) + ' MGA' : 'Aucun plafond fixé', 'b-ok'));
     var rt = document.getElementById('co-d-ret');
     rt.hidden = !kbReturned(p);
     if (!rt.hidden) rt.textContent = 'Retourné au brouillon' + (p.motif ? ' — motif : « ' + p.motif + ' »' : '') + '. Le contributeur corrige puis soumet à nouveau.';
     var lb = document.getElementById('co-d-lines'); lb.innerHTML = '';
     var dl = getLines(name).filter(function (l) { return l.dem != null; });
-    if (!dl.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, 'Aucune ligne saisie.'); td0.colSpan = 6; td0.style.textAlign = 'left'; lb.appendChild(tr0); }
+    if (!dl.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, 'Aucune ligne saisie.'); td0.colSpan = 9; td0.style.textAlign = 'left'; lb.appendChild(tr0); }
     dl.forEach(function (l) {
       var tr = document.createElement('tr');
-      cell(tr, l.c + ' — ' + l.l, 'name'); cell(tr, l.nat || '—'); cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num');
+      cell(tr, l.c + ' — ' + l.l, 'name'); cell(tr, l.nat || '—');
+      cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num');
+      cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num');
       var vr = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : 0; cell(tr, l.ref ? (vr > 0 ? '+' : '') + vr + ' %' : '—', 'num');
-      cell(tr, l.just || '—'); lb.appendChild(tr);
+      cell(tr, l.just || '—');
+      var tp = cell(tr, ''); if (l.pj && l.pj.length) l.pj.forEach(function (f) { var d = document.createElement('div'); d.textContent = '📎 ' + f; tp.appendChild(d); }); else tp.textContent = '—';
+      lb.appendChild(tr);
     });
     var pjb = document.getElementById('co-d-pj'); pjb.innerHTML = '';
     if (!(p.pj && p.pj.length)) { var ne = document.createElement('div'); ne.className = 'hint'; ne.textContent = 'Aucune pièce jointe.'; pjb.appendChild(ne); }
@@ -10580,6 +10599,18 @@ function fmAxes() {
       ji.setAttribute('aria-label', 'Justification pour ' + l.c);
       tj.appendChild(ji); tr.appendChild(tj);
       var tk = cell(tr, '');
+      var tpj = document.createElement('td'); tpj.className = 'co-pj-cell'; tr.appendChild(tpj);
+      (l.pj || []).forEach(function (f, fi) {
+        var d = document.createElement('div'); d.textContent = '📎 ' + f + ' ';
+        if (editable) { var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'btn small'; rm.textContent = '✕'; rm.title = 'Retirer ' + f; rm.setAttribute('aria-label', 'Retirer ' + f); rm.addEventListener('click', function () { l.pj.splice(fi, 1); renderSaisie(pname); }); d.appendChild(rm); }
+        tpj.appendChild(d);
+      });
+      if (editable) {
+        var lab = document.createElement('label'); lab.className = 'btn small'; lab.style.cursor = 'pointer'; lab.textContent = '＋ Joindre';
+        var fi2 = document.createElement('input'); fi2.type = 'file'; fi2.hidden = true; fi2.setAttribute('aria-label', 'Joindre un fichier à ' + l.c);
+        fi2.addEventListener('change', function () { if (fi2.files && fi2.files[0]) { (l.pj = l.pj || []).push(fi2.files[0].name); renderSaisie(pname); } });
+        lab.appendChild(fi2); tpj.appendChild(lab);
+      } else if (!(l.pj && l.pj.length)) tpj.textContent = '—';
       var ta = cell(tr, ''); ta.style.whiteSpace = 'nowrap';
       if (editable) {
         var bm = document.createElement('button'); bm.className = 'btn small'; bm.type = 'button'; bm.textContent = 'Modifier';
@@ -10604,7 +10635,7 @@ function fmAxes() {
       upd();
       body.appendChild(tr);
     });
-    if (!lines2.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, editable ? 'Aucune ligne. Cliquez sur « Ajouter une ligne ».' : 'Aucune ligne saisie.'); td0.colSpan = 7; td0.style.textAlign = 'left'; body.appendChild(tr0); }
+    if (!lines2.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, editable ? 'Aucune ligne. Cliquez sur « Ajouter une ligne ».' : 'Aucune ligne saisie.'); td0.colSpan = 8; td0.style.textAlign = 'left'; body.appendChild(tr0); }
     document.getElementById('cs-add').disabled = !editable;
     totals();
     var hist = document.getElementById('cs-hist');
@@ -19764,7 +19795,9 @@ function pcRenderEnv(){
   #co-ctrl > .body { padding: 0; }
   .co-blk { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--surface); margin-bottom: 14px; min-width: 0; }
   .co-blk > .kb-h { margin: 0 0 10px; font-weight: 600; color: var(--text); }
-  .co-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .co-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .co-env3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 10px; }
+  .co-envbar { height: 8px; }
   .co-kpi { border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; background: var(--surface); min-width: 0; }
   .co-kpi .l { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
   .co-kpi .v { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
