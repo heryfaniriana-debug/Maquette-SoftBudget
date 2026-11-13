@@ -4258,11 +4258,11 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           </div>
         </div>
         <div id="bv-wrap" hidden style="margin-bottom:16px">
-          <div class="kb-h" style="margin:0 0 8px;font-weight:600">Budgets validés</div>
+          <div class="head" style="margin-bottom:12px"><div><h1>PTBA</h1><p>Lots de collecte validés. Sélectionnez un lot pour consulter le détail de ses lignes.</p></div></div>
           <div class="card">
             <div class="scroll">
               <table style="min-width:860px">
-                <thead><tr><th>Campagne</th><th>Configuration</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Lot de collecte</th><th>Configuration</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Actions</th></tr></thead>
                 <tbody id="bv-body"></tbody>
               </table>
             </div>
@@ -11361,14 +11361,14 @@ function fmAxes() {
   function renderBv() {
     var body = document.getElementById('bv-body'), wrap = document.getElementById('bv-wrap'); if (!body) return;
     body.innerHTML = '';
-    var prj = activeCode() === 'prj'; wrap.hidden = !prj; if (!prj || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return;
+    var prj = activeCode() === 'prj'; wrap.hidden = !prj; document.getElementById('v-ptba').classList.toggle('ptba-lots', prj); if (!prj || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return;
     var rows = bvList();
-    if (!rows.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun budget validé pour le moment.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); }
+    if (!rows.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun lot de collecte validé pour le moment.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); }
     rows.forEach(function (r) {
       var c = cvCamp(r), pid = c.par || (CAMPPAR[c.code] || [])[0], pa = parById(pid), vd = r.hist.filter(function (h) { return /^Validée/.test(h.t); })[0], tr = document.createElement('tr');
       cell(tr, c.code + ' — ' + c.lib, 'name'); cell(tr, pa ? pa.lib : '—'); cell(tr, c.ex); cell(tr, fmt(bvData(r).lines.reduce(function (s, x) { return s + (x.l.dem || 0); }, 0)) + ' MGA', 'num'); cell(tr, vd ? vd.on.slice(0, 10) : '—');
       var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button';
-      b.addEventListener('click', function () { document.getElementById('bv-view-title').textContent = 'Budget validé — ' + c.code; bvRender(document.getElementById('bv-view-body'), r); document.getElementById('bv-view').hidden = false; });
+      b.addEventListener('click', function () { document.getElementById('bv-view-title').textContent = 'Lot de collecte validé — ' + c.code; bvRender(document.getElementById('bv-view-body'), r); document.getElementById('bv-view').hidden = false; });
       act.appendChild(b); body.appendChild(tr);
     });
   }
@@ -20017,6 +20017,9 @@ function pcRenderEnv(){
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
   /* Détail d'une contribution : blocs séparés, colonnes égales ; le titre est déjà dans l'en-tête de la page */
+  /* PTBA du profil Projet : à l'entrée, seulement la liste des lots de collecte validés */
+  #v-ptba.ptba-lots > :not(#bv-wrap):not(.sb-fp-head) { display: none !important; }
+  #v-ptba.ptba-lots > #bv-wrap:not([hidden]) { display: block; }
   #co-ctrl > h2, #cv-dec > h2, #cv-view > h2, #bv-view > h2 { display: none; }
   #cv-dec, #cv-view, #bv-view { border: 0; box-shadow: none; background: transparent; }
   #cv-dec > .body, #cv-view > .body, #bv-view > .body { padding: 0; }
