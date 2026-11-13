@@ -230,6 +230,10 @@
   .ptab.on { color: var(--primary); border-bottom-color: var(--primary); }
   .ptab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   .ptab[hidden] { display: none !important; }
+  /* Consultation d'une campagne : une seule page, sans onglets */
+  #cd > .tabs { display: none !important; }
+  #cd #cd-perims, #cd #cd-instr { display: block !important; margin-bottom: 14px; }
+  #cd #cd-follow, #cd #cd-hist { display: none !important; }
   .val-cfg { border-bottom: 1px solid var(--border); }
   .val-cfg > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
   .val-cfg > summary::-webkit-details-marker { display: none; }
@@ -3624,6 +3628,19 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           </div>
         </div>
 
+        <div class="panel" id="cm-act" hidden style="margin-bottom:12px">
+          <h2 id="cm-act-title"></h2>
+          <div class="body">
+            <div class="hint" id="cm-act-info" style="margin:0 0 10px"></div>
+            <div class="fgrid">
+              <div id="cm-act-d-w"><label for="cm-act-d">Nouvelle date de clôture <em>*</em></label><input id="cm-act-d" class="field" type="date"></div>
+              <div class="full"><label for="cm-act-m">Motif <em>*</em></label><input id="cm-act-m" class="field" type="text" placeholder="Pourquoi ?"></div>
+            </div>
+            <div class="err" id="cm-act-err"></div>
+            <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="cm-act-cancel">Retour</button><button class="btn" id="cm-act-ok">Confirmer</button></div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="scroll">
             <table style="min-width:1180px">
@@ -3713,6 +3730,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
           <div class="ppane" id="cd-instr">
             <div class="panel">
+              <h2>Dates, modèle de saisie et instructions</h2>
               <div class="body">
                 <div class="fgrid">
                   <div><label for="cd-d1">Ouverture</label><input id="cd-d1" class="field" type="date"></div>
@@ -9705,7 +9723,48 @@ function fmAxes() {
   var cdCur = null;
 
   function f2i(s) { var p = s.split('/'); return p[2] + '-' + p[1] + '-' + p[0]; }
-  function campBadge(st) { return badge(st, st === 'En collecte' ? 'b-info' : (st === 'Clôturée' ? 'b-ok' : 'b-neutral')); }
+  function campBadge(st) { return badge(st, st === 'En collecte' ? 'b-info' : (st === 'Clôturée' ? 'b-ok' : (st === 'Annulée' ? 'b-ko' : 'b-neutral'))); }
+  /* Actions de la liste : prolonger la clôture ou annuler une campagne */
+  var cmActCur = null, cmActKind = '';
+  function cmActOpen(c, kind) {
+    cmActCur = c; cmActKind = kind;
+    document.getElementById('cd').hidden = true;
+    var cancel = kind === 'cancel';
+    document.getElementById('cm-act-title').textContent = (cancel ? 'Annuler la campagne ' : 'Prolonger la campagne ') + c.code;
+    document.getElementById('cm-act-info').textContent = c.lib + ' · collecte du ' + c.open + ' au ' + c.close + ' · ' + c.st;
+    document.getElementById('cm-act-d-w').hidden = cancel;
+    document.getElementById('cm-act-d').value = '';
+    document.getElementById('cm-act-m').value = '';
+    document.getElementById('cm-act-err').textContent = '';
+    var ok = document.getElementById('cm-act-ok'); ok.textContent = cancel ? 'Annuler la campagne' : 'Prolonger'; ok.className = 'btn ' + (cancel ? '' : 'primary');
+    document.getElementById('cm-act').hidden = false;
+    document.getElementById('cm-act').scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  function cmActClose() { document.getElementById('cm-act').hidden = true; cmActCur = null; }
+  function cmListFocus(code) {
+    var tr = document.querySelector('#cm-body tr[data-code="' + code + '"]');
+    if (tr) { tr.style.background = 'var(--ok-bg)'; if (tr.scrollIntoView) tr.scrollIntoView({ block: 'center' }); setTimeout(function () { tr.style.background = ''; }, 2500); }
+  }
+  document.getElementById('cm-act-cancel').addEventListener('click', cmActClose);
+  document.getElementById('cm-act-ok').addEventListener('click', function () {
+    var c = cmActCur, err = document.getElementById('cm-act-err'); if (!c) return;
+    var mot = document.getElementById('cm-act-m').value.trim();
+    if (!mot) { err.textContent = 'Le motif est obligatoire.'; return; }
+    if (cmActKind === 'cancel') {
+      c.st = 'Annulée';
+      var bl = c.bud ? budgetByCode(c.bud) : null;
+      if (bl && !bl.amt && typeof BUDGETS !== 'undefined') { BUDGETS.splice(BUDGETS.indexOf(bl), 1); if (typeof renderBudgets === 'function') renderBudgets(); }
+      c.hist.unshift({ t: 'Campagne annulée — ' + mot, by: ME, on: nowStr() });
+      cmActClose(); renderCamps(); cmMsg('Campagne ' + c.code + ' annulée.', 'info');
+    } else {
+      var d = document.getElementById('cm-act-d').value;
+      if (!d) { err.textContent = 'Indiquez la nouvelle date de clôture.'; return; }
+      if (d <= f2i(c.close)) { err.textContent = 'La nouvelle clôture doit être postérieure à la clôture actuelle (' + c.close + ').'; return; }
+      var old = c.close; c.close = d2f(d);
+      c.hist.unshift({ t: 'Campagne prolongée : clôture ' + old + ' → ' + c.close + ' — ' + mot, by: ME, on: nowStr() });
+      cmActClose(); renderCamps(); cmMsg('Campagne ' + c.code + ' prolongée jusqu’au ' + c.close + '.', 'ok');
+    }
+  });
   function perimBadge(st) {
     var map = { 'Non démarrée': 'b-neutral', 'Brouillon': 'b-warn', 'Soumise': 'b-info', 'Acceptée': 'b-ok', 'Retournée': 'b-ko' };
     return badge(st, map[st] || 'b-neutral');
@@ -9746,11 +9805,17 @@ function fmAxes() {
       tk.appendChild(fl);
       var sp = document.createElement('span'); sp.style.minWidth = '40px'; sp.textContent = n + '/' + tot;
       w.appendChild(tk); w.appendChild(sp); av.appendChild(w); tr.appendChild(av);
-      var act = cell(tr, '');
-      var b = document.createElement('button');
-      b.className = 'btn small'; b.textContent = 'Ouvrir';
-      b.addEventListener('click', function () { openCamp(c.code); });
-      act.appendChild(b);
+      var act = cell(tr, ''); act.style.whiteSpace = 'nowrap';
+      tr.dataset.code = c.code;
+      [['Consulter', function () { openCamp(c.code); }, false],
+       ['Prolonger', function () { cmActOpen(c, 'prolong'); }, c.st !== 'Brouillon' && c.st !== 'En collecte'],
+       ['Annuler', function () { cmActOpen(c, 'cancel'); }, c.st === 'Clôturée' || c.st === 'Annulée']].forEach(function (a) {
+        var b = document.createElement('button');
+        b.className = 'btn small'; b.textContent = a[0]; b.style.marginRight = '6px'; b.disabled = a[2];
+        if (a[2]) b.title = a[0] === 'Annuler' ? 'Une campagne ' + c.st.toLowerCase() + ' ne peut plus être annulée.' : 'Seule une campagne en brouillon ou en collecte peut être prolongée.';
+        b.addEventListener('click', a[1]);
+        act.appendChild(b);
+      });
       body.appendChild(tr);
     });
   }
@@ -10158,8 +10223,9 @@ function fmAxes() {
     document.getElementById('cm-lib').value = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmLibAuto = true; cmGo(1);
     document.getElementById('cm-form').hidden = true;
     renderCamps();
+    document.getElementById('cd').hidden = true; cdCur = null;
     cmMsg('Campagne ' + code + ' créée en brouillon. ' + (perims.some(function (q) { return !cmWho[q]; }) ? 'Affectez un contributeur à chaque périmètre pour pouvoir l’ouvrir.' : 'Elle peut être ouverte.'), 'ok');
-    openCamp(code);
+    cmListFocus(code);
   });
   renderCamps();
 
