@@ -3633,11 +3633,11 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="body">
             <div class="hint" id="cm-act-info" style="margin:0 0 10px"></div>
             <div class="fgrid">
-              <div id="cm-act-d-w"><label for="cm-act-d">Nouvelle date de clôture <em>*</em></label><input id="cm-act-d" class="field" type="date"></div>
+              <div class="full" id="cm-act-d-w"><label for="cm-act-d">Nouvelle date de clôture <em>*</em></label><input id="cm-act-d" class="field" type="date"></div>
               <div class="full"><label for="cm-act-m">Motif <em>*</em></label><input id="cm-act-m" class="field" type="text" placeholder="Pourquoi ?"></div>
             </div>
             <div class="err" id="cm-act-err"></div>
-            <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="cm-act-cancel">Retour</button><button class="btn" id="cm-act-ok">Confirmer</button></div>
+            <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="cm-act-cancel">Fermer</button><button class="btn" id="cm-act-ok">Confirmer</button></div>
           </div>
         </div>
 
@@ -10095,16 +10095,16 @@ function fmAxes() {
     var box = document.getElementById('cm-env'); box.innerHTML = '';
     var labs = Array.prototype.slice.call(document.querySelectorAll('#cm-perims label'));
     var on = labs.map(function (l) { return l.querySelector('input').checked ? l.dataset.p : null; }).filter(Boolean);
-    if (labs.length) { var hd = document.createElement('div'); hd.className = 'list-row env-head'; hd.innerHTML = '<div style="flex:1">Périmètre de collecte</div><div style="width:230px;margin-right:8px">Contributeur</div><div style="width:160px;margin-right:8px">Minimum (MGA)</div><div style="width:160px">Maximum (MGA)</div>'; box.appendChild(hd); }
+    if (labs.length) { var hd = document.createElement('div'); hd.className = 'list-row env-head env-grid'; hd.innerHTML = '<div>Périmètre de collecte</div><div>Contributeur</div><div>Minimum (MGA)</div><div>Maximum (MGA)</div>'; box.appendChild(hd); }
     labs.forEach(function (lab) {
       var p = lab.dataset.p, ck = lab.querySelector('input');
-      var row = document.createElement('div'); row.className = 'list-row'; row.style.alignItems = 'center';
-      var nm = document.createElement('label'); nm.className = 'chk sm'; nm.style.flex = '1';
+      var row = document.createElement('div'); row.className = 'list-row env-grid';
+      var nm = document.createElement('label'); nm.className = 'chk sm';
       var inc = document.createElement('input'); inc.type = 'checkbox'; inc.checked = ck.checked; inc.setAttribute('aria-label', 'Inclure ' + p);
       inc.addEventListener('change', function () { ck.checked = inc.checked; cmDdSync(); cmEnvRender(); });
       nm.appendChild(inc); nm.appendChild(document.createTextNode(' ' + p));
       var wsel = mkSelect([['', '— Non affecté —']].concat(CONTRIB.map(function (x) { return [x, x]; })), cmWho[p] || '', 'stepsel', 'Contributeur du périmètre ' + p, function (v) { cmWho[p] = v; });
-      wsel.style.width = '230px'; wsel.style.marginRight = '8px'; wsel.disabled = !ck.checked;
+      wsel.disabled = !ck.checked;
       if (!ck.checked) row.style.opacity = '.55';
       var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'cellin'; inp.setAttribute('inputmode', 'numeric'); inp.setAttribute('aria-label', 'Enveloppe maximale de ' + p); inp.placeholder = 'Sans plafond';
       inp.value = cmEnv[p] != null ? fmt(cmEnv[p]) : '';
@@ -10114,7 +10114,7 @@ function fmAxes() {
     mi.value = cmMin[p] != null ? fmt(cmMin[p]) : '';
     mi.addEventListener('input', function () { cmMin[p] = parseInt0(mi.value); });
     mi.addEventListener('blur', function () { mi.value = cmMin[p] != null ? fmt(cmMin[p]) : ''; });
-    mi.style.width = '160px'; inp.style.width = '160px'; mi.style.marginRight = '8px'; mi.disabled = inp.disabled = !ck.checked;
+    mi.disabled = inp.disabled = !ck.checked;
     row.appendChild(nm); row.appendChild(wsel); row.appendChild(mi); row.appendChild(inp); box.appendChild(row);
     });
     if (!labs.length) { var h = document.createElement('div'); h.className = 'hint'; h.textContent = 'Aucun périmètre de collecte : choisissez d’abord une configuration.'; box.appendChild(h); }
@@ -18835,7 +18835,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -19756,6 +19756,12 @@ function pcRenderEnv(){
 <style>
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
+  /* Règle de la maquette : des champs de même longueur, alignés en colonnes égales */
+  .env-grid { display: grid !important; grid-template-columns: minmax(150px, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 10px; align-items: center; }
+  .env-grid > .chk { white-space: normal; min-width: 0; }
+  .env-grid .field, .env-grid .cellin, .env-grid select, .env-grid input[type="text"] { width: 100% !important; min-width: 0; box-sizing: border-box; margin: 0 !important; }
+  .fgrid > div > .field, .fgrid > div > select, .fgrid > div > input { width: 100%; box-sizing: border-box; }
+  .fgrid > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .row-toolbar [hidden] { display: none !important; }
   .actionbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 8px 16px; margin: 0 0 12px; }
   .actionbar > .row-toolbar { margin: 0; flex: 1 1 auto; min-width: 0; }
