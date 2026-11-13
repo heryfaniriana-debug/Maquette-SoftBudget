@@ -3599,8 +3599,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
                 <label for="cm-dpn">Devis-programme <em>*</em></label>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px"><input id="cm-dpn" class="field" type="text" placeholder="N° (ex. DP-03)" aria-label="Numéro du devis-programme"><input id="cm-dpd1" class="field" type="date" aria-label="Début du devis-programme"><input id="cm-dpd2" class="field" type="date" aria-label="Fin du devis-programme"></div>
               </div>
-              <div><label for="cm-d1">Ouverture <em>*</em></label><input id="cm-d1" class="field" type="date"></div>
-              <div><label for="cm-d2">Clôture <em>*</em></label><input id="cm-d2" class="field" type="date"></div>
+              <div><label for="cm-d1">Ouverture de la collecte <em>*</em></label><input id="cm-d1" class="field" type="date"></div>
+              <div><label for="cm-d2">Clôture de la collecte <em>*</em></label><input id="cm-d2" class="field" type="date"><div class="hint">Dates de la collecte, indépendantes de l’exercice : on peut collecter en 2026 le budget de 2027.</div></div>
               <div class="full"><label for="cm-tpl">Modèle de saisie</label><select id="cm-tpl" class="field"></select></div>
               <div class="full"><label for="cm-instr">Instructions aux contributeurs</label><textarea id="cm-instr" class="field" placeholder="Consignes, plafonds, calendrier…"></textarea></div>
               <div class="full"><label>Périmètres de contribution <em>*</em></label>
@@ -10130,7 +10130,7 @@ function fmAxes() {
     if (parM && parM.model) { var cm0 = models.filter(function (x) { return x.id === parM.model; })[0]; if (cm0 && cm0.status !== 'Actif') { err.textContent = 'Le circuit de validation « ' + cm0.name + ' » n’est pas actif : vérifiez-le et activez-le dans « Modèles de parcours ».'; return; } if (cm0) mid = cm0.id; }
     if (!mid) { err.textContent = 'Aucun modèle de parcours actif pour ce profil : activez-en un dans les modèles de parcours.'; return; }
     if (!d1 || !d2) { err.textContent = 'Les dates d’ouverture et de clôture sont obligatoires.'; return; }
-    if (d2 <= d1) { err.textContent = 'La date de clôture doit suivre la date d’ouverture.'; return; }
+    if (d2 <= d1) { err.textContent = 'La clôture de la collecte (' + d2f(d2) + ') doit être postérieure à son ouverture (' + d2f(d1) + '). Ces dates sont celles de la collecte : elles sont indépendantes de l’exercice budgétisé.'; return; }
       if (!perims.length) { err.textContent = 'Sélectionnez au moins un périmètre de contribution.'; return; }
   var badMM = perims.filter(function (q) { return cmMin[q] != null && cmEnv[q] != null && cmMin[q] > cmEnv[q]; })[0];
   if (badMM) { err.textContent = 'Périmètre « ' + badMM + ' » : le minimum dépasse le maximum.'; return; }
