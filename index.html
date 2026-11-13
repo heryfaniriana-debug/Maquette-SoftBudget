@@ -229,6 +229,15 @@
   .ptab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 9px 14px; font-size: 13.5px; font-weight: 500; color: #5B606D; cursor: pointer; white-space: nowrap; }
   .ptab.on { color: var(--primary); border-bottom-color: var(--primary); }
   .ptab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .ptab[hidden] { display: none !important; }
+  .val-cfg { border-bottom: 1px solid var(--border); }
+  .val-cfg > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+  .val-cfg > summary::-webkit-details-marker { display: none; }
+  .val-cfg > summary::before { content: '▸'; color: var(--muted); transition: transform .15s; }
+  .val-cfg[open] > summary::before { transform: rotate(90deg); }
+  .val-cfg .val-sum { margin-left: auto; display: flex; gap: 16px; align-items: center; color: var(--muted); font-size: 13px; }
+  .val-cfg .val-body { padding: 0 14px 14px 36px; }
+  .val-cfg details.val-line > summary { cursor: pointer; padding: 7px 0; font-size: 13px; }
   .ppane { display: none; }
   .ppane.on { display: block; }
   .saved { font-size: 12px; color: var(--muted); }
@@ -2076,6 +2085,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <p>Le cadre d’un budget : nature, devise, périodicité et structure. Ensuite, en mode Simple on saisit les montants dans « Budgets » ; en mode Avancé on lance une campagne.</p>
           </div>
           <div class="actions" id="bl-actions">
+            <button class="btn" id="bl-view" disabled>Consulter</button>
             <button class="btn" id="bl-mod" disabled>Modifier</button>
             <button class="btn" id="bl-dup2" disabled>Dupliquer</button>
             <button class="btn" id="bl-act" hidden>Activer</button>
@@ -3580,7 +3590,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div class="steps" id="cm-steps" style="margin-bottom:14px"></div>
             <div class="fgrid">
               <div><label for="cm-lib">Libellé <em>*</em></label><input id="cm-lib" class="field" type="text" placeholder="Ex. Campagne budgétaire 2027 — Santé"></div>
-              <div><label for="cm-par">Paramétrage <em>*</em></label><select id="cm-par" class="field"></select><div class="hint" id="cm-par-hint">Le paramétrage donne la nature, la devise, la structure et l’axe de collecte.</div></div>
+              <div><label for="cm-par">Paramétrage <em>*</em></label><select id="cm-par" class="field"></select><div class="hint" id="cm-par-hint">Le paramétrage donne la nature, la devise, la structure et le périmètre de collecte.</div></div>
             <select id="cm-prof" hidden></select>
               <div><label for="cm-ex">Exercice <em>*</em></label><select id="cm-ex" class="field"><option>2026</option><option selected>2027</option><option>2028</option></select></div>
             <div><label for="cm-per">Période</label><select id="cm-per" class="field"></select></div>
@@ -3656,9 +3666,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
           <div class="tabs" role="tablist">
             <button class="ptab on" data-ptab-target="cd-perims">Périmètres et contributeurs</button>
-            <button class="ptab" data-ptab-target="cd-follow">Suivi de la collecte</button>
+            <button class="ptab" data-ptab-target="cd-follow" hidden>Suivi de la collecte</button>
             <button class="ptab" data-ptab-target="cd-instr">Instructions et dates</button>
-            <button class="ptab" data-ptab-target="cd-hist">Historique</button>
+            <button class="ptab" data-ptab-target="cd-hist" hidden>Historique</button>
           </div>
 
           <div class="ppane on" id="cd-perims">
@@ -3669,7 +3679,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div class="card" style="margin-bottom:12px">
               <div class="scroll">
                 <table style="min-width:820px">
-                  <thead><tr><th>Périmètre</th><th>Contributeur</th><th class="num">Enveloppe min (MGA)</th><th class="num">Enveloppe max (MGA)</th><th>Contribution</th></tr></thead>
+                  <thead><tr><th>Périmètre</th><th>Contributeur</th><th class="num">Enveloppe min (MGA)</th><th class="num">Enveloppe max (MGA)</th><th>Circuit de validation</th></tr></thead>
                   <tbody id="cd-perims-body"></tbody>
                 </table>
               </div>
@@ -3952,6 +3962,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         </div>
 
         <div class="ppane on" id="ar-arb">
+          <div class="card" id="val-cfg-wrap" hidden style="margin-bottom:16px">
+            <div style="padding:12px 14px;border-bottom:1px solid var(--border)"><b>Validation par configuration</b><div class="hint" style="margin:2px 0 0">Dépliez une configuration pour voir ses campagnes, puis les grandes lignes de collecte de chaque périmètre.</div></div>
+            <div id="val-cfg-list"></div>
+          </div>
           <div class="callout" id="ar-msg" hidden style="margin-bottom:12px"></div>
           <div class="callout" id="ar-empty" style="margin-bottom:12px">
             <svg class="ico" viewBox="0 0 24 24" style="margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
@@ -6302,7 +6316,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="card">
           <div class="scroll">
             <table class="table-modern" style="min-width:960px">
-              <thead><tr><th>Modèle</th><th>Axe de collecte</th><th>Champs à saisir</th><th>Justification</th><th>Utilisé par</th><th>Statut</th><th></th></tr></thead>
+              <thead><tr><th>Modèle</th><th>Périmètre de collecte</th><th>Champs à saisir</th><th>Justification</th><th>Utilisé par</th><th>Statut</th><th></th></tr></thead>
               <tbody id="mc-body"></tbody>
             </table>
           </div>
@@ -6313,7 +6327,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="body">
             <div class="fgrid">
               <div class="full"><label for="mc-f-name">Nom du modèle <em>*</em></label><input id="mc-f-name" class="field" type="text" placeholder="Ex. Collecte par direction"></div>
-              <div><label for="mc-f-axis">Axe de collecte</label><select id="mc-f-axis" class="field"></select><div class="hint">Une ligne de collecte par valeur de cet axe.</div></div>
+              <div><label for="mc-f-axis">Périmètre de collecte</label><select id="mc-f-axis" class="field"></select><div class="hint">Une ligne de collecte par périmètre.</div></div>
               <div><label for="mc-f-just">Justification</label><select id="mc-f-just" class="field"><option>Aucune</option><option>Facultative</option><option>Obligatoire si variation au-delà du seuil</option><option>Obligatoire</option></select></div>
               <div class="full">
                 <label>Champs à saisir</label>
@@ -6475,6 +6489,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     });
     if (name === 'soon' && label) document.getElementById('soon-title').textContent = label;
     if (name === 'collecte' && typeof applyCoMode === 'function') applyCoMode();
+    if (name === 'arb' && typeof renderValCfg === 'function') renderValCfg();
     if (name === 'synth' && typeof renderSynth === 'function') renderSynth();
     if (name === 'ecarts' && typeof renderEcarts === 'function') renderEcarts();
     if (name === 'arb' || name === 'valid') openPtab('v-attente');
@@ -9792,7 +9807,14 @@ function fmAxes() {
       } else te.textContent = p.env != null ? fmt(p.env) : '—';
       tr.appendChild(te);
       var s = cell(tr, '');
-      s.appendChild(perimBadge(p.st));
+      var mdl = modelOf(c), vst = mdl ? mdl.steps.filter(function (z) { return z.act && (z.t === 'Validation' || z.t === 'Approbation'); }) : [];
+      if (p.circ == null) p.circ = vst.length ? 'cfg' : '';
+      var cs = mkSelect([['', vst.length ? 'Sans validation' : 'Aucun circuit défini'], ['cfg', 'Circuit de la configuration (' + pl(vst.length, 'étape') + ')']].slice(0, vst.length ? 2 : 1), vst.length ? p.circ : '', 'stepsel', 'Circuit de validation du périmètre ' + p.p, function (v) {
+        var old = p.circ; p.circ = v;
+        c.hist.unshift({ t: 'Périmètre ' + p.p + ' : circuit de validation ' + (v ? 'rattaché' : 'retiré'), by: ME, on: nowStr() });
+      });
+      cs.style.width = '280px'; cs.disabled = !vst.length || c.st === 'Clôturée';
+      s.appendChild(cs);
       body.appendChild(tr);
     });
     var load = document.getElementById('cd-load');
@@ -10016,28 +10038,24 @@ function fmAxes() {
   }
   function prjPadEnv(label, pa) {
     var code = label.split(' — ')[0], env = CPAD.env[code]; if (!env) return null;
-    var r = parRange(pa), cur = new Date(r[0].slice(0, 4), +r[0].slice(5, 7) - 1, 1), end = new Date(r[1] + 'T00:00:00'), tot = 0;
+    var cex = document.getElementById('cm-ex').value, r = [cex + '-01-01', cex + '-12-31'], cur = new Date(r[0].slice(0, 4), +r[0].slice(5, 7) - 1, 1), end = new Date(r[1] + 'T00:00:00'), tot = 0;
     while (cur <= end) { var yi = CPAD.years.indexOf(cur.getFullYear()); if (yi >= 0) tot += (env[yi] || 0) / 12; cur.setMonth(cur.getMonth() + 1); }
     return Math.round(tot) || null;
   }
-  function prjCampHide() { if (activeCode() === 'prj') ['cm-ex', 'cm-per', 'cm-tpl'].forEach(function (id) { document.getElementById(id).parentNode.hidden = true; }); }
+  function prjCampHide() { if (activeCode() === 'prj') ['cm-tpl'].forEach(function (id) { document.getElementById(id).parentNode.hidden = true; }); }
   function prjCampSync(pa) {
     var prj = activeCode() === 'prj';
-    document.querySelector('label[for="cm-par"]').firstChild.nodeValue = prj ? 'Cadre de programmation ' : 'Paramétrage ';
+    document.querySelector('label[for="cm-par"]').firstChild.nodeValue = prj ? 'Configuration ' : 'Paramétrage ';
     document.getElementById('cm-env-pad').hidden = true;
     if (!prj || !pa) return;
     prjCampHide();
-    var r = parRange(pa), ex = r[0].slice(0, 4), exs = document.getElementById('cm-ex');
-    if (![].some.call(exs.options, function (o) { return o.value === ex || o.textContent === ex; })) { var o = document.createElement('option'); o.textContent = ex; exs.appendChild(o); }
-    exs.value = ex;
-    var ps = document.getElementById('cm-per'); if ([].some.call(ps.options, function (o) { return o.value === 'Exercice'; })) ps.value = 'Exercice';
     document.getElementById('cm-tpl').value = pa.tpl || TPLS[1];
-    document.getElementById('cm-par-hint').textContent = ['Période : ' + parPerText(pa), 'Sources : ' + parSrcText(pa), 'Modèle de saisie : ' + (pa.tpl || TPLS[1]), 'Collecte : ' + collectText(pa.axes)].join(' · ');
+    document.getElementById('cm-par-hint').textContent = ['Sources : ' + parSrcText(pa), 'Ventilation : ' + (pa.vt && pa.vt !== 'Aucune' ? pa.vt : 'non ventilée'), 'Périmètre de collecte : ' + collectText(pa.axes), 'Circuit de validation : ' + ((models.filter(function (m) { return m.id === pa.model; })[0] || { steps: [] }).steps.some(function (s) { return s.act && (s.t === 'Validation' || s.t === 'Approbation'); }) ? 'défini' : 'aucun')].join(' · ');
     var vals = prjAxisValues(pa) || PERIMS['Projet / Programme'], box = document.getElementById('cm-perims'), pref = false;
     box.innerHTML = ''; cmEnv = {}; cmMin = {};
     vals.forEach(function (p) { var l = mkChk(true, p, function () { cmEnvRender(); cmDdSync(); }); l.dataset.p = p; box.appendChild(l); var v = prjPadEnv(p, pa); if (v) { cmEnv[p] = v; pref = true; } });
     var pe = document.getElementById('cm-env-pad'); pe.hidden = !pref;
-    pe.textContent = pref ? 'Maximum prérempli avec l’enveloppe de chaque composante au PAD ' + CPAD.code + ' (version ' + CPAD.ver + ') pour la période du cadre. Il reste modifiable.' : '';
+    pe.textContent = pref ? 'Maximum prérempli avec l’enveloppe de chaque composante au PAD ' + CPAD.code + ' (version ' + CPAD.ver + ') pour l’exercice ' + document.getElementById('cm-ex').value + '. Il reste modifiable.' : '';
     cmEnvRender(); cmDdSync();
   }
   function cmParChanged() {
@@ -10049,7 +10067,7 @@ function fmAxes() {
     var msel = document.getElementById('cm-model');
     if (pa && pa.model) { msel.value = pa.model; msel.disabled = true; } else msel.disabled = false;
     if (typeof prjCampSync === 'function') prjCampSync(pa);
-    if (!(typeof activeCode === 'function' && activeCode() === 'prj')) document.getElementById('cm-par-hint').textContent = pa ? [pa.nature + ' · ' + pa.devise, axText(pa.axes) !== '—' ? axText(pa.axes) : null, 'axe de collecte : ' + collectText(pa.axes)].filter(Boolean).join(' · ') : 'Aucun paramétrage actif : créez-en un dans « Paramétrage des budgets ».';
+    if (!(typeof activeCode === 'function' && activeCode() === 'prj')) document.getElementById('cm-par-hint').textContent = pa ? [pa.nature + ' · ' + pa.devise, axText(pa.axes) !== '—' ? axText(pa.axes) : null, 'périmètre de collecte : ' + collectText(pa.axes)].filter(Boolean).join(' · ') : 'Aucun paramétrage actif : créez-en un dans « Paramétrage des budgets ».';
     if (typeof prjCampHide === 'function') prjCampHide();
     cmLibSuggest();
   }
@@ -10061,7 +10079,7 @@ function fmAxes() {
   }
   document.getElementById('cm-lib').addEventListener('input', function () { cmLibAuto = false; });
   document.getElementById('cm-par').addEventListener('change', cmParChanged);
-  document.getElementById('cm-ex').addEventListener('change', cmLibSuggest);
+  document.getElementById('cm-ex').addEventListener('change', function () { cmLibSuggest(); if (typeof activeCode === 'function' && activeCode() === 'prj') prjCampSync(parById(document.getElementById('cm-par').value)); });
   document.getElementById('cm-per').addEventListener('change', cmLibSuggest);
   function cmRefresh() {
     var el = eligibleProfiles();
@@ -10990,7 +11008,40 @@ function fmAxes() {
     all.checked = vis.length > 0 && vis.every(function (r) { return ARBSEL[r.a.c]; });
     all.disabled = arbLocked();
   }
+  function renderValCfg() {
+    var wrap = document.getElementById('val-cfg-wrap'), box = document.getElementById('val-cfg-list');
+    var prj = activeCode() === 'prj'; wrap.hidden = !prj; box.innerHTML = '';
+    if (!prj || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return;
+    var cfgs = PARAMS.filter(function (x) { return x.prof === 'Projet / Programme' && x.id !== 'PAR-009'; });
+    if (!cfgs.length) { box.innerHTML = '<div class="hint" style="padding:12px 14px">Aucune configuration.</div>'; return; }
+    cfgs.forEach(function (cf) {
+      var cs = camps.filter(function (c) { return c.par === cf.id; });
+      var tot = 0, nper = 0; cs.forEach(function (c) { c.perims.forEach(function (p) { tot += p.amt || 0; nper++; }); });
+      var d = document.createElement('details'); d.className = 'val-cfg';
+      var sm = document.createElement('summary');
+      sm.innerHTML = '<b>' + escH(cf.lib) + '</b><span class="meta-tags">' + escH(cf.id) + '</span><span class="val-sum"><span>' + pl(cs.length, 'campagne') + '</span><span>' + pl(nper, 'périmètre') + '</span><span>' + fmt(tot) + ' MGA</span></span>';
+      d.appendChild(sm);
+      var body = document.createElement('div'); body.className = 'val-body';
+      if (!cs.length) body.innerHTML = '<div class="hint">Aucune campagne pour cette configuration.</div>';
+      cs.forEach(function (c) {
+        var cd = document.createElement('details'); cd.className = 'val-line';
+        var s2 = document.createElement('summary'); s2.innerHTML = '<b>' + escH(c.code) + '</b> — ' + escH(c.lib) + ' <span class="meta-tags">' + escH(c.ex) + ' · ' + escH(c.st) + '</span>';
+        cd.appendChild(s2);
+        var tb = '<table style="width:100%;margin:4px 0 10px"><thead><tr><th>Périmètre de collecte</th><th>Contributeur</th><th>Circuit</th><th class="num">Montant demandé</th></tr></thead><tbody>';
+        c.perims.forEach(function (p) {
+          var lines = COL[p.p] || [];
+          tb += '<tr><td colspan="4" style="padding:0"><details class="val-line"><summary style="display:grid;grid-template-columns:2fr 1.3fr 1fr 1fr;gap:8px"><b>' + escH(p.p) + '</b><span>' + escH(p.who || 'Non affecté') + '</span><span>' + (p.circ === 'cfg' ? 'Circuit rattaché' : 'Sans validation') + '</span><span style="text-align:right">' + fmt(p.amt || 0) + '</span></summary>'
+            + (lines.length ? '<table style="width:100%;margin:2px 0 8px 16px"><thead><tr><th>Ligne</th><th>Nature</th><th class="num">Demandé</th></tr></thead><tbody>' + lines.map(function (l) { return '<tr><td>' + escH(l.c + ' — ' + l.l) + '</td><td>' + escH(l.nat || '—') + '</td><td class="num">' + (l.dem != null ? fmt(l.dem) : '—') + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="hint" style="margin-left:16px">Aucune ligne saisie.</div>')
+            + '</details></td></tr>';
+        });
+        cd.insertAdjacentHTML('beforeend', tb + '</tbody></table>');
+        body.appendChild(cd);
+      });
+      d.appendChild(body); box.appendChild(d);
+    });
+  }
   function renderArb() {
+    renderValCfg();
     document.getElementById('ar-empty').hidden = ARB.length > 0;
     document.getElementById('ar-wrap').hidden = ARB.length === 0;
     var locked = arbLocked();
@@ -13456,7 +13507,7 @@ var EXEC_REC = [
     var ca = grp('Compte administratif').items.slice(); ca.splice(1, 0, ['Révisions et virements', rRevCA]);
     return [
       { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways]] },
-      { g: 'Programmation', items: [['Cadre de programmation', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['PTBA', rAlways], ['Plan de passation des marchés', rAlways], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
+      { g: 'Programmation', items: [['Configuration', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['PTBA', rAlways], ['Plan de passation des marchés', rAlways], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Compte administratif', items: ca },
       { g: 'Financement et trésorerie', items: [['Demandes de fonds (DRF et DPD)', treso], ['Plan de décaissement', treso], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement', treso]] },
       { g: 'Suivi', items: [['Budgets verrouillés', rAlways], [rImp('Engagements', 'Engagements importés'), rAlways], [rImp('Réalisations', 'Réalisations importées'), rAlways], [rImp('Paiements comptabilisés', 'Paiements importés'), rAlways], [rImp('Recettes comptabilisées', 'Recettes importées'), rAlways]] },
@@ -13470,7 +13521,7 @@ var EXEC_REC = [
   }
   var NAV_ORIG = null;
   var PRJ_GROUP_LBL = {
-    'g-budgets': ['Programmation', 'Programmation : cadre, campagnes, collecte, PTBA et marchés'],
+    'g-budgets': ['Programmation', 'Programmation : configuration, campagnes, collecte, PTBA et marchés'],
     'g-treso': ['Financement et trésorerie', 'Demandes de fonds, décaissements et trésorerie'],
     'g-suivi': ['Suivi', 'Suivi de l’exécution']
   };
@@ -13509,7 +13560,7 @@ var EXEC_REC = [
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
     put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)']]);
-    put('g-budgets', [['list', 'Cadre de programmation', 'Cadre de programmation : période, sources, structure et circuit'], ['camp'], ['collecte'], ['arb'], ['bud'], ['ptba'], ['ppm']].concat(revCA ? [] : [['revis']]));
+    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb'], ['bud'], ['ptba'], ['ppm']].concat(revCA ? [] : [['revis']]));
     if (revCA) put('g-cadm', [['cadcred'], ['revis', 'Révisions et virements', 'Révisions budgétaires et virements de crédits'], ['cadeng'], ['cadliq'], ['cadreg'], ['cadtab'], ['cadclot'], ['cadint']]);
     put('g-treso', [['dfon'], ['pdec'], ['bkacc'], ['bkrel'], ['bkrap']]);
     put('g-suivi', [['appr'], ['engage', circ ? 'Engagements importés' : ''], ['real', circ ? 'Réalisations importées' : ''], ['decaiss', circ ? 'Paiements importés' : ''], ['encaiss', circ ? 'Recettes importées' : '']]);
@@ -13525,7 +13576,7 @@ var EXEC_REC = [
     var gid = prjGroupOf(name); if (!gid || !PRJ_CRUMB_G[gid]) return t;
     var b = prjBtn(name), h = navHead(document.getElementById(gid));
     var lbl = (!label && b.dataset.o !== undefined && (MENU_OF[name] || name) === name) ? b.textContent.trim() : t[1];
-    if (name === 'create') lbl = 'Nouveau cadre de programmation';
+    if (name === 'create') lbl = 'Nouvelle configuration';
     return [h.textContent.trim(), lbl];
   }
   function regSetVis(sel, vis) { document.querySelectorAll(sel).forEach(function (e) { e.style.display = vis ? '' : 'none'; }); }
@@ -17162,7 +17213,7 @@ var EXEC_REC = [
     (axes || []).forEach(function (a) {
       var sp = document.createElement('span');
       sp.className = 'plan-badge' + (a.c ? ' is-collecte' : '') + (a.t === 'Département' ? ' is-dept' : '');
-      sp.title = (a.t === 'Plan' ? 'Plan' : (a.t === 'Niveau' ? 'Niveau de l’organisation' : 'Département')) + (a.c ? ' — axe de collecte' : '');
+      sp.title = (a.t === 'Plan' ? 'Plan' : (a.t === 'Niveau' ? 'Niveau de l’organisation' : 'Département')) + (a.c ? ' — périmètre de collecte' : '');
       sp.textContent = (a.c ? '🎯 ' : '') + axLabel(a);
       pb.appendChild(sp);
     });
@@ -17190,20 +17241,20 @@ var EXEC_REC = [
     var allowed = accProfiles(), adv = modes[activeCode()] === 'Avancé';
     var prj = activeCode() === 'prj';
     var vis = PARAMS.filter(function (x) { return allowed.indexOf(x.prof) >= 0 && (!prj || (x.prof === 'Projet / Programme' && x.id !== 'PAR-009')); });
-    var h1 = document.querySelector('#v-list > .head h1'); if (h1) h1.textContent = prj ? 'Cadre de programmation' : 'Paramétrage des budgets';
-    var nbt = document.querySelector('#bl-actions [data-go="create"]'); if (nbt) nbt.textContent = prj ? '+ Nouveau cadre' : '+ Créer un paramétrage';
-    document.getElementById('bl-q').placeholder = prj ? 'Rechercher un cadre…' : 'Rechercher un paramétrage…'; document.getElementById('bl-nat').hidden = prj;
+    var h1 = document.querySelector('#v-list > .head h1'); if (h1) h1.textContent = prj ? 'Configuration' : 'Paramétrage des budgets';
+    var nbt = document.querySelector('#bl-actions [data-go="create"]'); if (nbt) nbt.textContent = prj ? '+ Nouvelle configuration' : '+ Créer un paramétrage';
+    document.getElementById('bl-q').placeholder = prj ? 'Rechercher une configuration…' : 'Rechercher un paramétrage…'; document.getElementById('bl-nat').hidden = prj;
     var q = document.getElementById('bl-q').value.trim().toLowerCase();
     var fn = document.getElementById('bl-nat').value;
     var list = vis.filter(function (x) { return (!q || (x.id + ' ' + x.lib).toLowerCase().indexOf(q) >= 0) && (prj || fn === 'Toutes les natures' || x.nature === fn); });
     if (parSel && !list.some(function (x) { return x.id === parSel; })) parSel = null;
     var head = document.getElementById('bl-head'); head.innerHTML = '';
     var hr = document.createElement('tr');
-    (prj ? ['Cadre', 'Période', 'Ventilation', 'Sources couvertes'] : ['Paramétrage', 'Nature', 'Devise', 'Périodicité']).concat(adv ? ['Axe de collecte'] : []).forEach(function (h) { var th = document.createElement('th'); th.textContent = h; hr.appendChild(th); });
+    (prj ? ['Configuration', 'Ventilation', 'Sources couvertes'] : ['Paramétrage', 'Nature', 'Devise', 'Périodicité']).concat(adv ? ['Périmètre de collecte'] : []).forEach(function (h) { var th = document.createElement('th'); th.textContent = h; hr.appendChild(th); });
     head.appendChild(hr);
     var body = document.getElementById('bl-body'); body.innerHTML = '';
-    var cols = adv ? 5 : 4;
-    if (!list.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, prj ? 'Aucun cadre de programmation.' : 'Aucun paramétrage.'); td0.colSpan = cols; td0.style.textAlign = 'left'; body.appendChild(tr0); }
+    var cols = (prj ? 3 : 4) + (adv ? 1 : 0);
+    if (!list.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, prj ? 'Aucune configuration.' : 'Aucun paramétrage.'); td0.colSpan = cols; td0.style.textAlign = 'left'; body.appendChild(tr0); }
     list.forEach(function (x) {
       var tr = document.createElement('tr'); tr.className = 'clickable-row' + (x.id === parSel ? ' is-sel' : '');
       tr.setAttribute('aria-selected', x.id === parSel ? 'true' : 'false');
@@ -17213,7 +17264,7 @@ var EXEC_REC = [
       var nm = document.createElement('b'); nm.textContent = x.lib + (x.st !== 'Actif' ? ' (brouillon)' : '') + (inactive ? ' (historique)' : ''); nc.appendChild(nm);
       var mt = document.createElement('div'); mt.className = 'meta-tags'; mt.textContent = x.id + ' · ' + (n ? pl(n, adv ? 'budget' : 'saisie') : (adv ? 'aucun budget' : 'aucune saisie'));
       nc.appendChild(mt); tr.appendChild(nc);
-      if (prj) { cell(tr, parPerText(x)); cell(tr, x.vt && x.vt !== 'Aucune' ? x.vt : 'Non ventilée'); cell(tr, parSrcText(x)); }
+      if (prj) { cell(tr, x.vt && x.vt !== 'Aucune' ? x.vt : 'Non ventilée'); cell(tr, parSrcText(x)); }
       else { cell(tr, x.nature); cell(tr, x.devise);
       cell(tr, x.period + (x.vt && x.vt !== 'Aucune' ? ', ventilée ' + VT_WORD[x.vt] : '')); }
       if (adv) cell(tr, collectText(x.axes));
@@ -17221,7 +17272,7 @@ var EXEC_REC = [
       tr.addEventListener('dblclick', function () { if (!saisiesOf(x).length) { openBudgetForm(x.id); show('create'); } });
       body.appendChild(tr);
     });
-    document.getElementById('bl-count').textContent = prj ? list.length + ' cadre' + (list.length > 1 ? 's' : '') : pl(list.length, 'paramétrage') + (list.length > 1 ? 's' : '');
+    document.getElementById('bl-count').textContent = prj ? list.length + ' configuration' + (list.length > 1 ? 's' : '') : pl(list.length, 'paramétrage') + (list.length > 1 ? 's' : '');
     parToolbar();
   }
   /* Les boutons sont en haut : ils s’activent selon la ligne sélectionnée */
@@ -17231,6 +17282,7 @@ var EXEC_REC = [
     var n = x ? saisiesOf(x).length : 0;
     var inactive = x ? PROF[x.prof] !== activeCode() : false;
     var noCreate = !roleRights()['Création'], noMod = !roleRights()['Modification'];
+    document.getElementById('bl-view').disabled = !x;
     var mod = document.getElementById('bl-mod'), dup = document.getElementById('bl-dup2'), act = document.getElementById('bl-act'), del = document.getElementById('bl-del');
     mod.disabled = !x || n > 0;
     mod.title = n > 0 ? 'Un budget est déjà saisi dans ce paramétrage : il ne peut plus être modifié.' : '';
@@ -17241,7 +17293,28 @@ var EXEC_REC = [
     del.title = n > 0 ? 'Des saisies existent : supprimez-les d’abord.' : (x && noMod ? 'Le droit « Modification » est requis.' : '');
     document.getElementById('bl-sel-note').textContent = x && n > 0 ? 'Un budget est déjà saisi : modification impossible.' : '';
   }
+  var consultMode = false;
+  function setConsult(on) {
+    consultMode = on;
+    var root = document.getElementById('v-create');
+    [].forEach.call(root.querySelectorAll('input, select, textarea, button'), function (e) {
+      if (e.hasAttribute('data-go')) return;
+      if (on) { if (e.disabled) e.setAttribute('data-was-dis', '1'); e.disabled = true; }
+      else if (e.getAttribute('data-was-dis') === '1') e.removeAttribute('data-was-dis');
+      else if (e.id !== 'f-mode' && e.id !== 'f-ref') e.disabled = false;
+    });
+    document.getElementById('c-create').hidden = on;
+    var cb = root.querySelector('.form-foot [data-go="list"]'); if (cb) cb.textContent = on ? 'Fermer' : 'Annuler';
+  }
+  document.getElementById('bl-view').addEventListener('click', function () {
+    var x = parSel ? parById(parSel) : null; if (!x) return;
+    setConsult(false); openBudgetForm(x.id); setConsult(true);
+    document.getElementById('create-title').textContent = 'Consulter — ' + x.lib;
+    document.getElementById('create-sub').textContent = 'Détail de la configuration, en lecture seule.';
+    show('create');
+  });
   document.getElementById('bl-mod').addEventListener('click', function () {
+    setConsult(false);
     var x = parSel ? parById(parSel) : null;
     if (x && !saisiesOf(x).length) { openBudgetForm(x.id); show('create'); }
   });
@@ -17250,12 +17323,11 @@ var EXEC_REC = [
     var c = JSON.parse(JSON.stringify(x)); c.id = nextParCode(); c.lib = x.lib + ' (copie)'; c.st = 'Brouillon'; PARAMS.unshift(c);
     auditAdd('Création', 'Paramétrage ' + c.id, 'Paramétrage créé par duplication de ' + x.id, x.prof);
     parSel = c.id;
-    renderBudgets(); blMsg((x.prof === 'Projet / Programme' ? 'Cadre « ' : 'Paramétrage « ') + c.lib + ' » créé en brouillon.', 'ok');
+    renderBudgets(); blMsg((x.prof === 'Projet / Programme' ? 'Configuration « ' : 'Paramétrage « ') + c.lib + ' » créée en brouillon.', 'ok');
   });
   document.getElementById('bl-act').addEventListener('click', function () {
     var x = parSel ? parById(parSel) : null; if (!x) return;
-    if (x.prof === 'Projet / Programme') { var cfm = prjOverlap(parRange(x), parSrcCodes(x), x.id); if (cfm) { blMsg(cfm, 'ko'); return; } }
-    x.st = 'Actif'; auditAdd('Modification', 'Paramétrage ' + x.id, 'Paramétrage activé', x.prof); renderBudgets(); blMsg((x.prof === 'Projet / Programme' ? 'Cadre « ' : 'Paramétrage « ') + x.lib + ' » activé.', 'ok');
+    x.st = 'Actif'; auditAdd('Modification', 'Paramétrage ' + x.id, 'Paramétrage activé', x.prof); renderBudgets(); blMsg((x.prof === 'Projet / Programme' ? 'Configuration « ' : 'Paramétrage « ') + x.lib + ' » activée.', 'ok');
   });
   document.getElementById('bl-del').addEventListener('click', function () {
     var x = parSel ? parById(parSel) : null; if (!x || saisiesOf(x).length) return;
@@ -18245,9 +18317,9 @@ var EXEC_REC = [
     }
     if (adv) {
       var lab = document.createElement('label'); lab.className = 'pc-collect-label';
-      var rd = document.createElement('input'); rd.type = 'radio'; rd.name = 'bx-collect'; rd.checked = !!a.c; rd.setAttribute('aria-label', 'Axe de collecte : ' + a.n); rd.disabled = a.t === 'Département';
+      var rd = document.createElement('input'); rd.type = 'radio'; rd.name = 'bx-collect'; rd.checked = !!a.c; rd.setAttribute('aria-label', 'Périmètre de collecte : ' + a.n); rd.disabled = a.t === 'Département';
       rd.addEventListener('change', function () { bxAxes.forEach(function (x) { x.c = false; }); a.c = true; if (a.cl == null || a.cl > a.l) a.cl = a.l; renderBx(); });
-      lab.appendChild(rd); lab.appendChild(document.createTextNode(' Axe de collecte')); card.appendChild(lab);
+      lab.appendChild(rd); lab.appendChild(document.createTextNode(' Périmètre de collecte')); card.appendChild(lab);
     }
     var rm = document.createElement('span'); rm.className = 'rm-row'; rm.textContent = '✕'; rm.title = 'Retirer ce plan'; rm.setAttribute('role', 'button'); rm.setAttribute('aria-label', 'Retirer ' + a.n);
     rm.addEventListener('click', function () { bxAxes.splice(i, 1); renderBx(); }); card.appendChild(rm);
@@ -18286,11 +18358,11 @@ var EXEC_REC = [
       card.appendChild(c3);
       if (adv) {
         var lab = document.createElement('label'); lab.className = 'pc-collect-label';
-        var rd = document.createElement('input'); rd.type = 'radio'; rd.name = 'bx-collect'; rd.checked = !!a.c; rd.setAttribute('aria-label', 'Axe de collecte : ' + a.n);
+        var rd = document.createElement('input'); rd.type = 'radio'; rd.name = 'bx-collect'; rd.checked = !!a.c; rd.setAttribute('aria-label', 'Périmètre de collecte : ' + a.n);
         rd.disabled = a.t === 'Département';
         if (rd.disabled) lab.title = 'Un département précis ne peut pas diviser la collecte.';
         rd.addEventListener('change', function () { bxAxes.forEach(function (x) { x.c = false; }); a.c = true; if (a.cl == null || a.cl > a.l) a.cl = a.l; renderBx(); });
-        lab.appendChild(rd); lab.appendChild(document.createTextNode(' Axe de collecte'));
+        lab.appendChild(rd); lab.appendChild(document.createTextNode(' Périmètre de collecte'));
         card.appendChild(lab);
         if (a.c && lv) {
           var cc = document.createElement('div'); cc.className = 'pc-collect-row';
@@ -18409,8 +18481,7 @@ var EXEC_REC = [
     document.getElementById('f-circ-card').hidden = !adv;
     if (!adv) return;
     var m = p && p.model ? models.filter(function (x) { return x.id === p.model; })[0] : null;
-    circSteps = m ? m.steps.filter(function (s) { return s.act && (s.t === 'Validation' || s.t === 'Approbation'); }).map(function (s) { return { n: s.n, rt: s.rt || 'Rôle', rv: s.rv || '', corr: s.corr || '' }; }) : circDefault();
-    if (!circSteps.length) circSteps = circDefault();
+    circSteps = m ? m.steps.filter(function (s) { return s.act && (s.t === 'Validation' || s.t === 'Approbation'); }).map(function (s) { return { n: s.n, rt: s.rt || 'Rôle', rv: s.rv || '', corr: s.corr || '' }; }) : [];
     circRender();
   }
   function makeCircuit(par) {
@@ -18464,7 +18535,9 @@ var EXEC_REC = [
   }
   function prjfDdOpen(open) { fe('f-sdd-panel').hidden = !open; fe('f-sdd-btn').setAttribute('aria-expanded', open ? 'true' : 'false'); }
   function prjfCheck() {
-    var r = prjfRange(), codes = prjfCodes();
+    var codes = prjfCodes();
+    if (activeCode() === 'prj') return codes.length ? '' : 'Choisissez au moins une source de financement.';
+    var r = prjfRange();
     if (PRJF.t === 'dp') {
       var ref = fe('f-dpn').value.trim();
       if (!ref) return 'Le numéro du devis-programme est obligatoire.';
@@ -18483,7 +18556,7 @@ var EXEC_REC = [
   function prjfLive() {
     var m = prjfCheck(), r = prjfRange(), el = fe('f-pinfo');
     el.style.color = m ? '#BE123C' : 'var(--ok)';
-    el.textContent = m || (r[0] && r[1] ? '✔ Du ' + isoToFr(r[0]) + ' au ' + isoToFr(r[1]) + ' : compatible avec les accords, sans chevauchement.' : '');
+    el.textContent = m || (activeCode() === 'prj' ? '' : (r[0] && r[1] ? '✔ Du ' + isoToFr(r[0]) + ' au ' + isoToFr(r[1]) + ' : compatible avec les accords, sans chevauchement.' : ''));
     var e = exercices().filter(function (z) { return z.id === fe('f-pex').value; })[0];
     fe('f-pex-h').textContent = PRJF.t === 'exercice' && e ? 'Du ' + isoToFr(e.d1) + ' au ' + isoToFr(e.d2) + ' — exercice défini dans Paramètres.' : '';
   }
@@ -18503,17 +18576,19 @@ var EXEC_REC = [
     if (!(typeof CAD !== 'undefined' && CAD && CAD.src)) return;
     var prj = activeCode() === 'prj';
     ['f-fld-ref', 'f-fld-per', 'f-card-fin'].forEach(function (id) { fe(id).hidden = prj; });
-    fe('f-card-per').hidden = !prj; fe('f-card-src').hidden = !prj;
+    fe('f-card-per').hidden = true; fe('f-card-src').hidden = !prj;
+    if (prj) fe('f-card-src').querySelector('.fs-num').textContent = '2';
     document.querySelector('.param-card-grid.two').style.gridTemplateColumns = prj ? '1fr' : '';
     fe('f-t1').textContent = prj ? 'Identité et ventilation' : 'Identité & rythme';
-    fe('f-t4').textContent = prj ? 'Structure du cadre' : 'Structure — axes utilisés';
-    document.querySelector('label[for="f-lib"]').firstChild.nodeValue = prj ? 'Nom du cadre ' : 'Nom du paramétrage ';
-    fe('f-lib').placeholder = prj ? 'Ex. PTBA 2027' : 'Ex. Fonctionnement — Dépenses courantes';
+    fe('f-t4').textContent = prj ? 'Structure de la configuration' : 'Structure — axes utilisés';
+    document.querySelector('label[for="f-lib"]').firstChild.nodeValue = prj ? 'Nom de la configuration ' : 'Nom du paramétrage ';
+    fe('f-lib-err').textContent = prj ? 'Le nom de la configuration est obligatoire.' : 'Le nom du paramétrage est obligatoire.';
+    fe('f-lib').placeholder = prj ? 'Ex. PTBA' : 'Ex. Fonctionnement — Dépenses courantes';
     if (!prj) return;
     fe('f-env-card').hidden = true;
-    fe('create-title').textContent = p ? 'Modifier — ' + p.lib : 'Nouveau cadre de programmation';
-    fe('create-sub').textContent = '';
-    fe('c-create').textContent = p ? 'Enregistrer les modifications' : 'Créer le cadre';
+    fe('create-title').textContent = p ? 'Modifier — ' + p.lib : 'Nouvelle configuration';
+    fe('create-sub').textContent = 'Une configuration est indépendante de l’exercice : elle peut servir pour plusieurs exercices consécutifs. L’exercice se choisit au lancement de la campagne.';
+    fe('c-create').textContent = p ? 'Enregistrer les modifications' : 'Créer la configuration';
     var per = p ? parPer(p) : { t: 'exercice', ex: 'ex' + CAD.ex };
     fe('f-pex').innerHTML = exercices().filter(function (e) { return e.st === 'Ouvert'; }).map(function (e) { return '<option value="' + e.id + '">' + e.lib + '</option>'; }).join('');
     if (per.t !== 'dp') fe('f-pex').value = exercices().some(function (e) { return e.id === per.ex && e.st === 'Ouvert'; }) ? per.ex : fe('f-pex').options[0].value;
@@ -18522,7 +18597,7 @@ var EXEC_REC = [
     fe('f-slist').innerHTML = CAD.src.map(function (x) { var b = bailOf(x.bail); return '<label class="chk sm"><input type="checkbox" data-sc="' + x.code + '"' + (all || p.srcs.indexOf(x.code) >= 0 ? ' checked' : '') + '> ' + escH(x.lib) + ' <span style="color:#5B606D">— ' + escH(b ? b.nom : '') + ' · ' + escH(x.type) + '</span></label>'; }).join('');
     prjfDdOpen(false); prjfDdSync();
     fe('f-dpb').innerHTML = '<option value="">— Choisir un bailleur —</option>' + CAD.bail.filter(function (b) { return b.type !== 'État'; }).map(function (b) { return '<option value="' + b.code + '">' + escH(b.nom) + '</option>'; }).join('');
-    prjfType(per.t, p ? p.vt : 'Mensuelle');
+    prjfType('exercice', p ? p.vt : 'Mensuelle');
     if (!p) { bxAxes = [{ t: 'Plan', n: 'Activités', l: 1, c: modes[activeCode()] === 'Avancé', cl: 0 }]; renderBx(); }
   }
   [].forEach.call(document.querySelectorAll('#f-ptype-seg .seg-btn'), function (b) { b.addEventListener('click', function () { prjfType(b.dataset.value); }); });
@@ -18539,6 +18614,7 @@ var EXEC_REC = [
     prjfDdSync(); prjfLive();
   });
   function openBudgetForm(code) {
+    if (consultMode) setConsult(false);
     editCode = code || null;
     var p = code ? parById(code) : null;
     var lock = !!(p && saisiesOf(p).length);
@@ -18576,12 +18652,11 @@ var EXEC_REC = [
     if (!lib) { errLib.style.display = ''; document.getElementById('f-lib').focus(); return; }
     if (!editCode && ref && parById(ref)) { errLib.textContent = 'Cette référence existe déjà : choisissez-en une autre.'; errLib.style.display = ''; return; }
     if (p0 === 'prj') { var pe0 = prjfCheck(); if (pe0) { var pi = document.getElementById('f-pinfo'); pi.textContent = pe0; pi.style.color = '#BE123C'; if (pi.scrollIntoView) pi.scrollIntoView({ block: 'center' }); return; } }
-    if (mode === 'Avancé' && !bxAxes.some(function (a) { return a.c; })) { document.getElementById('bx-err').textContent = 'Désignez l’axe de collecte : un plan ou un niveau de l’organisation.'; return; }
-    if (mode === 'Avancé' && !circSteps.length) { document.getElementById('bx-err').textContent = 'Définissez au moins une étape du circuit de validation.'; return; }
+    if (mode === 'Avancé' && !bxAxes.some(function (a) { return a.c; })) { document.getElementById('bx-err').textContent = 'Désignez le périmètre de collecte : un plan ou un niveau de l’organisation.'; return; }
   if (mode === 'Avancé' && circSteps.some(function (s) { return !s.rv; })) { document.getElementById('bx-err').textContent = 'Renseignez le responsable de chaque étape du circuit de validation.'; return; }
     var fMin = parseInt0(document.getElementById('f-min').value), fMax = parseInt0(document.getElementById('f-max').value);
   if (modes[activeCode()] !== 'Avancé' && fMin != null && fMax != null && fMin > fMax) { document.getElementById('bx-err').textContent = 'Le budget minimum dépasse le budget maximum.'; return; }
-  var fields = { lib: lib, min: modes[activeCode()] !== 'Avancé' ? fMin : null, max: modes[activeCode()] !== 'Avancé' ? fMax : null, ent: document.getElementById('f-ent').value, nature: document.getElementById('f-nature').value, devise: document.getElementById('f-dev').value, period: document.getElementById('f-per').value, vt: document.getElementById('f-vt').value, axes: JSON.parse(JSON.stringify(bxAxes)).map(function (a) { if (mode !== 'Avancé') a.c = false; return a; }), proj: p0 === 'prj' ? document.getElementById('f-prj').value.split(' — ')[0] : '', per: p0 === 'prj' ? prjfPerOut() : null, srcs: p0 === 'prj' ? prjfSrcOut() : null };
+  var fields = { lib: lib, min: modes[activeCode()] !== 'Avancé' ? fMin : null, max: modes[activeCode()] !== 'Avancé' ? fMax : null, ent: document.getElementById('f-ent').value, nature: document.getElementById('f-nature').value, devise: document.getElementById('f-dev').value, period: document.getElementById('f-per').value, vt: document.getElementById('f-vt').value, axes: JSON.parse(JSON.stringify(bxAxes)).map(function (a) { if (mode !== 'Avancé') a.c = false; return a; }), proj: p0 === 'prj' ? document.getElementById('f-prj').value.split(' — ')[0] : '', per: null, srcs: p0 === 'prj' ? prjfSrcOut() : null };
     if (editCode) {
       var p = parById(editCode);
       for (var k in fields) p[k] = fields[k];
@@ -18590,7 +18665,7 @@ var EXEC_REC = [
       auditAdd('Modification', 'Paramétrage ' + p.id, 'Cadre du budget modifié (' + p.nature.toLowerCase() + ', ' + p.devise + ', ' + p.period.toLowerCase() + ')', p.prof);
       editCode = null;
       renderBudgets(); show('list');
-      blMsg((p0 === 'prj' ? 'Cadre ' : 'Paramétrage ') + p.id + ' modifié.', 'ok');
+      blMsg((p0 === 'prj' ? 'Configuration ' : 'Paramétrage ') + p.id + ' modifiée.', 'ok');
       return;
     }
     var np = { id: ref || nextParCode(), prof: names[p0], st: 'Actif' };
@@ -18599,7 +18674,7 @@ var EXEC_REC = [
     PARAMS.unshift(np);
     auditAdd('Création', 'Paramétrage ' + np.id, 'Paramétrage créé (' + np.nature.toLowerCase() + ', ' + np.devise + ', ' + np.period.toLowerCase() + ')', np.prof);
     renderBudgets(); show('list');
-    blMsg((p0 === 'prj' ? 'Cadre « ' : 'Paramétrage « ') + np.lib + ' » créé. ' + (mode === 'Avancé' ? 'Étape suivante : lancer une campagne.' : 'Ouvrez « Budgets » pour saisir une période.'), 'ok');
+    blMsg((p0 === 'prj' ? 'Configuration « ' : 'Paramétrage « ') + np.lib + ' » créée. ' + (mode === 'Avancé' ? 'Étape suivante : lancer une campagne.' : 'Ouvrez « Budgets » pour saisir une période.'), 'ok');
   }
   document.getElementById('c-create').addEventListener('click', saveBudget);
   document.querySelectorAll('[data-go="create"]').forEach(function (b) { b.addEventListener('click', function () { openBudgetForm(null); }); });
