@@ -3795,17 +3795,19 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="panel" id="co-ctrl" hidden>
           <h2><span id="co-ctrl-title">Détail</span><button class="btn small" id="co-ctrl-close">Fermer</button></h2>
           <div class="body">
-            <div id="co-d-head" class="kb-dhead"></div>
-            <div class="callout" id="co-d-ret" hidden style="margin-bottom:12px;background:var(--warn-bg);color:#B45309"></div>
-            <div class="kb-h">Lignes de la contribution</div>
-            <div class="scroll" style="margin-bottom:14px"><table style="min-width:760px"><thead><tr><th>Ligne</th><th>Nature</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Justification</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
-            <div class="kb-h">Pièces jointes</div>
-            <div id="co-d-pj" style="margin-bottom:14px"></div>
-            <div class="kb-h">Contrôles</div>
-            <div id="co-ctrl-list" style="margin-bottom:14px"></div>
-            <div id="co-d-dec">
+            <div id="co-d-head" class="co-kpis"></div>
+            <div class="callout" id="co-d-ret" hidden style="margin-bottom:14px;background:var(--warn-bg);color:#B45309"></div>
+            <section class="co-blk">
+              <div class="kb-h">Lignes de la contribution</div>
+              <div class="scroll"><table style="min-width:760px"><thead><tr><th>Ligne</th><th>Nature</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Justification</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
+            </section>
+            <div class="co-two">
+              <section class="co-blk"><div class="kb-h">Pièces jointes</div><div id="co-d-pj"></div></section>
+              <section class="co-blk"><div class="kb-h">Contrôles</div><div id="co-ctrl-list"></div></section>
+            </div>
+            <section class="co-blk" id="co-d-dec">
               <div class="kb-h">Validation de collecte</div>
-              <div class="fgrid">
+              <div class="co-dec-grid">
                 <div>
                   <label>Décision</label>
                   <div class="seg" id="co-dec">
@@ -3813,20 +3815,18 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
                     <button data-cdec="Retourner">Retourner au brouillon</button>
                   </div>
                 </div>
-                <div></div>
-                <div class="full">
+                <div>
                   <label for="co-motif" id="co-motif-l">Motif (facultatif)</label>
                   <textarea id="co-motif" class="field" placeholder="Précisez votre décision au contributeur"></textarea>
                   <div class="err" id="co-ctrl-err"></div>
                 </div>
               </div>
-            </div>
-            <div class="kb-h" style="margin-top:14px">Historique</div>
-            <div id="co-d-hist"></div>
-            <div class="form-foot" style="margin-top:8px;padding-top:12px">
-              <span class="saved" id="co-ctrl-note" style="margin-right:auto;align-self:center"></span>
-              <button class="btn primary" id="co-ctrl-save">Enregistrer la décision</button>
-            </div>
+              <div class="form-foot" style="margin-top:8px;padding-top:12px">
+                <button class="btn primary" id="co-ctrl-save">Enregistrer la décision</button>
+              </div>
+            </section>
+            <div class="saved" id="co-ctrl-note" style="margin:-4px 0 14px"></div>
+            <section class="co-blk"><div class="kb-h">Historique</div><div id="co-d-hist"></div></section>
           </div>
         </div>
         </div>
@@ -10438,9 +10438,11 @@ function fmAxes() {
     var p = coPerim(name);
     document.getElementById('co-ctrl-title').textContent = 'Détail — ' + name;
     var hd = document.getElementById('co-d-head'); hd.innerHTML = '';
-    hd.appendChild(perimBadge(p.st));
-    var wh = document.createElement('span'); wh.textContent = 'Contributeur : ' + (p.who || 'non affecté'); hd.appendChild(wh);
-    var am = document.createElement('span'); am.textContent = 'Montant demandé : ' + (p.amt ? fmt(p.amt) + ' MGA' : '—'); hd.appendChild(am);
+    function kpi(label, node) { var k = document.createElement('div'); k.className = 'co-kpi'; var l = document.createElement('div'); l.className = 'l'; l.textContent = label; var v = document.createElement('div'); v.className = 'v'; if (typeof node === 'string') v.textContent = node; else v.appendChild(node); k.appendChild(l); k.appendChild(v); hd.appendChild(k); }
+    kpi('Statut', perimBadge(p.st));
+    kpi('Contributeur', p.who || 'Non affecté');
+    kpi('Montant demandé', p.amt ? fmt(p.amt) + ' MGA' : '—');
+    kpi('Enveloppe min / max', (p.min != null ? fmt(p.min) : '—') + ' / ' + (p.env != null ? fmt(p.env) : '—'));
     var rt = document.getElementById('co-d-ret');
     rt.hidden = !kbReturned(p);
     if (!rt.hidden) rt.textContent = 'Retourné au brouillon' + (p.motif ? ' — motif : « ' + p.motif + ' »' : '') + '. Le contributeur corrige puis soumet à nouveau.';
@@ -19756,6 +19758,23 @@ function pcRenderEnv(){
 <style>
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
+  /* Détail d'une contribution : blocs séparés, colonnes égales ; le titre est déjà dans l'en-tête de la page */
+  #co-ctrl > h2 { display: none; }
+  #co-ctrl { border: 0; box-shadow: none; background: transparent; }
+  #co-ctrl > .body { padding: 0; }
+  .co-blk { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--surface); margin-bottom: 14px; min-width: 0; }
+  .co-blk > .kb-h { margin: 0 0 10px; font-weight: 600; color: var(--text); }
+  .co-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .co-kpi { border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; background: var(--surface); min-width: 0; }
+  .co-kpi .l { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .co-kpi .v { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+  .co-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .co-two > .co-blk { margin-bottom: 0; }
+  .co-dec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .co-dec-grid .seg { display: flex; width: 100%; }
+  .co-dec-grid .seg button { flex: 1; }
+  .co-dec-grid textarea { width: 100%; box-sizing: border-box; min-height: 84px; }
+  @media (max-width: 900px) { .co-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .co-two, .co-dec-grid { grid-template-columns: 1fr; } }
   /* Règle de la maquette : des champs de même longueur, alignés en colonnes égales */
   .env-grid { display: grid !important; grid-template-columns: minmax(150px, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 10px; align-items: center; }
   .env-grid > .chk { white-space: normal; min-width: 0; }
