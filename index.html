@@ -19739,5 +19739,98 @@ function pcRenderEnv(){
 }
 
 </script>
+<style>
+  .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
+  .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
+  .row-toolbar [hidden] { display: none !important; }
+  tr.ra-row { cursor: pointer; }
+  tr.ra-sel > td { background: var(--info-bg); }
+  .ra-hide { display: none !important; }
+</style>
+<script>
+/* Actions de ligne : tous les boutons d'action d'un tableau sont regroupés en haut à gauche.
+   On clique sur une ligne, puis sur le bouton voulu ; les boutons d'origine (masqués) restent ceux qui agissent. */
+(function () {
+  var pending = new Set(), timer = null;
+  function labelOf(b) { return b.textContent.replace(/\s+/g, ' ').trim(); }
+  function actionCell(tr) {
+    var tds = tr.children; if (!tds.length) return null;
+    var td = tds[tds.length - 1];
+    if (td.tagName !== 'TD' || td.colSpan > 1) return null;
+    var bs = td.querySelectorAll('button');
+    if (!bs.length || td.querySelector('input, select, textarea, a')) return null;
+    if (td.textContent.replace(/\s+/g, '') !== [].map.call(bs, function (b) { return b.textContent.replace(/\s+/g, ''); }).join('')) return null;
+    if (![].some.call(bs, function (b) { return labelOf(b).length > 2; })) return null;
+    return td;
+  }
+  function process(tbody) {
+    var table = tbody.closest('table'); if (!table) return;
+    var rows = [].filter.call(tbody.children, function (r) { return r.tagName === 'TR'; });
+    var acts = rows.map(function (r) { return { r: r, td: actionCell(r) }; }).filter(function (x) { return x.td; });
+    if (!acts.length) { if (table._rt && table._rt.bar) table._rt.bar.hidden = true; return; }
+    var st = table._rt || (table._rt = { key: null });
+    var labels = [];
+    acts.forEach(function (x) { [].forEach.call(x.td.querySelectorAll('button'), function (b) { var l = labelOf(b); if (l.length > 1 && labels.indexOf(l) < 0) labels.push(l); }); });
+    if (!st.bar) {
+      st.bar = document.createElement('div'); st.bar.className = 'row-toolbar'; st.bar.setAttribute('role', 'toolbar');
+      var anchor = table.closest('.card') || table.closest('.scroll') || table;
+      anchor.parentNode.insertBefore(st.bar, anchor);
+    }
+    st.bar.hidden = false; st.bar.innerHTML = '';
+    var hint = document.createElement('span'); hint.className = 'rt-hint'; hint.textContent = 'Cliquez sur une ligne pour activer les actions.';
+    var btns = labels.map(function (l) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = l; b.disabled = true;
+      b.addEventListener('click', function () {
+        var sel = tbody.querySelector('tr.ra-sel'); if (!sel) return;
+        var o = [].filter.call(sel.querySelectorAll('button'), function (x) { return labelOf(x) === l; })[0];
+        if (o && !o.disabled) o.click();
+      });
+      st.bar.appendChild(b); return b;
+    });
+    st.bar.appendChild(hint);
+    function refresh() {
+      var sel = tbody.querySelector('tr.ra-sel');
+      btns.forEach(function (b) {
+        var o = sel ? [].filter.call(sel.querySelectorAll('button'), function (x) { return labelOf(x) === b.textContent; })[0] : null;
+        b.disabled = !o || o.disabled; b.title = o && o.disabled ? (o.title || '') : (o && o.title) || '';
+      });
+      hint.hidden = !!sel;
+      if (sel) st.key = sel.children[0] ? sel.children[0].textContent : null;
+    }
+    // masquer la colonne d'actions (cellules et titre)
+    var idx = acts[0].td.cellIndex, th = table.tHead && table.tHead.rows[0] && table.tHead.rows[0].cells[idx];
+    if (th) th.classList.add('ra-hide');
+    acts.forEach(function (x) {
+      x.td.classList.add('ra-hide'); x.r.classList.add('ra-row');
+      x.r.addEventListener('click', function (ev) {
+        if (ev.target.closest('input, select, textarea, button, a, label')) return;
+        [].forEach.call(tbody.querySelectorAll('tr.ra-sel'), function (t) { t.classList.remove('ra-sel'); });
+        x.r.classList.add('ra-sel'); refresh();
+      });
+      if (st.key != null && x.r.children[0] && x.r.children[0].textContent === st.key) x.r.classList.add('ra-sel');
+    });
+    refresh();
+  }
+  function flush() { timer = null; var s = pending; pending = new Set(); s.forEach(process); }
+  function queue(tb) { pending.add(tb); if (!timer) timer = setTimeout(flush, 60); }
+  new MutationObserver(function (ms) {
+    ms.forEach(function (m) {
+      var t = m.target.nodeType === 1 ? m.target : m.target.parentElement;
+      if (!t || t.closest('.row-toolbar')) return;
+      var tb = t.closest && t.closest('tbody'); if (tb) queue(tb);
+    });
+  }).observe(document.body, { childList: true, subtree: true });
+  function init() { [].forEach.call(document.querySelectorAll('tbody'), queue); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  window.rowActionsRefresh = init;
+  /* Liste Configuration : les boutons de ligne passent en haut à gauche, sous le titre */
+  var host = document.getElementById('bl-actions'), flt = document.querySelector('#v-list .filters');
+  if (host && flt) {
+    var bar = document.createElement('div'); bar.className = 'row-toolbar'; bar.id = 'bl-rowbar'; bar.setAttribute('role', 'toolbar');
+    ['bl-view', 'bl-mod', 'bl-dup2', 'bl-act', 'bl-del'].forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
+    flt.parentNode.insertBefore(bar, flt);
+  }
+})();
+</script>
 </body>
 </html>
