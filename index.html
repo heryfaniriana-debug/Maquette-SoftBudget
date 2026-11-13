@@ -3990,9 +3990,20 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         </div>
 
         <div class="ppane on" id="ar-arb">
-          <div class="card" id="val-cfg-wrap" hidden style="margin-bottom:16px">
-            <div style="padding:12px 14px;border-bottom:1px solid var(--border)"><b>Validation par configuration</b><div class="hint" style="margin:2px 0 0">Dépliez une configuration pour voir ses campagnes, puis les grandes lignes de collecte de chaque périmètre.</div></div>
-            <div id="val-cfg-list"></div>
+          <div id="val-cfg-wrap" hidden>
+            <div class="callout" id="cv-msg" hidden style="margin-bottom:12px"></div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="scroll">
+                <table style="min-width:980px">
+                  <thead><tr><th>Configuration</th><th>Campagne consolidée</th><th class="num">Montant consolidé</th><th>Étape</th><th>Validateur</th><th>Statut</th><th>Dernière action</th><th>Actions</th></tr></thead>
+                  <tbody id="cv-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="panel" id="cv-view" hidden>
+              <h2><span id="cv-view-title">Campagne consolidée</span><button class="btn small" id="cv-view-close">Fermer</button></h2>
+              <div class="body" id="cv-view-body"></div>
+            </div>
           </div>
           <div class="callout" id="ar-msg" hidden style="margin-bottom:12px"></div>
           <div class="callout" id="ar-empty" style="margin-bottom:12px">
@@ -5822,6 +5833,14 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
               </table>
             </div>
             <div class="pager"><span id="tk-count"></span><span>Les tâches terminées ne sont jamais comptées comme en attente.</span></div>
+          </div>
+        </div>
+
+        <div class="panel" id="cv-dec" hidden>
+          <h2><span id="cv-dec-title">Valider la campagne consolidée</span><button class="btn small" id="cv-dec-close">Fermer</button></h2>
+          <div class="body">
+            <div class="row-toolbar" id="cv-dec-bar" style="margin-bottom:14px"></div>
+            <div id="cv-dec-body"></div>
           </div>
         </div>
 
@@ -11143,36 +11162,162 @@ function fmAxes() {
     all.checked = vis.length > 0 && vis.every(function (r) { return ARBSEL[r.a.c]; });
     all.disabled = arbLocked();
   }
-  function renderValCfg() {
-    var wrap = document.getElementById('val-cfg-wrap'), box = document.getElementById('val-cfg-list');
-    var prj = activeCode() === 'prj'; wrap.hidden = !prj; box.innerHTML = '';
-    if (!prj || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return;
-    var cfgs = PARAMS.filter(function (x) { return x.prof === 'Projet / Programme' && x.id !== 'PAR-009'; });
-    if (!cfgs.length) { box.innerHTML = '<div class="hint" style="padding:12px 14px">Aucune configuration.</div>'; return; }
-    cfgs.forEach(function (cf) {
-      var cs = camps.filter(function (c) { return c.par === cf.id; });
-      var tot = 0, nper = 0; cs.forEach(function (c) { c.perims.forEach(function (p) { tot += p.amt || 0; nper++; }); });
-      var d = document.createElement('details'); d.className = 'val-cfg';
-      var sm = document.createElement('summary');
-      sm.innerHTML = '<b>' + escH(cf.lib) + '</b><span class="meta-tags">' + escH(cf.id) + '</span><span class="val-sum"><span>' + pl(cs.length, 'campagne') + '</span><span>' + pl(nper, 'périmètre') + '</span><span>' + fmt(tot) + ' MGA</span></span>';
-      d.appendChild(sm);
-      var body = document.createElement('div'); body.className = 'val-body';
-      if (!cs.length) body.innerHTML = '<div class="hint">Aucune campagne pour cette configuration.</div>';
-      cs.forEach(function (c) {
-        var cd = document.createElement('details'); cd.className = 'val-line';
-        var s2 = document.createElement('summary'); s2.innerHTML = '<b>' + escH(c.code) + '</b> — ' + escH(c.lib) + ' <span class="meta-tags">' + escH(c.ex) + ' · ' + escH(c.st) + '</span>';
-        cd.appendChild(s2);
-        var tb = '<table style="width:100%;margin:4px 0 10px"><thead><tr><th>Périmètre de collecte</th><th>Contributeur</th><th>Circuit</th><th class="num">Montant demandé</th></tr></thead><tbody>';
-        c.perims.forEach(function (p) {
-          var lines = COL[p.p] || [];
-          tb += '<tr><td colspan="4" style="padding:0"><details class="val-line"><summary style="display:grid;grid-template-columns:2fr 1.3fr 1fr 1fr;gap:8px"><b>' + escH(p.p) + '</b><span>' + escH(p.who || 'Non affecté') + '</span><span>' + (p.circ === 'cfg' ? 'Circuit rattaché' : 'Sans validation') + '</span><span style="text-align:right">' + fmt(p.amt || 0) + '</span></summary>'
-            + (lines.length ? '<table style="width:100%;margin:2px 0 8px 16px"><thead><tr><th>Ligne</th><th>Nature</th><th class="num">Demandé</th></tr></thead><tbody>' + lines.map(function (l) { return '<tr><td>' + escH(l.c + ' — ' + l.l) + '</td><td>' + escH(l.nat || '—') + '</td><td class="num">' + (l.dem != null ? fmt(l.dem) : '—') + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="hint" style="margin-left:16px">Aucune ligne saisie.</div>')
-            + '</details></td></tr>';
+  /* ---------- Validation d'une campagne consolidée ----------
+     Menu « Validation » : historique et détail des campagnes consolidées, relance du validateur.
+     Menu « Tâches » : le validateur consulte le détail, puis valide, corrige ou demande une correction au contributeur. */
+  var CVAL = [
+    { id: 'CV-2027-01', camp: 'CAMP-2027-01', st: 'En validation', step: 'Contrôle budgétaire', validator: 'Direction Financière', hist: [
+      { t: 'Consolidation transmise à la validation', by: 'Super Administrateur', on: '20/10/2026 10:15' },
+      { t: 'Relance envoyée à Direction Financière', by: 'Super Administrateur', on: '23/10/2026 08:40' }] },
+    { id: 'CV-2026-02', camp: 'CAMP-2026-02', st: 'Validée', step: 'Terminée', validator: 'Direction Générale', hist: [
+      { t: 'Validée — budget conforme aux enveloppes', by: 'Direction Générale', on: '10/04/2026 16:20' },
+      { t: 'Consolidation transmise à la validation', by: 'Super Administrateur', on: '03/04/2026 09:00' }] }
+  ];
+  function cvById(id) { return CVAL.filter(function (r) { return r.id === id; })[0]; }
+  function cvCamp(r) { return camps.filter(function (c) { return c.code === r.camp; })[0]; }
+  function cvSum(a, k) { return a.reduce(function (s, x) { return s + (x[k] || 0); }, 0); }
+  function cvPerims(r) {
+    var c = cvCamp(r); if (!c) return [];
+    return c.perims.map(function (p) {
+      var ls = (COL[p.p] || []).filter(function (l) { return l.dem != null; });
+      return { p: p, lines: ls, dem: ls.length ? cvSum(ls, 'dem') : (p.amt || 0), ref: cvSum(ls, 'ref') };
+    });
+  }
+  function cvTotal(r) { return cvSum(cvPerims(r), 'dem'); }
+  function cvBadge(st) { return badge(st, st === 'Validée' ? 'b-ok' : (st === 'En validation' ? 'b-info' : (st === 'Correction demandée' || st === 'Corrigée' ? 'b-warn' : 'b-neutral'))); }
+  function cvEl(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function cvKpi(label, v) { var k = cvEl('div', 'co-kpi'); k.appendChild(cvEl('div', 'l', label)); var d = cvEl('div', 'v'); if (typeof v === 'string') d.textContent = v; else d.appendChild(v); k.appendChild(d); return k; }
+  /* Contenu commun : synthèse, graphique simple, périmètres dépliables, et (en consultation) historique */
+  function cvRender(root, r, withHist) {
+    root.innerHTML = '';
+    var c = cvCamp(r), pe = cvPerims(r), tot = cvSum(pe, 'dem');
+    var k = cvEl('div', 'co-kpis');
+    k.appendChild(cvKpi('Campagne', c ? c.code + ' — ' + c.lib : r.camp));
+    k.appendChild(cvKpi('Montant consolidé', fmt(tot) + ' MGA'));
+    var vb = cvEl('div'); vb.appendChild(cvBadge(r.st)); vb.appendChild(document.createTextNode(' ' + (r.st === 'En validation' ? r.step + ' · ' + r.validator : r.validator)));
+    k.appendChild(cvKpi('Validation', vb));
+    root.appendChild(k);
+    /* graphique : barre du demandé par périmètre, repère = référence */
+    var ch = cvEl('section', 'co-blk'); ch.appendChild(cvEl('div', 'kb-h', 'Répartition du montant demandé par périmètre'));
+    var mx = Math.max.apply(null, pe.map(function (x) { return Math.max(x.dem, x.ref, (x.p.env || 0)); }).concat([1]));
+    pe.forEach(function (x) {
+      var row = cvEl('div', 'cv-chart-row');
+      row.appendChild(cvEl('div', 'n', x.p.p));
+      var tr = cvEl('div', 'cv-bar'); var f = cvEl('div', 'cv-fill'); f.style.width = (100 * x.dem / mx) + '%';
+      if (x.p.env != null && x.dem > x.p.env) f.classList.add('over');
+      tr.appendChild(f);
+      if (x.ref) { var m = cvEl('div', 'cv-mark'); m.style.left = (100 * x.ref / mx) + '%'; m.title = 'Référence : ' + fmt(x.ref); tr.appendChild(m); }
+      row.appendChild(tr);
+      var v = x.ref ? Math.round((x.dem - x.ref) / x.ref * 100) : null;
+      row.appendChild(cvEl('div', 'a', fmt(x.dem) + (v != null ? ' (' + (v > 0 ? '+' : '') + v + ' %)' : '')));
+      ch.appendChild(row);
+    });
+    ch.appendChild(cvEl('div', 'hint', 'Barre : montant demandé · trait : budget de référence · rouge : au-dessus du maximum du périmètre.'));
+    root.appendChild(ch);
+    /* périmètres dépliables, avec leurs lignes */
+    var bl = cvEl('section', 'co-blk'); bl.appendChild(cvEl('div', 'kb-h', 'Périmètres et lignes — cliquez pour dérouler'));
+    pe.forEach(function (x) {
+      var d = cvEl('details', 'val-cfg'); var s = cvEl('summary', 'cv-sum');
+      s.appendChild(cvEl('b', null, x.p.p)); s.appendChild(cvEl('span', null, x.p.who || 'Non affecté'));
+      s.appendChild(cvEl('span', 'num', fmt(x.dem) + ' MGA'));
+      var vr = x.ref ? Math.round((x.dem - x.ref) / x.ref * 100) : null; s.appendChild(cvEl('span', 'num', vr == null ? '—' : (vr > 0 ? '+' : '') + vr + ' %'));
+      d.appendChild(s);
+      var body = cvEl('div', 'val-body');
+      if (!x.lines.length) body.appendChild(cvEl('div', 'hint', 'Aucune ligne détaillée.'));
+      else {
+        var sc = cvEl('div', 'scroll'); var tb = cvEl('table'); tb.style.minWidth = '900px';
+        tb.innerHTML = '<thead><tr><th>Ligne</th><th>Nature</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire</th><th>Pièces jointes</th></tr></thead>';
+        var tbd = cvEl('tbody');
+        x.lines.forEach(function (l) {
+          var tr = cvEl('tr'); var v2 = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : null;
+          cell(tr, l.c + ' — ' + l.l, 'name'); cell(tr, l.nat || '—');
+          cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num');
+          cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num'); cell(tr, v2 == null ? '—' : (v2 > 0 ? '+' : '') + v2 + ' %', 'num'); cell(tr, l.just || '—');
+          var tp = cell(tr, ''); if (l.pj && l.pj.length) l.pj.forEach(function (f) { tp.appendChild(cvEl('div', null, '📎 ' + f)); }); else tp.textContent = '—';
+          tbd.appendChild(tr);
         });
-        cd.insertAdjacentHTML('beforeend', tb + '</tbody></table>');
-        body.appendChild(cd);
-      });
-      d.appendChild(body); box.appendChild(d);
+        tb.appendChild(tbd); sc.appendChild(tb); body.appendChild(sc);
+      }
+      d.appendChild(body); bl.appendChild(d);
+    });
+    root.appendChild(bl);
+    if (withHist) {
+      var hs = cvEl('section', 'co-blk'); hs.appendChild(cvEl('div', 'kb-h', 'Historique de la validation'));
+      r.hist.forEach(function (h) { var row = cvEl('div', 'list-row'); var l = cvEl('div'); l.appendChild(cvEl('b', null, h.t)); l.appendChild(cvEl('div', 'hby', h.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', h.on)); hs.appendChild(row); });
+      root.appendChild(hs);
+    }
+  }
+  /* Fenêtre qui demande un commentaire */
+  function cvAsk(o, cb) {
+    var bd = cvEl('div', 'cv-modal-bd'), box = cvEl('div', 'cv-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+    box.appendChild(cvEl('h3', null, o.title));
+    var sel = null;
+    if (o.options) { var l1 = cvEl('label', null, o.optLabel); box.appendChild(l1); sel = cvEl('select', 'field'); o.options.forEach(function (x) { var op = cvEl('option', null, x); op.value = x; sel.appendChild(op); }); box.appendChild(sel); }
+    box.appendChild(cvEl('label', null, 'Commentaire' + (o.required ? ' *' : ' (facultatif)')));
+    var ta = cvEl('textarea', 'field'); ta.placeholder = o.placeholder || ''; box.appendChild(ta);
+    var err = cvEl('div', 'err'); box.appendChild(err);
+    var ft = cvEl('div', 'form-foot'); var bc = cvEl('button', 'btn', 'Annuler'); bc.type = 'button'; var bo = cvEl('button', 'btn primary', o.ok); bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
+    function close() { if (bd.parentNode) bd.parentNode.removeChild(bd); }
+    bc.addEventListener('click', close); bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
+    bo.addEventListener('click', function () {
+      var v = ta.value.trim(); if (o.required && !v) { err.textContent = 'Le commentaire est obligatoire.'; return; }
+      close(); cb(v, sel ? sel.value : null);
+    });
+    bd.appendChild(box); document.body.appendChild(bd); (sel || ta).focus();
+  }
+  function cvSay(id, text) { var e = document.getElementById(id); if (e) { e.hidden = false; e.textContent = text; } }
+  function cvAfter(msg) {
+    var p = document.getElementById('cv-dec'); if (p && !p.hidden) { var cl = document.getElementById('cv-dec-close'); if (cl) cl.click(); }
+    renderValCfg(); if (typeof renderTasks === 'function') renderTasks(); cvSay('tk-msg', msg);
+  }
+  var cvCur = null;
+  function cvOpenDecision(id) {
+    var r = cvById(id); if (!r) return; cvCur = r;
+    var c = cvCamp(r);
+    document.getElementById('cv-dec-title').textContent = 'Valider la campagne consolidée — ' + (c ? c.code : r.camp);
+    var bar = document.getElementById('cv-dec-bar'); bar.innerHTML = '';
+    var can = r.st === 'En validation';
+    [['Valider', 'primary', function () {
+        cvAsk({ title: 'Valider la campagne consolidée', ok: 'Valider', required: false, placeholder: 'Commentaire de validation' }, function (com) {
+          r.st = 'Validée'; r.step = 'Terminée'; r.hist.unshift({ t: 'Validée' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); cvAfter('Campagne ' + r.camp + ' validée.'); });
+      }],
+     ['Corriger', '', function () {
+        cvAsk({ title: 'Corriger la consolidation', ok: 'Enregistrer la correction', required: true, placeholder: 'Quelle correction apportez-vous ?' }, function (com) {
+          r.st = 'Corrigée'; r.step = 'Corrigée par le validateur'; r.hist.unshift({ t: 'Corrigée par le validateur — ' + com, by: ME, on: nowStr() }); cvAfter('Correction enregistrée pour ' + r.camp + '.'); });
+      }],
+     ['Demander une correction au contributeur', '', function () {
+        var names = cvPerims(r).map(function (x) { return x.p.p; });
+        cvAsk({ title: 'Demander une correction au contributeur', ok: 'Envoyer la demande', required: true, optLabel: 'Périmètre concerné *', options: names, placeholder: 'Précisez ce que le contributeur doit corriger' }, function (com, per) {
+          var p = c.perims.filter(function (x) { return x.p === per; })[0]; if (p) { p.st = 'Retournée'; p.motif = com; }
+          r.st = 'Correction demandée'; r.step = 'En attente du contributeur'; r.hist.unshift({ t: 'Correction demandée à ' + ((p && p.who) || 'contributeur') + ' (' + per + ') — ' + com, by: ME, on: nowStr() });
+          cvAfter('Demande de correction envoyée pour « ' + per + ' ».'); });
+      }]].forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] ? ' ' + a[1] : ''), a[0]); b.type = 'button'; b.disabled = !can; b.addEventListener('click', a[2]); bar.appendChild(b); });
+    cvRender(document.getElementById('cv-dec-body'), r, false);
+    document.getElementById('cv-dec').hidden = false;
+  }
+  document.getElementById('cv-dec-close').addEventListener('click', function () { document.getElementById('cv-dec').hidden = true; });
+  document.getElementById('cv-view-close').addEventListener('click', function () { document.getElementById('cv-view').hidden = true; });
+  function renderValCfg() {
+    var wrap = document.getElementById('val-cfg-wrap'), view = document.getElementById('v-arb');
+    var prj = activeCode() === 'prj'; wrap.hidden = !prj; view.classList.toggle('prj-val', prj);
+    var h1 = view.querySelector(':scope > .head h1'), hp = view.querySelector(':scope > .head p');
+    if (prj) { if (h1) h1.textContent = 'Validation'; if (hp) hp.textContent = 'Historique des validations et détail des campagnes consolidées. La décision se prend depuis le menu Tâches.'; }
+    var body = document.getElementById('cv-body'); body.innerHTML = '';
+    if (!prj || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return;
+    var rows = CVAL.slice().sort(function (a, b) { var ca = cvCamp(a), cb = cvCamp(b); return String(ca && ca.par).localeCompare(String(cb && cb.par)); });
+    rows.forEach(function (r) {
+      var c = cvCamp(r), pa = c && c.par ? parById(c.par) : null, tr = document.createElement('tr');
+      cell(tr, pa ? pa.lib : '—'); cell(tr, c ? c.code + ' — ' + c.lib : r.camp, 'name'); cell(tr, fmt(cvTotal(r)) + ' MGA', 'num');
+      cell(tr, r.step); cell(tr, r.validator);
+      var s = cell(tr, ''); s.appendChild(cvBadge(r.st));
+      cell(tr, r.hist.length ? r.hist[0].on : '—');
+      var act = cell(tr, '');
+      var b1 = cvEl('button', 'btn small', 'Consulter'); b1.type = 'button';
+      b1.addEventListener('click', function () { document.getElementById('cv-view-title').textContent = 'Campagne consolidée — ' + (c ? c.code : r.camp); cvRender(document.getElementById('cv-view-body'), r, true); document.getElementById('cv-view').hidden = false; });
+      var b2 = cvEl('button', 'btn small', 'Relancer'); b2.type = 'button'; b2.disabled = r.st !== 'En validation'; if (b2.disabled) b2.title = 'Seule une validation en cours peut être relancée.';
+      b2.addEventListener('click', function () { r.hist.unshift({ t: 'Relance envoyée à ' + r.validator, by: ME, on: nowStr() }); renderValCfg(); cvSay('cv-msg', 'Relance envoyée à ' + r.validator + ' pour ' + r.camp + '.'); });
+      act.appendChild(b1); act.appendChild(b2);
+      body.appendChild(tr);
     });
   }
   function renderArb() {
@@ -13695,7 +13840,7 @@ var EXEC_REC = [
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
     put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)']]);
-    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb'], ['bud'], ['ptba'], ['ppm']].concat(revCA ? [] : [['revis']]));
+    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud'], ['ptba'], ['ppm']].concat(revCA ? [] : [['revis']]));
     if (revCA) put('g-cadm', [['cadcred'], ['revis', 'Révisions et virements', 'Révisions budgétaires et virements de crédits'], ['cadeng'], ['cadliq'], ['cadreg'], ['cadtab'], ['cadclot'], ['cadint']]);
     put('g-treso', [['dfon'], ['pdec'], ['bkacc'], ['bkrel'], ['bkrap']]);
     put('g-suivi', [['appr'], ['engage', circ ? 'Engagements importés' : ''], ['real', circ ? 'Réalisations importées' : ''], ['decaiss', circ ? 'Paiements importés' : ''], ['encaiss', circ ? 'Recettes importées' : '']]);
@@ -16943,6 +17088,11 @@ var EXEC_REC = [
       var pst = apprSteps(), pcur = v.st === 'En approbation' ? pst[v.step] : null, pext = !!(pcur && pcur.rt === 'Entité externe') && !v.bailleurOK;
       add({ id: 'ptb-' + v.v, type: v.st === 'En approbation' ? 'Approbation' : 'PTBA', title: pext ? 'Enregistrer l’avis de ' + pcur.rv + ' sur le PTBA version ' + v.v : (v.st === 'En approbation' ? 'Clôturer le PTBA, version ' : (st === 'Terminée' ? 'PTBA version ' : 'Corriger et soumettre le PTBA version ')) + v.v, budget: 'BUD-2026-004 — PTBA 2026 — DECIM', prof: 'Projet / Programme', due: addDays(f2i(v.on), DL['PTBA'].days), st: st, need: v.st === 'En approbation' ? 'Approbation' : 'Modification', who: pext ? (pcur.corr || pcur.rv) : (v.st === 'En approbation' ? (pcur ? pcur.rv : 'Comité de pilotage') : 'RANDIMBIARISON Maminirina'), step: 'PTBA · ' + v.st.toLowerCase() + (pcur ? ' · ' + pcur.n : ''), dl: 'PTBA', open: function () { show('ptba'); renderPtba(); openPtab('pt-appr'); } });
     });
+    CVAL.forEach(function (r) {
+      var cc = cvCamp(r); if (!cc) return;
+      var pend2 = r.st === 'En validation', bud2 = cc.code === 'CAMP-2027-01' ? 'BUD-2027-001 — Budget 2027 — Ministère de l’Éducation' : cc.code + ' — ' + cc.lib;
+      add({ id: 'cv-' + r.id, type: 'Validation', title: 'Valider la campagne consolidée « ' + cc.lib + ' »', budget: bud2, prof: cc.prof, due: addDays(TODAY, 5), st: pend2 ? 'À faire' : 'Terminée', need: 'Validation', who: r.validator, step: 'Validation · ' + r.st.toLowerCase(), dl: 'Validation d’un budget', open: function () { show('taches'); cvOpenDecision(r.id); } });
+    });
     if (ARB.length) add({ id: 'arb', type: 'Arbitrage', title: 'Finaliser l’arbitrage et le budget final', budget: 'BUD-2027-001 — Budget 2027 — Ministère de l’Éducation', prof: 'Entité publique', due: '2026-11-10', st: FINAL.status === 'En validation' ? 'Terminée' : 'À faire', need: 'Modification', who: 'Comité d’arbitrage', step: 'Arbitrage', dl: 'Validation d’un budget', open: function () { show('arb'); renderArb(); renderFinal(); } });
     groupsBy('ligne', 1).forEach(function (g) {
       var ratio = g.rev ? g.used / g.rev : 0;
@@ -18868,7 +19018,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -19790,7 +19940,25 @@ function pcRenderEnv(){
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
   /* Détail d'une contribution : blocs séparés, colonnes égales ; le titre est déjà dans l'en-tête de la page */
-  #co-ctrl > h2 { display: none; }
+  #co-ctrl > h2, #cv-dec > h2, #cv-view > h2 { display: none; }
+  #cv-dec, #cv-view { border: 0; box-shadow: none; background: transparent; }
+  #cv-dec > .body, #cv-view > .body { padding: 0; }
+  #v-arb.prj-val #ar-arb > :not(#val-cfg-wrap) { display: none !important; }
+  #v-arb.prj-val #ar-arb { display: block !important; }
+  #v-arb.prj-val .ppane:not(#ar-arb) { display: none !important; }
+  .cv-sum { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, .6fr); gap: 10px; align-items: center; }
+  .cv-chart-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 1.6fr); gap: 12px; align-items: center; margin-bottom: 8px; font-size: 13px; }
+  .cv-chart-row .a { text-align: right; white-space: nowrap; }
+  .cv-bar { position: relative; height: 12px; background: var(--neutral-bg); border-radius: 6px; }
+  .cv-fill { height: 100%; background: var(--primary); border-radius: 6px; }
+  .cv-fill.over { background: var(--ko); }
+  .cv-mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text); }
+  .cv-modal-bd { position: fixed; inset: 0; background: rgba(15, 23, 42, .45); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .cv-modal { background: var(--surface); border-radius: 12px; padding: 20px; width: min(520px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  .cv-modal h3 { margin: 0 0 14px; font-size: 16px; }
+  .cv-modal label { display: block; font-size: 13px; font-weight: 500; margin: 10px 0 5px; }
+  .cv-modal .field, .cv-modal textarea { width: 100%; box-sizing: border-box; }
+  .cv-modal textarea { min-height: 96px; }
   #co-ctrl { border: 0; box-shadow: none; background: transparent; }
   #co-ctrl > .body { padding: 0; }
   .co-blk { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--surface); margin-bottom: 14px; min-width: 0; }
