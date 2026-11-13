@@ -3612,7 +3612,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
                   </div>
                 </div>
               </div>
-            <div class="full" id="cm-env-wrap"><label>Enveloppes minimale et maximale par périmètre <span class="hint" style="display:inline;margin:0">— facultatif</span></label><div class="hint" id="cm-env-pad" hidden style="margin:0 0 8px"></div><div id="cm-env"></div><div class="hint">Le maximum et le minimum se contrôlent à la soumission ; leur effet (bloquant ou alerte) se règle dans Paramètres > Contrôles et seuils. Ils se fixent à la campagne car ils changent d’une année à l’autre.</div></div>
+            <div class="full" id="cm-env-wrap"><label>Contributeur, minimum et maximum par périmètre de collecte <span class="hint" style="display:inline;margin:0">— contributeur et enveloppes facultatifs</span></label><div class="hint" id="cm-env-pad" hidden style="margin:0 0 8px"></div><div id="cm-env"></div><div class="hint">Le maximum et le minimum se contrôlent à la soumission ; leur effet (bloquant ou alerte) se règle dans Paramètres > Contrôles et seuils. Ils se fixent à la campagne car ils changent d’une année à l’autre.</div></div>
             </div>
             <div class="err" id="cm-err"></div>
             <div class="form-foot" style="margin-top:4px;padding-top:12px">
@@ -9978,7 +9978,7 @@ function fmAxes() {
     (PERIMS[prof] || []).forEach(function (p) { var l = mkChk(true, p, function () { cmEnvRender(); cmDdSync(); }); l.dataset.p = p; box.appendChild(l); });
     cmEnvRender(); cmDdSync();
   }
-  var cmEnv = {}, cmMin = {}, cmLibAuto = true, cmDry = false;
+  var cmEnv = {}, cmMin = {}, cmWho = {}, cmLibAuto = true, cmDry = false;
   function cmDdSync() {
     var all = Array.prototype.slice.call(document.querySelectorAll('#cm-perims label'));
     var on = all.filter(function (l) { return l.querySelector('input').checked; }).map(function (l) { return l.dataset.p; });
@@ -9999,12 +9999,13 @@ function fmAxes() {
   function cmGo(n) {
     cmDdOpen(false);
     cmS1.forEach(function (c) { c.hidden = n !== 1; });
+    document.getElementById('cm-dd').parentNode.hidden = true;
     document.getElementById('cm-env-wrap').hidden = n !== 2;
     document.getElementById('cm-next').hidden = n !== 1;
     document.getElementById('cm-back').hidden = n !== 2;
     document.getElementById('cm-create').hidden = n !== 2;
     var box = document.getElementById('cm-steps'); box.innerHTML = '';
-    ['Informations générales', 'Enveloppes par périmètre'].forEach(function (t, k) { var d = document.createElement('div'); d.className = 'step' + (k + 1 < n ? ' done' : (k + 1 === n ? ' cur' : '')); d.textContent = (k + 1) + '. ' + t; box.appendChild(d); });
+    ['Informations générales', 'Contributeurs et enveloppes'].forEach(function (t, k) { var d = document.createElement('div'); d.className = 'step' + (k + 1 < n ? ' done' : (k + 1 === n ? ' cur' : '')); d.textContent = (k + 1) + '. ' + t; box.appendChild(d); });
     if (n === 2) cmEnvRender();
     document.getElementById('cm-err').textContent = '';
     if (typeof prjCampHide === 'function') prjCampHide();
@@ -10013,11 +10014,19 @@ function fmAxes() {
   document.getElementById('cm-back').addEventListener('click', function () { cmGo(1); });
   function cmEnvRender() {
     var box = document.getElementById('cm-env'); box.innerHTML = '';
-    var on = Array.prototype.map.call(document.querySelectorAll('#cm-perims label'), function (l) { return l.querySelector('input').checked ? l.dataset.p : null; }).filter(Boolean);
-    if (on.length) { var hd = document.createElement('div'); hd.className = 'list-row env-head'; hd.innerHTML = '<div style="flex:1">Périmètre</div><div style="width:160px;margin-right:8px">Minimum (MGA)</div><div style="width:160px">Maximum (MGA)</div>'; box.appendChild(hd); }
-    on.forEach(function (p) {
+    var labs = Array.prototype.slice.call(document.querySelectorAll('#cm-perims label'));
+    var on = labs.map(function (l) { return l.querySelector('input').checked ? l.dataset.p : null; }).filter(Boolean);
+    if (labs.length) { var hd = document.createElement('div'); hd.className = 'list-row env-head'; hd.innerHTML = '<div style="flex:1">Périmètre de collecte</div><div style="width:230px;margin-right:8px">Contributeur</div><div style="width:160px;margin-right:8px">Minimum (MGA)</div><div style="width:160px">Maximum (MGA)</div>'; box.appendChild(hd); }
+    labs.forEach(function (lab) {
+      var p = lab.dataset.p, ck = lab.querySelector('input');
       var row = document.createElement('div'); row.className = 'list-row'; row.style.alignItems = 'center';
-      var nm = document.createElement('div'); nm.style.flex = '1'; nm.textContent = p;
+      var nm = document.createElement('label'); nm.className = 'chk sm'; nm.style.flex = '1';
+      var inc = document.createElement('input'); inc.type = 'checkbox'; inc.checked = ck.checked; inc.setAttribute('aria-label', 'Inclure ' + p);
+      inc.addEventListener('change', function () { ck.checked = inc.checked; cmDdSync(); cmEnvRender(); });
+      nm.appendChild(inc); nm.appendChild(document.createTextNode(' ' + p));
+      var wsel = mkSelect([['', '— Non affecté —']].concat(CONTRIB.map(function (x) { return [x, x]; })), cmWho[p] || '', 'stepsel', 'Contributeur du périmètre ' + p, function (v) { cmWho[p] = v; });
+      wsel.style.width = '230px'; wsel.style.marginRight = '8px'; wsel.disabled = !ck.checked;
+      if (!ck.checked) row.style.opacity = '.55';
       var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'cellin'; inp.setAttribute('inputmode', 'numeric'); inp.setAttribute('aria-label', 'Enveloppe maximale de ' + p); inp.placeholder = 'Sans plafond';
       inp.value = cmEnv[p] != null ? fmt(cmEnv[p]) : '';
       inp.addEventListener('input', function () { cmEnv[p] = parseInt0(inp.value); });
@@ -10026,10 +10035,10 @@ function fmAxes() {
     mi.value = cmMin[p] != null ? fmt(cmMin[p]) : '';
     mi.addEventListener('input', function () { cmMin[p] = parseInt0(mi.value); });
     mi.addEventListener('blur', function () { mi.value = cmMin[p] != null ? fmt(cmMin[p]) : ''; });
-    mi.style.width = '160px'; inp.style.width = '160px'; mi.style.marginRight = '8px';
-    row.appendChild(nm); row.appendChild(mi); row.appendChild(inp); box.appendChild(row);
+    mi.style.width = '160px'; inp.style.width = '160px'; mi.style.marginRight = '8px'; mi.disabled = inp.disabled = !ck.checked;
+    row.appendChild(nm); row.appendChild(wsel); row.appendChild(mi); row.appendChild(inp); box.appendChild(row);
     });
-    if (!on.length) { var h = document.createElement('div'); h.className = 'hint'; h.textContent = 'Sélectionnez des périmètres à l’étape précédente pour fixer leurs enveloppes.'; box.appendChild(h); }
+    if (!labs.length) { var h = document.createElement('div'); h.className = 'hint'; h.textContent = 'Aucun périmètre de collecte : choisissez d’abord une configuration.'; box.appendChild(h); }
   }
   /* ---------- Campagne du profil Projet : période, modèle et périmètres viennent du cadre de programmation ---------- */
   function prjAxisValues(pa) {
@@ -10059,7 +10068,7 @@ function fmAxes() {
     document.getElementById('cm-tpl').value = pa.tpl || TPLS[1];
     document.getElementById('cm-par-hint').textContent = ['Sources : ' + parSrcText(pa), 'Ventilation : ' + (pa.vt && pa.vt !== 'Aucune' ? pa.vt : 'non ventilée'), 'Périmètre de collecte : ' + collectText(pa.axes), 'Circuit de validation : ' + ((models.filter(function (m) { return m.id === pa.model; })[0] || { steps: [] }).steps.some(function (s) { return s.act && (s.t === 'Validation' || s.t === 'Approbation'); }) ? 'défini' : 'aucun')].join(' · ');
     var vals = prjAxisValues(pa) || PERIMS['Projet / Programme'], box = document.getElementById('cm-perims'), pref = false;
-    box.innerHTML = ''; cmEnv = {}; cmMin = {};
+    box.innerHTML = ''; cmEnv = {}; cmMin = {}; cmWho = {};
     vals.forEach(function (p) { var l = mkChk(true, p, function () { cmEnvRender(); cmDdSync(); }); l.dataset.p = p; box.appendChild(l); var v = prjPadEnv(p, pa); if (v) { cmEnv[p] = v; pref = true; } });
     var pe = document.getElementById('cm-env-pad'); pe.hidden = !pref;
     pe.textContent = pref ? 'Maximum prérempli avec l’enveloppe de chaque composante au PAD ' + CPAD.code + ' (version ' + CPAD.ver + ') pour l’exercice ' + document.getElementById('cm-ex').value + '. Il reste modifiable.' : '';
@@ -10100,7 +10109,7 @@ function fmAxes() {
     var act = el[0], ps = PARAMS.filter(function (x) { return x.prof === act && x.st === 'Actif' && x.id !== 'PAR-009'; });
     if (!ps.length) { var o1 = document.createElement('option'); o1.value = ''; o1.textContent = 'Aucun paramétrage actif'; sp.appendChild(o1); }
     ps.forEach(function (x) { var o2 = document.createElement('option'); o2.value = x.id; o2.textContent = x.lib; sp.appendChild(o2); });
-    cmEnv = {}; cmMin = {}; cmLibAuto = true; document.getElementById('cm-lib').value = '';
+    cmEnv = {}; cmMin = {}; cmWho = {}; cmLibAuto = true; document.getElementById('cm-lib').value = '';
     cmParChanged(); cmEnvRender();
   }
   document.getElementById('cm-prof').addEventListener('change', cmProfileChanged);
@@ -10143,13 +10152,13 @@ function fmAxes() {
     BUDGETS.unshift(nbud);
     auditAdd('Création', 'Budget ' + nbud.code, 'Budget créé par la campagne ' + code + ' (' + paC.lib + ', ' + perLabel(nbud) + ')', nbud.prof);
     camps.unshift({ code: code, bud: nbud.code, par: paC.id, per: perV, lib: lib, prof: prof, ex: ex, model: mid, mver: m.ver, open: d2f(d1), close: d2f(d2), st: 'Brouillon', tpl: document.getElementById('cm-tpl').value, instr: document.getElementById('cm-instr').value,
-      perims: perims.map(function (p) { return { p: p, who: '', st: 'Non démarrée', amt: 0, env: cmEnv[p] != null ? cmEnv[p] : null, min: cmMin[p] != null ? cmMin[p] : null }; }),
+      perims: perims.map(function (p) { return { p: p, who: cmWho[p] || '', st: 'Non démarrée', amt: 0, env: cmEnv[p] != null ? cmEnv[p] : null, min: cmMin[p] != null ? cmMin[p] : null }; }),
       hist: [{ t: 'Campagne créée (brouillon) pour ' + paC.lib + ' — ' + perLabel(nbud), by: ME, on: nowStr() }] });
     renderBudgets();
-    document.getElementById('cm-lib').value = ''; cmEnv = {}; cmMin = {}; cmLibAuto = true; cmGo(1);
+    document.getElementById('cm-lib').value = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmLibAuto = true; cmGo(1);
     document.getElementById('cm-form').hidden = true;
     renderCamps();
-    cmMsg('Campagne ' + code + ' créée en brouillon. Affectez un contributeur à chaque périmètre pour pouvoir l’ouvrir.', 'ok');
+    cmMsg('Campagne ' + code + ' créée en brouillon. ' + (perims.some(function (q) { return !cmWho[q]; }) ? 'Affectez un contributeur à chaque périmètre pour pouvoir l’ouvrir.' : 'Elle peut être ouverte.'), 'ok');
     openCamp(code);
   });
   renderCamps();
