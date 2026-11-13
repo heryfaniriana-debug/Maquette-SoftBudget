@@ -3595,6 +3595,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
               <div><label for="cm-ex">Exercice <em>*</em></label><select id="cm-ex" class="field"><option>2026</option><option selected>2027</option><option>2028</option></select></div>
             <div><label for="cm-per">Période</label><select id="cm-per" class="field"></select></div>
               <div hidden><select id="cm-model" class="field"></select></div>
+              <div class="full" id="cm-dp-w" hidden>
+                <label for="cm-dpn">Devis-programme <em>*</em></label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px"><input id="cm-dpn" class="field" type="text" placeholder="N° (ex. DP-03)" aria-label="Numéro du devis-programme"><input id="cm-dpd1" class="field" type="date" aria-label="Début du devis-programme"><input id="cm-dpd2" class="field" type="date" aria-label="Fin du devis-programme"></div>
+              </div>
               <div><label for="cm-d1">Ouverture <em>*</em></label><input id="cm-d1" class="field" type="date"></div>
               <div><label for="cm-d2">Clôture <em>*</em></label><input id="cm-d2" class="field" type="date"></div>
               <div class="full"><label for="cm-tpl">Modèle de saisie</label><select id="cm-tpl" class="field"></select></div>
@@ -10047,6 +10051,9 @@ function fmAxes() {
     var prj = activeCode() === 'prj';
     document.querySelector('label[for="cm-par"]').firstChild.nodeValue = prj ? 'Configuration ' : 'Paramétrage ';
     document.getElementById('cm-env-pad').hidden = true;
+    var isDp = prj && pa && parPer(pa).t === 'dp';
+    document.getElementById('cm-dp-w').hidden = !isDp;
+    document.getElementById('cm-ex').parentNode.hidden = !!isDp;
     if (!prj || !pa) return;
     prjCampHide();
     document.getElementById('cm-tpl').value = pa.tpl || TPLS[1];
@@ -10120,6 +10127,12 @@ function fmAxes() {
   if (badMM) { err.textContent = 'Périmètre « ' + badMM + ' » : le minimum dépasse le maximum.'; return; }
 
     var ex = document.getElementById('cm-ex').value;
+    if (!document.getElementById('cm-dp-w').hidden) {
+      var dpn = document.getElementById('cm-dpn').value.trim(), dd1 = document.getElementById('cm-dpd1').value, dd2 = document.getElementById('cm-dpd2').value;
+      if (!dpn || !dd1 || !dd2) { err.textContent = 'Renseignez le numéro et les dates du devis-programme.'; return; }
+      if (dd2 <= dd1) { err.textContent = 'La fin du devis-programme doit suivre son début.'; return; }
+      ex = dd1.slice(0, 4);
+    }
     if (findSaisie(paC, ex, perV)) { err.textContent = 'Un budget existe déjà pour ' + perLabel({ ex: ex, per: perV }) + ' dans ce paramétrage.'; return; }
     if (isClosedPeriod(ex, perV)) { err.textContent = 'La période ' + perLabel({ ex: ex, per: perV }) + ' est clôturée : aucune campagne ne peut y être lancée sans autorisation.'; return; }
       err.textContent = '';
@@ -17250,10 +17263,10 @@ var EXEC_REC = [
     if (parSel && !list.some(function (x) { return x.id === parSel; })) parSel = null;
     var head = document.getElementById('bl-head'); head.innerHTML = '';
     var hr = document.createElement('tr');
-    (prj ? ['Configuration', 'Ventilation', 'Sources couvertes'] : ['Paramétrage', 'Nature', 'Devise', 'Périodicité']).concat(adv ? ['Périmètre de collecte'] : []).forEach(function (h) { var th = document.createElement('th'); th.textContent = h; hr.appendChild(th); });
+    (prj ? ['Configuration', 'Périodicité', 'Ventilation', 'Sources couvertes'] : ['Paramétrage', 'Nature', 'Devise', 'Périodicité']).concat(adv ? ['Périmètre de collecte'] : []).forEach(function (h) { var th = document.createElement('th'); th.textContent = h; hr.appendChild(th); });
     head.appendChild(hr);
     var body = document.getElementById('bl-body'); body.innerHTML = '';
-    var cols = (prj ? 3 : 4) + (adv ? 1 : 0);
+    var cols = 4 + (adv ? 1 : 0);
     if (!list.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, prj ? 'Aucune configuration.' : 'Aucun paramétrage.'); td0.colSpan = cols; td0.style.textAlign = 'left'; body.appendChild(tr0); }
     list.forEach(function (x) {
       var tr = document.createElement('tr'); tr.className = 'clickable-row' + (x.id === parSel ? ' is-sel' : '');
@@ -17264,7 +17277,7 @@ var EXEC_REC = [
       var nm = document.createElement('b'); nm.textContent = x.lib + (x.st !== 'Actif' ? ' (brouillon)' : '') + (inactive ? ' (historique)' : ''); nc.appendChild(nm);
       var mt = document.createElement('div'); mt.className = 'meta-tags'; mt.textContent = x.id + ' · ' + (n ? pl(n, adv ? 'budget' : 'saisie') : (adv ? 'aucun budget' : 'aucune saisie'));
       nc.appendChild(mt); tr.appendChild(nc);
-      if (prj) { cell(tr, x.vt && x.vt !== 'Aucune' ? x.vt : 'Non ventilée'); cell(tr, parSrcText(x)); }
+      if (prj) { cell(tr, parPer(x).t === 'dp' ? 'Devis-programme' : 'Exercice'); cell(tr, x.vt && x.vt !== 'Aucune' ? x.vt : 'Non ventilée'); cell(tr, parSrcText(x)); }
       else { cell(tr, x.nature); cell(tr, x.devise);
       cell(tr, x.period + (x.vt && x.vt !== 'Aucune' ? ', ventilée ' + VT_WORD[x.vt] : '')); }
       if (adv) cell(tr, collectText(x.axes));
@@ -18568,7 +18581,9 @@ var EXEC_REC = [
   function prjfType(t, keepVt) {
     PRJF.t = t;
     [].forEach.call(fe('f-ptype-seg').querySelectorAll('.seg-btn'), function (b) { b.classList.toggle('active', b.dataset.value === t); });
-    fe('f-pex-w').hidden = t === 'dp'; fe('f-dp-w').hidden = t !== 'dp'; fe('f-dpb-w').hidden = t !== 'dp';
+    var isPrj = activeCode() === 'prj';
+    fe('f-pex-w').hidden = isPrj || t === 'dp'; fe('f-dp-w').hidden = isPrj || t !== 'dp'; fe('f-dpb-w').hidden = isPrj || t !== 'dp';
+    if (isPrj) { var ph = fe('f-ptype-hint') || (function () { var h = document.createElement('div'); h.className = 'hint'; h.id = 'f-ptype-hint'; fe('f-ptype-seg').parentNode.appendChild(h); return h; })(); ph.textContent = t === 'dp' ? 'Devis-programme : le numéro et les dates se renseignent au lancement de la campagne. Ventilation mensuelle.' : 'Exercice : l’exercice concerné se choisit au lancement de la campagne, ce qui permet de réutiliser la configuration d’une année sur l’autre.'; }
     fe('f-per').value = t === 'dp' ? 'Exercice' : 'Annuelle';
     prjfVt(keepVt); prjfLive();
   }
@@ -18576,8 +18591,8 @@ var EXEC_REC = [
     if (!(typeof CAD !== 'undefined' && CAD && CAD.src)) return;
     var prj = activeCode() === 'prj';
     ['f-fld-ref', 'f-fld-per', 'f-card-fin'].forEach(function (id) { fe(id).hidden = prj; });
-    fe('f-card-per').hidden = true; fe('f-card-src').hidden = !prj;
-    if (prj) fe('f-card-src').querySelector('.fs-num').textContent = '2';
+    fe('f-card-per').hidden = !prj; fe('f-card-src').hidden = !prj;
+    if (prj) { fe('f-card-per').querySelector('.param-card-title').innerHTML = '<span class="fs-num">2</span> Périodicité'; fe('f-card-src').querySelector('.fs-num').textContent = '3'; fe('f-card-per').querySelector('.lb').textContent = 'Périodicité de la configuration'; fe('f-ptype-seg').querySelector('[data-value="exercice"]').textContent = 'Exercice'; }
     document.querySelector('.param-card-grid.two').style.gridTemplateColumns = prj ? '1fr' : '';
     fe('f-t1').textContent = prj ? 'Identité et ventilation' : 'Identité & rythme';
     fe('f-t4').textContent = prj ? 'Structure de la configuration' : 'Structure — axes utilisés';
@@ -18587,7 +18602,7 @@ var EXEC_REC = [
     if (!prj) return;
     fe('f-env-card').hidden = true;
     fe('create-title').textContent = p ? 'Modifier — ' + p.lib : 'Nouvelle configuration';
-    fe('create-sub').textContent = 'Une configuration est indépendante de l’exercice : elle peut servir pour plusieurs exercices consécutifs. L’exercice se choisit au lancement de la campagne.';
+    fe('create-sub').textContent = 'On choisit ici la périodicité (exercice ou devis-programme), jamais la période elle-même : elle se précise au lancement de la campagne, et la configuration peut servir pour plusieurs exercices consécutifs.';
     fe('c-create').textContent = p ? 'Enregistrer les modifications' : 'Créer la configuration';
     var per = p ? parPer(p) : { t: 'exercice', ex: 'ex' + CAD.ex };
     fe('f-pex').innerHTML = exercices().filter(function (e) { return e.st === 'Ouvert'; }).map(function (e) { return '<option value="' + e.id + '">' + e.lib + '</option>'; }).join('');
@@ -18597,7 +18612,7 @@ var EXEC_REC = [
     fe('f-slist').innerHTML = CAD.src.map(function (x) { var b = bailOf(x.bail); return '<label class="chk sm"><input type="checkbox" data-sc="' + x.code + '"' + (all || p.srcs.indexOf(x.code) >= 0 ? ' checked' : '') + '> ' + escH(x.lib) + ' <span style="color:#5B606D">— ' + escH(b ? b.nom : '') + ' · ' + escH(x.type) + '</span></label>'; }).join('');
     prjfDdOpen(false); prjfDdSync();
     fe('f-dpb').innerHTML = '<option value="">— Choisir un bailleur —</option>' + CAD.bail.filter(function (b) { return b.type !== 'État'; }).map(function (b) { return '<option value="' + b.code + '">' + escH(b.nom) + '</option>'; }).join('');
-    prjfType('exercice', p ? p.vt : 'Mensuelle');
+    prjfType(prj ? (p && p.per && p.per.t === 'dp' ? 'dp' : 'exercice') : per.t, p ? p.vt : 'Mensuelle');
     if (!p) { bxAxes = [{ t: 'Plan', n: 'Activités', l: 1, c: modes[activeCode()] === 'Avancé', cl: 0 }]; renderBx(); }
   }
   [].forEach.call(document.querySelectorAll('#f-ptype-seg .seg-btn'), function (b) { b.addEventListener('click', function () { prjfType(b.dataset.value); }); });
@@ -18656,7 +18671,7 @@ var EXEC_REC = [
   if (mode === 'Avancé' && circSteps.some(function (s) { return !s.rv; })) { document.getElementById('bx-err').textContent = 'Renseignez le responsable de chaque étape du circuit de validation.'; return; }
     var fMin = parseInt0(document.getElementById('f-min').value), fMax = parseInt0(document.getElementById('f-max').value);
   if (modes[activeCode()] !== 'Avancé' && fMin != null && fMax != null && fMin > fMax) { document.getElementById('bx-err').textContent = 'Le budget minimum dépasse le budget maximum.'; return; }
-  var fields = { lib: lib, min: modes[activeCode()] !== 'Avancé' ? fMin : null, max: modes[activeCode()] !== 'Avancé' ? fMax : null, ent: document.getElementById('f-ent').value, nature: document.getElementById('f-nature').value, devise: document.getElementById('f-dev').value, period: document.getElementById('f-per').value, vt: document.getElementById('f-vt').value, axes: JSON.parse(JSON.stringify(bxAxes)).map(function (a) { if (mode !== 'Avancé') a.c = false; return a; }), proj: p0 === 'prj' ? document.getElementById('f-prj').value.split(' — ')[0] : '', per: null, srcs: p0 === 'prj' ? prjfSrcOut() : null };
+  var fields = { lib: lib, min: modes[activeCode()] !== 'Avancé' ? fMin : null, max: modes[activeCode()] !== 'Avancé' ? fMax : null, ent: document.getElementById('f-ent').value, nature: document.getElementById('f-nature').value, devise: document.getElementById('f-dev').value, period: document.getElementById('f-per').value, vt: document.getElementById('f-vt').value, axes: JSON.parse(JSON.stringify(bxAxes)).map(function (a) { if (mode !== 'Avancé') a.c = false; return a; }), proj: p0 === 'prj' ? document.getElementById('f-prj').value.split(' — ')[0] : '', per: p0 === 'prj' ? { t: PRJF.t } : null, srcs: p0 === 'prj' ? prjfSrcOut() : null };
     if (editCode) {
       var p = parById(editCode);
       for (var k in fields) p[k] = fields[k];
