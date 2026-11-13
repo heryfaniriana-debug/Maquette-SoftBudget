@@ -5310,7 +5310,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="panel" id="ppm-form" hidden style="margin-bottom:14px"><h2>Nouveau marché <small id="ppm-no"></small></h2><div class="body">
           <div class="fgrid">
             <div class="full"><label for="ppm-des">Désignation <em>*</em></label><input id="ppm-des" class="field" type="text" placeholder="Objet de l’acquisition"></div>
-            <div class="full"><label for="ppm-ligne">Composante et activité (ligne du PTBA) <em>*</em></label><select id="ppm-ligne" class="field"></select></div>
+            <div class="full"><label for="ppm-act">Activité du PTBA <em>*</em></label><select id="ppm-act" class="field"></select><div class="hint" id="ppm-act-h">Le marché découle d’une activité du PTBA validé ; le total des marchés d’une activité ne peut pas dépasser son coût.</div></div>
+            <div class="full"><label for="ppm-ligne">Ligne budgétaire et crédit <em>*</em></label><select id="ppm-ligne" class="field"></select></div>
             <div><label for="ppm-cat">Catégorie d’acquisition</label><select id="ppm-cat" class="field"><option>Biens</option><option>Travaux</option><option>Services</option><option>Consultants</option></select></div>
             <div><label for="ppm-met">Méthode de passation</label><select id="ppm-met" class="field"></select></div>
             <div><label for="ppm-est">Montant estimatif (MGA) <em>*</em></label><input id="ppm-est" class="field" type="text" inputmode="numeric"></div>
@@ -5322,8 +5323,11 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="ppm-cancel">Annuler</button><button class="btn primary" id="ppm-save">Enregistrer au plan</button></div>
         </div></div>
         <div class="rpbud" style="margin-bottom:12px"><div class="rpbud-grid"><div class="rpbud-fld"><label for="ppm-fst">Statut d’avancement</label><select class="field" id="ppm-fst"></select></div></div></div>
-        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1250px">
-          <thead><tr><th>Référence</th><th>Désignation</th><th>Ligne</th><th>Catégorie et méthode</th><th class="num">Estimatif</th><th class="num">Engagé</th><th>Lancement · attribution · signature</th><th>Statut</th><th>Action</th></tr></thead><tbody id="ppm-b"></tbody></table></div><div class="pager"><span id="ppm-n"></span><span>Montants en MGA</span></div></div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1450px">
+          <thead><tr><th>Référence</th><th>Désignation</th><th>Ligne</th><th>Activité du PTBA</th><th>Catégorie et méthode</th><th class="num">Estimatif</th><th class="num">Engagé</th><th>Lancement · attribution · signature</th><th>Statut</th><th>Action</th></tr></thead><tbody id="ppm-b"></tbody></table></div><div class="pager"><span id="ppm-n"></span><span>Montants en MGA</span></div></div>
+        <div class="kb-h" style="margin:0 0 8px;font-weight:600">Couverture du PTBA par le plan de passation</div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:980px">
+          <thead><tr><th>Activité du PTBA</th><th>Lot de collecte</th><th class="num">Coût au PTBA</th><th>Marchés rattachés</th><th class="num">Total des marchés</th><th class="num">Reste à programmer</th><th>Contrôle</th></tr></thead><tbody id="ppm-cov"></tbody></table></div><div class="pager"><span>Un marché dépassant le coût de son activité est refusé ; un dépassement constaté après révision du PTBA est signalé.</span></div></div>
       </section>
 
       <!-- ===== Projet : plan de décaissement prévisionnel ===== -->
@@ -15297,8 +15301,35 @@ var EXEC_REC = [
     { ref: 'PPM-2026-30', des: 'Assistance technique complémentaire en fiscalité', ligne: 'C1.3', cat: 'Consultants', met: PPM_MET[3], est: 40000000, d1: '2026-11-20', d2: '2027-01-15', d3: '2027-02-20', st: 'Planifié' },
     { ref: 'PPM-2026-40', des: 'Dédouanement et transit du matériel', ligne: 'C3.3', cat: 'Services', met: PPM_MET[2], est: 10000000, d1: '2026-09-01', d2: '2026-10-10', d3: '2026-10-25', st: 'Attribué' },
     { ref: 'PPM-2026-41', des: 'Câblage électrique de la salle de contrôle', ligne: 'C2.3', cat: 'Travaux', met: PPM_MET[2], est: 5000000, d1: '2026-11-05', d2: '2026-12-05', d3: '2026-12-20', st: 'Lancé' },
-    { ref: 'PPM-2026-50', des: 'Travaux d’aménagement des locaux de formation', ligne: 'C1.2', cat: 'Travaux', met: PPM_MET[1], est: 30000000, d1: '2026-09-15', d2: '2026-10-30', d3: '2026-11-15', st: 'Attribué' }
+    { ref: 'PPM-2026-50', des: 'Travaux d’aménagement des locaux de formation', ligne: 'C1.2', cat: 'Travaux', met: PPM_MET[1], est: 30000000, d1: '2026-09-15', d2: '2026-10-30', d3: '2026-11-15', st: 'Attribué' },
+    { ref: 'PPM-2026-60', des: 'Études de faisabilité des 17 centres isolés', ligne: 'C1.3', cat: 'Consultants', met: PPM_MET[3], est: 6800000, d1: '2026-02-01', d2: '2026-03-15', d3: '2026-04-10', st: 'En exécution', act: 'CAMP-2026-02|H1' },
+    { ref: 'PPM-2026-61', des: 'Fourniture des kits d’équipements hybrides', ligne: 'C1.1', cat: 'Biens', met: PPM_MET[1], est: 5000000, d1: '2026-06-01', d2: '2026-07-15', d3: '2026-08-10', st: 'Signé', act: 'CAMP-2026-02|H2' }
   ] };
+  /* Liaison PPM ↔ PTBA : chaque marché découle d'une activité (ligne) d'un lot de collecte validé */
+  function ppmActs() {
+    var out = [];
+    if (typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return out;
+    bvList().forEach(function (r) { var d = bvData(r); d.lines.forEach(function (x) { out.push({ key: r.camp + '|' + x.l.c, lot: r.camp, perim: x.perim, code: x.l.c, lib: x.l.lib || x.l.l, cost: x.l.dem || 0 }); }); });
+    return out;
+  }
+  function ppmActOf(key) { return ppmActs().filter(function (a) { return a.key === key; })[0]; }
+  function ppmActTotal(key, except) { return CPP.items.filter(function (x) { return x.act === key && x.ref !== except; }).reduce(function (s, x) { return s + x.est; }, 0); }
+  function ppmActCell(x) {
+    if (!x.act) return '<span class="badge b-neutral">Non rattaché</span>';
+    var a = ppmActOf(x.act); if (!a) return escH(x.act);
+    var over = ppmActTotal(x.act) > a.cost;
+    return escH(a.code + ' — ' + a.lib) + '<div class="hby" style="font-size:12.5px;color:#5B606D">' + escH(a.lot) + '</div>' + (over ? '<div><span class="badge b-ko">Total au-dessus du coût de l’activité</span></div>' : '');
+  }
+  function ppmCovRender() {
+    var box = document.getElementById('ppm-cov'); if (!box) return;
+    var acts = ppmActs();
+    if (!acts.length) { box.innerHTML = '<tr><td colspan="7" style="text-align:left">Aucun PTBA validé : les activités apparaissent ici dès qu’un lot de collecte est validé.</td></tr>'; return; }
+    box.innerHTML = acts.map(function (a) {
+      var ms = CPP.items.filter(function (x) { return x.act === a.key; }), tot = ms.reduce(function (s, x) { return s + x.est; }, 0), rest = a.cost - tot;
+      var b = !ms.length ? '<span class="badge b-neutral">Sans marché</span>' : (rest < 0 ? '<span class="badge b-ko">Dépassement de ' + fmt(-rest) + '</span>' : (rest === 0 ? '<span class="badge b-ok">Entièrement couvert</span>' : '<span class="badge b-info">Couvert à ' + Math.round(100 * tot / a.cost) + ' %</span>'));
+      return '<tr><td class="name">' + escH(a.code + ' — ' + a.lib) + '</td><td>' + escH(a.lot) + '</td><td class="num">' + fmt(a.cost) + '</td><td>' + (ms.length ? ms.map(function (x) { return escH(x.ref); }).join(', ') : '—') + '</td><td class="num">' + fmt(tot) + '</td><td class="num">' + fmt(Math.max(rest, 0)) + '</td><td>' + b + '</td></tr>';
+    }).join('');
+  }
   function ppmGet(ref) { return CPP.items.filter(function (x) { return x.ref === ref; })[0]; }
   function ppmEng(ref) { return CAD.eng.filter(function (e) { return e.ppm === ref && (e.st === 'Visé' || e.st === 'En visa RAF' || e.st === 'En approbation Directeur'); }).reduce(function (a, e) { return a + e.ttc; }, 0); }
   function ppmLig(code) { var l = CAD.lines.filter(function (x) { return x.code === code; })[0]; return code + ' — ' + l.lib; }
@@ -15309,9 +15340,10 @@ var EXEC_REC = [
     document.getElementById('ppm-new').disabled = !cadCan('ppm_edit'); document.getElementById('ppm-new').title = cadCan('ppm_edit') ? '' : 'Réservé : ' + cadRolesTxt('ppm_edit');
     document.getElementById('ppm-b').innerHTML = items.map(function (x) {
       var i = PPM_ST.indexOf(x.st), nx = PPM_ST[i + 1], en = ppmEng(x.ref), sb = 'font-size:12.5px;color:#5B606D';
-      return '<tr><td class="name">' + x.ref + '</td><td>' + escH(x.des) + '</td><td>' + escH(ppmLig(x.ligne)) + '</td><td>' + x.cat + '<div class="hby" style="' + sb + '">' + escH(x.met) + '</div></td><td class="num">' + fmt(x.est) + '</td><td class="num">' + fmt(en) + (en > x.est ? '<div><span class="badge b-ko">Dépasse l’estimatif</span></div>' : '') + '</td><td style="' + sb + '">' + isoToFr(x.d1) + ' · ' + isoToFr(x.d2) + ' · ' + isoToFr(x.d3) + '</td><td><span class="badge ' + PPM_STC[x.st] + '">' + x.st + '</span></td><td>' + (nx ? '<button class="btn small" data-ppm="' + x.ref + '"' + cadTitle('ppm_edit') + '>Passer à « ' + nx + ' »</button>' : '') + '</td></tr>';
+      return '<tr><td class="name">' + x.ref + '</td><td>' + escH(x.des) + '</td><td>' + escH(ppmLig(x.ligne)) + '</td><td>' + ppmActCell(x) + '</td><td>' + x.cat + '<div class="hby" style="' + sb + '">' + escH(x.met) + '</div></td><td class="num">' + fmt(x.est) + '</td><td class="num">' + fmt(en) + (en > x.est ? '<div><span class="badge b-ko">Dépasse l’estimatif</span></div>' : '') + '</td><td style="' + sb + '">' + isoToFr(x.d1) + ' · ' + isoToFr(x.d2) + ' · ' + isoToFr(x.d3) + '</td><td><span class="badge ' + PPM_STC[x.st] + '">' + x.st + '</span></td><td>' + (nx ? '<button class="btn small" data-ppm="' + x.ref + '"' + cadTitle('ppm_edit') + '>Passer à « ' + nx + ' »</button>' : '') + '</td></tr>';
     }).join('');
     document.getElementById('ppm-n').textContent = pl(items.length, 'marché') + ' · estimatif total ' + fmt(sumK(items, 'est')) + ' MGA';
+    ppmCovRender();
     document.querySelectorAll('#ppm-b button[data-ppm]').forEach(function (b) { b.addEventListener('click', function () {
       if (!cadPerm('ppm_edit', 'ppm-msg')) return; var x = ppmGet(b.dataset.ppm), nx = PPM_ST[PPM_ST.indexOf(x.st) + 1]; x.st = nx; cadAudit(x.ref, 'Statut : ' + nx); bkMsg('ppm-msg', x.ref + ' passe à « ' + nx + ' »' + (nx === 'Attribué' ? ' : les engagements peuvent désormais le référencer.' : '.'), 'ok'); ppmRender();
     }); });
@@ -15321,6 +15353,8 @@ var EXEC_REC = [
     if (!cadPerm('ppm_edit', 'ppm-msg')) return;
     document.getElementById('ppm-ligne').innerHTML = CAD.lines.map(function (l) { return '<option value="' + l.code + '">' + escH(l.code + ' — ' + l.lib + ' (' + (cadSrcOf(l.code).lib) + ')') + '</option>'; }).join('');
     document.getElementById('ppm-met').innerHTML = PPM_MET.map(function (m) { return '<option>' + m + '</option>'; }).join('');
+    var acts = ppmActs(), sa = document.getElementById('ppm-act');
+    sa.innerHTML = acts.length ? '<option value="">— Choisir une activité du PTBA —</option>' + acts.map(function (a) { var rest = a.cost - ppmActTotal(a.key); return '<option value="' + escH(a.key) + '">' + escH(a.code + ' — ' + a.lib + ' · coût ' + fmt(a.cost) + ' · reste ' + fmt(Math.max(rest, 0)) + ' (' + a.lot + ')') + '</option>'; }).join('') : '<option value="">Aucun PTBA validé</option>';
     ['ppm-des', 'ppm-est', 'ppm-d1', 'ppm-d2', 'ppm-d3'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('ppm-err').textContent = '';
     document.getElementById('ppm-no').textContent = '· PPM-2026-' + (CPP.seq + 1); document.getElementById('ppm-form').hidden = false;
   });
@@ -15332,9 +15366,12 @@ var EXEC_REC = [
     if (isNaN(est) || est <= 0) { err.textContent = 'Le montant estimatif doit être positif.'; return; }
     if (!v('ppm-d1') || !v('ppm-d2') || !v('ppm-d3')) { err.textContent = 'Les trois dates prévisionnelles sont obligatoires.'; return; }
     if (!(v('ppm-d1') <= v('ppm-d2') && v('ppm-d2') <= v('ppm-d3'))) { err.textContent = 'Les dates doivent suivre l’ordre : lancement, attribution, signature.'; return; }
+    var actK = v('ppm-act'), actO = actK ? ppmActOf(actK) : null;
+    if (ppmActs().length && !actO) { err.textContent = 'Rattachez le marché à une activité du PTBA : le plan de passation découle du PTBA.'; return; }
+    if (actO && ppmActTotal(actK) + est > actO.cost) { err.textContent = 'Le total des marchés de l’activité ' + actO.code + ' (' + fmt(ppmActTotal(actK) + est) + ' MGA) dépasserait son coût au PTBA (' + fmt(actO.cost) + ' MGA) : il reste ' + fmt(Math.max(actO.cost - ppmActTotal(actK), 0)) + ' MGA à programmer.'; return; }
     var l = cadLines(2).filter(function (z) { return z.code === v('ppm-ligne'); })[0]; if (est > l.cred) { err.textContent = 'L’estimatif dépasse le crédit révisé de la ligne ' + l.code + ' (' + fmt(l.cred) + ' MGA).'; return; }
     err.textContent = ''; var ref = 'PPM-2026-' + (++CPP.seq);
-    CPP.items.push({ ref: ref, des: v('ppm-des'), ligne: v('ppm-ligne'), cat: v('ppm-cat'), met: v('ppm-met'), est: est, d1: v('ppm-d1'), d2: v('ppm-d2'), d3: v('ppm-d3'), st: 'Planifié' });
+    CPP.items.push({ ref: ref, des: v('ppm-des'), ligne: v('ppm-ligne'), cat: v('ppm-cat'), met: v('ppm-met'), est: est, d1: v('ppm-d1'), d2: v('ppm-d2'), d3: v('ppm-d3'), st: 'Planifié', act: actK || undefined });
     cadAudit(ref, 'Marché ajouté au plan (' + fmt(est) + ' MGA)'); document.getElementById('ppm-form').hidden = true; bkMsg('ppm-msg', ref + ' ajouté au plan de passation.', 'ok'); ppmRender();
   });
   function cegPpmOpts() {
