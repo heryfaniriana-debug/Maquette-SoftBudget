@@ -4257,6 +4257,21 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <button class="btn primary" id="pt-close" hidden>🔒 Clôturer</button>
           </div>
         </div>
+        <div id="bv-wrap" hidden style="margin-bottom:16px">
+          <div class="kb-h" style="margin:0 0 8px;font-weight:600">Budgets validés</div>
+          <div class="card">
+            <div class="scroll">
+              <table style="min-width:860px">
+                <thead><tr><th>Campagne</th><th>Configuration</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Actions</th></tr></thead>
+                <tbody id="bv-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel" id="bv-view" hidden>
+            <h2><span id="bv-view-title">Budget validé</span><button class="btn small" id="bv-view-close">Fermer</button></h2>
+            <div class="body" id="bv-view-body"></div>
+          </div>
+        </div>
         <div class="steps" id="pt-hsteps"></div>
         <div class="callout" id="pt-empty" style="margin-bottom:12px"></div>
         <div hidden><select id="pt-ver"></select><button id="pt-rev" type="button"></button><div id="pt-badges"></div></div>
@@ -6537,6 +6552,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'soon' && label) document.getElementById('soon-title').textContent = label;
     if (name === 'collecte' && typeof applyCoMode === 'function') applyCoMode();
     if (name === 'arb' && typeof renderValCfg === 'function') renderValCfg();
+    if (name === 'ptba' && typeof renderBv === 'function') renderBv();
     if (name === 'synth' && typeof renderSynth === 'function') renderSynth();
     if (name === 'ecarts' && typeof renderEcarts === 'function') renderEcarts();
     if (name === 'arb' || name === 'valid') openPtab('v-attente');
@@ -11297,7 +11313,68 @@ function fmAxes() {
   }
   document.getElementById('cv-dec-close').addEventListener('click', function () { document.getElementById('cv-dec').hidden = true; });
   document.getElementById('cv-view-close').addEventListener('click', function () { document.getElementById('cv-view').hidden = true; });
+  /* ---------- PTBA : budgets validés ----------
+     Une campagne consolidée validée devient un budget validé, consultable au niveau du PTBA :
+     uniquement le détail des lignes (axes, nature, quantité, coût, montant, répartition), sans enveloppes min/max ni pièces jointes. */
+  var VLINES = {
+    '1110101 Hybridation et numérisation des réseaux (17 centres isolés)': [
+      { c: 'H1', l: 'Études de faisabilité des 17 centres', nat: '62', q: 17, p: 400000, dem: 6800000, axv: { Financier: 'IDA 7286-MG', Géographique: 'Atsimo-Andrefana' }, per: [3400000, 3400000, 0, 0] },
+      { c: 'H2', l: 'Kits d’équipements hybrides', nat: '21', q: 2, p: 3133000, dem: 6266000, axv: { Financier: 'IDA 7286-MG', Géographique: 'Anosy' }, per: [0, 0, 3133000, 3133000] }
+    ]
+  };
+  Object.keys(COL).forEach(function (k) { COL[k].forEach(function (l) { if (!l.axv) l.axv = { Analytique: 'Programme ' + l.c.split('.')[0], Financier: 'Budget de l’État' }; }); });
+  function bvList() { return CVAL.filter(function (r) { return r.st === 'Validée' && cvCamp(r); }); }
+  function bvData(r) {
+    var c = cvCamp(r), pid = c.par || (CAMPPAR[c.code] || [])[0], pa = parById(pid), out = [];
+    cvPerims(r).forEach(function (x) {
+      var ls = x.lines.length ? x.lines : (VLINES[x.p.p] || []);
+      ls.forEach(function (l) { out.push({ perim: x.p.p, l: l }); });
+    });
+    return { c: c, pa: pa, lines: out };
+  }
+  function bvRender(root, r) {
+    var d = bvData(r), pa = d.pa, axes = pa && pa.axes ? pa.axes : [], labs = pa && VTS[pa.vt] ? VTS[pa.vt] : null;
+    var tot = d.lines.reduce(function (s, x) { return s + (x.l.dem || 0); }, 0), vd = r.hist.filter(function (h) { return /^Validée/.test(h.t); })[0];
+    root.innerHTML = '';
+    var k = cvEl('div', 'co-kpis');
+    k.appendChild(cvKpi('Configuration', pa ? pa.lib : '—'));
+    k.appendChild(cvKpi('Exercice', d.c.ex));
+    k.appendChild(cvKpi('Montant validé', fmt(tot) + ' MGA' + (vd ? ' · le ' + vd.on.slice(0, 10) : '')));
+    root.appendChild(k);
+    var bl = cvEl('section', 'co-blk'); bl.appendChild(cvEl('div', 'kb-h', 'Détail des lignes'));
+    var showPer = !!labs && d.lines.some(function (x) { return x.l.per; });
+    var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (900 + axes.length * 150 + (showPer ? labs.length * 110 : 0)) + 'px';
+    var th = '<th>Périmètre de collecte</th><th>Ligne</th><th>Nature</th>' + axes.filter(function (a) { return !a.c; }).map(function (a) { return '<th>' + escH(a.n) + '</th>'; }).join('') + '<th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Montant</th>' + (showPer ? labs.map(function (x) { return '<th class="num">' + escH(x) + '</th>'; }).join('') : '');
+    tb.innerHTML = '<thead><tr>' + th + '</tr></thead>';
+    var tbd = cvEl('tbody');
+    if (!d.lines.length) { var t0 = cvEl('tr'); var c0 = cell(t0, 'Aucune ligne détaillée pour ce budget.'); c0.colSpan = 8; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
+    d.lines.forEach(function (x) {
+      var l = x.l, tr = cvEl('tr');
+      cell(tr, x.perim); cell(tr, l.c + ' — ' + (l.lib || l.l), 'name'); cell(tr, l.nat || '—');
+      axes.filter(function (a) { return !a.c; }).forEach(function (a) { cell(tr, (l.axv && l.axv[a.n]) || '—'); });
+      cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num'); cell(tr, fmt(l.dem), 'num');
+      if (showPer) labs.forEach(function (_, i) { cell(tr, l.per && l.per[i] ? fmt(l.per[i]) : '—', 'num'); });
+      tbd.appendChild(tr);
+    });
+    tb.appendChild(tbd); sc.appendChild(tb); bl.appendChild(sc); root.appendChild(bl);
+  }
+  function renderBv() {
+    var body = document.getElementById('bv-body'), wrap = document.getElementById('bv-wrap'); if (!body) return;
+    body.innerHTML = '';
+    var prj = activeCode() === 'prj'; wrap.hidden = !prj; if (!prj || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return;
+    var rows = bvList();
+    if (!rows.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun budget validé pour le moment.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); }
+    rows.forEach(function (r) {
+      var c = cvCamp(r), pid = c.par || (CAMPPAR[c.code] || [])[0], pa = parById(pid), vd = r.hist.filter(function (h) { return /^Validée/.test(h.t); })[0], tr = document.createElement('tr');
+      cell(tr, c.code + ' — ' + c.lib, 'name'); cell(tr, pa ? pa.lib : '—'); cell(tr, c.ex); cell(tr, fmt(bvData(r).lines.reduce(function (s, x) { return s + (x.l.dem || 0); }, 0)) + ' MGA', 'num'); cell(tr, vd ? vd.on.slice(0, 10) : '—');
+      var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button';
+      b.addEventListener('click', function () { document.getElementById('bv-view-title').textContent = 'Budget validé — ' + c.code; bvRender(document.getElementById('bv-view-body'), r); document.getElementById('bv-view').hidden = false; });
+      act.appendChild(b); body.appendChild(tr);
+    });
+  }
+  document.getElementById('bv-view-close').addEventListener('click', function () { document.getElementById('bv-view').hidden = true; });
   function renderValCfg() {
+    renderBv();
     var wrap = document.getElementById('val-cfg-wrap'), view = document.getElementById('v-arb');
     var prj = activeCode() === 'prj'; wrap.hidden = !prj; view.classList.toggle('prj-val', prj);
     var h1 = view.querySelector(':scope > .head h1'), hp = view.querySelector(':scope > .head p');
@@ -19018,7 +19095,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -19940,9 +20017,9 @@ function pcRenderEnv(){
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
   /* Détail d'une contribution : blocs séparés, colonnes égales ; le titre est déjà dans l'en-tête de la page */
-  #co-ctrl > h2, #cv-dec > h2, #cv-view > h2 { display: none; }
-  #cv-dec, #cv-view { border: 0; box-shadow: none; background: transparent; }
-  #cv-dec > .body, #cv-view > .body { padding: 0; }
+  #co-ctrl > h2, #cv-dec > h2, #cv-view > h2, #bv-view > h2 { display: none; }
+  #cv-dec, #cv-view, #bv-view { border: 0; box-shadow: none; background: transparent; }
+  #cv-dec > .body, #cv-view > .body, #bv-view > .body { padding: 0; }
   #v-arb.prj-val #ar-arb > :not(#val-cfg-wrap) { display: none !important; }
   #v-arb.prj-val #ar-arb { display: block !important; }
   #v-arb.prj-val .ppane:not(#ar-arb) { display: none !important; }
@@ -19999,7 +20076,7 @@ function pcRenderEnv(){
   function labelOf(b) { return b.textContent.replace(/\s+/g, ' ').trim(); }
   /* Les boutons de ligne s'alignent sur la même ligne que le bouton de création (ex. « + Lancer une campagne ») */
   function joinHead(view, bar) {
-    if (!view || view._rowbarJoined) return;
+    if (!view || view._rowbarJoined || view.id === 'v-ptba') return;
     var acts = view.querySelector(':scope > .head .actions'); if (!acts || !acts.querySelector('button')) return;
     var wrap = document.createElement('div'); wrap.className = 'actionbar';
     bar.parentNode.insertBefore(wrap, bar); wrap.appendChild(bar); wrap.appendChild(acts);
