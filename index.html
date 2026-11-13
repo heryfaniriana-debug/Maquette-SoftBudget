@@ -4262,7 +4262,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="card">
             <div class="scroll">
               <table style="min-width:860px">
-                <thead><tr><th>Lot de collecte</th><th>Configuration</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Lot de collecte</th><th>Configuration</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du PTBA</th><th>Actions</th></tr></thead>
                 <tbody id="bv-body"></tbody>
               </table>
             </div>
@@ -11269,14 +11269,14 @@ function fmAxes() {
     box.appendChild(cvEl('h3', null, o.title));
     var sel = null;
     if (o.options) { var l1 = cvEl('label', null, o.optLabel); box.appendChild(l1); sel = cvEl('select', 'field'); o.options.forEach(function (x) { var op = cvEl('option', null, x); op.value = x; sel.appendChild(op); }); box.appendChild(sel); }
-    box.appendChild(cvEl('label', null, 'Commentaire' + (o.required ? ' *' : ' (facultatif)')));
+    box.appendChild(cvEl('label', null, 'Commentaire' + (typeof o.required === 'function' ? ' (obligatoire sauf approbation)' : (o.required ? ' *' : ' (facultatif)'))));
     var ta = cvEl('textarea', 'field'); ta.placeholder = o.placeholder || ''; box.appendChild(ta);
     var err = cvEl('div', 'err'); box.appendChild(err);
     var ft = cvEl('div', 'form-foot'); var bc = cvEl('button', 'btn', 'Annuler'); bc.type = 'button'; var bo = cvEl('button', 'btn primary', o.ok); bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
     function close() { if (bd.parentNode) bd.parentNode.removeChild(bd); }
     bc.addEventListener('click', close); bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
     bo.addEventListener('click', function () {
-      var v = ta.value.trim(); if (o.required && !v) { err.textContent = 'Le commentaire est obligatoire.'; return; }
+      var v = ta.value.trim(), need = typeof o.required === 'function' ? o.required(sel ? sel.value : null) : o.required; if (need && !v) { err.textContent = 'Le commentaire est obligatoire.'; return; }
       close(); cb(v, sel ? sel.value : null);
     });
     bd.appendChild(box); document.body.appendChild(bd); (sel || ta).focus();
@@ -11332,14 +11332,77 @@ function fmAxes() {
     });
     return { c: c, pa: pa, lines: out };
   }
+  /* Suivi du PTBA : à envoyer → envoyé au bailleur → retour notifié → clôturé */
+  var PTST = { 'À envoyer': 'b-warn', 'Envoyé au bailleur': 'b-info', 'Retour notifié : approuvé': 'b-ok', 'Correction demandée par le bailleur': 'b-ko', 'Clôturé': 'b-neutral' };
+  function bvPt(r) { if (!r.pt) r.pt = { st: 'À envoyer', ret: '', hist: [] }; return r.pt; }
+  function bvInfo(r) {
+    var d = bvData(r), pa = d.pa;
+    var P = { 'PAR-008': { name: 'DECIM — Digital and Energy Connectivity for Inclusion in Madagascar', ref: 'P178701 — Crédit IDA 7286-MG', bailleur: 'Banque mondiale — Association internationale de développement (IDA)' } }[pa && pa.id];
+    return P || { name: pa ? pa.lib : d.c.lib, ref: pa ? pa.id : d.c.code, bailleur: '—' };
+  }
+  function bvMatrix(r) {
+    var d = bvData(r), pa = d.pa, axes = (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }), labs = pa && VTS[pa.vt] ? VTS[pa.vt] : null;
+    var showPer = !!labs && d.lines.some(function (x) { return x.l.per; });
+    var head = ['Périmètre de collecte', 'Ligne', 'Nature'].concat(axes.map(function (a) { return a.n; }), ['Quantité', 'Coût unitaire', 'Montant'], showPer ? labs : []);
+    var tot = 0;
+    var rows = d.lines.map(function (x) {
+      var l = x.l; tot += l.dem || 0;
+      return [x.perim, l.c + ' — ' + (l.lib || l.l), l.nat || ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || ''; }), [l.q != null ? l.q : '', l.p != null ? l.p : '', l.dem || 0], showPer ? labs.map(function (_, i) { return l.per && l.per[i] ? l.per[i] : ''; }) : []);
+    });
+    var fin = {}; d.lines.forEach(function (x) { var k = (x.l.axv && x.l.axv.Financier) || 'Non précisé'; fin[k] = (fin[k] || 0) + (x.l.dem || 0); });
+    return { head: head, rows: rows, total: tot, fin: Object.keys(fin).map(function (k) { return [k, fin[k], tot ? Math.round(1000 * fin[k] / tot) / 10 : 0]; }), d: d };
+  }
+  function bvExportXlsx(r) {
+    var m = bvMatrix(r), info = bvInfo(r), pt = bvPt(r);
+    var rows = [['PTBA — ' + info.name], ['Référence', info.ref], ['Bailleur', info.bailleur], ['Configuration', m.d.pa ? m.d.pa.lib : ''], ['Lot de collecte', m.d.c.code + ' — ' + m.d.c.lib], ['Exercice', m.d.c.ex], ['Statut', pt.st], ['Montant total (MGA)', m.total], [],
+      ['Financement'], ['Source de financement', 'Montant (MGA)', 'Part (%)']].concat(m.fin, [[], ['Détail des lignes'], m.head], m.rows);
+    sbDl('ptba-' + sbSlug(m.d.c.code) + '-' + sbStamp() + '.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', sbXlsx([{ name: 'PTBA', rows: rows, head: 1, boldRows: [0, 9, 10, 10 + m.fin.length + 2, 10 + m.fin.length + 3] }]));
+  }
+  function bvExportPdf(r) {
+    var m = bvMatrix(r), info = bvInfo(r), pt = bvPt(r), E = sbXml;
+    function tbl(head, rows, numFrom) { return '<table><thead><tr>' + head.map(function (h, i) { return '<th' + (i >= numFrom ? ' class="num"' : '') + '>' + E(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.map(function (rw) { return '<tr>' + rw.map(function (c, i) { return '<td' + (i >= numFrom ? ' class="num"' : '') + '>' + E(typeof c === 'number' ? fmt(c) : c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>'; }
+    var html = '<h1>PTBA — ' + E(info.name) + '</h1><div class="meta">' + E(info.ref) + ' · Bailleur : ' + E(info.bailleur) + '<br>Configuration : ' + E(m.d.pa ? m.d.pa.lib : '') + ' · Lot de collecte : ' + E(m.d.c.code + ' — ' + m.d.c.lib) + ' · Exercice ' + E(m.d.c.ex) + '<br>Statut : ' + E(pt.st) + ' · Montant total : ' + E(fmt(m.total)) + ' MGA</div>'
+      + '<h2>Financement</h2>' + tbl(['Source de financement', 'Montant (MGA)', 'Part (%)'], m.fin.map(function (x) { return [x[0], x[1], String(x[2]).replace('.', ',')]; }), 1)
+      + '<h2>Détail des lignes</h2>' + tbl(m.head, m.rows, m.head.indexOf('Quantité'));
+    sbPrint('PTBA ' + info.name + ' ' + m.d.c.code, html);
+  }
+  function bvOpen(r) {
+    document.getElementById('bv-view-title').textContent = 'Lot de collecte validé — ' + r.camp;
+    bvRender(document.getElementById('bv-view-body'), r);
+    document.getElementById('bv-view').hidden = false;
+  }
+  function bvAfter(r, msg) { bvRender(document.getElementById('bv-view-body'), r); renderBv(); cvSay('bv-msg', msg); }
+  function bvBar(root, r) {
+    var pt = bvPt(r), bar = cvEl('div', 'row-toolbar'); bar.style.marginBottom = '14px';
+    var canSend = pt.st === 'À envoyer' || pt.st === 'Correction demandée par le bailleur', canRet = pt.st === 'Envoyé au bailleur', canClose = pt.st === 'Retour notifié : approuvé';
+    [['Exporter en Excel', '', true, function () { bvExportXlsx(r); }],
+     ['Exporter en PDF', '', true, function () { bvExportPdf(r); }],
+     [pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', 'primary', canSend, function () {
+        cvAsk({ title: 'Marquer le PTBA comme envoyé au bailleur', ok: 'Marquer envoyé', required: false, placeholder: 'Mode d’envoi, référence du courrier…' }, function (com) {
+          pt.st = 'Envoyé au bailleur'; pt.hist.unshift({ t: 'PTBA envoyé au bailleur' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA marqué comme envoyé au bailleur.'); });
+      }],
+     ['Notifier le retour du bailleur', 'primary', canRet, function () {
+        cvAsk({ title: 'Notifier le retour du bailleur', ok: 'Enregistrer le retour', required: function (v) { return v !== 'Approuvé'; }, optLabel: 'Décision du bailleur *', options: ['Approuvé', 'Correction demandée'], placeholder: 'Avis du bailleur (obligatoire si correction demandée)' }, function (com, dec) {
+          if (dec === 'Approuvé') { pt.st = 'Retour notifié : approuvé'; pt.hist.unshift({ t: 'Retour du bailleur : approuvé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'Retour du bailleur enregistré : PTBA approuvé. Il peut être clôturé.'); }
+          else { pt.st = 'Correction demandée par le bailleur'; pt.hist.unshift({ t: 'Retour du bailleur : correction demandée — ' + com, by: ME, on: nowStr() }); bvAfter(r, 'Retour du bailleur enregistré : correction demandée. Corrigez puis renvoyez le PTBA.'); } });
+      }],
+     ['Clôturer', 'primary', canClose, function () {
+        cvAsk({ title: 'Clôturer le PTBA', ok: 'Clôturer', required: false, placeholder: 'Commentaire de clôture' }, function (com) {
+          pt.st = 'Clôturé'; pt.hist.unshift({ t: 'PTBA clôturé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA clôturé : il est verrouillé.'); });
+      }]].forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
+    root.appendChild(bar);
+  }
   function bvRender(root, r) {
     var d = bvData(r), pa = d.pa, axes = pa && pa.axes ? pa.axes : [], labs = pa && VTS[pa.vt] ? VTS[pa.vt] : null;
     var tot = d.lines.reduce(function (s, x) { return s + (x.l.dem || 0); }, 0), vd = r.hist.filter(function (h) { return /^Validée/.test(h.t); })[0];
     root.innerHTML = '';
-    var k = cvEl('div', 'co-kpis');
+    var mg = cvEl('div', 'callout', ''); mg.id = 'bv-msg'; mg.hidden = true; mg.style.marginBottom = '12px'; root.appendChild(mg);
+    bvBar(root, r);
+    var k = cvEl('div', 'co-kpis'); k.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
     k.appendChild(cvKpi('Configuration', pa ? pa.lib : '—'));
     k.appendChild(cvKpi('Exercice', d.c.ex));
     k.appendChild(cvKpi('Montant validé', fmt(tot) + ' MGA' + (vd ? ' · le ' + vd.on.slice(0, 10) : '')));
+    k.appendChild(cvKpi('Statut du PTBA', badge(bvPt(r).st, PTST[bvPt(r).st] || 'b-neutral')));
     root.appendChild(k);
     var bl = cvEl('section', 'co-blk'); bl.appendChild(cvEl('div', 'kb-h', 'Détail des lignes'));
     var showPer = !!labs && d.lines.some(function (x) { return x.l.per; });
@@ -11357,18 +11420,23 @@ function fmAxes() {
       tbd.appendChild(tr);
     });
     tb.appendChild(tbd); sc.appendChild(tb); bl.appendChild(sc); root.appendChild(bl);
+    var hs = cvEl('section', 'co-blk'); hs.appendChild(cvEl('div', 'kb-h', 'Suivi du PTBA'));
+    var ph = bvPt(r).hist; if (!ph.length) hs.appendChild(cvEl('div', 'hint', 'Aucune action enregistrée : le PTBA est prêt à être envoyé au bailleur.'));
+    ph.forEach(function (h) { var row = cvEl('div', 'list-row'); var l = cvEl('div'); l.appendChild(cvEl('b', null, h.t)); l.appendChild(cvEl('div', 'hby', h.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', h.on)); hs.appendChild(row); });
+    root.appendChild(hs);
   }
   function renderBv() {
     var body = document.getElementById('bv-body'), wrap = document.getElementById('bv-wrap'); if (!body) return;
     body.innerHTML = '';
     var prj = activeCode() === 'prj'; wrap.hidden = !prj; document.getElementById('v-ptba').classList.toggle('ptba-lots', prj); if (!prj || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return;
     var rows = bvList();
-    if (!rows.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun lot de collecte validé pour le moment.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); }
+    if (!rows.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun lot de collecte validé pour le moment.'); c0.colSpan = 7; c0.style.textAlign = 'left'; body.appendChild(t0); }
     rows.forEach(function (r) {
       var c = cvCamp(r), pid = c.par || (CAMPPAR[c.code] || [])[0], pa = parById(pid), vd = r.hist.filter(function (h) { return /^Validée/.test(h.t); })[0], tr = document.createElement('tr');
       cell(tr, c.code + ' — ' + c.lib, 'name'); cell(tr, pa ? pa.lib : '—'); cell(tr, c.ex); cell(tr, fmt(bvData(r).lines.reduce(function (s, x) { return s + (x.l.dem || 0); }, 0)) + ' MGA', 'num'); cell(tr, vd ? vd.on.slice(0, 10) : '—');
+      var stc = cell(tr, ''); stc.appendChild(badge(bvPt(r).st, PTST[bvPt(r).st] || 'b-neutral'));
       var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button';
-      b.addEventListener('click', function () { document.getElementById('bv-view-title').textContent = 'Lot de collecte validé — ' + c.code; bvRender(document.getElementById('bv-view-body'), r); document.getElementById('bv-view').hidden = false; });
+      b.addEventListener('click', function () { bvOpen(r); });
       act.appendChild(b); body.appendChild(tr);
     });
   }
