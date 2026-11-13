@@ -3693,14 +3693,14 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           </div>
 
           <div class="ppane on" id="cd-perims">
-            <div class="callout" style="margin-bottom:12px">
+            <div class="callout" hidden style="margin-bottom:12px">
               <svg class="ico" viewBox="0 0 24 24" style="margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
               <span>Un contributeur peut être affecté à plusieurs périmètres. Il ne voit et ne saisit que les périmètres qui lui sont affectés. Chaque changement d’affectation est historisé.</span>
             </div>
             <div class="card" style="margin-bottom:12px">
               <div class="scroll">
                 <table style="min-width:820px">
-                  <thead><tr><th>Périmètre</th><th>Contributeur</th><th class="num">Enveloppe min (MGA)</th><th class="num">Enveloppe max (MGA)</th><th>Circuit de validation</th></tr></thead>
+                  <thead><tr><th>Périmètre</th><th>Contributeur</th><th class="num">Enveloppe min (MGA)</th><th class="num">Enveloppe max (MGA)</th></tr></thead>
                   <tbody id="cd-perims-body"></tbody>
                 </table>
               </div>
@@ -9841,8 +9841,22 @@ function fmAxes() {
     document.getElementById('cd-launch').hidden = c.st !== 'Brouillon';
     document.getElementById('cd-closecoll').hidden = c.st !== 'En collecte';
     renderCdPerims(); renderCdFollow(); renderCdInstr(); renderCdHist();
+    ['cd-load', 'cd-circ'].forEach(function (id) { var e = document.getElementById(id); if (e && e.parentNode) e.parentNode.hidden = true; });
+    ['cd-d1', 'cd-d2', 'cd-tpl', 'cd-instr-txt'].forEach(function (id) { document.getElementById(id).disabled = true; });
+    document.getElementById('cd-instr-save').hidden = true; document.getElementById('cd-instr-note').hidden = true;
   }
+  /* Consultation d'une campagne : lecture seule, périmètres, contributeurs et enveloppes uniquement */
   function renderCdPerims() {
+    var c = cdCur, body = document.getElementById('cd-perims-body');
+    body.innerHTML = '';
+    c.perims.forEach(function (p) {
+      var tr = document.createElement('tr');
+      cell(tr, p.p, 'name'); cell(tr, p.who || 'Non affecté');
+      cell(tr, p.min != null ? fmt(p.min) : '—', 'num'); cell(tr, p.env != null ? fmt(p.env) : '—', 'num');
+      body.appendChild(tr);
+    });
+  }
+  function renderCdPerimsOld() {
     var c = cdCur;
     var body = document.getElementById('cd-perims-body');
     body.innerHTML = '';
@@ -19743,6 +19757,10 @@ function pcRenderEnv(){
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
   .row-toolbar [hidden] { display: none !important; }
+  .actionbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 8px 16px; margin: 0 0 12px; }
+  .actionbar > .row-toolbar { margin: 0; flex: 1 1 auto; min-width: 0; }
+  .actionbar > .actions { margin: 0 0 0 auto; flex: 0 0 auto; padding: 0; align-self: center; }
+  .actionbar .btn { white-space: nowrap; }
   tr.ra-row { cursor: pointer; }
   tr.ra-sel > td { background: var(--info-bg); }
   .ra-hide { display: none !important; }
@@ -19753,6 +19771,14 @@ function pcRenderEnv(){
 (function () {
   var pending = new Set(), timer = null;
   function labelOf(b) { return b.textContent.replace(/\s+/g, ' ').trim(); }
+  /* Les boutons de ligne s'alignent sur la même ligne que le bouton de création (ex. « + Lancer une campagne ») */
+  function joinHead(view, bar) {
+    if (!view || view._rowbarJoined) return;
+    var acts = view.querySelector(':scope > .head .actions'); if (!acts || !acts.querySelector('button')) return;
+    var wrap = document.createElement('div'); wrap.className = 'actionbar';
+    bar.parentNode.insertBefore(wrap, bar); wrap.appendChild(bar); wrap.appendChild(acts);
+    view._rowbarJoined = true;
+  }
   function actionCell(tr) {
     var tds = tr.children; if (!tds.length) return null;
     var td = tds[tds.length - 1];
@@ -19775,9 +19801,10 @@ function pcRenderEnv(){
       st.bar = document.createElement('div'); st.bar.className = 'row-toolbar'; st.bar.setAttribute('role', 'toolbar');
       var anchor = table.closest('.card') || table.closest('.scroll') || table;
       anchor.parentNode.insertBefore(st.bar, anchor);
+      var vw = table.closest('section.view'); if (vw && vw.querySelector('table') === table) joinHead(vw, st.bar);
     }
     st.bar.hidden = false; st.bar.innerHTML = '';
-    var hint = document.createElement('span'); hint.className = 'rt-hint'; hint.textContent = 'Cliquez sur une ligne pour activer les actions.';
+    var hint = document.createElement('span'); hint.className = 'rt-hint'; hint.textContent = 'Sélectionnez une ligne'; hint.title = 'Cliquez sur une ligne pour activer les actions.';
     var btns = labels.map(function (l) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = l; b.disabled = true;
       b.addEventListener('click', function () {
@@ -19829,6 +19856,7 @@ function pcRenderEnv(){
     var bar = document.createElement('div'); bar.className = 'row-toolbar'; bar.id = 'bl-rowbar'; bar.setAttribute('role', 'toolbar');
     ['bl-view', 'bl-mod', 'bl-dup2', 'bl-act', 'bl-del'].forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
     flt.parentNode.insertBefore(bar, flt);
+    joinHead(document.getElementById('v-list'), bar);
   }
 })();
 </script>
