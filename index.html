@@ -3799,10 +3799,6 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="body">
             <div id="co-d-head" class="co-kpis"></div>
             <div class="callout" id="co-d-ret" hidden style="margin-bottom:14px;background:var(--warn-bg);color:#B45309"></div>
-            <section class="co-blk" id="co-d-glance">
-              <div class="kb-h">À retenir</div>
-              <div id="co-d-glance-list"></div>
-            </section>
             <section class="co-blk" id="co-d-env">
               <div class="kb-h">Enveloppe et montant demandé</div>
               <div class="co-env3" id="co-d-env3"></div>
@@ -10603,11 +10599,10 @@ function fmAxes() {
     var lb = document.getElementById('co-d-lines'); lb.innerHTML = '';
     var dl = getLines(name).filter(function (l) { return l.dem != null; });
     lb.appendChild(indView(p, dl));
-    var gl = document.getElementById('co-d-glance-list'); gl.innerHTML = '';
-    glanceFor(p, dl, tot).forEach(function (g) { var row = document.createElement('div'); row.className = 'gl-row'; var b = badge(g[1], g[0]); row.appendChild(b); var s = document.createElement('span'); s.textContent = g[2]; row.appendChild(s); gl.appendChild(row); });
     var pjb = document.getElementById('co-d-pj'); pjb.innerHTML = '';
     if (!(p.pj && p.pj.length)) { var ne = document.createElement('div'); ne.className = 'hint'; ne.textContent = 'Aucune pièce jointe.'; pjb.appendChild(ne); }
-    (p.pj || []).forEach(function (f) { var row = document.createElement('div'); row.className = 'list-row'; var b = document.createElement('b'); b.textContent = '📎 ' + f; row.appendChild(b); pjb.appendChild(row); });
+    if (p.pj && p.pj.length) pjb.appendChild(pjList(p.pj));
+    pjb.parentNode.hidden = false;
     var box = document.getElementById('co-ctrl-list');
     box.innerHTML = '';
     var r = ctrlOf(name);
@@ -10803,8 +10798,29 @@ function fmAxes() {
     var bd = []; if (l.q != null && l.p != null) bd.push(fmt(l.q) + ' × ' + fmt(l.p) + ' MGA'); if (l.ref) bd.push('Référence : ' + fmt(l.ref) + ' MGA'); bd.push('Nature : ' + (l.nat || '—'));
     blk('Budget', bd); c.appendChild(g);
     if (l.just) { var cm = cvEl('div', 'lc-foot'); cm.appendChild(cvEl('b', null, 'Commentaire : ')); cm.appendChild(document.createTextNode(l.just)); c.appendChild(cm); }
-    if (l.pj && l.pj.length) { var pj = cvEl('div', 'lc-foot'); pj.appendChild(cvEl('b', null, 'Pièces jointes : ')); pj.appendChild(document.createTextNode(l.pj.map(function (f) { return '📎 ' + f; }).join('   '))); c.appendChild(pj); }
+    if (l.pj && l.pj.length) { var pj = cvEl('div', 'lc-foot'); pj.appendChild(cvEl('b', null, 'Pièces jointes')); pj.appendChild(pjList(l.pj)); c.appendChild(pj); }
     return c;
+  }
+  /* Pièces jointes : chaque fichier se consulte (aperçu) ou se télécharge via un bouton */
+  function pjList(files) {
+    var box = cvEl('div', 'pj-list'); box.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+    files.forEach(function (f) {
+      var row = cvEl('div', 'pj-row'); row.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+      var nm = cvEl('span', null, '📎 ' + f); nm.style.cssText = 'flex:1;min-width:160px'; row.appendChild(nm);
+      var v = cvEl('button', 'btn small', 'Consulter'); v.type = 'button'; v.setAttribute('aria-label', 'Consulter ' + f); v.addEventListener('click', function (e) { e.stopPropagation(); pjPreview(f); }); row.appendChild(v);
+      var d = cvEl('button', 'btn small', 'Télécharger'); d.type = 'button'; d.setAttribute('aria-label', 'Télécharger ' + f); d.addEventListener('click', function (e) { e.stopPropagation(); sbDl(f, 'text/plain;charset=utf-8', 'Pièce jointe : ' + f + '\r\n(Document simulé pour la maquette.)\r\n'); }); row.appendChild(d);
+      box.appendChild(row);
+    });
+    return box;
+  }
+  function pjPreview(f) {
+    var bd = cvEl('div', 'cv-modal-bd'), box = cvEl('div', 'cv-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+    box.appendChild(cvEl('h3', null, f));
+    var pv = cvEl('div', null, 'Aperçu simulé du document « ' + f + ' ». Dans la version réelle, le fichier s’affiche ici.'); pv.style.cssText = 'border:1px dashed var(--border,#cbd5e1);border-radius:8px;padding:40px 16px;text-align:center;color:var(--muted);margin:12px 0'; box.appendChild(pv);
+    var ft = cvEl('div', 'form-foot');
+    var dl = cvEl('button', 'btn', 'Télécharger'); dl.type = 'button'; dl.addEventListener('click', function () { sbDl(f, 'text/plain;charset=utf-8', 'Pièce jointe : ' + f + '\r\n(Document simulé pour la maquette.)\r\n'); });
+    var cl = cvEl('button', 'btn primary', 'Fermer'); cl.type = 'button'; cl.addEventListener('click', function () { bd.remove(); });
+    ft.appendChild(dl); ft.appendChild(cl); box.appendChild(ft); bd.appendChild(box); bd.addEventListener('click', function (e) { if (e.target === bd) bd.remove(); }); document.body.appendChild(bd); cl.focus();
   }
   /* Indicateurs servis, affichés juste sous la ligne de budget concernée (vue fusionnée) */
   function indSubRow(p, l, span) {
