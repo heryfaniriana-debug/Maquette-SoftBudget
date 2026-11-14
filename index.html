@@ -3790,7 +3790,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
         <!-- Liste et contrôle -->
         <div class="ppane on" id="co-list">
-          <div class="actionbar"><div class="row-toolbar" id="co-rowbar"></div><div class="actions" id="co-bar-right"></div></div>
+          <div class="row-toolbar" id="co-rowbar" style="margin-bottom:12px"></div>
           <div class="kb-sum"><span id="co-prog"></span><span id="co-rights" hidden></span></div>
         <div class="kanban" id="co-kanban"></div>
 
@@ -20481,6 +20481,10 @@ function pcRenderEnv(){
   .fgrid > div > .field, .fgrid > div > select, .fgrid > div > input { width: 100%; box-sizing: border-box; }
   .fgrid > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .row-toolbar [hidden] { display: none !important; }
+  /* Les barres d'action sont reflétées en haut à droite de la page (voir le dock d'en-tête) */
+  .row-toolbar.docked { display: none !important; }
+  .dock-mirror { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
+  .head > .actions { flex-wrap: wrap; justify-content: flex-end; align-items: center; }
   .actionbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 8px 16px; margin: 0 0 12px; }
   .actionbar > .row-toolbar { margin: 0; flex: 1 1 auto; min-width: 0; }
   .actionbar > .actions { margin: 0 0 0 auto; flex: 0 0 auto; padding: 0; align-self: center; }
@@ -20496,13 +20500,7 @@ function pcRenderEnv(){
   var pending = new Set(), timer = null;
   function labelOf(b) { return b.textContent.replace(/\s+/g, ' ').trim(); }
   /* Les boutons de ligne s'alignent sur la même ligne que le bouton de création (ex. « + Lancer une campagne ») */
-  function joinHead(view, bar) {
-    if (!view || view._rowbarJoined || view.id === 'v-ptba') return;
-    var acts = view.querySelector(':scope > .head .actions'); if (!acts || !acts.querySelector('button')) return;
-    var wrap = document.createElement('div'); wrap.className = 'actionbar';
-    bar.parentNode.insertBefore(wrap, bar); wrap.appendChild(bar); wrap.appendChild(acts);
-    view._rowbarJoined = true;
-  }
+  function joinHead() { /* remplacé par le dock d'en-tête ci-dessous : les boutons montent dans l'en-tête de la page */ }
   function actionCell(tr) {
     var tds = tr.children; if (!tds.length) return null;
     var td = tds[tds.length - 1];
@@ -20574,17 +20572,52 @@ function pcRenderEnv(){
   function init() { [].forEach.call(document.querySelectorAll('tbody'), queue); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window.rowActionsRefresh = init;
-  /* Collecte : « Consolider » rejoint la barre d'actions, sur la même ligne que les boutons de la carte sélectionnée */
-  var cons = document.getElementById('co-consolider'), consBox = document.getElementById('co-bar-right');
-  if (cons && consBox) consBox.appendChild(cons);
   /* Liste Configuration : les boutons de ligne passent en haut à gauche, sous le titre */
   var host = document.getElementById('bl-actions'), flt = document.querySelector('#v-list .filters');
   if (host && flt) {
     var bar = document.createElement('div'); bar.className = 'row-toolbar'; bar.id = 'bl-rowbar'; bar.setAttribute('role', 'toolbar');
     ['bl-view', 'bl-mod', 'bl-dup2', 'bl-act', 'bl-del'].forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
     flt.parentNode.insertBefore(bar, flt);
-    joinHead(document.getElementById('v-list'), bar);
   }
+  /* Boutons d'action : toujours en haut à droite de la page, dans l'en-tête, à côté du bouton de création.
+     Chaque barre d'actions (boutons de ligne, de détail, de décision) est reflétée dans l'en-tête ; la barre d'origine reste masquée et agit. */
+  var mirrors = [];
+  function dshown(el) { for (var n = el.parentElement; n && n !== document.body; n = n.parentElement) { if (n.hidden) return false; if (getComputedStyle(n).display === 'none') return false; } return true; }
+  function dfill(bar, rec) {
+    var btns = [].filter.call(bar.querySelectorAll('button'), function (b) { return !b.hidden; });
+    var sig = btns.map(function (b) { return b.textContent + '|' + b.disabled + '|' + b.className + '|' + b.title; }).join('§');
+    if (sig === rec.sig) return; rec.sig = sig; rec.m.innerHTML = '';
+    btns.forEach(function (b) {
+      var c = document.createElement('button'); c.type = 'button'; c.className = b.className; c.textContent = b.textContent; c.disabled = b.disabled; if (b.title) c.title = b.title;
+      c.addEventListener('click', function () { if (!b.disabled) b.click(); }); rec.m.appendChild(c);
+    });
+  }
+  function dock() {
+    mirrors = mirrors.filter(function (x) { if (!document.body.contains(x.bar)) { if (x.m.parentNode) x.m.parentNode.removeChild(x.m); return false; } return true; });
+    [].forEach.call(document.querySelectorAll('section.view .row-toolbar'), function (bar) {
+      var rec = mirrors.filter(function (x) { return x.bar === bar; })[0], view = bar.closest('section.view'), head = null, shown = dshown(bar);
+      if (shown) {
+        var fph = view.querySelector(':scope > .sb-fp-head');
+        if (fph) { for (var n = bar.parentElement; n && n !== view; n = n.parentElement) { if (n._fp) { head = fph; break; } } }
+        else { head = [].filter.call(view.querySelectorAll('.head'), function (h) { return getComputedStyle(h).display !== 'none' && dshown(h) && !h.closest('.panel'); })[0] || null; }
+      }
+      if (!head) { if (rec && rec.m.parentNode) rec.m.parentNode.removeChild(rec.m); return; }
+      var actions = head.querySelector(':scope > .actions'); if (!actions) { actions = document.createElement('div'); actions.className = 'actions'; head.appendChild(actions); }
+      if (!rec) {
+        rec = { bar: bar, m: document.createElement('div'), sig: null }; rec.m.className = 'dock-mirror'; mirrors.push(rec);
+        new MutationObserver(function () { dfill(bar, rec); }).observe(bar, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'hidden', 'class', 'title'] });
+      }
+      if (!bar.classList.contains('docked')) bar.classList.add('docked');
+      if (rec.m.parentNode !== actions) actions.insertBefore(rec.m, [].filter.call(actions.children, function (c) { return !c.classList.contains('dock-mirror'); })[0] || null);
+      dfill(bar, rec);
+    });
+  }
+  var dockTimer = null;
+  new MutationObserver(function (ms) {
+    if (ms.every(function (m) { var t = m.target.nodeType === 1 ? m.target : m.target.parentElement; return !t || t.closest('.dock-mirror, .row-toolbar'); })) return;
+    if (!dockTimer) dockTimer = setTimeout(function () { dockTimer = null; dock(); }, 80);
+  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'class'] });
+  setTimeout(dock, 200);
 })();
 </script>
 </body>
