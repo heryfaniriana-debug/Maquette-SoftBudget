@@ -1916,7 +1916,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="arb" title="Valider les données collectées">Validation</button>
           <button data-go="bud">Budgets</button>
           <button data-go="ptba" title="PTBA — Projets et programmes">PTBA</button>
-          <button data-go="ppm" title="Plan de passation des marchés">Plan de passation des marchés</button>
+          <button data-go="pta" title="PTA — Plan de travail annuel (indicateurs)">PTA</button>
+          <button data-go="ppm" title="Plan de passation des marchés (PPM)">PPM</button>
           <button data-go="pad" title="Budget initial du projet (PAD)">Budget initial du projet (PAD)</button>
           <button data-go="resu" title="Cadre de résultats">Cadre de résultats</button>
           <button data-go="inv" title="Budget d’investissement">Budget d’investissement</button>
@@ -4270,7 +4271,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           </div>
         </div>
         <div id="bv-wrap" hidden style="margin-bottom:16px">
-          <div class="head" style="margin-bottom:12px"><div><h1>PTBA</h1><p>Lots de collecte validés. Sélectionnez un lot pour consulter le détail de ses lignes.</p></div></div>
+          <div class="head" style="margin-bottom:12px"><div><h1 id="bv-h1">PTBA</h1><p id="bv-h1p">Lots de collecte validés. Sélectionnez un lot pour consulter le détail de ses lignes.</p></div></div>
           <div class="card">
             <div class="scroll">
               <table style="min-width:860px">
@@ -5319,7 +5320,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       
 <!-- ===== Projet : plan de passation des marchés ===== -->
       <section class="view" id="v-ppm">
-        <div class="head"><div><h1>Plan de passation des marchés</h1><p>Planifier et suivre les acquisitions de biens, travaux et services, de la programmation à l’exécution. Un engagement ne peut référencer qu’un marché attribué.</p></div>
+        <div class="head"><div><h1>PPM — Plan de passation des marchés</h1><p>Planifier et suivre les acquisitions de biens, travaux et services, de la programmation à l’exécution. Un engagement ne peut référencer qu’un marché attribué.</p></div>
           <div class="actions"><button class="btn primary" id="ppm-new">+ Nouveau marché</button></div></div>
         <div class="callout" id="ppm-msg" hidden style="margin-bottom:12px"></div>
         <div class="kpis" id="ppm-k"></div>
@@ -6514,6 +6515,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     collecte: ['Budgets', 'Collecte et consolidation'],
     arb: ['Budgets', 'Arbitrage'],
     ptba: ['Budgets', 'PTBA'],
+    pta: ['Budgets', 'PTA'],
     revis: ['Budgets', 'Révisions budgétaires'],
     decaiss: ['Exécution budgétaire', 'Paiements comptabilisés'],
     encaiss: ['Exécution budgétaire', 'Recettes comptabilisées'],
@@ -6554,7 +6556,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     pubpay: ['Compte administratif', 'Paiements'],
     pubtab: ['Compte administratif', 'Tableau de restitution'],
     pubclot: ['Compte administratif', 'Clôture'],
-    ppm: ['Élaboration', 'Plan de passation des marchés'],
+    ppm: ['Élaboration', 'PPM — Plan de passation des marchés'],
     pad: ['Cadre du projet', 'Plan de financement (PAD)'],
     resu: ['Cadre du projet', 'Cadre de résultats'],
     avanc: ['Suivi', 'Avancement physique'],
@@ -6575,7 +6577,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var homeSvg = '<svg class="ico" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>';
 
   var NAVGROUPS = {
-    'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'ppm', 'pad', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
+    'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'real', 'engage', 'decaiss', 'encaiss'],
     'nav-cadm': ['cadcred', 'cadeng', 'cadliq', 'cadreg', 'cadtab', 'cadclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-treso': ['bkacc', 'bkdec', 'pdec', 'dfon', 'bkrel', 'bkrap'],
@@ -6585,7 +6587,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
   var MENU_OF = { create: 'list', detail: 'bud', saisie: 'bud', valid: 'arb' };
   var LABELLED = ['soon', 'params', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl', 'appr'];
-  var VIEWALIAS = { engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
+  var VIEWALIAS = { pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
   function show(name, label) {
     var vn = VIEWALIAS[name] || name;
     views.forEach(function (v) {
@@ -6615,7 +6617,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'soon' && label) document.getElementById('soon-title').textContent = label;
     if (name === 'collecte' && typeof applyCoMode === 'function') applyCoMode();
     if (name === 'arb' && typeof renderValCfg === 'function') renderValCfg();
-    if (name === 'ptba' && typeof renderBv === 'function') renderBv();
+    if ((name === 'ptba' || name === 'pta') && typeof renderBv === 'function') { bvKind = name; renderBv(); }
     if (name === 'resu' && typeof resuRender === 'function') resuRender();
     if (name === 'avanc' && typeof avancRender === 'function') avancRender();
     if (name === 'synth' && typeof renderSynth === 'function') renderSynth();
@@ -10427,7 +10429,7 @@ function fmAxes() {
     wk(E6.lines[1], 'Former 150 enseignants', '2026-03-01', '2026-06-30', 150, 'enseignant', [{ id: 'E26-2', contrib: 150 }], [60, 150, 150, null], 120000000);
     var S6 = pp(1, 'Composante 2 — Santé'); S6.obj = 'Rapprocher les soins de santé des villages.';
     S6.inds = [ind('S26-1', 'Centres de santé construits', 'centre', 5), ind('S26-2', 'Agents de santé formés', 'agent', 60)];
-    S6.lines = [{ c: '2.1', l: 'Construire des centres de santé', nat: '21', ref: null, dem: 400000000, q: 5, p: 80000000, just: '' }, { c: '2.2', l: 'Former des agents de santé', nat: '', ref: null, dem: 60000000, q: 60, p: 1000000, just: '' }];
+    S6.lines = [{ c: '2.1', l: 'Construire des centres de santé', nat: '21', ref: null, dem: 400000000, q: 5, p: 80000000, just: '' }, { c: '2.2', l: 'Former des agents de santé', nat: '62', ref: null, dem: 60000000, q: 60, p: 1000000, just: '' }];
     wk(S6.lines[0], 'Construire 5 centres de santé', '2026-06-01', '2026-12-15', 5, 'centre', [{ id: 'S26-1', contrib: 5 }], [0, 0, 2, null], 150000000);
     wk(S6.lines[1], 'Former 60 agents de santé', '2026-04-01', '2026-08-31', 60, 'agent', [{ id: 'S26-2', contrib: 60 }], [20, 40, 50, null], 60000000);
     /* axes du plan de financement et de la géographie, pour toutes les lignes */
@@ -11722,19 +11724,20 @@ function fmAxes() {
   function bvMatrix(r) {
     var d = bvData(r), pa = d.pa, axes = (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }), labs = pa && VTS[pa.vt] ? VTS[pa.vt] : null;
     var showPer = !!labs && d.lines.some(function (x) { return x.l.per; });
-    var head = ['Périmètre de collecte', 'Ligne', 'Nature de dépense', 'Travail', 'Début', 'Fin', 'Volume prévu', 'Indicateurs servis'].concat(axes.map(function (a) { return a.n; }), ['Quantité', 'Coût unitaire', 'Montant'], showPer ? labs : []);
+    var head = ['Périmètre de collecte', 'Ligne', 'Travail', 'Début', 'Fin', 'Volume prévu', 'Indicateurs servis'].concat(axes.map(function (a) { return a.n; }), ['Quantité', 'Coût unitaire', 'Montant'], showPer ? labs : []);
     var tot = 0;
     var rows = d.lines.map(function (x) {
       var l = x.l; tot += l.dem || 0;
       var pr = d.c.perims.filter(function (pp) { return pp.p === x.perim; })[0] || {};
-      return [x.perim, l.c + ' — ' + (l.lib || l.l), bvNatLbl(l), l.wk ? l.wk.task : '', l.wk ? isoToFr(l.wk.d1) : '', l.wk ? isoToFr(l.wk.d2) : '', l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '', l.wk ? wkIndText(pr, l) : ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || ''; }), [l.q != null ? l.q : '', l.p != null ? l.p : '', l.dem || 0], showPer ? labs.map(function (_, i) { return l.per && l.per[i] ? l.per[i] : ''; }) : []);
+      return [x.perim, l.c + ' — ' + (l.lib || l.l), l.wk ? l.wk.task : '', l.wk ? isoToFr(l.wk.d1) : '', l.wk ? isoToFr(l.wk.d2) : '', l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '', l.wk ? wkIndText(pr, l) : ''].concat(axes.map(function (a) { return bvAxVal(l, a.n); }), [l.q != null ? l.q : '', l.p != null ? l.p : '', l.dem || 0], showPer ? labs.map(function (_, i) { return l.per && l.per[i] ? l.per[i] : ''; }) : []);
     });
     var fin = {}; d.lines.forEach(function (x) { var k = (x.l.axv && x.l.axv.Financier) || 'Non précisé'; fin[k] = (fin[k] || 0) + (x.l.dem || 0); });
     return { head: head, rows: rows, total: tot, fin: Object.keys(fin).map(function (k) { return [k, fin[k], tot ? Math.round(1000 * fin[k] / tot) / 10 : 0]; }), d: d };
   }
   /* Deux états générés après validation, répartis par mois : PTBA (montants) et PTA (indicateurs et travaux) */
   var BVMOIS = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
-  function bvView(r) { return r._vw === 'pta' ? 'pta' : 'ptba'; }
+  var bvKind = 'ptba';
+  function bvView() { return bvKind; }
   /* Répartit un total sur les mois couverts par le travail prévu de la ligne (sur l'exercice), le reste allant aux premiers mois */
   function bvSpread(total, l, ex) {
     var m = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], a = 0, b = 11, y = parseInt(ex, 10);
@@ -11749,13 +11752,13 @@ function fmAxes() {
   function bvSum(arr) { return arr.reduce(function (s, v) { return s + v; }, 0); }
   function bvPtba(r) {
     var d = bvData(r), pa = d.pa, axes = (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }), ex = d.c.ex;
-    var head = ['Périmètre de collecte', 'Ligne', 'Nature de dépense', 'Période'].concat(axes.map(function (a) { return a.n; }), ['Montant annuel (MGA)'], BVMOIS), tot = new Array(13).fill(0);
+    var head = ['Périmètre de collecte', 'Ligne', 'Période'].concat(axes.map(function (a) { return a.n; }), ['Montant annuel (MGA)'], BVMOIS), tot = new Array(13).fill(0);
     var rows = d.lines.map(function (x) {
       var l = x.l, mo = bvSpread(l.dem, l, ex), amt = l.dem || 0; tot[0] += amt; mo.forEach(function (v, i) { tot[i + 1] += v; });
-      return { c: [x.perim, l.c + ' — ' + (l.lib || l.l), bvNatLbl(l), l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || 'À rattacher'; }), [amt], mo) };
+      return { c: [x.perim, l.c + ' — ' + (l.lib || l.l), l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : ''].concat(axes.map(function (a) { return bvAxVal(l, a.n) || 'À rattacher'; }), [amt], mo) };
     });
-    if (rows.length) rows.push({ k: 'tot', c: ['Total', '', '', ''].concat(axes.map(function () { return ''; }), tot) });
-    return { title: 'PTBA — Plan de travail et budget annuel : montants par mois', hint: 'Les montants de chaque ligne sont répartis sur les mois de son travail prévu.', head: head, rows: rows, numFrom: 4 + axes.length };
+    if (rows.length) rows.push({ k: 'tot', c: ['Total', '', ''].concat(axes.map(function () { return ''; }), tot) });
+    return { title: 'PTBA — Plan de travail et budget annuel : montants par mois', hint: 'Les montants de chaque ligne sont répartis sur les mois de son travail prévu.', head: head, rows: rows, numFrom: 3 + axes.length };
   }
   function bvPta(r) {
     var d = bvData(r), ex = d.c.ex, head = ['Périmètre de collecte', 'Indicateur / travail', 'Unité', 'Cible annuelle'].concat(BVMOIS, ['Total']), rows = [];
@@ -11774,14 +11777,17 @@ function fmAxes() {
     return { title: 'PTA — Plan de travail annuel : indicateurs et travaux par mois', hint: 'Chaque indicateur est suivi mois par mois ; les travaux qui y contribuent sont détaillés dessous (volumes répartis sur leur période).', head: head, rows: rows, numFrom: 3 };
   }
   /* Rattachement des lignes du PTBA aux autres plans (plan comptable, financement, géographie…) : les techniciens ne saisissent que le plan d'activité */
-  var BVPLANOPT = { 'Financier': ['Don du partenaire', 'Budget national'], 'Géographique': ['Région Nord', 'Région Sud'] };
-  function bvNatLbl(l) { return l.nat && NATL[l.nat] ? NATL[l.nat] : 'À rattacher'; }
+  var BVPLANOPT = { 'Financier': ['Don du partenaire', 'Budget national'], 'Géographique': ['Région Nord', 'Région Sud'], 'Analytique': ['Programme Éducation', 'Programme Santé'] };
+  /* Les plans à renseigner dépendent des axes paramétrés dans la configuration (hors axe des activités) */
+  function bvAxVal(l, n) { return n === 'Comptable' ? (l.nat && NATL[l.nat] ? NATL[l.nat] : '') : ((l.axv && l.axv[n]) || ''); }
   function bvPlans(r) {
-    var pa = bvData(r).pa, plans = [{ key: null, n: 'Nature de dépense', opts: Object.keys(NATL).map(function (k) { return [k, NATL[k]]; }) }];
-    (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }).forEach(function (a) { plans.push({ key: a.n, n: a.n, opts: (BVPLANOPT[a.n] || []).map(function (v) { return [v, v]; }) }); });
+    var pa = bvData(r).pa, plans = [];
+    (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }).forEach(function (a) {
+      plans.push({ key: a.n, n: a.n === 'Comptable' ? 'Plan comptable' : a.n, opts: a.n === 'Comptable' ? Object.keys(NATL).map(function (k) { return [k, NATL[k]]; }) : (BVPLANOPT[a.n] || []).map(function (v) { return [v, v]; }) });
+    });
     return plans;
   }
-  function bvLinkVal(l, p) { return p.key ? ((l.axv && l.axv[p.key]) || '') : (l.nat && NATL[l.nat] ? l.nat : ''); }
+  function bvLinkVal(l, p) { return p.key === 'Comptable' ? (l.nat && NATL[l.nat] ? l.nat : '') : ((l.axv && l.axv[p.key]) || ''); }
   function bvLinkMissing(r) {
     var plans = bvPlans(r), n = 0;
     bvData(r).lines.forEach(function (x) { if (plans.some(function (p) { return !bvLinkVal(x.l, p); })) n++; });
@@ -11795,7 +11801,7 @@ function fmAxes() {
       var miss = 0; d.lines.forEach(function (x, i) { if (plans.some(function (p) { return !draftVal(x, i, p); })) miss++; });
       var bar = cvEl('div', 'row-toolbar'), sv = cvEl('button', 'btn primary', 'Enregistrer le rattachement'); sv.type = 'button';
       sv.addEventListener('click', function () {
-        d.lines.forEach(function (x, i) { plans.forEach(function (p) { var k = i + '|' + p.n; if (!(k in draft)) return; if (p.key) { x.l.axv = x.l.axv || {}; x.l.axv[p.key] = draft[k]; } else x.l.nat = draft[k]; }); });
+        d.lines.forEach(function (x, i) { plans.forEach(function (p) { var k = i + '|' + p.n; if (!(k in draft)) return; if (p.key !== 'Comptable') { x.l.axv = x.l.axv || {}; x.l.axv[p.key] = draft[k]; } else x.l.nat = draft[k]; }); });
         r.pt && r.pt.hist.unshift({ t: 'Lignes rattachées aux autres plans (' + plans.map(function (p) { return p.n; }).join(', ') + ')', by: ME, on: nowStr() });
         document.getElementById('bv-link').hidden = true; bvAfter(r, 'Rattachement enregistré : ' + (bvLinkMissing(r) ? pl(bvLinkMissing(r), 'ligne') + ' reste à rattacher.' : 'toutes les lignes sont rattachées.'));
       });
@@ -11837,7 +11843,7 @@ function fmAxes() {
     sbPrint(nm + ' ' + info.name + ' ' + m.d.c.code, html);
   }
   function bvOpen(r) {
-    document.getElementById('bv-view-title').textContent = 'Lot de collecte validé — ' + r.camp;
+    document.getElementById('bv-view-title').textContent = (bvKind === 'pta' ? 'PTA' : 'PTBA') + ' — ' + r.camp;
     bvRender(document.getElementById('bv-view-body'), r);
     document.getElementById('bv-view').hidden = false;
   }
@@ -11846,10 +11852,12 @@ function fmAxes() {
     var pt = bvPt(r), bar = cvEl('div', 'row-toolbar'); bar.style.marginBottom = '14px';
     var canSend = pt.st === 'À envoyer' || pt.st === 'Correction demandée par le bailleur', canRet = pt.st === 'Envoyé au bailleur', canClose = pt.st === 'Retour notifié : approuvé';
     var noInd = [];
+    var isPta = bvView() === 'pta';
     [['Exporter en Excel', '', true, function () { bvExportXlsx(r); }],
      ['Exporter en PDF', '', true, function () { bvExportPdf(r); }],
-     ['Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), '', pt.st !== 'Clôturé', function () { bvLinkOpen(r); }],
+     ['Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), '', pt.st !== 'Clôturé' && bvPlans(r).length > 0, function () { bvLinkOpen(r); }],
      [pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', 'primary', canSend, function () {
+        if (bvLinkMissing(r)) { cvSay('bv-msg', 'Envoi impossible : ' + pl(bvLinkMissing(r), 'ligne') + ' à rattacher aux plans de la configuration (' + bvPlans(r).map(function (p) { return p.n; }).join(', ') + ').'); var m0 = document.getElementById('bv-msg'); m0.style.background = 'var(--ko-bg)'; m0.style.color = 'var(--ko)'; return; }
         if (noInd.length) { cvSay('bv-msg', 'Envoi impossible : ' + pl(noInd.length, 'activité') + ' sans indicateur (' + noInd.map(function (x) { return x.l.c; }).join(', ') + '). Rattachez-' + (noInd.length > 1 ? 'les' : 'la') + ' dans le cadre de résultats.'); var mm = document.getElementById('bv-msg'); mm.style.background = 'var(--ko-bg)'; mm.style.color = 'var(--ko)'; return; }
         cvAsk({ title: 'Marquer le PTBA comme envoyé au bailleur', ok: 'Marquer envoyé', required: false, placeholder: 'Mode d’envoi, référence du courrier…' }, function (com) {
           pt.st = 'Envoyé au bailleur'; pt.hist.unshift({ t: 'PTBA envoyé au bailleur' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA marqué comme envoyé au bailleur.'); });
@@ -11862,7 +11870,7 @@ function fmAxes() {
      ['Clôturer', 'primary', canClose, function () {
         cvAsk({ title: 'Clôturer le PTBA', ok: 'Clôturer', required: false, placeholder: 'Commentaire de clôture' }, function (com) {
           pt.st = 'Clôturé'; pt.hist.unshift({ t: 'PTBA clôturé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA clôturé : il est verrouillé.'); });
-      }]].forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
+      }]].slice(0, isPta ? 2 : 99).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
     root.appendChild(bar);
   }
   function bvRender(root, r) {
@@ -11875,14 +11883,10 @@ function fmAxes() {
     k.appendChild(cvKpi('Configuration', pa ? pa.lib : '—'));
     k.appendChild(cvKpi('Exercice', d.c.ex));
     k.appendChild(cvKpi('Montant validé', fmt(tot) + ' MGA' + (vd ? ' · le ' + vd.on.slice(0, 10) : '')));
-    k.appendChild(cvKpi('Statut du PTBA', badge(bvPt(r).st, PTST[bvPt(r).st] || 'b-neutral')));
+    if (bvView() === 'pta') k.appendChild(cvKpi('Indicateurs suivis', String(d.c.perims.reduce(function (s, p) { return s + (p.inds || []).length; }, 0))));
+    else k.appendChild(cvKpi('Statut du PTBA', badge(bvPt(r).st, PTST[bvPt(r).st] || 'b-neutral')));
     root.appendChild(k);
-    var sw = cvEl('div', 'seg'); sw.style.margin = '0 0 14px'; sw.setAttribute('role', 'group');
-    [['ptba', 'PTBA — budget par mois'], ['pta', 'PTA — indicateurs par mois']].forEach(function (o) {
-      var b = cvEl('button', bvView(r) === o[0] ? 'on' : '', o[1]); b.type = 'button'; b.addEventListener('click', function () { r._vw = o[0]; bvRender(root, r); }); sw.appendChild(b);
-    });
-    root.appendChild(sw);
-    var bl = cvEl('section', 'co-blk'), m = bvView(r) === 'pta' ? bvPta(r) : bvPtba(r);
+    var bl = cvEl('section', 'co-blk'), m = bvView() === 'pta' ? bvPta(r) : bvPtba(r);
     bl.appendChild(cvEl('div', 'kb-h', m.title)); bl.appendChild(cvEl('div', 'hint', m.hint));
     var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (m.head.length * 90) + 'px';
     tb.innerHTML = '<thead><tr>' + m.head.map(function (h, i) { return '<th' + (i >= m.numFrom ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr></thead>';
@@ -11897,11 +11901,14 @@ function fmAxes() {
     var hs = cvEl('section', 'co-blk'); hs.appendChild(cvEl('div', 'kb-h', 'Suivi du PTBA'));
     var ph = bvPt(r).hist; if (!ph.length) hs.appendChild(cvEl('div', 'hint', 'Aucune action enregistrée : le PTBA est prêt à être envoyé au bailleur.'));
     ph.forEach(function (h) { var row = cvEl('div', 'list-row'); var l = cvEl('div'); l.appendChild(cvEl('b', null, h.t)); l.appendChild(cvEl('div', 'hby', h.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', h.on)); hs.appendChild(row); });
-    root.appendChild(hs);
+    if (bvView() !== 'pta') root.appendChild(hs);
   }
   function renderBv() {
     var body = document.getElementById('bv-body'), wrap = document.getElementById('bv-wrap'); if (!body) return;
     body.innerHTML = '';
+    var h1 = document.getElementById('bv-h1'), h1p = document.getElementById('bv-h1p');
+    if (bvKind === 'pta') { h1.textContent = 'PTA — Plan de travail annuel'; h1p.textContent = 'Indicateurs et travaux du lot validé, répartis par mois. Sélectionnez un lot pour le consulter ou l’exporter.'; }
+    else { h1.textContent = 'PTBA — Plan de travail et budget annuel'; h1p.textContent = 'Lots de collecte validés : montants par mois, rattachement aux plans de la configuration, envoi au bailleur.'; }
     var prj = activeCode() === 'prj'; wrap.hidden = !prj; document.getElementById('v-ptba').classList.toggle('ptba-lots', prj); if (!prj || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return;
     var rows = bvList();
     if (!rows.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun lot de collecte validé pour le moment.'); c0.colSpan = 7; c0.style.textAlign = 'left'; body.appendChild(t0); }
@@ -14459,7 +14466,7 @@ var EXEC_REC = [
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
     put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['resu']]);
-    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud'], ['ptba'], ['ppm']].concat(revCA ? [] : [['revis']]));
+    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud'], ['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)']].concat(revCA ? [] : [['revis']]));
     if (revCA) put('g-cadm', [['cadcred'], ['revis', 'Révisions et virements', 'Révisions budgétaires et virements de crédits'], ['cadeng'], ['cadliq'], ['cadreg'], ['cadtab'], ['cadclot'], ['cadint']]);
     put('g-treso', [['dfon'], ['pdec'], ['bkacc'], ['bkrel'], ['bkrap']]);
     put('g-suivi', [['appr'], ['avanc'], ['engage', circ ? 'Engagements importés' : ''], ['real', circ ? 'Réalisations importées' : ''], ['decaiss', circ ? 'Paiements importés' : ''], ['encaiss', circ ? 'Recettes importées' : '']]);
@@ -14485,7 +14492,7 @@ var EXEC_REC = [
     var code = activeCode(), cfg = REG[code], adv = modes[code] === 'Avancé', circ = cfg.regime !== 'importe';
     applyProjectMenu(code, cfg);
     regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso);
-    regSetVis('.sub button[data-go="pluri"]', cfg.mods.pluri); regSetVis('.sub button[data-go="bkdvr"]', cfg.mods.treso); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso && code !== 'prj'); regSetVis('.sub button[data-go="pdec"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="dfon"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="ppm"]', code === 'prj'); regSetVis('.sub button[data-go="inv"]', code === 'ent'); regSetVis('.sub button[data-go="pad"]', code === 'prj'); regSetVis('.sub button.epub', cfg.regime === 'public'); regSetVis('.sub button[data-go="revis"]', cfg.regime !== 'public');
+    regSetVis('.sub button[data-go="pluri"]', cfg.mods.pluri); regSetVis('.sub button[data-go="bkdvr"]', cfg.mods.treso); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso && code !== 'prj'); regSetVis('.sub button[data-go="pdec"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="dfon"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="ppm"]', code === 'prj'); regSetVis('.sub button[data-go="pta"]', code === 'prj'); regSetVis('.sub button[data-go="inv"]', code === 'ent'); regSetVis('.sub button[data-go="pad"]', code === 'prj'); regSetVis('.sub button.epub', cfg.regime === 'public'); regSetVis('.sub button[data-go="revis"]', cfg.regime !== 'public');
     regSetVis('.sub button[data-go="cadm"]', !circ);
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
