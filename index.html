@@ -5334,11 +5334,11 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       <!-- ===== Projet : cadre de résultats ===== -->
       <section class="view" id="v-resu">
-        <div class="head"><div><h1>Cadre de résultats</h1><p>Référentiel du projet : indicateurs, valeurs de départ, cibles par période et activités du PTBA qui y contribuent. Les réalisations ne se saisissent pas ici mais dans Suivi › Avancement physique. Chaque activité doit être rattachée à un indicateur avant l’envoi du PTBA au bailleur.</p></div>
+        <div class="head"><div><h1>Cadre de résultats</h1><p>Référentiel défini à la conception du projet : indicateurs, valeur de départ et cible de fin de projet. Les cibles de l’exercice et les réalisations ne se saisissent pas ici mais dans Suivi › Avancement physique. Chaque activité du PTBA doit être couverte par un indicateur avant l’envoi au bailleur.</p></div>
           <div class="actions"><button class="btn primary" id="resu-new">+ Nouvel indicateur</button></div></div>
         <div class="callout" id="resu-msg" hidden style="margin-bottom:12px"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1400px">
-          <thead><tr><th>Code</th><th>Indicateur</th><th>Type</th><th>Rattaché à</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de l’exercice</th><th>Cibles cumulées par trimestre</th><th>Activités du PTBA concernées</th><th>Responsable</th><th>Actions</th></tr></thead><tbody id="resu-b"></tbody></table></div><div class="pager"><span id="resu-n"></span><span>Référence : les réalisations se saisissent dans Suivi › Avancement physique</span></div></div>
+          <thead><tr><th>Code</th><th>Indicateur</th><th>Type</th><th>Rattaché à</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de fin de projet</th><th>Activités du PTBA concernées</th><th>Responsable</th><th>Actions</th></tr></thead><tbody id="resu-b"></tbody></table></div><div class="pager"><span id="resu-n"></span><span>Référence : valeur de départ et cible de fin de projet. Les cibles de l’exercice et les réalisations se gèrent dans Suivi › Avancement physique</span></div></div>
         <div class="kb-h" style="margin:0 0 8px;font-weight:600">Structure du projet</div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:760px">
           <thead><tr><th>Niveau</th><th>Libellé</th><th>Indicateurs rattachés</th></tr></thead><tbody id="resu-struct"></tbody></table></div><div class="pager"><span>Définie à la conception du projet ; les activités du PTBA s’y rattachent</span></div></div>
@@ -5355,9 +5355,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
               <div class="full"><label for="ri-resp">Responsable</label><select id="ri-resp" class="field"></select></div>
               <div><label for="ri-unit">Unité <em>*</em></label><input id="ri-unit" class="field" type="text" placeholder="Ex. centre, personne, km"></div>
               <div><label for="ri-base">Valeur de départ</label><input id="ri-base" class="field" type="text" inputmode="decimal"></div>
-              <div class="full"><label for="ri-cible">Cible de l’exercice <em>*</em></label><input id="ri-cible" class="field" type="text" inputmode="decimal"></div>
-              <div class="full"><label>Cibles cumulées par trimestre <em>*</em></label>
-                <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px"><input id="ri-t1" class="field" type="text" inputmode="decimal" placeholder="T1" aria-label="Cible T1"><input id="ri-t2" class="field" type="text" inputmode="decimal" placeholder="T2" aria-label="Cible T2"><input id="ri-t3" class="field" type="text" inputmode="decimal" placeholder="T3" aria-label="Cible T3"><input id="ri-t4" class="field" type="text" inputmode="decimal" placeholder="T4" aria-label="Cible T4"></div></div>
+              <div><label for="ri-cible">Cible de fin de projet <em>*</em></label><input id="ri-cible" class="field" type="text" inputmode="decimal"></div>
+              <div><label for="ri-fin">Échéance de la cible (année) <em>*</em></label><select id="ri-fin" class="field"><option>2026</option><option>2027</option><option selected>2028</option><option>2029</option><option>2030</option><option>2031</option><option>2032</option></select></div>
               <div class="full"><div class="hint" style="margin:0">L’indicateur se définit à la conception du projet, sans lien avec un PTBA. Les activités du PTBA qui dépendent de ce niveau (ou de ses sous-niveaux) y contribuent automatiquement.</div></div>
             </div>
             <div class="err" id="ri-err"></div>
@@ -5368,10 +5367,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       <!-- ===== Projet : avancement physique ===== -->
       <section class="view" id="v-avanc">
-        <div class="head"><div><h1>Avancement physique</h1><p>Réalisation des indicateurs du cadre de résultats, période par période. Les cibles sont celles du cadre de résultats ; seules les réalisations se saisissent ici.</p></div></div>
+        <div class="head"><div><h1>Avancement physique</h1><p>Réalisation des indicateurs du cadre de résultats, période par période. La cible de fin de projet vient du cadre de résultats ; les cibles de l’exercice (par trimestre) et les réalisations se saisissent ici.</p></div></div>
         <div class="callout" id="av-msg" hidden style="margin-bottom:12px"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1250px">
-          <thead><tr><th>Code</th><th>Indicateur</th><th>Niveau</th><th>Unité</th><th class="num">Cible de l’exercice</th><th class="num">T1<br>réalisé / cible</th><th class="num">T2<br>réalisé / cible</th><th class="num">T3<br>réalisé / cible</th><th class="num">T4<br>réalisé / cible</th><th>Avancement</th><th>Actions</th></tr></thead><tbody id="av-b"></tbody></table></div><div class="pager"><span id="av-n"></span><span>Valeurs réalisées cumulées</span></div></div>
+          <thead><tr><th>Code</th><th>Indicateur</th><th>Niveau</th><th>Unité</th><th class="num">Cible de fin de projet</th><th class="num">Cible de l’exercice</th><th class="num">T1<br>réalisé / cible</th><th class="num">T2<br>réalisé / cible</th><th class="num">T3<br>réalisé / cible</th><th class="num">T4<br>réalisé / cible</th><th>Avancement</th><th>Actions</th></tr></thead><tbody id="av-b"></tbody></table></div><div class="pager"><span id="av-n"></span><span>Valeurs réalisées cumulées</span></div></div>
       </section>
 
       <!-- ===== Projet : plan de décaissement prévisionnel ===== -->
@@ -15400,6 +15399,7 @@ var EXEC_REC = [
     { id: 'P6', lib: 'Composante P6 — Cabinet', lvl: 'Composante', parent: 'ROOT' }
   ];
   RES.items[0].node = '11'; RES.items[1].node = '111';
+  RES.items[0].final = 17; RES.items[0].finY = 2028; RES.items[1].final = 17; RES.items[1].finY = 2028;
   function nodeById(id) { return PSTRUCT.filter(function (n) { return n.id === id; })[0]; }
   function nodePath(id) { var out = []; for (var n = nodeById(id); n; n = n.parent ? nodeById(n.parent) : null) out.push(n.id); return out; }
   function nodeOfAct(perim, code) {
@@ -15412,7 +15412,7 @@ var EXEC_REC = [
   function resuMissing() { return ppmActs().filter(function (a) { return !resuHas(a.key); }); }
   function resuState(i) {
     var last = -1; i.real.forEach(function (v, k) { if (v != null) last = k; });
-    if (last < 0) return { real: null, cib: null, q: null, ok: null, taux: 0 };
+    if (last < 0 || !i.t || i.t[last] == null) return { real: last < 0 ? null : i.real[last], cib: null, q: last < 0 ? null : RES_Q[last], ok: null, taux: 0 };
     return { real: i.real[last], cib: i.t[last], q: RES_Q[last], ok: i.real[last] >= i.t[last], taux: i.cible ? Math.round(100 * i.real[last] / i.cible) : 0 };
   }
   function resuMsg(t, kind) { var e = document.getElementById('resu-msg'); e.hidden = !t; e.textContent = t || ''; var m = { ok: ['var(--ok-bg)', 'var(--ok)'], ko: ['var(--ko-bg)', 'var(--ko)'], info: ['var(--info-bg)', '#2E427B'] }[kind || 'ok']; e.style.background = m[0]; e.style.color = m[1]; }
@@ -15422,8 +15422,7 @@ var EXEC_REC = [
     RES.items.forEach(function (i) {
       var tr = document.createElement('tr');
       cell(tr, i.id, 'name'); cell(tr, i.lib); cell(tr, i.niv || 'Produit'); cell(tr, (nodeById(i.node) || { lib: '—' }).lib); cell(tr, i.unit);
-      cell(tr, String(i.base), 'num'); cell(tr, fmt(i.cible), 'num');
-      cell(tr, i.t.map(function (v, k) { return RES_Q[k] + ' : ' + fmt(v); }).join(' · '));
+      cell(tr, String(i.base), 'num'); cell(tr, fmt(i.final) + ' (fin ' + i.finY + ')', 'num');
       var cov = ppmActs().filter(function (a) { return resuCovers(i, a); });
       cell(tr, i.node === 'ROOT' ? 'Ensemble du projet' : (cov.length ? pl(cov.length, 'activité') + ' du PTBA concernée' + (cov.length > 1 ? 's' : '') : 'Aucune activité du PTBA pour l’instant'));
       cell(tr, i.resp);
@@ -15450,24 +15449,21 @@ var EXEC_REC = [
     g('resu-form-title').textContent = i ? 'Modifier l’indicateur ' + i.id : 'Nouvel indicateur';
     g('ri-node').innerHTML = PSTRUCT.filter(function (n) { return n.lvl !== 'Sous-activité'; }).map(function (n) { return '<option value="' + n.id + '">' + escH(n.lvl + ' — ' + n.lib.replace(/^[^—]+— /, '')) + '</option>'; }).join('');
     g('ri-resp').innerHTML = CONTRIB.map(function (c) { return '<option>' + escH(c) + '</option>'; }).join('');
-    g('ri-lib').value = i ? i.lib : ''; g('ri-unit').value = i ? i.unit : ''; g('ri-base').value = i ? i.base : '0'; g('ri-cible').value = i ? i.cible : '';
+    g('ri-lib').value = i ? i.lib : ''; g('ri-unit').value = i ? i.unit : ''; g('ri-base').value = i ? i.base : '0'; g('ri-cible').value = i ? i.final : ''; g('ri-fin').value = i ? i.finY : '2028';
     g('ri-niv').value = i ? (i.niv || 'Produit') : 'Produit';
     if (i) { g('ri-node').value = i.node; g('ri-resp').value = i.resp; }
-    RES_Q.forEach(function (q, k) { g('ri-t' + (k + 1)).value = i ? i.t[k] : ''; });
     g('ri-err').textContent = '';
     g('resu-form').hidden = false;
   }
   function resuSave() {
     var g = function (id) { return document.getElementById(id); }, err = g('ri-err'), num = function (id) { var v = parseFloat(g(id).value.replace(/\s/g, '').replace(',', '.')); return isNaN(v) ? null : v; };
-    var lib = g('ri-lib').value.trim(), unit = g('ri-unit').value.trim(), cible = num('ri-cible'), base = num('ri-base'), t = RES_Q.map(function (q, k) { return num('ri-t' + (k + 1)); });
+    var lib = g('ri-lib').value.trim(), unit = g('ri-unit').value.trim(), final = num('ri-cible'), base = num('ri-base');
     if (lib.length < 5) { err.textContent = 'Le libellé de l’indicateur est obligatoire.'; return; }
     if (!unit) { err.textContent = 'L’unité est obligatoire.'; return; }
-    if (cible == null || cible <= 0) { err.textContent = 'La cible de l’exercice doit être positive.'; return; }
-    if (t.some(function (v) { return v == null; })) { err.textContent = 'Renseignez la cible cumulée des quatre trimestres.'; return; }
-    for (var k = 1; k < 4; k++) if (t[k] < t[k - 1]) { err.textContent = 'Les cibles sont cumulées : elles ne peuvent pas diminuer d’un trimestre à l’autre.'; return; }
-    if (t[3] > cible) { err.textContent = 'La cible cumulée du T4 dépasse la cible de l’exercice.'; return; }
-    var o = resuEdit || { id: 'IND-' + ('0' + (++RES.seq)).slice(-2), real: [null, null, null, null] };
-    o.lib = lib; o.unit = unit; o.cible = cible; o.base = base || 0; o.t = t; o.niv = g('ri-niv').value; o.node = g('ri-node').value; o.resp = g('ri-resp').value;
+    if (final == null || final <= 0) { err.textContent = 'La cible de fin de projet doit être positive.'; return; }
+    if (final < (base || 0)) { err.textContent = 'La cible de fin de projet ne peut pas être inférieure à la valeur de départ.'; return; }
+    var o = resuEdit || { id: 'IND-' + ('0' + (++RES.seq)).slice(-2), real: [null, null, null, null], t: [null, null, null, null], cible: null };
+    o.lib = lib; o.unit = unit; o.final = final; o.finY = parseInt(g('ri-fin').value, 10); o.base = base || 0; o.niv = g('ri-niv').value; o.node = g('ri-node').value; o.resp = g('ri-resp').value;
     if (!resuEdit) RES.items.push(o);
     g('resu-form').hidden = true; resuRender(); resuMsg('Indicateur ' + o.id + (resuEdit ? ' modifié.' : ' créé.'), 'ok');
   }
@@ -15478,20 +15474,43 @@ var EXEC_REC = [
       i.real[RES_Q.indexOf(q)] = n; avancRender(); avMsg('Avancement de ' + i.id + ' enregistré pour ' + q + ' : ' + fmt(n) + ' ' + i.unit + (com ? ' — ' + com : '') + '.', 'ok');
     });
   }
-  /* Suivi › Avancement physique : les réalisations se saisissent ici, par période ; les cibles viennent du cadre de résultats */
+  /* Cibles de l'exercice : elles relèvent de la programmation annuelle (PTBA) ; la cible de fin de projet reste celle du cadre de résultats */
+  function avCibles(i) {
+    var bd = cvEl('div', 'cv-modal-bd'), box = cvEl('div', 'cv-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+    box.appendChild(cvEl('h3', null, 'Cibles de l’exercice — ' + i.id));
+    box.appendChild(cvEl('div', 'hint', 'Cible de fin de projet : ' + fmt(i.final) + ' ' + i.unit + ' (' + i.finY + '). Saisissez les valeurs à atteindre à la fin de chaque trimestre, en cumulé.'));
+    var wrap = cvEl('div'); wrap.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px';
+    var ins = RES_Q.map(function (q, k) { var d = cvEl('div'); d.appendChild(cvEl('label', null, q + ' (cumulé)')); var inp = cvEl('input', 'field'); inp.type = 'text'; inp.setAttribute('inputmode', 'decimal'); inp.value = i.t[k] == null ? '' : i.t[k]; d.appendChild(inp); wrap.appendChild(d); return inp; });
+    box.appendChild(wrap);
+    var err = cvEl('div', 'err'); box.appendChild(err);
+    var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Enregistrer'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
+    function close() { if (bd.parentNode) bd.parentNode.removeChild(bd); }
+    bc.addEventListener('click', close); bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
+    bo.addEventListener('click', function () {
+      var t = ins.map(function (x) { var v = parseFloat(x.value.replace(/\s/g, '').replace(',', '.')); return isNaN(v) ? null : v; });
+      if (t.some(function (v) { return v == null; })) { err.textContent = 'Renseignez la cible cumulée des quatre trimestres.'; return; }
+      for (var k = 1; k < 4; k++) if (t[k] < t[k - 1]) { err.textContent = 'Les cibles sont cumulées : elles ne peuvent pas diminuer d’un trimestre à l’autre.'; return; }
+      if (t[3] > i.final) { err.textContent = 'La cible de l’exercice dépasse la cible de fin de projet (' + fmt(i.final) + ').'; return; }
+      i.t = t; i.cible = t[3]; close(); avancRender(); avMsg('Cibles de l’exercice enregistrées pour ' + i.id + ' : ' + fmt(t[3]) + ' ' + i.unit + ' à fin d’exercice.', 'ok');
+    });
+    bd.appendChild(box); document.body.appendChild(bd); ins[0].focus();
+  }
+  /* Suivi › Avancement physique : cibles de l'exercice et réalisations, par période */
   function avMsg(t, kind) { var e = document.getElementById('av-msg'); e.hidden = !t; e.textContent = t || ''; var m = { ok: ['var(--ok-bg)', 'var(--ok)'], ko: ['var(--ko-bg)', 'var(--ko)'] }[kind || 'ok']; e.style.background = m[0]; e.style.color = m[1]; }
   function avancRender() {
     var body = document.getElementById('av-b'); if (!body) return;
     body.innerHTML = '';
     RES.items.forEach(function (i) {
       var s = resuState(i), tr = document.createElement('tr');
-      cell(tr, i.id, 'name'); cell(tr, i.lib); cell(tr, i.niv || 'Produit'); cell(tr, i.unit); cell(tr, fmt(i.cible), 'num');
-      RES_Q.forEach(function (q, k) { cell(tr, (i.real[k] == null ? '—' : fmt(i.real[k])) + ' / ' + fmt(i.t[k]), 'num'); });
-      var e = cell(tr, ''); if (s.ok == null) e.appendChild(badge('Pas de mesure', 'b-neutral')); else e.appendChild(badge(s.ok ? 'À jour · ' + s.taux + ' % de la cible' : 'En retard sur la cible ' + s.q, s.ok ? 'b-ok' : 'b-ko'));
-      var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Renseigner l’avancement'); b.type = 'button'; b.addEventListener('click', function () { resuAvance(i); }); act.appendChild(b);
+      cell(tr, i.id, 'name'); cell(tr, i.lib); cell(tr, i.niv || 'Produit'); cell(tr, i.unit);
+      cell(tr, fmt(i.final) + ' (fin ' + i.finY + ')', 'num'); cell(tr, i.cible == null ? 'À définir' : fmt(i.cible), 'num');
+      RES_Q.forEach(function (q, k) { cell(tr, (i.real[k] == null ? '—' : fmt(i.real[k])) + ' / ' + (i.t[k] == null ? '—' : fmt(i.t[k])), 'num'); });
+      var e = cell(tr, ''); if (i.cible == null) e.appendChild(badge('Cibles de l’exercice à définir', 'b-warn')); else if (s.ok == null) e.appendChild(badge('Pas de mesure', 'b-neutral')); else e.appendChild(badge(s.ok ? 'À jour · ' + s.taux + ' % de la cible' : 'En retard sur la cible ' + s.q, s.ok ? 'b-ok' : 'b-ko'));
+      var act = cell(tr, '');
+      [['Définir les cibles de l’exercice', function () { avCibles(i); }], ['Renseigner l’avancement', function () { resuAvance(i); }]].forEach(function (a) { var b = cvEl('button', 'btn small', a[0]); b.type = 'button'; b.addEventListener('click', a[1]); act.appendChild(b); });
       body.appendChild(tr);
     });
-    if (!RES.items.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun indicateur : définissez-les dans le cadre de résultats.'); c0.colSpan = 11; c0.style.textAlign = 'left'; body.appendChild(t0); }
+    if (!RES.items.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun indicateur : définissez-les dans le cadre de résultats.'); c0.colSpan = 12; c0.style.textAlign = 'left'; body.appendChild(t0); }
     document.getElementById('av-n').textContent = pl(RES.items.length, 'indicateur');
   }
   document.getElementById('resu-new').addEventListener('click', function () { resuOpen(null); });
