@@ -5338,7 +5338,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="actions"><button class="btn primary" id="resu-new">+ Nouvel indicateur</button></div></div>
         <div class="callout" id="resu-msg" hidden style="margin-bottom:12px"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1400px">
-          <thead><tr><th>Code</th><th>Indicateur</th><th>Niveau</th><th>Composante</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de l’exercice</th><th>Cibles cumulées par trimestre</th><th>Activités du PTBA</th><th>Responsable</th><th>Actions</th></tr></thead><tbody id="resu-b"></tbody></table></div><div class="pager"><span id="resu-n"></span><span>Référence : les réalisations se saisissent dans Suivi › Avancement physique</span></div></div>
+          <thead><tr><th>Code</th><th>Indicateur</th><th>Type</th><th>Rattaché à</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de l’exercice</th><th>Cibles cumulées par trimestre</th><th>Activités du PTBA concernées</th><th>Responsable</th><th>Actions</th></tr></thead><tbody id="resu-b"></tbody></table></div><div class="pager"><span id="resu-n"></span><span>Référence : les réalisations se saisissent dans Suivi › Avancement physique</span></div></div>
+        <div class="kb-h" style="margin:0 0 8px;font-weight:600">Structure du projet</div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:760px">
+          <thead><tr><th>Niveau</th><th>Libellé</th><th>Indicateurs rattachés</th></tr></thead><tbody id="resu-struct"></tbody></table></div><div class="pager"><span>Définie à la conception du projet ; les activités du PTBA s’y rattachent</span></div></div>
         <div class="kb-h" style="margin:0 0 8px;font-weight:600">Activités du PTBA sans indicateur</div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:760px">
           <thead><tr><th>Activité</th><th>Lot de collecte</th><th class="num">Coût au PTBA</th><th>Contrôle</th></tr></thead><tbody id="resu-nov"></tbody></table></div></div>
@@ -5348,14 +5351,14 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div class="fgrid">
               <div class="full"><label for="ri-lib">Indicateur <em>*</em></label><input id="ri-lib" class="field" type="text" placeholder="Ex. Centres équipés de kits hybrides"></div>
               <div><label for="ri-niv">Niveau</label><select id="ri-niv" class="field"><option>Objectif de développement</option><option>Résultat intermédiaire</option><option selected>Produit</option></select></div>
-              <div><label for="ri-per">Composante</label><select id="ri-per" class="field"></select></div>
+              <div><label for="ri-node">Rattaché à (structure du projet) <em>*</em></label><select id="ri-node" class="field"></select></div>
               <div class="full"><label for="ri-resp">Responsable</label><select id="ri-resp" class="field"></select></div>
               <div><label for="ri-unit">Unité <em>*</em></label><input id="ri-unit" class="field" type="text" placeholder="Ex. centre, personne, km"></div>
               <div><label for="ri-base">Valeur de départ</label><input id="ri-base" class="field" type="text" inputmode="decimal"></div>
               <div class="full"><label for="ri-cible">Cible de l’exercice <em>*</em></label><input id="ri-cible" class="field" type="text" inputmode="decimal"></div>
               <div class="full"><label>Cibles cumulées par trimestre <em>*</em></label>
                 <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px"><input id="ri-t1" class="field" type="text" inputmode="decimal" placeholder="T1" aria-label="Cible T1"><input id="ri-t2" class="field" type="text" inputmode="decimal" placeholder="T2" aria-label="Cible T2"><input id="ri-t3" class="field" type="text" inputmode="decimal" placeholder="T3" aria-label="Cible T3"><input id="ri-t4" class="field" type="text" inputmode="decimal" placeholder="T4" aria-label="Cible T4"></div></div>
-              <div class="full"><label>Activités du PTBA rattachées <em>*</em></label><div class="chkcol" id="ri-acts"></div><div class="hint">Une activité ne peut contribuer qu’à un seul indicateur.</div></div>
+              <div class="full"><div class="hint" style="margin:0">L’indicateur se définit à la conception du projet, sans lien avec un PTBA. Les activités du PTBA qui dépendent de ce niveau (ou de ses sous-niveaux) y contribuent automatiquement.</div></div>
             </div>
             <div class="err" id="ri-err"></div>
             <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="resu-cancel">Annuler</button><button class="btn primary" id="resu-save">Enregistrer l’indicateur</button></div>
@@ -15360,7 +15363,7 @@ var EXEC_REC = [
   function ppmActs() {
     var out = [];
     if (typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return out;
-    bvList().forEach(function (r) { var d = bvData(r); d.lines.forEach(function (x) { out.push({ key: r.camp + '|' + x.l.c, lot: r.camp, perim: x.perim, code: x.l.c, lib: x.l.lib || x.l.l, cost: x.l.dem || 0 }); }); });
+    bvList().forEach(function (r) { var d = bvData(r); d.lines.forEach(function (x) { out.push({ key: r.camp + '|' + x.l.c, lot: r.camp, perim: x.perim, code: x.l.c, lib: x.l.lib || x.l.l, cost: x.l.dem || 0, node: nodeOfAct(x.perim, x.l.c) }); }); });
     return out;
   }
   function ppmActOf(key) { return ppmActs().filter(function (a) { return a.key === key; })[0]; }
@@ -15377,7 +15380,35 @@ var EXEC_REC = [
     { id: 'IND-02', lib: 'Centres équipés de kits hybrides', per: '1110101 Hybridation et numérisation des réseaux (17 centres isolés)', unit: 'centre', base: 0, cible: 2, t: [0, 0, 1, 2], real: [0, 0, 1, null], resp: 'RANDIMBIARISON Maminirina', acts: ['CAMP-2026-02|H2'] }
   ] };
   var RES_Q = ['T1', 'T2', 'T3', 'T4'];
-  function resuHas(key) { return RES.items.some(function (i) { return i.acts.indexOf(key) >= 0; }); }
+  /* Structure du projet (définie à la conception, avant tout PTBA) : les indicateurs s'y rattachent, les activités du PTBA aussi */
+  var PSTRUCT = [
+    { id: 'ROOT', lib: 'Projet — objectif de développement', lvl: 'Projet', parent: null },
+    { id: '1', lib: 'Composante 1 — Expansion des infrastructures énergétiques et numériques', lvl: 'Composante', parent: 'ROOT' },
+    { id: '11', lib: 'Sous-composante 1.1 — Hybridation et numérisation des réseaux isolés', lvl: 'Sous-composante', parent: '1' },
+    { id: '111', lib: 'Résultat 111 — Technologie solaire, stockage par batteries et équipements associés', lvl: 'Résultat', parent: '11' },
+    { id: '11101', lib: 'Activité 11101 — Achat, installation et automatisation', lvl: 'Activité', parent: '111' },
+    { id: '1110101', lib: 'Sous-activité 1110101 — Hybridation et numérisation des réseaux (17 centres isolés)', lvl: 'Sous-activité', parent: '11101' },
+    { id: '1110102', lib: 'Sous-activité 1110102 — Assistance technique, contrôle et surveillance', lvl: 'Sous-activité', parent: '11101' },
+    { id: '112', lib: 'Résultat 112 — Amélioration des réseaux de distribution et raccordements', lvl: 'Résultat', parent: '11' },
+    { id: '11201', lib: 'Activité 11201 — Amélioration des réseaux existants', lvl: 'Activité', parent: '112' },
+    { id: '1120101', lib: 'Sous-activité 1120101 — Amélioration des réseaux de distribution', lvl: 'Sous-activité', parent: '11201' },
+    { id: 'P1', lib: 'Composante P1 — Enseignement fondamental', lvl: 'Composante', parent: 'ROOT' },
+    { id: 'P2', lib: 'Composante P2 — Enseignement supérieur', lvl: 'Composante', parent: 'ROOT' },
+    { id: 'P3', lib: 'Composante P3 — Infrastructures', lvl: 'Composante', parent: 'ROOT' },
+    { id: 'P4', lib: 'Composante P4 — Administration et finances', lvl: 'Composante', parent: 'ROOT' },
+    { id: 'P5', lib: 'Composante P5 — Inspection', lvl: 'Composante', parent: 'ROOT' },
+    { id: 'P6', lib: 'Composante P6 — Cabinet', lvl: 'Composante', parent: 'ROOT' }
+  ];
+  RES.items[0].node = '11'; RES.items[1].node = '111';
+  function nodeById(id) { return PSTRUCT.filter(function (n) { return n.id === id; })[0]; }
+  function nodePath(id) { var out = []; for (var n = nodeById(id); n; n = n.parent ? nodeById(n.parent) : null) out.push(n.id); return out; }
+  function nodeOfAct(perim, code) {
+    var m = /^(\d{5,7})\s/.exec(perim);
+    if (m) { for (var k = m[1].length; k >= 1; k--) { var id = m[1].slice(0, k); if (nodeById(id)) return id; } }
+    var p = /^(P\d)\./.exec(code || ''); return p && nodeById(p[1]) ? p[1] : null;
+  }
+  function resuCovers(i, a) { return !!(a && a.node && nodePath(a.node).indexOf(i.node) >= 0); }
+  function resuHas(key) { var a = ppmActOf(key); return RES.items.some(function (i) { return i.node !== 'ROOT' && resuCovers(i, a); }); }
   function resuMissing() { return ppmActs().filter(function (a) { return !resuHas(a.key); }); }
   function resuState(i) {
     var last = -1; i.real.forEach(function (v, k) { if (v != null) last = k; });
@@ -15390,10 +15421,11 @@ var EXEC_REC = [
     body.innerHTML = '';
     RES.items.forEach(function (i) {
       var tr = document.createElement('tr');
-      cell(tr, i.id, 'name'); cell(tr, i.lib); cell(tr, i.niv || 'Produit'); cell(tr, i.per); cell(tr, i.unit);
+      cell(tr, i.id, 'name'); cell(tr, i.lib); cell(tr, i.niv || 'Produit'); cell(tr, (nodeById(i.node) || { lib: '—' }).lib); cell(tr, i.unit);
       cell(tr, String(i.base), 'num'); cell(tr, fmt(i.cible), 'num');
       cell(tr, i.t.map(function (v, k) { return RES_Q[k] + ' : ' + fmt(v); }).join(' · '));
-      cell(tr, i.acts.map(function (k) { var a = ppmActOf(k); return a ? a.code + ' — ' + a.lib : k; }).join(' ; ') || '—');
+      var cov = ppmActs().filter(function (a) { return resuCovers(i, a); });
+      cell(tr, i.node === 'ROOT' ? 'Ensemble du projet' : (cov.length ? pl(cov.length, 'activité') + ' du PTBA concernée' + (cov.length > 1 ? 's' : '') : 'Aucune activité du PTBA pour l’instant'));
       cell(tr, i.resp);
       var act = cell(tr, '');
       [['Modifier', function () { resuOpen(i); }], ['Supprimer', function () {
@@ -15403,42 +15435,39 @@ var EXEC_REC = [
     });
     if (!RES.items.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun indicateur : créez-en un et rattachez-y les activités du PTBA.'); c0.colSpan = 11; c0.style.textAlign = 'left'; body.appendChild(t0); }
     document.getElementById('resu-n').textContent = pl(RES.items.length, 'indicateur');
+    var st = document.getElementById('resu-struct'); if (st) st.innerHTML = PSTRUCT.map(function (n) {
+      var d = nodePath(n.id).length - 1, ni = RES.items.filter(function (i) { return i.node === n.id; });
+      return '<tr><td>' + escH(n.lvl) + '</td><td class="name" style="padding-left:' + (12 + d * 16) + 'px">' + escH(n.lib) + '</td><td>' + (ni.length ? escH(ni.map(function (i) { return i.id; }).join(', ')) : '—') + '</td></tr>';
+    }).join('');
     var nv = document.getElementById('resu-nov'); nv.innerHTML = ''; var miss = resuMissing();
     if (!miss.length) { var t1 = document.createElement('tr'), c1 = cell(t1, 'Toutes les activités des PTBA validés sont rattachées à un indicateur.'); c1.colSpan = 4; c1.style.textAlign = 'left'; nv.appendChild(t1); }
-    miss.forEach(function (a) { var tr = document.createElement('tr'); cell(tr, a.code + ' — ' + a.lib, 'name'); cell(tr, a.lot); cell(tr, fmt(a.cost), 'num'); var c = cell(tr, ''); c.appendChild(badge('Sans indicateur : le PTBA ne peut pas être envoyé au bailleur', 'b-ko')); nv.appendChild(tr); });
+    miss.forEach(function (a) { var tr = document.createElement('tr'); cell(tr, a.code + ' — ' + a.lib, 'name'); cell(tr, a.lot); cell(tr, fmt(a.cost), 'num'); var c = cell(tr, ''); c.appendChild(badge(a.node ? 'Aucun indicateur sur ' + nodeById(a.node).lvl.toLowerCase() + ' ' + a.node + ' ni au-dessus : le PTBA ne peut pas être envoyé au bailleur' : 'Activité non rattachée à la structure du projet', 'b-ko')); nv.appendChild(tr); });
   }
   var resuEdit = null;
   function resuOpen(i) {
     resuEdit = i || null;
     var g = function (id) { return document.getElementById(id); }, acts = ppmActs();
     g('resu-form-title').textContent = i ? 'Modifier l’indicateur ' + i.id : 'Nouvel indicateur';
-    var pers = []; acts.forEach(function (a) { if (pers.indexOf(a.perim) < 0) pers.push(a.perim); }); pers.push('Transversal (tout le projet)');
-    g('ri-per').innerHTML = pers.map(function (p) { return '<option>' + escH(p) + '</option>'; }).join('');
+    g('ri-node').innerHTML = PSTRUCT.filter(function (n) { return n.lvl !== 'Sous-activité'; }).map(function (n) { return '<option value="' + n.id + '">' + escH(n.lvl + ' — ' + n.lib.replace(/^[^—]+— /, '')) + '</option>'; }).join('');
     g('ri-resp').innerHTML = CONTRIB.map(function (c) { return '<option>' + escH(c) + '</option>'; }).join('');
     g('ri-lib').value = i ? i.lib : ''; g('ri-unit').value = i ? i.unit : ''; g('ri-base').value = i ? i.base : '0'; g('ri-cible').value = i ? i.cible : '';
     g('ri-niv').value = i ? (i.niv || 'Produit') : 'Produit';
-    if (i) { g('ri-per').value = i.per; g('ri-resp').value = i.resp; }
+    if (i) { g('ri-node').value = i.node; g('ri-resp').value = i.resp; }
     RES_Q.forEach(function (q, k) { g('ri-t' + (k + 1)).value = i ? i.t[k] : ''; });
-    g('ri-acts').innerHTML = acts.length ? acts.map(function (a) {
-      var owner = RES.items.filter(function (x) { return x !== i && x.acts.indexOf(a.key) >= 0; })[0];
-      return '<label class="chk sm"><input type="checkbox" data-k="' + escH(a.key) + '"' + (i && i.acts.indexOf(a.key) >= 0 ? ' checked' : '') + (owner ? ' disabled' : '') + '> ' + escH(a.code + ' — ' + a.lib) + ' <span style="color:#5B606D">· ' + escH(a.lot) + (owner ? ' · déjà rattachée à ' + owner.id : '') + '</span></label>';
-    }).join('') : '<div class="hint">Aucun PTBA validé : aucune activité à rattacher.</div>';
     g('ri-err').textContent = '';
     g('resu-form').hidden = false;
   }
   function resuSave() {
     var g = function (id) { return document.getElementById(id); }, err = g('ri-err'), num = function (id) { var v = parseFloat(g(id).value.replace(/\s/g, '').replace(',', '.')); return isNaN(v) ? null : v; };
     var lib = g('ri-lib').value.trim(), unit = g('ri-unit').value.trim(), cible = num('ri-cible'), base = num('ri-base'), t = RES_Q.map(function (q, k) { return num('ri-t' + (k + 1)); });
-    var acts = [].filter.call(g('ri-acts').querySelectorAll('input'), function (c) { return c.checked; }).map(function (c) { return c.dataset.k; });
     if (lib.length < 5) { err.textContent = 'Le libellé de l’indicateur est obligatoire.'; return; }
     if (!unit) { err.textContent = 'L’unité est obligatoire.'; return; }
     if (cible == null || cible <= 0) { err.textContent = 'La cible de l’exercice doit être positive.'; return; }
     if (t.some(function (v) { return v == null; })) { err.textContent = 'Renseignez la cible cumulée des quatre trimestres.'; return; }
     for (var k = 1; k < 4; k++) if (t[k] < t[k - 1]) { err.textContent = 'Les cibles sont cumulées : elles ne peuvent pas diminuer d’un trimestre à l’autre.'; return; }
     if (t[3] > cible) { err.textContent = 'La cible cumulée du T4 dépasse la cible de l’exercice.'; return; }
-    if (!acts.length) { err.textContent = 'Rattachez au moins une activité du PTBA : un indicateur sans activité ne peut pas être suivi.'; return; }
     var o = resuEdit || { id: 'IND-' + ('0' + (++RES.seq)).slice(-2), real: [null, null, null, null] };
-    o.lib = lib; o.unit = unit; o.cible = cible; o.base = base || 0; o.t = t; o.niv = g('ri-niv').value; o.per = g('ri-per').value; o.resp = g('ri-resp').value; o.acts = acts;
+    o.lib = lib; o.unit = unit; o.cible = cible; o.base = base || 0; o.t = t; o.niv = g('ri-niv').value; o.node = g('ri-node').value; o.resp = g('ri-resp').value;
     if (!resuEdit) RES.items.push(o);
     g('resu-form').hidden = true; resuRender(); resuMsg('Indicateur ' + o.id + (resuEdit ? ' modifié.' : ' créé.'), 'ok');
   }
