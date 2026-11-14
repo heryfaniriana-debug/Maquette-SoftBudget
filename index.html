@@ -3858,9 +3858,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="card" style="margin-bottom:12px">
             <div class="scroll">
               <table style="min-width:1180px">
-                <thead><tr><th>Ligne</th><th>Axes</th><th class="num">Montant (MGA)</th><th>Répartition</th><th>Commentaire / justification</th><th>Contrôle</th><th>Pièces jointes</th><th></th></tr></thead>
+                <thead><tr><th>Ligne</th><th>Axes</th><th class="num">Montant (MGA)</th><th>Répartition</th><th>Plan de travail</th><th>Commentaire / justification</th><th>Contrôle</th><th>Pièces jointes</th><th></th></tr></thead>
                 <tbody id="cs-body"></tbody>
-                <tfoot><tr><td colspan="2">Total du périmètre</td><td class="num" id="cs-t3"></td><td colspan="4"></td></tr><tr id="cs-min-row" hidden><td colspan="2">Enveloppe minimale du périmètre</td><td class="num" id="cs-min"></td><td colspan="4" id="cs-min-st"></td></tr><tr id="cs-env-row" hidden><td colspan="2">Enveloppe maximale du périmètre</td><td class="num" id="cs-env"></td><td colspan="4" id="cs-env-st"></td></tr><tr hidden><td id="cs-t1"></td><td id="cs-t2"></td><td id="cs-t4"></td></tr></tfoot>
+                <tfoot><tr><td colspan="2">Total du périmètre</td><td class="num" id="cs-t3"></td><td colspan="5"></td></tr><tr id="cs-min-row" hidden><td colspan="2">Enveloppe minimale du périmètre</td><td class="num" id="cs-min"></td><td colspan="5" id="cs-min-st"></td></tr><tr id="cs-env-row" hidden><td colspan="2">Enveloppe maximale du périmètre</td><td class="num" id="cs-env"></td><td colspan="5" id="cs-env-st"></td></tr><tr hidden><td id="cs-t1"></td><td id="cs-t2"></td><td id="cs-t4"></td></tr></tfoot>
               </table>
             </div>
           </div>
@@ -3868,7 +3868,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="card" style="margin-bottom:12px">
             <div class="scroll">
               <table style="min-width:900px">
-                <thead><tr><th>Indicateur</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de l’exercice</th><th>Ligne concernée</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Indicateur</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de l’exercice (somme des lignes)</th><th>Lignes liées</th><th>Actions</th></tr></thead>
                 <tbody id="cs-ind-b"></tbody>
               </table>
             </div>
@@ -5371,8 +5371,15 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       <!-- ===== Projet : avancement physique ===== -->
       <section class="view" id="v-avanc">
-        <div class="head"><div><h1>Avancement physique</h1><p>Mesure, période par période, des indicateurs du projet et de ceux proposés par les contributeurs dans les lots de collecte validés. Le profil trimestriel des cibles et les réalisations se saisissent ici.</p></div></div>
+        <div class="head"><div><h1>Avancement physique</h1><p>Suivi du plan de travail des lots validés : pour chaque ligne, la dépense et la réalisation physique sont comparées à ce qui était prévu. Les indicateurs se calculent à partir des lignes qui y contribuent.</p></div></div>
         <div class="callout" id="av-msg" hidden style="margin-bottom:12px"></div>
+        <div class="kb-h" style="margin:0 0 8px;font-weight:600">Suivi par ligne de travail</div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1700px">
+          <thead><tr><th>Lot</th><th>Périmètre</th><th>Ligne</th><th>Travail</th><th>Période prévue</th><th class="num">Budget</th><th class="num">Dépensé</th><th class="num">Volume prévu</th><th class="num">Réalisé</th><th class="num">Attendu à ce jour</th><th>Signal</th><th>Actions</th></tr></thead><tbody id="av-lines"></tbody></table></div><div class="pager"><span>Dépense reprise de l’exécution (données de démonstration) · réalisé saisi par le technicien</span></div></div>
+        <div class="kb-h" style="margin:0 0 8px;font-weight:600">Suivi par indicateur (calculé à partir des lignes)</div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1100px">
+          <thead><tr><th>Indicateur</th><th>Périmètre</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de l’exercice</th><th>Lignes liées</th><th class="num">Réalisé</th><th class="num">Attendu à ce jour</th><th>Avancement</th></tr></thead><tbody id="av-inds"></tbody></table></div></div>
+        <div class="kb-h" style="margin:0 0 8px;font-weight:600">Indicateurs du projet (mesure directe)</div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1250px">
           <thead><tr><th>Code</th><th>Indicateur</th><th>Périmètre</th><th>Unité</th><th class="num">Cible de l’exercice</th><th>Responsable du suivi</th><th class="num">T1<br>réalisé / cible</th><th class="num">T2<br>réalisé / cible</th><th class="num">T3<br>réalisé / cible</th><th class="num">T4<br>réalisé / cible</th><th>Avancement</th><th>Actions</th></tr></thead><tbody id="av-b"></tbody></table></div><div class="pager"><span id="av-n"></span><span>Valeurs réalisées cumulées</span></div></div>
       </section>
@@ -10395,11 +10402,16 @@ function fmAxes() {
   (function () {
     function pp(ci, name) { return camps[ci].perims.filter(function (x) { return x.p.indexOf(name) === 0; })[0]; }
     var a = pp(0, 'Direction de l’Enseignement fondamental'); a.obj = 'Scolariser 3 000 000 d’élèves et renouveler les manuels du primaire.';
-    a.inds = [{ lib: 'Élèves scolarisés au fondamental', unit: 'élève', base: 2800000, cible: 3000000, line: 'P1.1' }, { lib: 'Manuels distribués', unit: 'manuel', base: 0, cible: 460000, line: 'P1.2' }];
-    var b = pp(0, 'Direction de l’Enseignement supérieur'); b.obj = 'Accueillir 50 000 boursiers supplémentaires.'; b.inds = [{ lib: 'Boursiers supplémentaires', unit: 'étudiant', base: 0, cible: 50000, line: 'P2.1' }];
+    a.inds = [{ id: 'IC-E1', lib: 'Élèves scolarisés au fondamental', unit: 'élève', base: 2800000 }, { id: 'IC-E2', lib: 'Manuels distribués', unit: 'manuel', base: 0 }];
+    function ln(name, code) { return (COL[name] || []).filter(function (l) { return l.c === code; })[0]; }
+    function wk(l, task, d1, d2, vol, unit, inds) { if (l) l.wk = { task: task, d1: d1, d2: d2, vol: vol, unit: unit, inds: inds, real: [null, null, null, null], spent: null }; }
+    wk(ln(a.p, 'P1.1'), 'Assurer la rémunération des enseignants et la scolarisation des élèves', '2027-01-01', '2027-12-31', 3000000, 'élève', [{ id: 'IC-E1', contrib: 3000000 }]);
+    wk(ln(a.p, 'P1.2'), 'Acheter et distribuer les manuels du primaire', '2027-03-01', '2027-09-30', 460000, 'manuel', [{ id: 'IC-E2', contrib: 460000 }]);
+    var b = pp(0, 'Direction de l’Enseignement supérieur'); b.obj = 'Accueillir 50 000 boursiers supplémentaires.'; b.inds = [{ id: 'IC-E3', lib: 'Boursiers supplémentaires', unit: 'étudiant', base: 0 }];
+    wk(ln(b.p, 'P2.1'), 'Attribuer et verser les bourses aux étudiants', '2027-01-15', '2027-12-15', 50000, 'étudiant', [{ id: 'IC-E3', contrib: 50000 }]);
     var c = pp(0, 'Direction des Infrastructures'); c.obj = 'Réhabiliter 120 écoles.'; c.inds = [];
     var d = pp(1, '1110101'); d.obj = 'Équiper 17 centres isolés d’ici 2028, dont 2 en 2026.';
-    d.inds = [{ lib: 'Études de faisabilité réalisées', unit: 'étude', base: 0, cible: 17, line: 'H1' }, { lib: 'Centres équipés de kits hybrides', unit: 'centre', base: 0, cible: 2, line: 'H2' }];
+    d.inds = [{ id: 'IC-D1', lib: 'Études de faisabilité réalisées', unit: 'étude', base: 0 }, { id: 'IC-D2', lib: 'Centres équipés de kits hybrides', unit: 'centre', base: 0 }];
   })();
   function coMsg(text, kind) {
     var el = document.getElementById('co-msg');
@@ -10640,15 +10652,84 @@ function fmAxes() {
   });
 
   /* Saisie */
+  /* ---------- Plan de travail de la ligne : prévisions (programmation) ; le suivi compare ensuite dépense et réalisation physique ---------- */
+  var INDUID = 0;
+  function perimLines(p) { var c = (COL[p.p] || []).filter(function (l) { return l.dem != null; }); return c.length ? c : (VLINES[p.p] || []); }
+  function indCible(p, id) { return perimLines(p).reduce(function (s, l) { var k = l.wk && (l.wk.inds || []).filter(function (z) { return z.id === id; })[0]; return s + (k ? k.contrib : 0); }, 0); }
+  function indLines(p, id) { return perimLines(p).filter(function (l) { return l.wk && (l.wk.inds || []).some(function (z) { return z.id === id; }); }); }
+  function wkFrac(l) {
+    var w = l.wk; if (!w || !w.d1 || !w.d2) return null;
+    var a = Date.parse(w.d1), b = Date.parse(w.d2), t = Date.parse(TODAY);
+    if (b <= a) return t >= b ? 1 : 0;
+    return Math.max(0, Math.min(1, (t - a) / (b - a)));
+  }
+  function wkReal(l) { var w = l.wk, last = null; if (w && w.real) w.real.forEach(function (v) { if (v != null) last = v; }); return last; }
+  function lineSignal(l) {
+    var w = l.wk; if (!w || !w.vol) return { t: 'Plan de travail à renseigner', cls: 'b-warn', ph: null, fin: null, ex: null };
+    var r = wkReal(l), ph = r == null ? null : Math.min(1, r / w.vol), fin = (w.spent == null || !l.dem) ? null : w.spent / l.dem, ex = wkFrac(l);
+    if (ph == null) return { t: ex > 0 ? 'Aucune mesure alors que le travail a commencé' : 'Pas encore commencé', cls: ex > 0 ? 'b-warn' : 'b-neutral', ph: ph, fin: fin, ex: ex };
+    if (fin != null && fin - ph > 0.25) return { t: 'Dépense sans avancement', cls: 'b-ko', ph: ph, fin: fin, ex: ex };
+    if (fin != null && ph - fin > 0.25) return { t: 'Avancement sans dépense', cls: 'b-warn', ph: ph, fin: fin, ex: ex };
+    if (ex != null && ph < ex - 0.1) return { t: 'En retard', cls: 'b-ko', ph: ph, fin: fin, ex: ex };
+    return { t: 'À jour', cls: 'b-ok', ph: ph, fin: fin, ex: ex };
+  }
+  function wkIndText(p, l) {
+    return ((l.wk && l.wk.inds) || []).map(function (k) { var i = (p.inds || []).filter(function (z) { return z.id === k.id; })[0]; return i ? i.lib + ' (' + fmt(k.contrib) + ' ' + i.unit + ')' : k.id; }).join(' ; ') || '—';
+  }
+  function wkSummary(p, l) {
+    var w = l.wk; if (!w || !w.vol) return null;
+    return w.task + ' · ' + isoToFr(w.d1) + ' → ' + isoToFr(w.d2) + ' · ' + fmt(w.vol) + ' ' + w.unit;
+  }
+  function wkAsk(p, l) {
+    var w = l.wk || {}, bd = cvEl('div', 'cv-modal-bd'), box = cvEl('div', 'cv-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.style.maxHeight = '90vh'; box.style.overflow = 'auto';
+    box.appendChild(cvEl('h3', null, 'Plan de travail — ' + l.c + ' ' + (l.lib || l.l)));
+    box.appendChild(cvEl('div', 'hint', 'Prévisions de l’exercice : aucun réalisé à ce stade, l’avancement se saisit plus tard dans Suivi › Avancement physique.'));
+    function fld(label, el, parent) { var d = cvEl('div'); d.appendChild(cvEl('label', null, label)); d.appendChild(el); (parent || box).appendChild(d); return el; }
+    var task = fld('Travail à réaliser *', cvEl('input', 'field')); task.type = 'text'; task.value = w.task || ''; task.placeholder = 'Ex. Réaliser les études de faisabilité des 17 centres';
+    var g1 = cvEl('div'); g1.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px'; box.appendChild(g1);
+    var d1 = fld('Début prévu *', cvEl('input', 'field'), g1); d1.type = 'date'; d1.value = w.d1 || '';
+    var d2 = fld('Fin prévue *', cvEl('input', 'field'), g1); d2.type = 'date'; d2.value = w.d2 || '';
+    var g2 = cvEl('div'); g2.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px'; box.appendChild(g2);
+    var vol = fld('Volume physique prévu sur l’exercice *', cvEl('input', 'field'), g2); vol.type = 'text'; vol.setAttribute('inputmode', 'decimal'); vol.value = w.vol != null ? w.vol : '';
+    var unit = fld('Unité *', cvEl('input', 'field'), g2); unit.type = 'text'; unit.value = w.unit || ''; unit.placeholder = 'étude, centre, élève…';
+    box.appendChild(cvEl('label', null, 'Indicateurs servis par ce travail'));
+    var list = cvEl('div'); box.appendChild(list); var rows = [];
+    (p.inds || []).forEach(function (i) {
+      var cur = (w.inds || []).filter(function (z) { return z.id === i.id; })[0];
+      var row = cvEl('div'); row.style.cssText = 'display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:10px;align-items:center;margin-bottom:6px';
+      var lab = cvEl('label', 'chk sm'); var ck = cvEl('input'); ck.type = 'checkbox'; ck.checked = !!cur; lab.appendChild(ck); lab.appendChild(document.createTextNode(' ' + i.lib + ' (' + i.unit + ')'));
+      var ct = cvEl('input', 'field'); ct.type = 'text'; ct.setAttribute('inputmode', 'decimal'); ct.placeholder = 'Apport (' + i.unit + ')'; ct.value = cur ? cur.contrib : ''; ct.disabled = !ck.checked;
+      ck.addEventListener('change', function () { ct.disabled = !ck.checked; });
+      row.appendChild(lab); row.appendChild(ct); list.appendChild(row); rows.push({ i: i, ck: ck, ct: ct });
+    });
+    if (!(p.inds || []).length) list.appendChild(cvEl('div', 'hint', 'Aucun indicateur proposé pour ce périmètre : ajoutez-en dans la saisie, puis revenez ici.'));
+    var err = cvEl('div', 'err'); box.appendChild(err);
+    var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Enregistrer'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
+    function close() { if (bd.parentNode) bd.parentNode.removeChild(bd); }
+    bc.addEventListener('click', close); bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
+    bo.addEventListener('click', function () {
+      var v = parseFloat(vol.value.replace(/\s/g, '').replace(',', '.')), inds = [];
+      if (task.value.trim().length < 5) { err.textContent = 'Décrivez le travail à réaliser.'; return; }
+      if (!d1.value || !d2.value) { err.textContent = 'Les dates de début et de fin sont obligatoires.'; return; }
+      if (d2.value < d1.value) { err.textContent = 'La fin du travail ne peut pas précéder son début.'; return; }
+      if (isNaN(v) || v <= 0) { err.textContent = 'Le volume physique prévu doit être positif.'; return; }
+      if (!unit.value.trim()) { err.textContent = 'L’unité est obligatoire.'; return; }
+      for (var k = 0; k < rows.length; k++) { if (!rows[k].ck.checked) continue; var c = parseFloat(rows[k].ct.value.replace(/\s/g, '').replace(',', '.')); if (isNaN(c) || c <= 0) { err.textContent = 'Indiquez l’apport positif à l’indicateur « ' + rows[k].i.lib + ' ».'; return; } inds.push({ id: rows[k].i.id, contrib: c }); }
+      l.wk = { task: task.value.trim(), d1: d1.value, d2: d2.value, vol: v, unit: unit.value.trim(), inds: inds, real: w.real || [null, null, null, null], spent: w.spent };
+      close(); renderSaisie(p.p);
+    });
+    bd.appendChild(box); document.body.appendChild(bd); task.focus();
+  }
   /* Indicateurs de résultat proposés par le contributeur pour son périmètre (jugés ensuite par le validateur par rapport à l'objectif du cadrage) */
   function renderCsInds(p, editable, lines) {
     var body = document.getElementById('cs-ind-b'); body.innerHTML = ''; p.inds = p.inds || [];
     p.inds.forEach(function (x, k) {
       var tr = document.createElement('tr');
-      cell(tr, x.lib, 'name'); cell(tr, x.unit); cell(tr, String(x.base || 0), 'num'); cell(tr, fmt(x.cible), 'num');
-      var ln = x.line ? lines.filter(function (l) { return l.c === x.line; })[0] : null; cell(tr, ln ? ln.c + ' — ' + (ln.lib || ln.l) : 'Périmètre entier');
+      var nl = indLines(p, x.id).length, ci = indCible(p, x.id);
+      cell(tr, x.lib, 'name'); cell(tr, x.unit); cell(tr, String(x.base || 0), 'num'); cell(tr, ci ? fmt(ci) : 'Calculée par les lignes', 'num');
+      cell(tr, nl ? pl(nl, 'ligne') + ' liée' + (nl > 1 ? 's' : '') : 'Aucune ligne liée');
       var act = cell(tr, ''); var b = cvEl('button', 'btn small', 'Retirer'); b.type = 'button'; b.disabled = !editable; if (!editable) b.title = 'La contribution n’est plus modifiable.';
-      b.addEventListener('click', function () { p.inds.splice(k, 1); renderSaisie(p.p); }); act.appendChild(b);
+      b.addEventListener('click', function () { var id = x.id; p.inds.splice(k, 1); lines.forEach(function (l) { if (l.wk && l.wk.inds) l.wk.inds = l.wk.inds.filter(function (z) { return z.id !== id; }); }); renderSaisie(p.p); }); act.appendChild(b);
       body.appendChild(tr);
     });
     if (!p.inds.length) { var t0 = document.createElement('tr'), c0 = cell(t0, editable ? 'Aucun indicateur : ajoutez ceux qui permettront de mesurer l’objectif de l’exercice.' : 'Aucun indicateur proposé pour ce périmètre.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); }
@@ -10659,24 +10740,20 @@ function fmAxes() {
     if (p.obj) box.appendChild(cvEl('div', 'hint', 'Objectif de l’exercice : ' + p.obj));
     function fld(label, el) { var d = cvEl('div'); d.appendChild(cvEl('label', null, label)); d.appendChild(el); box.appendChild(d); return el; }
     var lib = fld('Indicateur *', cvEl('input', 'field')); lib.type = 'text'; lib.placeholder = 'Ex. Centres équipés de kits hybrides';
-    var grid = cvEl('div'); grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px'; box.appendChild(grid);
+    var grid = cvEl('div'); grid.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px'; box.appendChild(grid);
     function gf(label, el) { var d = cvEl('div'); d.appendChild(cvEl('label', null, label)); d.appendChild(el); grid.appendChild(d); return el; }
     var unit = gf('Unité *', cvEl('input', 'field')); unit.type = 'text'; unit.placeholder = 'centre, élève…';
     var base = gf('Valeur de départ', cvEl('input', 'field')); base.type = 'text'; base.setAttribute('inputmode', 'decimal'); base.value = '0';
-    var cib = gf('Cible de l’exercice *', cvEl('input', 'field')); cib.type = 'text'; cib.setAttribute('inputmode', 'decimal');
-    var sel = fld('Ligne concernée', cvEl('select', 'field')); var o0 = cvEl('option', null, 'Périmètre entier'); o0.value = ''; sel.appendChild(o0);
-    lines.forEach(function (l) { var o = cvEl('option', null, l.c + ' — ' + (l.lib || l.l)); o.value = l.c; sel.appendChild(o); });
+    box.appendChild(cvEl('div', 'hint', 'La cible de l’exercice n’est pas saisie ici : elle se calcule à partir de ce que chaque ligne de travail apporte à l’indicateur (bouton « Plan de travail » de la ligne).'));
     var err = cvEl('div', 'err'); box.appendChild(err);
     var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Ajouter'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
     function close() { if (bd.parentNode) bd.parentNode.removeChild(bd); }
     bc.addEventListener('click', close); bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
     bo.addEventListener('click', function () {
-      var num = function (e) { var v = parseFloat(e.value.replace(/\s/g, '').replace(',', '.')); return isNaN(v) ? null : v; }, c = num(cib), b = num(base);
+      var num = function (e) { var v = parseFloat(e.value.replace(/\s/g, '').replace(',', '.')); return isNaN(v) ? null : v; }, b = num(base);
       if (lib.value.trim().length < 5) { err.textContent = 'Le libellé de l’indicateur est obligatoire.'; return; }
       if (!unit.value.trim()) { err.textContent = 'L’unité est obligatoire.'; return; }
-      if (c == null || c <= 0) { err.textContent = 'La cible de l’exercice doit être positive.'; return; }
-      if (c < (b || 0)) { err.textContent = 'La cible ne peut pas être inférieure à la valeur de départ.'; return; }
-      (p.inds = p.inds || []).push({ lib: lib.value.trim(), unit: unit.value.trim(), base: b || 0, cible: c, line: sel.value });
+      (p.inds = p.inds || []).push({ id: 'IC-' + p.p.slice(0, 4).replace(/\W/g, '') + '-' + (++INDUID), lib: lib.value.trim(), unit: unit.value.trim(), base: b || 0 });
       close(); renderSaisie(p.p);
     });
     bd.appendChild(box); document.body.appendChild(bd); lib.focus();
@@ -10736,6 +10813,9 @@ function fmAxes() {
       cell(tr, l.axv ? Object.keys(l.axv).map(function (k) { return l.axv[k]; }).filter(Boolean).join(' · ') || '—' : '—');
       var tm = cell(tr, '', 'num');
       var tpr = cell(tr, '');
+      var twk = cell(tr, ''), wsum = wkSummary(p, l);
+      if (wsum) { twk.appendChild(document.createTextNode(wsum)); var wi = document.createElement('div'); wi.className = 'hby'; wi.style.cssText = 'font-size:12.5px;color:#5B606D'; wi.textContent = 'Indicateurs : ' + wkIndText(p, l); twk.appendChild(wi); }
+      else twk.appendChild(badge('À renseigner', 'b-warn'));
       var tj = document.createElement('td');
       var ji = document.createElement('input');
       ji.type = 'text'; ji.className = 'field stepin'; ji.value = l.just || ''; ji.disabled = !editable;
@@ -10756,6 +10836,8 @@ function fmAxes() {
       } else if (!(l.pj && l.pj.length)) tpj.textContent = '—';
       var ta = cell(tr, ''); ta.style.whiteSpace = 'nowrap';
       if (editable) {
+        var bw = document.createElement('button'); bw.className = 'btn small'; bw.type = 'button'; bw.style.marginRight = '6px'; bw.textContent = 'Plan de travail';
+        bw.addEventListener('click', function () { wkAsk(p, l); }); ta.appendChild(bw);
         var bm = document.createElement('button'); bm.className = 'btn small'; bm.type = 'button'; bm.textContent = 'Modifier';
         bm.addEventListener('click', function () { if (l.q == null && l.p == null && l.m == null) l.m = l.dem; coOpenLine(pname, l); });
         var bd = document.createElement('button'); bd.className = 'btn small'; bd.type = 'button'; bd.style.marginLeft = '6px'; bd.textContent = 'Supprimer';
@@ -10778,7 +10860,7 @@ function fmAxes() {
       upd();
       body.appendChild(tr);
     });
-    if (!lines2.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, editable ? 'Aucune ligne. Cliquez sur « Ajouter une ligne ».' : 'Aucune ligne saisie.'); td0.colSpan = 8; td0.style.textAlign = 'left'; body.appendChild(tr0); }
+    if (!lines2.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, editable ? 'Aucune ligne. Cliquez sur « Ajouter une ligne ».' : 'Aucune ligne saisie.'); td0.colSpan = 9; td0.style.textAlign = 'left'; body.appendChild(tr0); }
     document.getElementById('cs-add').disabled = !editable;
     var ob = document.getElementById('cs-obj'); ob.hidden = !p.obj; ob.textContent = p.obj ? 'Objectif de l’exercice fixé au cadrage : ' + p.obj : '';
     document.getElementById('cs-ind-add').disabled = !editable;
@@ -11359,18 +11441,19 @@ function fmAxes() {
       body.appendChild(obj);
       if ((x.p.inds || []).length) {
         var ti = cvEl('table'); ti.style.cssText = 'width:100%;margin:0 0 10px';
-        ti.innerHTML = '<thead><tr><th>Indicateur proposé</th><th>Unité</th><th class="num">Départ</th><th class="num">Cible de l’exercice</th><th>Ligne concernée</th></tr></thead>';
-        var tib = cvEl('tbody'); x.p.inds.forEach(function (it) { var tr = cvEl('tr'); cell(tr, it.lib, 'name'); cell(tr, it.unit); cell(tr, String(it.base || 0), 'num'); cell(tr, fmt(it.cible), 'num'); cell(tr, it.line || 'Périmètre entier'); tib.appendChild(tr); });
+        ti.innerHTML = '<thead><tr><th>Indicateur proposé</th><th>Unité</th><th class="num">Départ</th><th class="num">Cible de l’exercice</th><th>Lignes de travail liées</th></tr></thead>';
+        var tib = cvEl('tbody'); x.p.inds.forEach(function (it) { var tr = cvEl('tr'), ci = indCible(x.p, it.id), nl = indLines(x.p, it.id).length; cell(tr, it.lib, 'name'); cell(tr, it.unit); cell(tr, String(it.base || 0), 'num'); cell(tr, ci ? fmt(ci) : '—', 'num'); cell(tr, nl ? pl(nl, 'ligne') : 'Aucune ligne liée'); tib.appendChild(tr); });
         ti.appendChild(tib); body.appendChild(ti);
       } else body.appendChild(cvEl('div', 'hint', 'Aucun indicateur proposé par le contributeur : à juger par rapport à l’objectif de l’exercice.'));
       if (!x.lines.length) body.appendChild(cvEl('div', 'hint', 'Aucune ligne détaillée.'));
       else {
-        var sc = cvEl('div', 'scroll'); var tb = cvEl('table'); tb.style.minWidth = '900px';
-        tb.innerHTML = '<thead><tr><th>Ligne</th><th>Nature</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire</th><th>Pièces jointes</th></tr></thead>';
+        var sc = cvEl('div', 'scroll'); var tb = cvEl('table'); tb.style.minWidth = '1500px';
+        tb.innerHTML = '<thead><tr><th>Ligne</th><th>Nature</th><th>Travail et période</th><th class="num">Volume prévu</th><th>Indicateurs servis</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire</th><th>Pièces jointes</th></tr></thead>';
         var tbd = cvEl('tbody');
         x.lines.forEach(function (l) {
           var tr = cvEl('tr'); var v2 = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : null;
           cell(tr, l.c + ' — ' + l.l, 'name'); cell(tr, l.nat || '—');
+          cell(tr, l.wk ? l.wk.task + ' · ' + isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : 'Non renseigné'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num'); cell(tr, wkIndText(x.p, l));
           cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num');
           cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num'); cell(tr, v2 == null ? '—' : (v2 > 0 ? '+' : '') + v2 + ' %', 'num'); cell(tr, l.just || '—');
           var tp = cell(tr, ''); if (l.pj && l.pj.length) l.pj.forEach(function (f) { tp.appendChild(cvEl('div', null, '📎 ' + f)); }); else tp.textContent = '—';
@@ -11445,8 +11528,8 @@ function fmAxes() {
      uniquement le détail des lignes (axes, nature, quantité, coût, montant, répartition), sans enveloppes min/max ni pièces jointes. */
   var VLINES = {
     '1110101 Hybridation et numérisation des réseaux (17 centres isolés)': [
-      { c: 'H1', l: 'Études de faisabilité des 17 centres', nat: '62', q: 17, p: 400000, dem: 6800000, axv: { Financier: 'IDA 7286-MG', Géographique: 'Atsimo-Andrefana' }, per: [3400000, 3400000, 0, 0] },
-      { c: 'H2', l: 'Kits d’équipements hybrides', nat: '21', q: 2, p: 3133000, dem: 6266000, axv: { Financier: 'IDA 7286-MG', Géographique: 'Anosy' }, per: [0, 0, 3133000, 3133000] }
+      { c: 'H1', l: 'Études de faisabilité des 17 centres', nat: '62', q: 17, p: 400000, dem: 6800000, axv: { Financier: 'IDA 7286-MG', Géographique: 'Atsimo-Andrefana' }, per: [3400000, 3400000, 0, 0], wk: { task: 'Réaliser les études de faisabilité sur les 17 centres isolés', d1: '2026-02-01', d2: '2026-06-30', vol: 17, unit: 'étude', inds: [{ id: 'IC-D1', contrib: 17 }], real: [5, 12, 17, null], spent: 6800000 } },
+      { c: 'H2', l: 'Kits d’équipements hybrides', nat: '21', q: 2, p: 3133000, dem: 6266000, axv: { Financier: 'IDA 7286-MG', Géographique: 'Anosy' }, per: [0, 0, 3133000, 3133000], wk: { task: 'Installer et mettre en service les kits hybrides', d1: '2026-06-01', d2: '2026-12-15', vol: 2, unit: 'centre', inds: [{ id: 'IC-D2', contrib: 2 }], real: [0, 0, 1, null], spent: 3000000 } }
     ]
   };
   Object.keys(COL).forEach(function (k) { COL[k].forEach(function (l) { if (!l.axv) l.axv = { Analytique: 'Programme ' + l.c.split('.')[0], Financier: 'Budget de l’État' }; }); });
@@ -11470,11 +11553,12 @@ function fmAxes() {
   function bvMatrix(r) {
     var d = bvData(r), pa = d.pa, axes = (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }), labs = pa && VTS[pa.vt] ? VTS[pa.vt] : null;
     var showPer = !!labs && d.lines.some(function (x) { return x.l.per; });
-    var head = ['Périmètre de collecte', 'Ligne', 'Nature'].concat(axes.map(function (a) { return a.n; }), ['Quantité', 'Coût unitaire', 'Montant'], showPer ? labs : []);
+    var head = ['Périmètre de collecte', 'Ligne', 'Nature', 'Travail', 'Début', 'Fin', 'Volume prévu', 'Indicateurs servis'].concat(axes.map(function (a) { return a.n; }), ['Quantité', 'Coût unitaire', 'Montant'], showPer ? labs : []);
     var tot = 0;
     var rows = d.lines.map(function (x) {
       var l = x.l; tot += l.dem || 0;
-      return [x.perim, l.c + ' — ' + (l.lib || l.l), l.nat || ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || ''; }), [l.q != null ? l.q : '', l.p != null ? l.p : '', l.dem || 0], showPer ? labs.map(function (_, i) { return l.per && l.per[i] ? l.per[i] : ''; }) : []);
+      var pr = d.c.perims.filter(function (pp) { return pp.p === x.perim; })[0] || {};
+      return [x.perim, l.c + ' — ' + (l.lib || l.l), l.nat || '', l.wk ? l.wk.task : '', l.wk ? isoToFr(l.wk.d1) : '', l.wk ? isoToFr(l.wk.d2) : '', l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '', l.wk ? wkIndText(pr, l) : ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || ''; }), [l.q != null ? l.q : '', l.p != null ? l.p : '', l.dem || 0], showPer ? labs.map(function (_, i) { return l.per && l.per[i] ? l.per[i] : ''; }) : []);
     });
     var fin = {}; d.lines.forEach(function (x) { var k = (x.l.axv && x.l.axv.Financier) || 'Non précisé'; fin[k] = (fin[k] || 0) + (x.l.dem || 0); });
     return { head: head, rows: rows, total: tot, fin: Object.keys(fin).map(function (k) { return [k, fin[k], tot ? Math.round(1000 * fin[k] / tot) / 10 : 0]; }), d: d };
@@ -11535,14 +11619,16 @@ function fmAxes() {
     root.appendChild(k);
     var bl = cvEl('section', 'co-blk'); bl.appendChild(cvEl('div', 'kb-h', 'Détail des lignes'));
     var showPer = !!labs && d.lines.some(function (x) { return x.l.per; });
-    var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (900 + axes.length * 150 + (showPer ? labs.length * 110 : 0)) + 'px';
-    var th = '<th>Périmètre de collecte</th><th>Ligne</th><th>Nature</th>' + axes.filter(function (a) { return !a.c; }).map(function (a) { return '<th>' + escH(a.n) + '</th>'; }).join('') + '<th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Montant</th>' + (showPer ? labs.map(function (x) { return '<th class="num">' + escH(x) + '</th>'; }).join('') : '');
+    var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (1500 + axes.length * 150 + (showPer ? labs.length * 110 : 0)) + 'px';
+    var th = '<th>Périmètre de collecte</th><th>Ligne</th><th>Nature</th><th>Travail</th><th>Période</th><th class="num">Volume prévu</th><th>Indicateurs servis</th>' + axes.filter(function (a) { return !a.c; }).map(function (a) { return '<th>' + escH(a.n) + '</th>'; }).join('') + '<th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Montant</th>' + (showPer ? labs.map(function (x) { return '<th class="num">' + escH(x) + '</th>'; }).join('') : '');
     tb.innerHTML = '<thead><tr>' + th + '</tr></thead>';
     var tbd = cvEl('tbody');
     if (!d.lines.length) { var t0 = cvEl('tr'); var c0 = cell(t0, 'Aucune ligne détaillée pour ce budget.'); c0.colSpan = 8; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
     d.lines.forEach(function (x) {
       var l = x.l, tr = cvEl('tr');
+      var pr = d.c.perims.filter(function (pp) { return pp.p === x.perim; })[0] || {};
       cell(tr, x.perim); cell(tr, l.c + ' — ' + (l.lib || l.l), 'name'); cell(tr, l.nat || '—');
+      cell(tr, l.wk ? l.wk.task : '—'); cell(tr, l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : '—'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num'); cell(tr, l.wk ? wkIndText(pr, l) : '—');
       axes.filter(function (a) { return !a.c; }).forEach(function (a) { cell(tr, (l.axv && l.axv[a.n]) || '—'); });
       cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num'); cell(tr, fmt(l.dem), 'num');
       if (showPer) labs.forEach(function (_, i) { cell(tr, l.per && l.per[i] ? fmt(l.per[i]) : '—', 'num'); });
@@ -15593,8 +15679,50 @@ var EXEC_REC = [
   }
   /* Suivi › Avancement physique : cibles de l'exercice et réalisations, par période */
   function avMsg(t, kind) { var e = document.getElementById('av-msg'); e.hidden = !t; e.textContent = t || ''; var m = { ok: ['var(--ok-bg)', 'var(--ok)'], ko: ['var(--ko-bg)', 'var(--ko)'] }[kind || 'ok']; e.style.background = m[0]; e.style.color = m[1]; }
+  function lineAvance(l) {
+    var w = l.wk; if (!w) return;
+    cvAsk({ title: 'Avancement physique — ' + l.c + ' ' + (l.lib || l.l), ok: 'Enregistrer', required: false, optLabel: 'Période *', options: RES_Q, num: 'Volume réalisé cumulé (' + w.unit + ') *', placeholder: 'Source de la mesure, observations' }, function (com, q, v) {
+      var n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.'));
+      if (isNaN(n) || n < 0) { avMsg('Valeur invalide : l’avancement n’a pas été enregistré.', 'ko'); return; }
+      w.real = w.real || [null, null, null, null]; w.real[RES_Q.indexOf(q)] = n; avancRender();
+      avMsg('Avancement enregistré pour ' + l.c + ' (' + q + ') : ' + fmt(n) + ' ' + w.unit + ' sur ' + fmt(w.vol) + (com ? ' — ' + com : '') + '.', 'ok');
+    });
+  }
+  /* Suivi par ligne (dépense et réalisation physique face au plan) et par indicateur (calculé à partir des lignes) */
+  function avSuiviRender() {
+    var bl = document.getElementById('av-lines'), bi = document.getElementById('av-inds'); if (!bl || !bi) return;
+    bl.innerHTML = ''; bi.innerHTML = '';
+    var lots = (typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) ? [] : bvList(), nl = 0, ni = 0;
+    lots.forEach(function (r) {
+      var c = cvCamp(r);
+      c.perims.forEach(function (p) {
+        perimLines(p).forEach(function (l) {
+          nl++; var w = l.wk, s = lineSignal(l), tr = document.createElement('tr'), rl = wkReal(l);
+          cell(tr, c.code, 'name'); cell(tr, p.p); cell(tr, l.c + ' — ' + (l.lib || l.l)); cell(tr, w && w.task ? w.task : '—');
+          cell(tr, w && w.d1 ? isoToFr(w.d1) + ' → ' + isoToFr(w.d2) : '—');
+          cell(tr, l.dem ? fmt(l.dem) : '—', 'num'); cell(tr, w && w.spent != null ? fmt(w.spent) + (s.fin != null ? ' (' + Math.round(100 * s.fin) + ' %)' : '') : 'Non disponible', 'num');
+          cell(tr, w && w.vol ? fmt(w.vol) + ' ' + w.unit : '—', 'num'); cell(tr, rl == null ? '—' : fmt(rl) + (s.ph != null ? ' (' + Math.round(100 * s.ph) + ' %)' : ''), 'num');
+          cell(tr, s.ex == null ? '—' : Math.round(100 * s.ex) + ' %', 'num');
+          var sg = cell(tr, ''); sg.appendChild(badge(s.t, s.cls));
+          var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Renseigner l’avancement'); b.type = 'button'; b.disabled = !(w && w.vol); if (b.disabled) b.title = 'Aucun plan de travail pour cette ligne.';
+          b.addEventListener('click', function () { lineAvance(l); }); act.appendChild(b); bl.appendChild(tr);
+        });
+        (p.inds || []).forEach(function (x) {
+          ni++; var ls = indLines(p, x.id), cible = indCible(p, x.id), real = 0, exp = 0, tr = document.createElement('tr');
+          ls.forEach(function (l) { var k = l.wk.inds.filter(function (z) { return z.id === x.id; })[0], rl = wkReal(l); real += k.contrib * (rl == null ? 0 : Math.min(1, rl / l.wk.vol)); exp += k.contrib * (wkFrac(l) || 0); });
+          cell(tr, x.lib, 'name'); cell(tr, p.p); cell(tr, x.unit); cell(tr, String(x.base || 0), 'num'); cell(tr, cible ? fmt(cible) : '—', 'num');
+          cell(tr, ls.length ? pl(ls.length, 'ligne') : 'Aucune ligne liée'); cell(tr, fmt(Math.round(real * 10) / 10), 'num'); cell(tr, fmt(Math.round(exp * 10) / 10), 'num');
+          var e = cell(tr, ''); e.appendChild(!ls.length ? badge('Sans ligne liée', 'b-warn') : (cible && real >= exp * 0.9 ? badge('À jour · ' + Math.round(100 * real / cible) + ' % de la cible', 'b-ok') : badge('En retard · ' + Math.round(100 * real / cible) + ' % de la cible', 'b-ko')));
+          bi.appendChild(tr);
+        });
+      });
+    });
+    if (!nl) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucune ligne à suivre : le suivi porte sur les lots de collecte validés.'); c0.colSpan = 12; c0.style.textAlign = 'left'; bl.appendChild(t0); }
+    if (!ni) { var t1 = document.createElement('tr'), c1 = cell(t1, 'Aucun indicateur proposé dans les lots validés.'); c1.colSpan = 9; c1.style.textAlign = 'left'; bi.appendChild(t1); }
+  }
   function avancRender() {
     var body = document.getElementById('av-b'); if (!body) return;
+    avSuiviRender();
     body.innerHTML = '';
     var items = avItems();
     items.forEach(function (it) {
@@ -15606,9 +15734,9 @@ var EXEC_REC = [
       RES_Q.forEach(function (q, k) { cell(tr, (i.real[k] == null ? '—' : fmt(i.real[k])) + ' / ' + (i.t[k] == null ? '—' : fmt(i.t[k])), 'num'); });
       var e = cell(tr, ''); if (i.cible == null) e.appendChild(badge('Cibles de l’exercice à définir', 'b-warn')); else if (s.ok == null) e.appendChild(badge('Pas de mesure', 'b-neutral')); else e.appendChild(badge(s.ok ? 'À jour · ' + s.taux + ' % de la cible' : 'En retard sur la cible ' + s.q, s.ok ? 'b-ok' : 'b-ko'));
       var act = cell(tr, '');
-      [['Désigner le responsable', function () {
+      [['Désigner le responsable du suivi', function () {
         cvAsk({ title: 'Responsable du suivi — ' + i.id, ok: 'Enregistrer', required: false, optLabel: 'Responsable *', options: CONTRIB, placeholder: 'Précisions éventuelles' }, function (com, who) { i.resp = who; avancRender(); avMsg('Responsable du suivi de ' + i.id + ' : ' + who + '.', 'ok'); }); }],
-       ['Définir les cibles de l’exercice', function () { avCibles(i); }], ['Renseigner l’avancement', function () { resuAvance(i); }]].forEach(function (a) { var b = cvEl('button', 'btn small', a[0]); b.type = 'button'; b.addEventListener('click', a[1]); act.appendChild(b); });
+       ['Définir les cibles du projet', function () { avCibles(i); }], ['Mesurer l’indicateur du projet', function () { resuAvance(i); }]].forEach(function (a) { var b = cvEl('button', 'btn small', a[0]); b.type = 'button'; b.addEventListener('click', a[1]); act.appendChild(b); });
       body.appendChild(tr);
     });
     if (!items.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun indicateur à mesurer : ils viennent du cadre de résultats et des lots de collecte validés.'); c0.colSpan = 12; c0.style.textAlign = 'left'; body.appendChild(t0); }
@@ -15618,15 +15746,6 @@ var EXEC_REC = [
   var INDSEQ = 0;
   function avItems() {
     var out = RES.items.map(function (i) { return { i: i, scope: 'Projet entier' }; });
-    if (typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return out;
-    bvList().forEach(function (r) {
-      cvCamp(r).perims.forEach(function (p) {
-        (p.inds || []).forEach(function (x) {
-          if (!x.id) { x.id = 'IC-' + ('0' + (++INDSEQ)).slice(-2); x.real = x.real || [null, null, null, null]; x.niv = 'Indicateur de collecte'; x.resp = x.resp || p.who || ''; var c4 = x.cible || 0; x.t = x.t || [Math.round(c4 / 4), Math.round(c4 / 2), Math.round(3 * c4 / 4), c4]; }
-          out.push({ i: x, scope: p.p });
-        });
-      });
-    });
     return out;
   }
   document.getElementById('resu-new').addEventListener('click', function () { resuOpen(null); });
