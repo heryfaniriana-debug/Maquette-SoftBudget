@@ -11728,19 +11728,61 @@ function fmAxes() {
     var fin = {}; d.lines.forEach(function (x) { var k = (x.l.axv && x.l.axv.Financier) || 'Non précisé'; fin[k] = (fin[k] || 0) + (x.l.dem || 0); });
     return { head: head, rows: rows, total: tot, fin: Object.keys(fin).map(function (k) { return [k, fin[k], tot ? Math.round(1000 * fin[k] / tot) / 10 : 0]; }), d: d };
   }
+  /* Deux états générés après validation, répartis par mois : PTBA (montants) et PTA (indicateurs et travaux) */
+  var BVMOIS = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
+  function bvView(r) { return r._vw === 'pta' ? 'pta' : 'ptba'; }
+  /* Répartit un total sur les mois couverts par le travail prévu de la ligne (sur l'exercice), le reste allant aux premiers mois */
+  function bvSpread(total, l, ex) {
+    var m = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], a = 0, b = 11, y = parseInt(ex, 10);
+    if (l.wk && l.wk.d1 && l.wk.d2) {
+      var d1 = new Date(l.wk.d1), d2 = new Date(l.wk.d2);
+      a = d1.getFullYear() < y ? 0 : (d1.getFullYear() > y ? 11 : d1.getMonth()); b = d2.getFullYear() > y ? 11 : (d2.getFullYear() < y ? 0 : d2.getMonth()); if (b < a) b = a;
+    }
+    var n = b - a + 1, t = Math.round(total || 0), base = Math.floor(t / n), rest = t - base * n;
+    for (var i = 0; i < n; i++) m[a + i] = base + (i < rest ? 1 : 0);
+    return m;
+  }
+  function bvSum(arr) { return arr.reduce(function (s, v) { return s + v; }, 0); }
+  function bvPtba(r) {
+    var d = bvData(r), pa = d.pa, axes = (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }), ex = d.c.ex;
+    var head = ['Périmètre de collecte', 'Ligne', 'Nature', 'Période'].concat(axes.map(function (a) { return a.n; }), ['Montant annuel (MGA)'], BVMOIS), tot = new Array(13).fill(0);
+    var rows = d.lines.map(function (x) {
+      var l = x.l, mo = bvSpread(l.dem, l, ex), amt = l.dem || 0; tot[0] += amt; mo.forEach(function (v, i) { tot[i + 1] += v; });
+      return { c: [x.perim, l.c + ' — ' + (l.lib || l.l), l.nat || '', l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || ''; }), [amt], mo) };
+    });
+    if (rows.length) rows.push({ k: 'tot', c: ['Total', '', '', ''].concat(axes.map(function () { return ''; }), tot) });
+    return { title: 'PTBA — Plan de travail et budget annuel : montants par mois', hint: 'Les montants de chaque ligne sont répartis sur les mois de son travail prévu.', head: head, rows: rows, numFrom: 4 + axes.length };
+  }
+  function bvPta(r) {
+    var d = bvData(r), ex = d.c.ex, head = ['Périmètre de collecte', 'Indicateur / travail', 'Unité', 'Cible annuelle'].concat(BVMOIS, ['Total']), rows = [];
+    d.c.perims.forEach(function (pr) {
+      var ls = d.lines.filter(function (x) { return x.perim === pr.p; });
+      (pr.inds || []).forEach(function (ind) {
+        var sub = [], tot = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        ls.forEach(function (x) {
+          var k = x.l.wk && (x.l.wk.inds || []).filter(function (z) { return z.id === ind.id; })[0]; if (!k) return;
+          var mo = bvSpread(k.contrib, x.l, ex); mo.forEach(function (v, i) { tot[i] += v; });
+          sub.push({ c: ['', '   ' + x.l.c + ' — ' + (x.l.wk.task || x.l.l), ind.unit, k.contrib].concat(mo, [bvSum(mo)]) });
+        });
+        rows.push({ k: 'ind', c: [pr.p, ind.lib, ind.unit, ind.cible != null ? ind.cible : ''].concat(tot, [bvSum(tot)]) }); sub.forEach(function (s) { rows.push(s); });
+      });
+    });
+    return { title: 'PTA — Plan de travail annuel : indicateurs et travaux par mois', hint: 'Chaque indicateur est suivi mois par mois ; les travaux qui y contribuent sont détaillés dessous (volumes répartis sur leur période).', head: head, rows: rows, numFrom: 3 };
+  }
   function bvExportXlsx(r) {
-    var m = bvMatrix(r), info = bvInfo(r), pt = bvPt(r);
-    var rows = [['PTBA — ' + info.name], ['Référence', info.ref], ['Bailleur', info.bailleur], ['Configuration', m.d.pa ? m.d.pa.lib : ''], ['Lot de collecte', m.d.c.code + ' — ' + m.d.c.lib], ['Exercice', m.d.c.ex], ['Statut', pt.st], ['Montant total (MGA)', m.total], [],
-      ['Financement'], ['Source de financement', 'Montant (MGA)', 'Part (%)']].concat(m.fin, [[], ['Détail des lignes'], m.head], m.rows);
-    sbDl('ptba-' + sbSlug(m.d.c.code) + '-' + sbStamp() + '.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', sbXlsx([{ name: 'PTBA', rows: rows, head: 1, boldRows: [0, 9, 10, 10 + m.fin.length + 2, 10 + m.fin.length + 3] }]));
+    var m = bvMatrix(r), info = bvInfo(r), pt = bvPt(r), v = bvView(r), tv = v === 'pta' ? bvPta(r) : bvPtba(r), nm = v === 'pta' ? 'PTA' : 'PTBA';
+    var rows = [[nm + ' — ' + info.name], ['Référence', info.ref], ['Bailleur', info.bailleur], ['Configuration', m.d.pa ? m.d.pa.lib : ''], ['Lot de collecte', m.d.c.code + ' — ' + m.d.c.lib], ['Exercice', m.d.c.ex], ['Statut', pt.st], ['Montant total (MGA)', m.total], [],
+      ['Financement'], ['Source de financement', 'Montant (MGA)', 'Part (%)']].concat(m.fin, [[], [tv.title], tv.head], tv.rows.map(function (x) { return x.c; }));
+    sbDl(nm.toLowerCase() + '-' + sbSlug(m.d.c.code) + '-' + sbStamp() + '.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', sbXlsx([{ name: nm, rows: rows, head: 1, boldRows: [0, 9, 10, 10 + m.fin.length + 2, 10 + m.fin.length + 3] }]));
   }
   function bvExportPdf(r) {
     var m = bvMatrix(r), info = bvInfo(r), pt = bvPt(r), E = sbXml;
     function tbl(head, rows, numFrom) { return '<table><thead><tr>' + head.map(function (h, i) { return '<th' + (i >= numFrom ? ' class="num"' : '') + '>' + E(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.map(function (rw) { return '<tr>' + rw.map(function (c, i) { return '<td' + (i >= numFrom ? ' class="num"' : '') + '>' + E(typeof c === 'number' ? fmt(c) : c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>'; }
-    var html = '<h1>PTBA — ' + E(info.name) + '</h1><div class="meta">' + E(info.ref) + ' · Bailleur : ' + E(info.bailleur) + '<br>Configuration : ' + E(m.d.pa ? m.d.pa.lib : '') + ' · Lot de collecte : ' + E(m.d.c.code + ' — ' + m.d.c.lib) + ' · Exercice ' + E(m.d.c.ex) + '<br>Statut : ' + E(pt.st) + ' · Montant total : ' + E(fmt(m.total)) + ' MGA</div>'
+    var v = bvView(r), tv = v === 'pta' ? bvPta(r) : bvPtba(r), nm = v === 'pta' ? 'PTA' : 'PTBA';
+    var html = '<h1>' + nm + ' — ' + E(info.name) + '</h1><div class="meta">' + E(info.ref) + ' · Bailleur : ' + E(info.bailleur) + '<br>Configuration : ' + E(m.d.pa ? m.d.pa.lib : '') + ' · Lot de collecte : ' + E(m.d.c.code + ' — ' + m.d.c.lib) + ' · Exercice ' + E(m.d.c.ex) + '<br>Statut : ' + E(pt.st) + ' · Montant total : ' + E(fmt(m.total)) + ' MGA</div>'
       + '<h2>Financement</h2>' + tbl(['Source de financement', 'Montant (MGA)', 'Part (%)'], m.fin.map(function (x) { return [x[0], x[1], String(x[2]).replace('.', ',')]; }), 1)
-      + '<h2>Détail des lignes</h2>' + tbl(m.head, m.rows, m.head.indexOf('Quantité'));
-    sbPrint('PTBA ' + info.name + ' ' + m.d.c.code, html);
+      + '<h2>' + E(tv.title) + '</h2>' + tbl(tv.head, tv.rows.map(function (x) { return x.c; }), tv.numFrom);
+    sbPrint(nm + ' ' + info.name + ' ' + m.d.c.code, html);
   }
   function bvOpen(r) {
     document.getElementById('bv-view-title').textContent = 'Lot de collecte validé — ' + r.camp;
@@ -11782,21 +11824,20 @@ function fmAxes() {
     k.appendChild(cvKpi('Montant validé', fmt(tot) + ' MGA' + (vd ? ' · le ' + vd.on.slice(0, 10) : '')));
     k.appendChild(cvKpi('Statut du PTBA', badge(bvPt(r).st, PTST[bvPt(r).st] || 'b-neutral')));
     root.appendChild(k);
-    var bl = cvEl('section', 'co-blk'); bl.appendChild(cvEl('div', 'kb-h', 'Détail des lignes'));
-    var showPer = !!labs && d.lines.some(function (x) { return x.l.per; });
-    var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (1500 + axes.length * 150 + (showPer ? labs.length * 110 : 0)) + 'px';
-    var th = '<th>Périmètre de collecte</th><th>Ligne</th><th>Nature</th><th>Travail</th><th>Période</th><th class="num">Volume prévu</th><th>Indicateurs servis</th>' + axes.filter(function (a) { return !a.c; }).map(function (a) { return '<th>' + escH(a.n) + '</th>'; }).join('') + '<th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Montant</th>' + (showPer ? labs.map(function (x) { return '<th class="num">' + escH(x) + '</th>'; }).join('') : '');
-    tb.innerHTML = '<thead><tr>' + th + '</tr></thead>';
+    var sw = cvEl('div', 'seg'); sw.style.margin = '0 0 14px'; sw.setAttribute('role', 'group');
+    [['ptba', 'PTBA — budget par mois'], ['pta', 'PTA — indicateurs par mois']].forEach(function (o) {
+      var b = cvEl('button', bvView(r) === o[0] ? 'on' : '', o[1]); b.type = 'button'; b.addEventListener('click', function () { r._vw = o[0]; bvRender(root, r); }); sw.appendChild(b);
+    });
+    root.appendChild(sw);
+    var bl = cvEl('section', 'co-blk'), m = bvView(r) === 'pta' ? bvPta(r) : bvPtba(r);
+    bl.appendChild(cvEl('div', 'kb-h', m.title)); bl.appendChild(cvEl('div', 'hint', m.hint));
+    var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (m.head.length * 90) + 'px';
+    tb.innerHTML = '<thead><tr>' + m.head.map(function (h, i) { return '<th' + (i >= m.numFrom ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr></thead>';
     var tbd = cvEl('tbody');
-    if (!d.lines.length) { var t0 = cvEl('tr'); var c0 = cell(t0, 'Aucune ligne détaillée pour ce budget.'); c0.colSpan = 8; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
-    d.lines.forEach(function (x) {
-      var l = x.l, tr = cvEl('tr');
-      var pr = d.c.perims.filter(function (pp) { return pp.p === x.perim; })[0] || {};
-      cell(tr, x.perim); cell(tr, l.c + ' — ' + (l.lib || l.l), 'name'); cell(tr, l.nat || '—');
-      cell(tr, l.wk ? l.wk.task : '—'); cell(tr, l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : '—'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num'); cell(tr, l.wk ? wkIndText(pr, l) : '—');
-      axes.filter(function (a) { return !a.c; }).forEach(function (a) { cell(tr, (l.axv && l.axv[a.n]) || '—'); });
-      cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num'); cell(tr, fmt(l.dem), 'num');
-      if (showPer) labs.forEach(function (_, i) { cell(tr, l.per && l.per[i] ? fmt(l.per[i]) : '—', 'num'); });
+    if (!m.rows.length) { var t0 = cvEl('tr'); var c0 = cell(t0, 'Aucune ligne détaillée pour ce budget.'); c0.colSpan = m.head.length; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
+    m.rows.forEach(function (rw) {
+      var tr = cvEl('tr'); if (rw.k) tr.style.fontWeight = '600'; if (rw.k === 'ind') tr.style.background = 'var(--surface-2, #F1F5F9)';
+      rw.c.forEach(function (v, i) { cell(tr, typeof v === 'number' ? (v ? fmt(v) : '—') : (v === '' || v == null ? '—' : v), i >= m.numFrom ? 'num' : (i === 1 ? 'name' : '')); });
       tbd.appendChild(tr);
     });
     tb.appendChild(tbd); sc.appendChild(tb); bl.appendChild(sc); root.appendChild(bl);
