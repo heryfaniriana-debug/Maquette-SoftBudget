@@ -5337,11 +5337,12 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="head"><div><h1>Cadre de résultats</h1><p>Référentiel défini à la conception du projet : indicateurs, valeur de départ et cible de fin de projet. Les cibles de l’exercice et les réalisations ne se saisissent pas ici mais dans Suivi › Avancement physique. Chaque activité du PTBA doit être couverte par un indicateur avant l’envoi au bailleur.</p></div>
           <div class="actions"><button class="btn primary" id="resu-new">+ Nouvel indicateur</button></div></div>
         <div class="callout" id="resu-msg" hidden style="margin-bottom:12px"></div>
+        <div class="kb-h" style="margin:0 0 8px;font-weight:600">Plan du projet, objectifs et indicateurs</div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1100px">
+          <thead><tr><th>Niveau</th><th>Libellé</th><th>Objectif</th><th>Indicateurs</th><th>Contrôle</th><th>Actions</th></tr></thead><tbody id="resu-tree"></tbody></table></div><div class="pager"><span>Plan synchronisé avec la structure du projet : sélectionnez un niveau pour définir son objectif ou lui ajouter un indicateur</span></div></div>
+        <div class="kb-h" style="margin:0 0 8px;font-weight:600">Indicateurs</div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1400px">
           <thead><tr><th>Code</th><th>Indicateur</th><th>Type</th><th>Rattaché à</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de fin de projet</th><th>Activités du PTBA concernées</th><th>Responsable</th><th>Actions</th></tr></thead><tbody id="resu-b"></tbody></table></div><div class="pager"><span id="resu-n"></span><span>Référence : valeur de départ et cible de fin de projet. Les cibles de l’exercice et les réalisations se gèrent dans Suivi › Avancement physique</span></div></div>
-        <div class="kb-h" style="margin:0 0 8px;font-weight:600">Structure du projet</div>
-        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:760px">
-          <thead><tr><th>Niveau</th><th>Libellé</th><th>Indicateurs rattachés</th></tr></thead><tbody id="resu-struct"></tbody></table></div><div class="pager"><span>Définie à la conception du projet ; les activités du PTBA s’y rattachent</span></div></div>
         <div class="kb-h" style="margin:0 0 8px;font-weight:600">Activités du PTBA sans indicateur</div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:760px">
           <thead><tr><th>Activité</th><th>Lot de collecte</th><th class="num">Coût au PTBA</th><th>Contrôle</th></tr></thead><tbody id="resu-nov"></tbody></table></div></div>
@@ -11322,14 +11323,14 @@ function fmAxes() {
     if (o.options) { var l1 = cvEl('label', null, o.optLabel); box.appendChild(l1); sel = cvEl('select', 'field'); o.options.forEach(function (x) { var op = cvEl('option', null, x); op.value = x; sel.appendChild(op); }); box.appendChild(sel); }
     var nin = null;
     if (o.num) { box.appendChild(cvEl('label', null, o.num)); nin = cvEl('input', 'field'); nin.type = 'text'; nin.setAttribute('inputmode', 'decimal'); box.appendChild(nin); }
-    box.appendChild(cvEl('label', null, 'Commentaire' + (typeof o.required === 'function' ? ' (obligatoire sauf approbation)' : (o.required ? ' *' : ' (facultatif)'))));
-    var ta = cvEl('textarea', 'field'); ta.placeholder = o.placeholder || ''; box.appendChild(ta);
+    box.appendChild(cvEl('label', null, (o.cLabel || 'Commentaire') + (typeof o.required === 'function' ? ' (obligatoire sauf approbation)' : (o.required ? ' *' : ' (facultatif)'))));
+    var ta = cvEl('textarea', 'field'); ta.placeholder = o.placeholder || ''; ta.value = o.value || ''; box.appendChild(ta);
     var err = cvEl('div', 'err'); box.appendChild(err);
     var ft = cvEl('div', 'form-foot'); var bc = cvEl('button', 'btn', 'Annuler'); bc.type = 'button'; var bo = cvEl('button', 'btn primary', o.ok); bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
     function close() { if (bd.parentNode) bd.parentNode.removeChild(bd); }
     bc.addEventListener('click', close); bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
     bo.addEventListener('click', function () {
-      var v = ta.value.trim(), need = typeof o.required === 'function' ? o.required(sel ? sel.value : null) : o.required; if (need && !v) { err.textContent = 'Le commentaire est obligatoire.'; return; }
+      var v = ta.value.trim(), need = typeof o.required === 'function' ? o.required(sel ? sel.value : null) : o.required; if (need && !v) { err.textContent = o.cLabel ? 'Le champ « ' + o.cLabel + ' » est obligatoire.' : 'Le commentaire est obligatoire.'; return; }
       if (nin && !nin.value.trim()) { err.textContent = 'La valeur est obligatoire.'; return; }
       close(); cb(v, sel ? sel.value : null, nin ? nin.value : null);
     });
@@ -15407,6 +15408,36 @@ var EXEC_REC = [
     if (m) { for (var k = m[1].length; k >= 1; k--) { var id = m[1].slice(0, k); if (nodeById(id)) return id; } }
     var p = /^(P\d)\./.exec(code || ''); return p && nodeById(p[1]) ? p[1] : null;
   }
+  /* Arbre synchronisé avec la structure du projet : un objectif par niveau, des indicateurs là où ils servent */
+  PSTRUCT.forEach(function (n) { n.obj = ''; });
+  nodeById('ROOT').obj = 'Améliorer durablement l’accès aux services d’énergie et au numérique dans les zones isolées.';
+  nodeById('1').obj = 'Étendre des infrastructures énergétiques et numériques fiables dans les zones isolées.';
+  nodeById('11').obj = 'Hybrider et numériser 17 réseaux isolés d’ici 2028.';
+  function nodeDesc(id) { var out = []; PSTRUCT.forEach(function (n) { if (nodePath(n.id).indexOf(id) >= 0 && n.id !== id) out.push(n.id); }); return out; }
+  function resuTreeRender() {
+    var body = document.getElementById('resu-tree'); if (!body) return;
+    body.innerHTML = '';
+    PSTRUCT.forEach(function (n) {
+      var d = nodePath(n.id).length - 1, own = RES.items.filter(function (i) { return i.node === n.id; }), below = nodeDesc(n.id), sub = RES.items.filter(function (i) { return below.indexOf(i.node) >= 0; });
+      var up = RES.items.filter(function (i) { return i.node !== 'ROOT' && i.node !== n.id && nodePath(n.id).indexOf(i.node) >= 0; });
+      var tr = document.createElement('tr');
+      cell(tr, n.lvl); var l = cell(tr, n.lib, 'name'); l.style.paddingLeft = (12 + d * 16) + 'px';
+      cell(tr, n.obj || '—');
+      cell(tr, own.length ? own.map(function (i) { return i.id; }).join(', ') : '—');
+      var c = cell(tr, '');
+      if (n.lvl === 'Sous-activité') c.appendChild(badge('Tâche : pas d’indicateur propre', 'b-neutral'));
+      else if (n.lvl === 'Activité') c.appendChild(own.length || up.length ? badge('Couverte' + (own.length ? '' : ' par ' + up.map(function (i) { return i.id; }).join(', ')), 'b-ok') : badge('Non couverte', 'b-ko'));
+      else if (n.lvl === 'Projet') c.appendChild(own.length ? badge(pl(own.length, 'indicateur') + ' d’objectif', 'b-ok') : badge('Aucun indicateur d’objectif', 'b-warn'));
+      else { if (!n.obj) c.appendChild(badge('Sans objectif', 'b-warn')); if (!own.length && !sub.length && !up.length) c.appendChild(badge('Aucun indicateur', n.lvl === 'Composante' ? 'b-ko' : 'b-warn')); if (n.obj && (own.length || sub.length || up.length)) c.appendChild(badge('Complet', 'b-ok')); }
+      var act = cell(tr, '');
+      var b1 = cvEl('button', 'btn small', 'Définir l’objectif'); b1.type = 'button'; b1.disabled = n.lvl === 'Sous-activité';
+      b1.addEventListener('click', function () { cvAsk({ title: 'Objectif — ' + n.lib, ok: 'Enregistrer l’objectif', required: true, cLabel: 'Objectif', value: n.obj, placeholder: 'Ce que ce niveau doit permettre d’atteindre' }, function (v) { n.obj = v; resuRender(); resuMsg('Objectif enregistré pour « ' + n.lib + ' ».', 'ok'); }); });
+      var b2 = cvEl('button', 'btn small', 'Ajouter un indicateur'); b2.type = 'button'; b2.disabled = n.lvl === 'Sous-activité';
+      b2.addEventListener('click', function () { resuOpen(null, n.id); });
+      act.appendChild(b1); act.appendChild(b2);
+      body.appendChild(tr);
+    });
+  }
   function resuCovers(i, a) { return !!(a && a.node && nodePath(a.node).indexOf(i.node) >= 0); }
   function resuHas(key) { var a = ppmActOf(key); return RES.items.some(function (i) { return i.node !== 'ROOT' && resuCovers(i, a); }); }
   function resuMissing() { return ppmActs().filter(function (a) { return !resuHas(a.key); }); }
@@ -15434,16 +15465,13 @@ var EXEC_REC = [
     });
     if (!RES.items.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun indicateur : créez-en un et rattachez-y les activités du PTBA.'); c0.colSpan = 11; c0.style.textAlign = 'left'; body.appendChild(t0); }
     document.getElementById('resu-n').textContent = pl(RES.items.length, 'indicateur');
-    var st = document.getElementById('resu-struct'); if (st) st.innerHTML = PSTRUCT.map(function (n) {
-      var d = nodePath(n.id).length - 1, ni = RES.items.filter(function (i) { return i.node === n.id; });
-      return '<tr><td>' + escH(n.lvl) + '</td><td class="name" style="padding-left:' + (12 + d * 16) + 'px">' + escH(n.lib) + '</td><td>' + (ni.length ? escH(ni.map(function (i) { return i.id; }).join(', ')) : '—') + '</td></tr>';
-    }).join('');
-    var nv = document.getElementById('resu-nov'); nv.innerHTML = ''; var miss = resuMissing();
+    resuTreeRender();
+    var nv =document.getElementById('resu-nov'); nv.innerHTML = ''; var miss = resuMissing();
     if (!miss.length) { var t1 = document.createElement('tr'), c1 = cell(t1, 'Toutes les activités des PTBA validés sont rattachées à un indicateur.'); c1.colSpan = 4; c1.style.textAlign = 'left'; nv.appendChild(t1); }
     miss.forEach(function (a) { var tr = document.createElement('tr'); cell(tr, a.code + ' — ' + a.lib, 'name'); cell(tr, a.lot); cell(tr, fmt(a.cost), 'num'); var c = cell(tr, ''); c.appendChild(badge(a.node ? 'Aucun indicateur sur ' + nodeById(a.node).lvl.toLowerCase() + ' ' + a.node + ' ni au-dessus : le PTBA ne peut pas être envoyé au bailleur' : 'Activité non rattachée à la structure du projet', 'b-ko')); nv.appendChild(tr); });
   }
   var resuEdit = null;
-  function resuOpen(i) {
+  function resuOpen(i, nodeId) {
     resuEdit = i || null;
     var g = function (id) { return document.getElementById(id); }, acts = ppmActs();
     g('resu-form-title').textContent = i ? 'Modifier l’indicateur ' + i.id : 'Nouvel indicateur';
@@ -15452,6 +15480,7 @@ var EXEC_REC = [
     g('ri-lib').value = i ? i.lib : ''; g('ri-unit').value = i ? i.unit : ''; g('ri-base').value = i ? i.base : '0'; g('ri-cible').value = i ? i.final : ''; g('ri-fin').value = i ? i.finY : '2028';
     g('ri-niv').value = i ? (i.niv || 'Produit') : 'Produit';
     if (i) { g('ri-node').value = i.node; g('ri-resp').value = i.resp; }
+    else if (nodeId) { var nn = nodeById(nodeId); if (nn && nn.lvl === 'Sous-activité') nn = nodeById(nn.parent); if (nn) g('ri-node').value = nn.id; }
     g('ri-err').textContent = '';
     g('resu-form').hidden = false;
   }
