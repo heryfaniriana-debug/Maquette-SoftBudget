@@ -3812,7 +3812,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             </section>
             <section class="co-blk">
               <div class="kb-h">Lignes de la contribution et plan de travail</div>
-              <div class="scroll"><table style="min-width:1500px"><thead><tr><th>Ligne</th><th>Nature</th><th>Travail et période</th><th class="num">Volume prévu</th><th>Indicateurs servis</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire du contributeur</th><th>Pièces jointes</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
+              <div class="scroll"><table style="min-width:1500px"><thead><tr><th>Ligne</th><th>Nature</th><th>Travail et période</th><th class="num">Volume prévu</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire du contributeur</th><th>Pièces jointes</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
             </section>
             <section class="co-blk"><div class="kb-h">Pièces jointes de la contribution</div><div id="co-d-pj"></div></section>
             <section class="co-blk"><div class="kb-h">Contrôles</div><div id="co-ctrl-list"></div></section>
@@ -3869,15 +3869,6 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
                 <thead><tr><th>Ligne</th><th>Axes</th><th class="num">Montant (MGA)</th><th>Répartition</th><th>Plan de travail</th><th>Commentaire / justification</th><th>Contrôle</th><th>Pièces jointes</th><th></th></tr></thead>
                 <tbody id="cs-body"></tbody>
                 <tfoot><tr><td colspan="2">Total du périmètre</td><td class="num" id="cs-t3"></td><td colspan="5"></td></tr><tr id="cs-min-row" hidden><td colspan="2">Enveloppe minimale du périmètre</td><td class="num" id="cs-min"></td><td colspan="5" id="cs-min-st"></td></tr><tr id="cs-env-row" hidden><td colspan="2">Enveloppe maximale du périmètre</td><td class="num" id="cs-env"></td><td colspan="5" id="cs-env-st"></td></tr><tr hidden><td id="cs-t1"></td><td id="cs-t2"></td><td id="cs-t4"></td></tr></tfoot>
-              </table>
-            </div>
-          </div>
-          <div class="kb-h" style="margin:0 0 8px;font-weight:600">Indicateurs de résultat du périmètre</div>
-          <div class="card" style="margin-bottom:12px">
-            <div class="scroll">
-              <table style="min-width:900px">
-                <thead><tr><th>Indicateur</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de l’exercice (somme des lignes)</th><th>Lignes liées</th><th>Actions</th></tr></thead>
-                <tbody id="cs-ind-b"></tbody>
               </table>
             </div>
           </div>
@@ -10586,7 +10577,7 @@ function fmAxes() {
     var dl = getLines(name).filter(function (l) { return l.dem != null; });
     var ot = document.getElementById('co-d-objtxt'); ot.innerHTML = ''; var ob = document.createElement('b'); ob.textContent = 'Objectif fixé au cadrage : '; ot.appendChild(ob); ot.appendChild(document.createTextNode(p.obj || 'non défini'));
     var ib = document.getElementById('co-d-ind'); ib.innerHTML = '';
-    (p.inds || []).forEach(function (x) {
+    tgtInds(p).forEach(function (x) {
       var tr = document.createElement('tr'), pn = indCible(p, x.id), nl2 = indLines(p, x.id).length;
       cell(tr, x.lib, 'name'); cell(tr, x.fixed ? 'Cadrage' : 'Proposé par le contributeur'); cell(tr, x.unit); cell(tr, x.fixed ? fmt(x.cible) : '—', 'num'); cell(tr, fmt(pn) + ' (' + pl(nl2, 'ligne') + ')', 'num');
       var cc = cell(tr, ''); if (x.fixed) { var rt2 = x.cible ? pn / x.cible : 0; cc.appendChild(badge(Math.round(100 * rt2) + ' %' + (rt2 < 1 ? ' · écart de ' + fmt(x.cible - pn) + ' ' + x.unit : ' · couvert'), rt2 >= 1 ? 'b-ok' : 'b-ko')); } else cc.textContent = '—';
@@ -10594,18 +10585,22 @@ function fmAxes() {
       if (pb) { pc.appendChild(pb); var pd = document.createElement('div'); pd.className = 'hby'; pd.style.cssText = 'font-size:12.5px;color:#5B606D'; pd.textContent = x.pos.why + (x.pos.alt != null ? ' · valeur jugée réaliste : ' + fmt(x.pos.alt) + ' ' + x.unit : '') + (x.pos.decision ? ' · décision : ' + x.pos.decision : ''); pc.appendChild(pd); } else pc.textContent = x.fixed ? (pn >= x.cible ? 'Non requise : objectif couvert' : 'Aucune position') : '—';
       ib.appendChild(tr);
     });
-    if (!(p.inds || []).length) { var ti0 = document.createElement('tr'), ci0 = cell(ti0, 'Aucun indicateur pour ce périmètre.'); ci0.colSpan = 7; ci0.style.textAlign = 'left'; ib.appendChild(ti0); }
-    if (!dl.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, 'Aucune ligne saisie.'); td0.colSpan = 12; td0.style.textAlign = 'left'; lb.appendChild(tr0); }
+    if (!tgtInds(p).length) { var ti0 = document.createElement('tr'), ci0 = cell(ti0, 'Aucun objectif chiffré fixé au cadrage pour ce périmètre.'); ci0.colSpan = 7; ci0.style.textAlign = 'left'; ib.appendChild(ti0); }
+    if (!dl.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, 'Aucune ligne saisie.'); td0.colSpan = 11; td0.style.textAlign = 'left'; lb.appendChild(tr0); }
     dl.forEach(function (l) {
       var tr = document.createElement('tr');
       var lcc = cell(tr, l.c + ' — ' + l.l, 'name'); if (l.added) { var hp2 = badge('Hors plan', 'b-warn'); hp2.style.marginLeft = '8px'; lcc.appendChild(hp2); var hw2 = document.createElement('div'); hw2.className = 'hby'; hw2.style.cssText = 'font-size:12.5px;color:#5B606D'; hw2.textContent = 'Motif : ' + (l.addedWhy || '—'); lcc.appendChild(hw2); } cell(tr, l.nat || '—');
-      cell(tr, l.wk ? l.wk.task + ' · ' + isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : 'Non renseigné'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num'); cell(tr, wkIndText(p, l));
+      cell(tr, l.wk ? l.wk.task + ' · ' + isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : 'Non renseigné'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num');
       cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num');
       cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num');
       var vr = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : 0; cell(tr, l.ref ? (vr > 0 ? '+' : '') + vr + ' %' : '—', 'num');
       cell(tr, l.just || '—');
       var tp = cell(tr, ''); if (l.pj && l.pj.length) l.pj.forEach(function (f) { var d = document.createElement('div'); d.textContent = '📎 ' + f; tp.appendChild(d); }); else tp.textContent = '—';
       lb.appendChild(tr);
+      var srow2 = indSubRow(p, l, 11); if (srow2) lb.appendChild(srow2);
+    });
+    (p.inds || []).filter(function (x) { return !x.fixed && !indLines(p, x.id).length; }).forEach(function (x) {
+      var tru = document.createElement('tr'); tru.className = 'sub-ind'; var tdu = cell(tru, '↳ Indicateur proposé sans ligne liée : ' + x.lib + ' (' + x.unit + ', valeur de départ ' + (x.base || 0) + ')'); tdu.colSpan = 11; lb.appendChild(tru);
     });
     var pjb = document.getElementById('co-d-pj'); pjb.innerHTML = '';
     if (!(p.pj && p.pj.length)) { var ne = document.createElement('div'); ne.className = 'hint'; ne.textContent = 'Aucune pièce jointe.'; pjb.appendChild(ne); }
@@ -10719,6 +10714,20 @@ function fmAxes() {
       act.appendChild(b); body.appendChild(tr);
     });
     if (!ts.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun objectif chiffré fixé au cadrage pour ce périmètre : planifiez vos travaux selon l’objectif ci-dessus.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); }
+  }
+  /* Indicateurs servis, affichés juste sous la ligne de budget concernée (vue fusionnée) */
+  function indSubRow(p, l, span) {
+    var ks = (l.wk && l.wk.inds) || [], parts = [];
+    ks.forEach(function (k) {
+      var i = (p.inds || []).filter(function (z) { return z.id === k.id; })[0]; if (!i) return;
+      var t = '↳ ' + i.lib + ' : apport de ' + fmt(k.contrib) + ' ' + i.unit;
+      if (i.fixed) { var pn = indCible(p, i.id), r = i.cible ? Math.round(100 * pn / i.cible) : 0; t += ' sur une cible de ' + fmt(i.cible) + ' (couverture de l’objectif : ' + r + ' %)'; } else t += ' (indicateur proposé par le contributeur)';
+      parts.push(t);
+    });
+    if (!parts.length) return null;
+    var tr = document.createElement('tr'); tr.className = 'sub-ind'; var td = document.createElement('td'); td.colSpan = span;
+    parts.forEach(function (t) { var d = document.createElement('div'); d.textContent = t; td.appendChild(d); });
+    tr.appendChild(td); return tr;
   }
   function wkIndText(p, l) {
     return ((l.wk && l.wk.inds) || []).map(function (k) { var i = (p.inds || []).filter(function (z) { return z.id === k.id; })[0]; return i ? i.lib + ' (' + fmt(k.contrib) + ' ' + i.unit + ')' : k.id; }).join(' ; ') || '—';
@@ -10863,7 +10872,7 @@ function fmAxes() {
       var tm = cell(tr, '', 'num');
       var tpr = cell(tr, '');
       var twk = cell(tr, ''), wsum = wkSummary(p, l);
-      if (wsum) { twk.appendChild(document.createTextNode(wsum)); var wi = document.createElement('div'); wi.className = 'hby'; wi.style.cssText = 'font-size:12.5px;color:#5B606D'; wi.textContent = 'Indicateurs : ' + wkIndText(p, l); twk.appendChild(wi); }
+      if (wsum) { twk.appendChild(document.createTextNode(wsum)); }
       else twk.appendChild(badge('À renseigner', 'b-warn'));
       var tj = document.createElement('td');
       var ji = document.createElement('input');
@@ -10908,12 +10917,17 @@ function fmAxes() {
       ji.addEventListener('input', function () { l.just = ji.value; upd(); });
       upd();
       body.appendChild(tr);
+      var srow = indSubRow(p, l, 9); if (srow) body.appendChild(srow);
     });
     if (!lines2.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, editable ? 'Aucune ligne. Cliquez sur « Ajouter une ligne ».' : 'Aucune ligne saisie.'); td0.colSpan = 9; td0.style.textAlign = 'left'; body.appendChild(tr0); }
+    (p.inds || []).filter(function (x) { return !x.fixed && !indLines(p, x.id).length; }).forEach(function (x) {
+      var tru = document.createElement('tr'); tru.className = 'sub-ind'; var tdu = cell(tru, '↳ Indicateur proposé sans ligne liée : ' + x.lib + ' (' + x.unit + ', valeur de départ ' + (x.base || 0) + ') — liez-le depuis le plan de travail d’une ligne'); tdu.colSpan = 8;
+      var au = cell(tru, ''), bu = cvEl('button', 'btn small', 'Retirer l’indicateur'); bu.type = 'button'; bu.disabled = !editable;
+      bu.addEventListener('click', function () { p.inds.splice(p.inds.indexOf(x), 1); renderSaisie(p.p); }); au.appendChild(bu); body.appendChild(tru);
+    });
     document.getElementById('cs-add').disabled = !editable;
     var ob = document.getElementById('cs-obj'); ob.hidden = !p.obj; ob.textContent = p.obj ? 'Objectif de l’exercice fixé au cadrage : ' + p.obj : '';
     document.getElementById('cs-ind-add').disabled = !editable;
-    renderCsInds(p, editable, lines2);
     renderCsTargets(p, editable);
     totals();
     var hist = document.getElementById('cs-hist');
@@ -11499,10 +11513,10 @@ function fmAxes() {
       var obj = cvEl('div'); obj.style.cssText = 'margin:0 0 8px;font-size:13px';
       obj.appendChild(cvEl('b', null, 'Objectif de l’exercice : ')); obj.appendChild(document.createTextNode(x.p.obj || 'non défini au cadrage'));
       body.appendChild(obj);
-      if ((x.p.inds || []).length) {
+      if (tgtInds(x.p).length) {
         var ti = cvEl('table'); ti.style.cssText = 'width:100%;margin:0 0 10px';
         ti.innerHTML = '<thead><tr><th>Indicateur</th><th>Unité</th><th class="num">Cible fixée</th><th class="num">Planifié par les travaux</th><th>Couverture</th><th>Position du contributeur</th></tr></thead>';
-        var tib = cvEl('tbody'); x.p.inds.forEach(function (it) {
+        var tib = cvEl('tbody'); tgtInds(x.p).forEach(function (it) {
           var tr = cvEl('tr'), pn = indCible(x.p, it.id), nl = indLines(x.p, it.id).length;
           cell(tr, it.lib + (it.fixed ? '' : ' (proposé par le contributeur)'), 'name'); cell(tr, it.unit); cell(tr, it.fixed ? fmt(it.cible) : '—', 'num'); cell(tr, fmt(pn) + ' (' + pl(nl, 'ligne') + ')', 'num');
           var cc = cell(tr, ''); if (it.fixed) { var rt = it.cible ? pn / it.cible : 0; cc.appendChild(badge(Math.round(100 * rt) + ' %' + (rt < 1 ? ' · écart de ' + fmt(it.cible - pn) + ' ' + it.unit : ''), rt >= 1 ? 'b-ok' : 'b-ko')); } else cc.textContent = '—';
@@ -11511,20 +11525,24 @@ function fmAxes() {
           tib.appendChild(tr);
         });
         ti.appendChild(tib); body.appendChild(ti);
-      } else body.appendChild(cvEl('div', 'hint', 'Aucun indicateur proposé par le contributeur : à juger par rapport à l’objectif de l’exercice.'));
+      } else body.appendChild(cvEl('div', 'hint', 'Aucun objectif chiffré fixé au cadrage : à juger par rapport à l’objectif de l’exercice.'));
       if (!x.lines.length) body.appendChild(cvEl('div', 'hint', 'Aucune ligne détaillée.'));
       else {
         var sc = cvEl('div', 'scroll'); var tb = cvEl('table'); tb.style.minWidth = '1500px';
-        tb.innerHTML = '<thead><tr><th>Ligne</th><th>Nature</th><th>Travail et période</th><th class="num">Volume prévu</th><th>Indicateurs servis</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire</th><th>Pièces jointes</th></tr></thead>';
+        tb.innerHTML = '<thead><tr><th>Ligne</th><th>Nature</th><th>Travail et période</th><th class="num">Volume prévu</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire</th><th>Pièces jointes</th></tr></thead>';
         var tbd = cvEl('tbody');
         x.lines.forEach(function (l) {
           var tr = cvEl('tr'); var v2 = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : null;
           var lcell = cell(tr, l.c + ' — ' + l.l, 'name'); if (l.added) { var hp = badge('Hors plan', 'b-warn'); hp.style.marginLeft = '8px'; hp.title = 'Ajoutée par le contributeur : ' + (l.addedWhy || ''); lcell.appendChild(hp); var hw = cvEl('div', 'hby'); hw.style.cssText = 'font-size:12.5px;color:#5B606D'; hw.textContent = 'Motif : ' + (l.addedWhy || '—'); lcell.appendChild(hw); } cell(tr, l.nat || '—');
-          cell(tr, l.wk ? l.wk.task + ' · ' + isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : 'Non renseigné'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num'); cell(tr, wkIndText(x.p, l));
+          cell(tr, l.wk ? l.wk.task + ' · ' + isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : 'Non renseigné'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num');
           cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num');
           cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num'); cell(tr, v2 == null ? '—' : (v2 > 0 ? '+' : '') + v2 + ' %', 'num'); cell(tr, l.just || '—');
           var tp = cell(tr, ''); if (l.pj && l.pj.length) l.pj.forEach(function (f) { tp.appendChild(cvEl('div', null, '📎 ' + f)); }); else tp.textContent = '—';
           tbd.appendChild(tr);
+          var sr = indSubRow(x.p, l, 11); if (sr) tbd.appendChild(sr);
+        });
+        (x.p.inds || []).filter(function (z) { return !z.fixed && !indLines(x.p, z.id).length; }).forEach(function (z) {
+          var tru = cvEl('tr'); tru.className = 'sub-ind'; var tdu = cell(tru, '↳ Indicateur proposé sans ligne liée : ' + z.lib + ' (' + z.unit + ')'); tdu.colSpan = 11; tbd.appendChild(tru);
         });
         tb.appendChild(tbd); sc.appendChild(tb); body.appendChild(sc);
       }
@@ -20691,6 +20709,7 @@ function pcRenderEnv(){
   .env-grid .field, .env-grid .cellin, .env-grid select, .env-grid input[type="text"] { width: 100% !important; min-width: 0; box-sizing: border-box; margin: 0 !important; }
   .fgrid > div > .field, .fgrid > div > select, .fgrid > div > input { width: 100%; box-sizing: border-box; }
   .fgrid > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .sub-ind > td { background: var(--page-bg); color: var(--muted); font-size: 12.5px; padding-top: 6px; padding-bottom: 6px; padding-left: 28px; }
   .row-toolbar [hidden] { display: none !important; }
   /* Les barres d'action sont reflétées en haut à droite de la page (voir le dock d'en-tête) */
   .row-toolbar.docked { display: none !important; }
