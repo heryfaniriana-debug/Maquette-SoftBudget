@@ -3799,6 +3799,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="body">
             <div id="co-d-head" class="co-kpis"></div>
             <div class="callout" id="co-d-ret" hidden style="margin-bottom:14px;background:var(--warn-bg);color:#B45309"></div>
+            <section class="co-blk" id="co-d-glance">
+              <div class="kb-h">À retenir</div>
+              <div id="co-d-glance-list"></div>
+            </section>
             <section class="co-blk" id="co-d-env">
               <div class="kb-h">Enveloppe et montant demandé</div>
               <div class="co-env3" id="co-d-env3"></div>
@@ -3806,15 +3810,15 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
               <div id="co-d-envst" style="margin-top:8px"></div>
             </section>
             <section class="co-blk">
-              <div class="kb-h">Objectif de l’exercice, indicateurs et couverture</div>
-              <div id="co-d-objtxt" style="margin-bottom:10px;font-size:13px"></div>
-              <div class="scroll"><table style="min-width:900px"><thead><tr><th>Indicateur</th><th>Origine</th><th>Unité</th><th class="num">Cible fixée</th><th class="num">Planifié par les travaux</th><th>Couverture</th><th>Position du contributeur</th></tr></thead><tbody id="co-d-ind"></tbody></table></div>
+              <div class="kb-h">Objectif de l’exercice</div>
+              <div id="co-d-objtxt" style="margin-bottom:12px;font-size:14px"></div>
+              <div id="co-d-ind"></div>
             </section>
             <section class="co-blk">
-              <div class="kb-h">Lignes de la contribution et plan de travail</div>
-              <div class="scroll"><table style="min-width:1500px"><thead><tr><th>Ligne</th><th>Nature</th><th>Travail et période</th><th class="num">Volume prévu</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire du contributeur</th><th>Pièces jointes</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
+              <div class="kb-h">Lignes de la contribution</div>
+              <div id="co-d-lines"></div>
             </section>
-            <section class="co-blk"><div class="kb-h">Pièces jointes de la contribution</div><div id="co-d-pj"></div></section>
+            <section class="co-blk" hidden><div class="kb-h">Pièces jointes de la contribution</div><div id="co-d-pj"></div></section>
             <section class="co-blk"><div class="kb-h">Contrôles</div><div id="co-ctrl-list"></div></section>
             <section class="co-blk" id="co-d-dec">
               <div class="kb-h">Validation de collecte</div>
@@ -10573,35 +10577,18 @@ function fmAxes() {
     var rt = document.getElementById('co-d-ret');
     rt.hidden = !kbReturned(p);
     if (!rt.hidden) rt.textContent = 'Retourné au brouillon' + (p.motif ? ' — motif : « ' + p.motif + ' »' : '') + '. Le contributeur corrige puis soumet à nouveau.';
+    var ot = document.getElementById('co-d-objtxt'); ot.innerHTML = ''; ot.appendChild(document.createTextNode(p.obj || 'Aucun objectif défini au cadrage.'));
+    var ib = document.getElementById('co-d-ind'); ib.innerHTML = '';
+    tgtInds(p).forEach(function (x) { ib.appendChild(objCard(p, x)); });
     var lb = document.getElementById('co-d-lines'); lb.innerHTML = '';
     var dl = getLines(name).filter(function (l) { return l.dem != null; });
-    var ot = document.getElementById('co-d-objtxt'); ot.innerHTML = ''; var ob = document.createElement('b'); ob.textContent = 'Objectif fixé au cadrage : '; ot.appendChild(ob); ot.appendChild(document.createTextNode(p.obj || 'non défini'));
-    var ib = document.getElementById('co-d-ind'); ib.innerHTML = '';
-    tgtInds(p).forEach(function (x) {
-      var tr = document.createElement('tr'), pn = indCible(p, x.id), nl2 = indLines(p, x.id).length;
-      cell(tr, x.lib, 'name'); cell(tr, x.fixed ? 'Cadrage' : 'Proposé par le contributeur'); cell(tr, x.unit); cell(tr, x.fixed ? fmt(x.cible) : '—', 'num'); cell(tr, fmt(pn) + ' (' + pl(nl2, 'ligne') + ')', 'num');
-      var cc = cell(tr, ''); if (x.fixed) { var rt2 = x.cible ? pn / x.cible : 0; cc.appendChild(badge(Math.round(100 * rt2) + ' %' + (rt2 < 1 ? ' · écart de ' + fmt(x.cible - pn) + ' ' + x.unit : ' · couvert'), rt2 >= 1 ? 'b-ok' : 'b-ko')); } else cc.textContent = '—';
-      var pc = cell(tr, ''), pb = posBadge(x);
-      if (pb) { pc.appendChild(pb); var pd = document.createElement('div'); pd.className = 'hby'; pd.style.cssText = 'font-size:12.5px;color:#5B606D'; pd.textContent = x.pos.why + (x.pos.alt != null ? ' · valeur jugée réaliste : ' + fmt(x.pos.alt) + ' ' + x.unit : '') + (x.pos.decision ? ' · décision : ' + x.pos.decision : ''); pc.appendChild(pd); } else pc.textContent = x.fixed ? (pn >= x.cible ? 'Non requise : objectif couvert' : 'Aucune position') : '—';
-      ib.appendChild(tr);
-    });
-    if (!tgtInds(p).length) { var ti0 = document.createElement('tr'), ci0 = cell(ti0, 'Aucun objectif chiffré fixé au cadrage pour ce périmètre.'); ci0.colSpan = 7; ci0.style.textAlign = 'left'; ib.appendChild(ti0); }
-    if (!dl.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, 'Aucune ligne saisie.'); td0.colSpan = 11; td0.style.textAlign = 'left'; lb.appendChild(tr0); }
-    dl.forEach(function (l) {
-      var tr = document.createElement('tr');
-      var lcc = cell(tr, l.c + ' — ' + l.l, 'name'); if (l.added) { var hp2 = badge('Hors plan', 'b-warn'); hp2.style.marginLeft = '8px'; lcc.appendChild(hp2); var hw2 = document.createElement('div'); hw2.className = 'hby'; hw2.style.cssText = 'font-size:12.5px;color:#5B606D'; hw2.textContent = 'Motif : ' + (l.addedWhy || '—'); lcc.appendChild(hw2); } cell(tr, l.nat || '—');
-      cell(tr, l.wk ? l.wk.task + ' · ' + isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : 'Non renseigné'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num');
-      cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num');
-      cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num');
-      var vr = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : 0; cell(tr, l.ref ? (vr > 0 ? '+' : '') + vr + ' %' : '—', 'num');
-      cell(tr, l.just || '—');
-      var tp = cell(tr, ''); if (l.pj && l.pj.length) l.pj.forEach(function (f) { var d = document.createElement('div'); d.textContent = '📎 ' + f; tp.appendChild(d); }); else tp.textContent = '—';
-      lb.appendChild(tr);
-      var srow2 = indSubRow(p, l, 11); if (srow2) lb.appendChild(srow2);
-    });
+    if (!dl.length) { var ne0 = document.createElement('div'); ne0.className = 'hint'; ne0.textContent = 'Aucune ligne saisie.'; lb.appendChild(ne0); }
+    dl.forEach(function (l) { lb.appendChild(lineCard(p, l)); });
     (p.inds || []).filter(function (x) { return !x.fixed && !indLines(p, x.id).length; }).forEach(function (x) {
-      var tru = document.createElement('tr'); tru.className = 'sub-ind'; var tdu = cell(tru, '↳ Indicateur proposé sans ligne liée : ' + x.lib + ' (' + x.unit + ', valeur de départ ' + (x.base || 0) + ')'); tdu.colSpan = 11; lb.appendChild(tru);
+      var nt = document.createElement('div'); nt.className = 'lc-note'; nt.textContent = 'Indicateur proposé sans ligne liée : ' + x.lib + ' (' + x.unit + ').'; lb.appendChild(nt);
     });
+    var gl = document.getElementById('co-d-glance-list'); gl.innerHTML = '';
+    glanceFor(p, dl, tot).forEach(function (g) { var row = document.createElement('div'); row.className = 'gl-row'; var b = badge(g[1], g[0]); row.appendChild(b); var s = document.createElement('span'); s.textContent = g[2]; row.appendChild(s); gl.appendChild(row); });
     var pjb = document.getElementById('co-d-pj'); pjb.innerHTML = '';
     if (!(p.pj && p.pj.length)) { var ne = document.createElement('div'); ne.className = 'hint'; ne.textContent = 'Aucune pièce jointe.'; pjb.appendChild(ne); }
     (p.pj || []).forEach(function (f) { var row = document.createElement('div'); row.className = 'list-row'; var b = document.createElement('b'); b.textContent = '📎 ' + f; row.appendChild(b); pjb.appendChild(row); });
@@ -10714,6 +10701,55 @@ function fmAxes() {
       act.appendChild(b); body.appendChild(tr);
     });
     if (!ts.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun objectif chiffré fixé au cadrage pour ce périmètre : planifiez vos travaux selon l’objectif ci-dessus.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); }
+  }
+  /* ---------- Détail d'une contribution reçue : cartes lisibles plutôt qu'un tableau large ---------- */
+  function glanceFor(p, dl, tot) {
+    var out = [];
+    if (p.env != null && tot > p.env) out.push(['b-ko', 'Enveloppe dépassée', 'Le montant demandé dépasse le maximum de ' + fmt(tot - p.env) + ' MGA.']);
+    else if (p.min != null && tot < p.min) out.push(['b-warn', 'Sous le minimum', 'Il manque ' + fmt(p.min - tot) + ' MGA pour atteindre le minimum.']);
+    else out.push(['b-ok', 'Enveloppe respectée', p.env != null ? 'Il reste ' + fmt(p.env - tot) + ' MGA sous le maximum.' : 'Aucun plafond n’est fixé.']);
+    tgtInds(p).forEach(function (x) {
+      var cv = covOf(p, x), base = x.lib + ' : ' + fmt(cv.planned) + ' sur ' + fmt(x.cible) + ' ' + x.unit + '.';
+      if (cv.rate >= 1) out.push(['b-ok', 'Objectif couvert', base]);
+      else if (x.pos && x.pos.st === 'Non atteignable') out.push(['b-ko', 'Objectif non atteignable', base + ' Le contributeur le juge non atteignable' + (x.pos.alt != null ? ' (réaliste : ' + fmt(x.pos.alt) + ')' : '') + '.']);
+      else if (x.pos && x.pos.st === 'Atteignable sous conditions') out.push(['b-warn', 'Atteignable sous conditions', base + ' ' + (x.pos.why || '')]);
+      else out.push(['b-ko', 'Objectif non couvert', base + ' Aucune position du contributeur.']);
+    });
+    var nAdd = dl.filter(function (l) { return l.added; }).length; if (nAdd) out.push(['b-warn', pl(nAdd, 'ligne') + ' hors plan', 'À accepter ou à refuser : voir le motif sur chaque ligne.']);
+    var nNo = dl.filter(function (l) { return !l.wk; }).length; out.push(nNo ? ['b-warn', pl(nNo, 'ligne') + ' sans plan de travail', 'Le travail prévu n’est pas décrit pour ces lignes.'] : ['b-ok', 'Plans de travail complets', 'Chaque ligne décrit son travail et ses indicateurs.']);
+    return out;
+  }
+  function objCard(p, x) {
+    var cv = covOf(p, x), c = cvEl('div', 'oc'), h = cvEl('div', 'oc-h'); h.appendChild(cvEl('b', null, x.lib));
+    h.appendChild(badge(Math.round(100 * cv.rate) + ' % couvert', cv.rate >= 1 ? 'b-ok' : 'b-ko')); c.appendChild(h);
+    var m = cvEl('div', 'oc-m');
+    [['Cible fixée', fmt(x.cible) + ' ' + x.unit], ['Planifié par les travaux', fmt(cv.planned) + ' ' + x.unit], ['Écart', cv.rate >= 1 ? 'Aucun' : fmt(x.cible - cv.planned) + ' ' + x.unit]].forEach(function (z) { var d = cvEl('div', 'oc-s'); d.appendChild(cvEl('div', 'lc-l', z[0])); d.appendChild(cvEl('div', 'oc-v', z[1])); m.appendChild(d); });
+    c.appendChild(m);
+    var tr = cvEl('div', 'track'); tr.style.margin = '8px 0'; var fl = cvEl('div', 'fill'); fl.style.width = Math.min(100, Math.round(100 * cv.rate)) + '%'; tr.appendChild(fl); c.appendChild(tr);
+    var pb = posBadge(x), pr = cvEl('div', 'lc-foot');
+    if (pb) { pr.appendChild(cvEl('b', null, 'Position du contributeur : ')); pr.appendChild(pb); pr.appendChild(document.createTextNode(' ' + (x.pos.why || '') + (x.pos.alt != null ? ' — valeur jugée réaliste : ' + fmt(x.pos.alt) + ' ' + x.unit : '') + (x.pos.decision ? ' — décision : ' + x.pos.decision : ''))); }
+    else pr.textContent = cv.rate >= 1 ? 'Position non requise : l’objectif est couvert.' : 'Aucune position du contributeur alors que l’objectif n’est pas couvert.';
+    c.appendChild(pr); return c;
+  }
+  function lineCard(p, l) {
+    var c = cvEl('div', 'lc'), h = cvEl('div', 'lc-h'), t = cvEl('div', 'lc-t'); t.appendChild(cvEl('b', null, l.c + ' — ' + (l.lib || l.l)));
+    if (l.added) { var hb = badge('Hors plan', 'b-warn'); hb.style.marginLeft = '8px'; t.appendChild(hb); } else if (l.ref != null) { var sb = badge('Sous-activité du plan', 'b-neutral'); sb.style.marginLeft = '8px'; t.appendChild(sb); }
+    h.appendChild(t);
+    var a = cvEl('div', 'lc-a'); a.appendChild(cvEl('div', 'lc-amt', fmt(l.dem) + ' MGA'));
+    var v = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : null; if (v != null) a.appendChild(badge((v > 0 ? '+' : '') + v + ' % par rapport à la référence', Math.abs(v) > 20 ? 'b-warn' : 'b-neutral'));
+    h.appendChild(a); c.appendChild(h);
+    if (l.added) c.appendChild(cvEl('div', 'lc-note', 'Ligne ajoutée par le contributeur — motif : ' + (l.addedWhy || '—')));
+    var g = cvEl('div', 'lc-grid');
+    function blk(title, nodes) { var b = cvEl('div', 'lc-b'); b.appendChild(cvEl('div', 'lc-l', title)); nodes.forEach(function (n) { b.appendChild(typeof n === 'string' ? cvEl('div', null, n) : n); }); g.appendChild(b); }
+    var w = l.wk;
+    blk('Travail prévu', w ? [w.task, 'Du ' + isoToFr(w.d1) + ' au ' + isoToFr(w.d2), 'Volume prévu : ' + fmt(w.vol) + ' ' + w.unit] : [badge('Plan de travail non renseigné', 'b-warn')]);
+    var inds = ((w && w.inds) || []).map(function (k) { var i = (p.inds || []).filter(function (z) { return z.id === k.id; })[0]; if (!i) return null; return '• ' + i.lib + ' — apport ' + fmt(k.contrib) + ' ' + i.unit; }).filter(Boolean);
+    blk('Indicateurs servis', inds.length ? inds : ['Aucun indicateur lié']);
+    var bd = []; if (l.q != null && l.p != null) bd.push(fmt(l.q) + ' × ' + fmt(l.p) + ' MGA'); if (l.ref) bd.push('Référence : ' + fmt(l.ref) + ' MGA'); bd.push('Nature : ' + (l.nat || '—'));
+    blk('Budget', bd); c.appendChild(g);
+    if (l.just) { var cm = cvEl('div', 'lc-foot'); cm.appendChild(cvEl('b', null, 'Commentaire : ')); cm.appendChild(document.createTextNode(l.just)); c.appendChild(cm); }
+    if (l.pj && l.pj.length) { var pj = cvEl('div', 'lc-foot'); pj.appendChild(cvEl('b', null, 'Pièces jointes : ')); pj.appendChild(document.createTextNode(l.pj.map(function (f) { return '📎 ' + f; }).join('   '))); c.appendChild(pj); }
+    return c;
   }
   /* Indicateurs servis, affichés juste sous la ligne de budget concernée (vue fusionnée) */
   function indSubRow(p, l, span) {
@@ -20654,6 +20690,23 @@ function pcRenderEnv(){
 <style>
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
+  /* Détail d'une contribution reçue : lisible d'un coup d'œil */
+  .gl-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .gl-row:last-child { border-bottom: 0; }
+  .gl-row .badge { flex: 0 0 auto; min-width: 190px; justify-content: center; }
+  .oc, .lc { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; background: var(--surface); }
+  .oc-h, .lc-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .oc-m { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .oc-v { font-size: 16px; font-weight: 600; }
+  .lc-t { font-size: 15px; min-width: 0; flex: 1 1 260px; }
+  .lc-a { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .lc-amt { font-size: 18px; font-weight: 700; white-space: nowrap; }
+  .lc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 4px; }
+  .lc-b { min-width: 0; font-size: 13.5px; line-height: 1.45; overflow-wrap: anywhere; }
+  .lc-l { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); margin-bottom: 4px; }
+  .lc-foot { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 13.5px; }
+  .lc-note { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: var(--warn-bg); color: var(--warn); font-size: 13px; }
+  @media (max-width: 900px) { .lc-grid, .oc-m { grid-template-columns: 1fr; } .lc-a { align-items: flex-start; text-align: left; } .gl-row { flex-wrap: wrap; } }
   /* Cadrage de campagne : une fiche par périmètre, champs de même largeur */
   .env-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: var(--surface); }
   .env-title { font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
