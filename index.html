@@ -9783,48 +9783,47 @@ function fmAxes() {
 
   /* ---------- Campagnes budgétaires (SB-06-US-001, SB-06-US-002) ---------- */
   var CONTRIB = ['RAKOTO Hanta', 'RANDIMBIARISON Maminirina', 'RASOARIMALALA Voahangy Lalao', 'Hery Rasoanaivo', 'ANDRIA Tiana', 'RABE Solofo'];
+  /* Plan d'activité unique de toute la maquette : un projet « Écoles et Santé » à deux composantes, avec leurs sous-activités */
   var PERIMS = {
-    'Entité publique': ['Direction de l’Enseignement fondamental', 'Direction de l’Enseignement supérieur', 'Direction des Infrastructures', 'Direction Administrative et Financière', 'Inspection générale', 'Cabinet'],
-    'Projet / Programme': ['1110101 Hybridation et numérisation des réseaux (17 centres isolés)', '1110102 Assistance technique — contrôle et surveillance', '1120101 Amélioration des réseaux de distribution'],
+    'Entité publique': ['Composante 1 — Éducation', 'Composante 2 — Santé'],
+    'Projet / Programme': ['Composante 1 — Éducation', 'Composante 2 — Santé'],
     'Entreprise': SERVICES.slice()
   };
+  var PLAN = {
+    'Composante 1 — Éducation': [
+      { c: '1.1', l: 'Construire des salles de classe', nat: '21', ref: 960000000 },
+      { c: '1.2', l: 'Former des enseignants', nat: '62', ref: 195000000 },
+      { c: '1.3', l: 'Distribuer des manuels scolaires', nat: '60', ref: 150000000 }
+    ],
+    'Composante 2 — Santé': [
+      { c: '2.1', l: 'Construire des centres de santé', nat: '21', ref: 800000000 },
+      { c: '2.2', l: 'Former des agents de santé', nat: '62', ref: 190000000 },
+      { c: '2.3', l: 'Acheter du matériel médical', nat: '60', ref: 280000000 }
+    ]
+  };
+  function planLines(name) { return (PLAN[name] || []).map(function (l) { return { c: l.c, l: l.l, nat: l.nat, ref: l.ref, dem: null, just: '' }; }); }
   var TPLS = ['Modèle de saisie standard (nature de dépense)', 'Modèle de saisie PTBA (activité et source de financement)'];
   var camps = [
-    { code: 'CAMP-2027-01', lib: 'Campagne budgétaire 2027 — Éducation', prof: 'Entité publique', ex: '2027', model: 'm1', mver: 2, open: '01/10/2026', close: '05/11/2026', st: 'En collecte', tpl: TPLS[0],
-      instr: 'Chaque direction saisit ses besoins par programme et par nature de dépense. Les demandes sont plafonnées à 105 % du budget 2026.',
+    { code: 'CAMP-2027-01', lib: 'Campagne 2027 — Projet Écoles et Santé', prof: 'Projet / Programme', ex: '2027', model: 'm2', mver: 1, open: '01/10/2026', close: '05/11/2026', st: 'En collecte', tpl: TPLS[1],
+      instr: 'Chaque composante détaille les travaux à réaliser en 2027 pour atteindre l’objectif fixé, avec le budget correspondant.',
       perims: [
-        { p: 'Direction de l’Enseignement fondamental', who: 'RANDIMBIARISON Maminirina', st: 'Acceptée', amt: 8200000000 },
-        { p: 'Direction de l’Enseignement supérieur', who: 'RAKOTO Hanta', st: 'Soumise', amt: 4100000000 },
-        { p: 'Direction des Infrastructures', who: 'RASOARIMALALA Voahangy Lalao', st: 'Brouillon', amt: 3900000000 },
-        { p: 'Direction Administrative et Financière', who: 'Hery Rasoanaivo', st: 'Soumise', amt: 1650000000 },
-        { p: 'Inspection générale', who: 'ANDRIA Tiana', st: 'Non démarrée', amt: 0 },
-        { p: 'Cabinet', who: 'RABE Solofo', st: 'Retournée', amt: 380000000 },
-        { p: 'Direction de la Communication', who: 'ANDRIA Tiana', st: 'Non démarrée', amt: 0 }
+        { p: 'Composante 1 — Éducation', who: 'RAKOTO Hanta', st: 'Soumise', amt: 1390000000 },
+        { p: 'Composante 2 — Santé', who: 'RASOARIMALALA Voahangy Lalao', st: 'Brouillon', amt: 760000000 }
       ],
       hist: [
-        { t: 'Périmètre Cabinet : RAKOTO Hanta → RABE Solofo', by: ME, on: '09/10/2026 14:20' },
-        { t: 'Campagne ouverte — 6 contributeurs notifiés', by: ME, on: '01/10/2026 08:00' },
+        { t: 'Campagne ouverte — 2 contributeurs notifiés', by: ME, on: '01/10/2026 08:00' },
         { t: 'Campagne créée (brouillon)', by: ME, on: '24/09/2026 16:45' }
       ] },
-    { code: 'CAMP-2026-02', lib: 'PTBA 2026 — DECIM', prof: 'Projet / Programme', ex: '2026', model: 'm2', mver: 1, open: '01/07/2026', close: '31/07/2026', st: 'Clôturée', tpl: TPLS[1],
-      instr: 'Saisir les activités, les périodes et les sources de financement du PTBA 2026.',
+    { code: 'CAMP-2026-02', lib: 'Campagne 2026 — Projet Écoles et Santé', prof: 'Projet / Programme', ex: '2026', model: 'm2', mver: 1, open: '01/07/2025', close: '31/07/2025', st: 'Clôturée', tpl: TPLS[1],
+      instr: 'Détailler les travaux de l’année 2026 pour chaque composante.',
       perims: [
-        { p: '1110101 Hybridation et numérisation des réseaux (17 centres isolés)', who: 'RASOARIMALALA Voahangy Lalao', st: 'Acceptée', amt: 13066000 },
-        { p: '1110102 Assistance technique — contrôle et surveillance', who: 'RANDIMBIARISON Maminirina', st: 'Acceptée', amt: 0 },
-        { p: '1120101 Amélioration des réseaux de distribution', who: 'RAKOTO Hanta', st: 'Acceptée', amt: 0 }
+        { p: 'Composante 1 — Éducation', who: 'RAKOTO Hanta', st: 'Acceptée', amt: 570000000 },
+        { p: 'Composante 2 — Santé', who: 'RASOARIMALALA Voahangy Lalao', st: 'Acceptée', amt: 460000000 }
       ],
       hist: [
-        { t: 'Collecte clôturée — toutes les contributions acceptées', by: ME, on: '31/07/2026 18:00' },
-        { t: 'Campagne ouverte — 3 contributeurs notifiés', by: ME, on: '01/07/2026 08:00' }
-      ] },
-    { code: 'CAMP-2027-03', lib: 'PTBA 2027 — Santé Communautaire', prof: 'Projet / Programme', ex: '2027', model: 'm2', mver: 1, open: '01/11/2026', close: '30/11/2026', st: 'Brouillon', tpl: TPLS[1],
-      instr: '',
-      perims: [
-        { p: '1110101 Hybridation et numérisation des réseaux (17 centres isolés)', who: '', st: 'Non démarrée', amt: 0 },
-        { p: '1110102 Assistance technique — contrôle et surveillance', who: '', st: 'Non démarrée', amt: 0 },
-        { p: '1120101 Amélioration des réseaux de distribution', who: '', st: 'Non démarrée', amt: 0 }
-      ],
-      hist: [{ t: 'Campagne créée (brouillon)', by: ME, on: '20/10/2026 11:30' }] }
+        { t: 'Collecte clôturée — toutes les contributions acceptées', by: ME, on: '31/07/2025 18:00' },
+        { t: 'Campagne ouverte — 2 contributeurs notifiés', by: ME, on: '01/07/2025 08:00' }
+      ] }
   ];
   var cdCur = null;
 
@@ -9957,8 +9956,9 @@ function fmAxes() {
     body.innerHTML = '';
     c.perims.forEach(function (p) {
       var tr = document.createElement('tr');
-      var tg = (p.inds || []).filter(function (z) { return z.fixed; })[0];
-      cell(tr, p.p, 'name'); cell(tr, p.who || 'Non affecté'); cell(tr, (p.obj || '—') + (tg ? ' · cible : ' + fmt(tg.cible) + ' ' + tg.unit : ''));
+      var tgs = (p.inds || []).filter(function (z) { return z.fixed; });
+      var oc = cell(tr, p.p, 'name'); cell(tr, p.who || 'Non affecté'); var ocell = cell(tr, p.obj || '—');
+      tgs.forEach(function (z) { var dd = document.createElement('div'); dd.className = 'hby'; dd.style.cssText = 'font-size:12.5px;color:#5B606D'; dd.textContent = '• ' + z.lib + ' : ' + fmt(z.cible) + ' ' + z.unit; ocell.appendChild(dd); });
       cell(tr, p.min != null ? fmt(p.min) : '—', 'num'); cell(tr, p.env != null ? fmt(p.env) : '—', 'num');
       body.appendChild(tr);
     });
@@ -10164,7 +10164,7 @@ function fmAxes() {
     (PERIMS[prof] || []).forEach(function (p) { var l = mkChk(true, p, function () { cmEnvRender(); cmDdSync(); }); l.dataset.p = p; box.appendChild(l); });
     cmEnvRender(); cmDdSync();
   }
-  var cmEnv = {}, cmMin = {}, cmWho = {}, cmObj = {}, cmTgt = {}, cmUnit = {}, cmLibAuto = true, cmDry = false;
+  var cmEnv = {}, cmMin = {}, cmWho = {}, cmObj = {}, cmInds = {}, cmLibAuto = true, cmDry = false;
   function cmDdSync() {
     var all = Array.prototype.slice.call(document.querySelectorAll('#cm-perims label'));
     var on = all.filter(function (l) { return l.querySelector('input').checked; }).map(function (l) { return l.dataset.p; });
@@ -10217,9 +10217,22 @@ function fmAxes() {
       mi.addEventListener('blur', function () { mi.value = cmMin[p] != null ? fmt(cmMin[p]) : ''; }); fld('Minimum (MGA)', mi);
       var inp = txt('Enveloppe maximale de ' + p, 'Sans plafond', cmEnv[p] != null ? fmt(cmEnv[p]) : '', function (i) { cmEnv[p] = parseInt0(i.value); }, true);
       inp.addEventListener('blur', function () { inp.value = cmEnv[p] != null ? fmt(cmEnv[p]) : ''; }); fld('Maximum (MGA)', inp);
-      fld('Objectif de l’exercice', txt('Objectif de l’exercice pour ' + p, 'Ex. Équiper des centres isolés en kits hybrides', cmObj[p] || '', function (i) { cmObj[p] = i.value; }), 'full');
-      fld('Cible chiffrée', txt('Cible chiffrée pour ' + p, 'Ex. 17', cmTgt[p] != null ? String(cmTgt[p]) : '', function (i) { var v = parseFloat(i.value.replace(/\s/g, '').replace(',', '.')); cmTgt[p] = isNaN(v) ? null : v; }, true));
-      fld('Unité de la cible', txt('Unité de la cible pour ' + p, 'Ex. centre', cmUnit[p] || '', function (i) { cmUnit[p] = i.value; }));
+      fld('Objectif général de l’exercice', txt('Objectif général de l’exercice pour ' + p, 'Ex. Permettre à plus d’enfants d’aller à l’école', cmObj[p] || '', function (i) { cmObj[p] = i.value; }), 'full');
+      /* Les indicateurs sont la répartition de l'objectif général : chacun a sa cible chiffrée */
+      var ih = document.createElement('div'); ih.className = 'full env-l'; ih.style.marginTop = '4px'; ih.textContent = 'Indicateurs : la répartition de l’objectif général en cibles chiffrées'; grid.appendChild(ih);
+      cmInds[p] = cmInds[p] || [];
+      cmInds[p].forEach(function (it, k) {
+        var row = document.createElement('div'); row.className = 'full env-ind';
+        function cellf(label, el) { var d = document.createElement('div'); var s = document.createElement('span'); s.className = 'env-l'; s.textContent = label; d.appendChild(s); d.appendChild(el); row.appendChild(d); }
+        cellf('Indicateur', txt('Indicateur ' + (k + 1) + ' de ' + p, 'Ex. Salles de classe construites', it.lib || '', function (i) { it.lib = i.value; }));
+        cellf('Cible chiffrée', txt('Cible de l’indicateur ' + (k + 1) + ' de ' + p, 'Ex. 20', it.cible != null ? String(it.cible) : '', function (i) { var v = parseFloat(i.value.replace(/\s/g, '').replace(',', '.')); it.cible = isNaN(v) ? null : v; }, true));
+        cellf('Unité', txt('Unité de l’indicateur ' + (k + 1) + ' de ' + p, 'Ex. salle', it.unit || '', function (i) { it.unit = i.value; }));
+        var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'btn small'; rm.textContent = 'Retirer'; rm.disabled = !ck.checked; rm.setAttribute('aria-label', 'Retirer l’indicateur ' + (k + 1) + ' de ' + p);
+        rm.addEventListener('click', function () { cmInds[p].splice(k, 1); cmEnvRender(); }); row.appendChild(rm);
+        grid.appendChild(row);
+      });
+      var add = document.createElement('div'); add.className = 'full'; var ab = document.createElement('button'); ab.type = 'button'; ab.className = 'btn small'; ab.textContent = '+ Ajouter un indicateur'; ab.disabled = !ck.checked;
+      ab.addEventListener('click', function () { cmInds[p].push({ lib: '', cible: null, unit: '' }); cmEnvRender(); }); add.appendChild(ab); grid.appendChild(add);
       card.appendChild(grid); box.appendChild(card);
     });
     if (!labs.length) { var h = document.createElement('div'); h.className = 'hint'; h.textContent = 'Aucun périmètre de collecte : choisissez d’abord une configuration.'; box.appendChild(h); }
@@ -10228,7 +10241,7 @@ function fmAxes() {
   function prjAxisValues(pa) {
     var c = (pa.axes || []).filter(function (a) { return a.c; })[0]; if (!c) return null;
     var cl = c.cl != null ? c.cl : c.l;
-    if (c.t === 'Plan' && c.n === 'Activités' && cl === 0) return Object.keys(CAD.comps).sort(function (x, y) { return +x.slice(1) - +y.slice(1); }).map(function (k) { return k + ' — ' + CAD.comps[k]; });
+    if (c.t === 'Plan' && c.n === 'Activités' && cl === 0) return Object.keys(PLAN);
     var lv = bxLevels(c); if (!lv || !lv[cl]) return null;
     var parts = lv[cl].split(' — '); if (parts.length < 2) return null;
     return parts[1].split(', ').map(function (x) { return x.trim(); }).filter(Boolean);
@@ -10252,7 +10265,7 @@ function fmAxes() {
     document.getElementById('cm-tpl').value = pa.tpl || TPLS[1];
     document.getElementById('cm-par-hint').textContent = ['Sources : ' + parSrcText(pa), 'Ventilation : ' + (pa.vt && pa.vt !== 'Aucune' ? pa.vt : 'non ventilée'), 'Périmètre de collecte : ' + collectText(pa.axes), 'Circuit de validation : ' + ((models.filter(function (m) { return m.id === pa.model; })[0] || { steps: [] }).steps.some(function (s) { return s.act && (s.t === 'Validation' || s.t === 'Approbation'); }) ? 'défini' : 'aucun')].join(' · ');
     var vals = prjAxisValues(pa) || PERIMS['Projet / Programme'], box = document.getElementById('cm-perims'), pref = false;
-    box.innerHTML = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmTgt = {}; cmUnit = {};
+    box.innerHTML = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmInds = {};
     vals.forEach(function (p) { var l = mkChk(true, p, function () { cmEnvRender(); cmDdSync(); }); l.dataset.p = p; box.appendChild(l); var v = prjPadEnv(p, pa); if (v) { cmEnv[p] = v; pref = true; } });
     var pe = document.getElementById('cm-env-pad'); pe.hidden = !pref;
     pe.textContent = pref ? 'Maximum prérempli avec l’enveloppe de chaque composante au PAD ' + CPAD.code + ' (version ' + CPAD.ver + ') pour l’exercice ' + document.getElementById('cm-ex').value + '. Il reste modifiable.' : '';
@@ -10293,7 +10306,7 @@ function fmAxes() {
     var act = el[0], ps = PARAMS.filter(function (x) { return x.prof === act && x.st === 'Actif' && x.id !== 'PAR-009'; });
     if (!ps.length) { var o1 = document.createElement('option'); o1.value = ''; o1.textContent = 'Aucun paramétrage actif'; sp.appendChild(o1); }
     ps.forEach(function (x) { var o2 = document.createElement('option'); o2.value = x.id; o2.textContent = x.lib; sp.appendChild(o2); });
-    cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmTgt = {}; cmUnit = {}; cmLibAuto = true; document.getElementById('cm-lib').value = '';
+    cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmInds = {}; cmLibAuto = true; document.getElementById('cm-lib').value = '';
     cmParChanged(); cmEnvRender();
   }
   document.getElementById('cm-prof').addEventListener('change', cmProfileChanged);
@@ -10318,8 +10331,8 @@ function fmAxes() {
       if (!perims.length) { err.textContent = 'Sélectionnez au moins un périmètre de contribution.'; return; }
   var badMM = perims.filter(function (q) { return cmMin[q] != null && cmEnv[q] != null && cmMin[q] > cmEnv[q]; })[0];
   if (badMM) { err.textContent = 'Périmètre « ' + badMM + ' » : le minimum dépasse le maximum.'; return; }
-  var badTgt = perims.filter(function (q) { return cmTgt[q] != null && (!(cmObj[q] || '').trim() || !(cmUnit[q] || '').trim() || cmTgt[q] <= 0); })[0];
-  if (badTgt) { err.textContent = 'Périmètre « ' + badTgt + ' » : une cible chiffrée demande un objectif, une unité et une valeur positive.'; return; }
+  var badTgt = perims.filter(function (q) { var l = cmInds[q] || []; return l.length && (!(cmObj[q] || '').trim() || l.some(function (z) { return !(z.lib || '').trim() || !(z.unit || '').trim() || !(z.cible > 0); })); })[0];
+  if (badTgt) { err.textContent = 'Périmètre « ' + badTgt + ' » : chaque indicateur demande un libellé, une unité et une cible positive, et le périmètre un objectif général.'; return; }
 
     var ex = document.getElementById('cm-ex').value;
     if (!document.getElementById('cm-dp-w').hidden) {
@@ -10338,10 +10351,10 @@ function fmAxes() {
     BUDGETS.unshift(nbud);
     auditAdd('Création', 'Budget ' + nbud.code, 'Budget créé par la campagne ' + code + ' (' + paC.lib + ', ' + perLabel(nbud) + ')', nbud.prof);
     camps.unshift({ code: code, bud: nbud.code, par: paC.id, per: perV, lib: lib, prof: prof, ex: ex, model: mid, mver: m.ver, open: d2f(d1), close: d2f(d2), st: 'Brouillon', tpl: document.getElementById('cm-tpl').value, instr: document.getElementById('cm-instr').value,
-      perims: perims.map(function (p) { return { p: p, who: cmWho[p] || '', obj: (cmObj[p] || '').trim(), inds: (cmTgt[p] != null && cmTgt[p] > 0 ? [{ id: 'IF-' + (++INDUID), lib: (cmObj[p] || '').trim(), unit: (cmUnit[p] || '').trim(), base: 0, cible: cmTgt[p], fixed: true }] : []), st: 'Non démarrée', amt: 0, env: cmEnv[p] != null ? cmEnv[p] : null, min: cmMin[p] != null ? cmMin[p] : null }; }),
+      perims: perims.map(function (p) { return { p: p, who: cmWho[p] || '', obj: (cmObj[p] || '').trim(), lines: planLines(p), inds: (cmInds[p] || []).map(function (z) { return { id: 'IF-' + (++INDUID), lib: z.lib.trim(), unit: z.unit.trim(), base: 0, cible: z.cible, fixed: true }; }), st: 'Non démarrée', amt: 0, env: cmEnv[p] != null ? cmEnv[p] : null, min: cmMin[p] != null ? cmMin[p] : null }; }),
       hist: [{ t: 'Campagne créée (brouillon) pour ' + paC.lib + ' — ' + perLabel(nbud), by: ME, on: nowStr() }] });
     renderBudgets();
-    document.getElementById('cm-lib').value = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmTgt = {}; cmUnit = {}; cmLibAuto = true; cmGo(1);
+    document.getElementById('cm-lib').value = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmInds = {}; cmLibAuto = true; cmGo(1);
     document.getElementById('cm-form').hidden = true;
     renderCamps();
     document.getElementById('cd').hidden = true; cdCur = null;
@@ -10353,71 +10366,72 @@ function fmAxes() {
   /* ---------- Collecte et contrôle des contributions (SB-06-US-003, 004, 005) ---------- */
   var PLAF = 1.05;
   var COL = {
-    'Direction de l’Enseignement fondamental': [
-      { c: 'P1.1', l: 'Salaires du personnel enseignant', nat: '61', ref: 6800000000, dem: 6900000000, just: 'Revalorisation indiciaire 2027' },
-      { c: 'P1.2', l: 'Fournitures et manuels scolaires', nat: '60', ref: 900000000, dem: 920000000, q: 460000, p: 2000, just: 'Manuels du primaire à renouveler', pj: ['Devis_manuels.pdf'] },
-      { c: 'P1.3', l: 'Centres d’alphabétisation', nat: '65', ref: 420000000, dem: 380000000, just: '' }
+    'Composante 1 — Éducation': [
+      { c: '1.1', l: 'Construire des salles de classe', nat: '21', ref: 960000000, dem: 1000000000, q: 20, p: 50000000, just: 'Vingt salles : le besoin est plus élevé que l’an dernier' },
+      { c: '1.2', l: 'Former des enseignants', nat: '62', ref: 195000000, dem: 200000000, q: 250, p: 800000, just: 'Une formation de trois jours par enseignant', pj: ['Programme_de_formation.pdf'] },
+      { c: '1.3', l: 'Distribuer des manuels scolaires', nat: '60', ref: 150000000, dem: 150000000, q: 20000, p: 7500, just: '' }
     ],
-    'Direction de l’Enseignement supérieur': [
-      { c: 'P2.1', l: 'Bourses d’études', nat: '65', ref: 2600000000, dem: 2700000000, q: 1350000, p: 2000, just: '50 000 boursiers supplémentaires prévus à la rentrée', pj: ['Liste_boursiers_2027.xlsx'] },
-      { c: 'P2.2', l: 'Fonctionnement des universités', nat: '62', ref: 1300000000, dem: 1400000000, q: 14, p: 100000000, just: 'Hausse des coûts d’énergie et de maintenance (14 établissements)', pj: ['Facture_JIRAMA.pdf', 'Devis_maintenance.pdf'] }
-    ],
-    'Direction des Infrastructures': [
-      { c: 'P3.1', l: 'Construction et réhabilitation', nat: '21', ref: 3000000000, dem: 3400000000, just: '' },
-      { c: 'P3.2', l: 'Entretien du patrimoine', nat: '61', ref: 600000000, dem: 500000000, just: '' }
-    ],
-    'Direction Administrative et Financière': [
-      { c: 'P4.1', l: 'Frais de fonctionnement', nat: '62', ref: 900000000, dem: 930000000, just: '' },
-      { c: 'P4.2', l: 'Logiciels et équipements', nat: '21', ref: 690000000, dem: 720000000, just: '' }
-    ],
-    'Inspection générale': [
-      { c: 'P5.1', l: 'Missions d’inspection', nat: '62', ref: 280000000, dem: null, just: '' }
-    ],
-    'Cabinet': [
-      { c: 'P6.1', l: 'Fonctionnement du cabinet', nat: '62', ref: 340000000, dem: 380000000, just: '' }
+    'Composante 2 — Santé': [
+      { c: '2.1', l: 'Construire des centres de santé', nat: '21', ref: 800000000, dem: 640000000, q: 8, p: 80000000, just: 'Huit centres seulement : le budget ne permet pas d’aller plus loin' },
+      { c: '2.2', l: 'Former des agents de santé', nat: '62', ref: 190000000, dem: 120000000, q: 120, p: 1000000, just: 'Moins d’agents à former cette année que prévu au plan' },
+      { c: '2.3', l: 'Acheter du matériel médical', nat: '60', ref: 280000000, dem: null, just: '' }
     ]
   };
   var CH = {
-    'Direction de l’Enseignement fondamental': [{ t: 'Contribution acceptée', by: ME, on: '12/10/2026 11:00' }, { t: 'Contribution soumise', by: 'RANDIMBIARISON Maminirina', on: '08/10/2026 15:42' }],
-    'Direction de l’Enseignement supérieur': [{ t: 'Contribution soumise', by: 'RAKOTO Hanta', on: '15/10/2026 09:30' }],
-    'Direction Administrative et Financière': [{ t: 'Contribution soumise', by: 'Hery Rasoanaivo', on: '16/10/2026 14:05' }],
-    'Cabinet': [{ t: 'Retournée pour correction : « Plafond dépassé : réduisez la demande ou justifiez-la. »', by: ME, on: '14/10/2026 10:05' }, { t: 'Contribution soumise', by: 'RABE Solofo', on: '13/10/2026 17:30' }]
+    'Composante 1 — Éducation': [{ t: 'Contribution soumise', by: 'RAKOTO Hanta', on: '15/10/2026 09:30' }],
+    'Composante 2 — Santé': [{ t: 'Brouillon enregistré (première ligne saisie)', by: 'RASOARIMALALA Voahangy Lalao', on: '16/10/2026 14:05' }]
   };
-  var IMPLOG = [{ on: '06/10/2026 09:12', file: 'contributions_enseignement_fondamental.xlsx', p: 'Direction de l’Enseignement fondamental', by: 'RANDIMBIARISON Maminirina', ok: 3, rej: 0 }];
+  var IMPLOG = [{ on: '06/10/2026 09:12', file: 'contributions_composante_education.xlsx', p: 'Composante 1 — Éducation', by: 'RAKOTO Hanta', ok: 3, rej: 0 }];
   var IMPSAMPLE = [
-    ['P3.1', '21', '3250000000', 'Phase 2 du programme de rénovation des écoles'],
-    ['P3.2', '61', '520000000', ''],
-    ['P3.9', '61', '120000000', 'Ligne inexistante'],
-    ['P3.2', '61', '520000000', ''],
-    ['P3.1', '21', 'abc', 'Montant illisible'],
-    ['P3.1', '21', '-500000', 'Montant négatif']
+    ['2.1', '21', '700000000', 'Neuf centres de santé au lieu de huit'],
+    ['2.2', '62', '130000000', ''],
+    ['2.9', '62', '120000000', 'Ligne inexistante'],
+    ['2.2', '62', '130000000', ''],
+    ['2.1', '21', 'abc', 'Montant illisible'],
+    ['2.1', '21', '-500000', 'Montant négatif']
   ];
   var ciOn = false;
   var ctrlP = null, ctrlDec = 'Accepter';
-  (function () { var cab = camps[0].perims.filter(function (p) { return p.p === 'Cabinet'; })[0]; if (cab) cab.motif = 'Plafond dépassé : réduisez la demande ou justifiez-la.'; })();
   (function () {
-    var PJ = { 'Direction de l’Enseignement fondamental': ['Lettre_de_cadrage_2027.pdf', 'Tableau_des_besoins.xlsx'], 'Direction de l’Enseignement supérieur': ['Note_justificative_bourses.pdf'], 'Direction Administrative et Financière': ['Devis_fournisseurs.pdf', 'Plan_de_charge.xlsx', 'Justificatif_loyers.pdf'], 'Cabinet': ['Demande_initiale.pdf'] };
+    var PJ = { 'Composante 1 — Éducation': ['Lettre_de_cadrage_2027.pdf', 'Liste_des_villages.xlsx'] };
     camps[0].perims.forEach(function (p) { if (PJ[p.p]) p.pj = PJ[p.p]; });
   })();
 
-  /* Données de démonstration : objectifs fixés au cadrage et indicateurs proposés par les contributeurs */
+  /* Données de démonstration : un seul plan d'activité, deux composantes faciles à comprendre.
+     L'objectif de l'exercice est général ; les indicateurs en sont la répartition. */
   (function () {
-    function pp(ci, name) { return camps[ci].perims.filter(function (x) { return x.p.indexOf(name) === 0; })[0]; }
-    var a = pp(0, 'Direction de l’Enseignement fondamental'); a.obj = 'Scolariser 3 000 000 d’élèves et renouveler les manuels du primaire.';
-    a.inds = [{ id: 'IC-E1', lib: 'Élèves scolarisés au fondamental', unit: 'élève', base: 2800000, fixed: true, cible: 3000000 }, { id: 'IC-E2', lib: 'Manuels distribués', unit: 'manuel', base: 0, fixed: true, cible: 460000 }];
-    function ln(name, code) { return (COL[name] || []).filter(function (l) { return l.c === code; })[0]; }
-    function wk(l, task, d1, d2, vol, unit, inds) { if (l) l.wk = { task: task, d1: d1, d2: d2, vol: vol, unit: unit, inds: inds, real: [null, null, null, null], spent: null }; }
-    wk(ln(a.p, 'P1.1'), 'Assurer la rémunération des enseignants et la scolarisation des élèves', '2027-01-01', '2027-12-31', 3000000, 'élève', [{ id: 'IC-E1', contrib: 3000000 }]);
-    wk(ln(a.p, 'P1.2'), 'Acheter et distribuer les manuels du primaire', '2027-03-01', '2027-09-30', 460000, 'manuel', [{ id: 'IC-E2', contrib: 460000 }]);
-    var b = pp(0, 'Direction de l’Enseignement supérieur'); b.obj = 'Accueillir 50 000 boursiers supplémentaires.'; b.inds = [{ id: 'IC-E3', lib: 'Boursiers supplémentaires', unit: 'étudiant', base: 0, fixed: true, cible: 50000 }];
-    wk(ln(b.p, 'P2.1'), 'Attribuer et verser les bourses aux étudiants', '2027-01-15', '2027-12-15', 40000, 'étudiant', [{ id: 'IC-E3', contrib: 40000 }]);
-    /* Cas de démonstration : 1 indicateur servi par 2 lignes, dont une activité créée par le contributeur (hors plan) */
-    COL[b.p].push({ c: 'L01', l: 'Bourses d’excellence en sciences et technologies', nat: '65', ref: null, dem: 100000000, q: 10000, p: 10000, just: 'Programme prioritaire annoncé après le cadrage', added: true, addedWhy: 'Les bourses d’excellence n’existent pas parmi les sous-activités du plan', axv: { Analytique: 'Programme P2', Financier: 'Budget de l’État' },
-      wk: { task: 'Attribuer 10 000 bourses d’excellence en sciences et technologies', d1: '2027-03-01', d2: '2027-10-31', vol: 10000, unit: 'étudiant', inds: [{ id: 'IC-E3', contrib: 10000 }], real: [null, null, null, null], spent: null } });
-    b.amt = 4200000000;
-    var c = pp(0, 'Direction des Infrastructures'); c.obj = 'Réhabiliter 120 écoles.'; c.inds = [{ id: 'IC-E4', lib: 'Écoles réhabilitées', unit: 'école', base: 0, fixed: true, cible: 120 }];
-    var d = pp(1, '1110101'); d.obj = 'Équiper 17 centres isolés d’ici 2028, dont 2 en 2026.';
-    d.inds = [{ id: 'IC-D1', lib: 'Études de faisabilité réalisées', unit: 'étude', base: 0, fixed: true, cible: 17 }, { id: 'IC-D2', lib: 'Centres équipés de kits hybrides', unit: 'centre', base: 0, fixed: true, cible: 2 }];
+    function pp(ci, name) { return camps[ci].perims.filter(function (x) { return x.p === name; })[0]; }
+    function ind(id, lib, unit, cible) { return { id: id, lib: lib, unit: unit, base: 0, fixed: true, cible: cible }; }
+    function wk(l, task, d1, d2, vol, unit, inds, real, spent) { l.wk = { task: task, d1: d1, d2: d2, vol: vol, unit: unit, inds: inds, real: real || [null, null, null, null], spent: spent == null ? null : spent }; }
+    function ln(name, code) { return COL[name].filter(function (l) { return l.c === code; })[0]; }
+    /* --- Campagne 2027 : collecte en cours --- */
+    var E = pp(0, 'Composante 1 — Éducation'); E.obj = 'Permettre à plus d’enfants d’aller à l’école dans de bonnes conditions.'; E.min = 1200000000; E.env = 1400000000;
+    E.inds = [ind('E-IND1', 'Salles de classe construites', 'salle', 20), ind('E-IND2', 'Enseignants formés', 'enseignant', 300), ind('E-IND3', 'Manuels distribués', 'manuel', 20000)];
+    wk(ln(E.p, '1.1'), 'Construire 20 salles de classe dans les villages', '2027-02-01', '2027-10-31', 20, 'salle', [{ id: 'E-IND1', contrib: 20 }]);
+    wk(ln(E.p, '1.2'), 'Former 250 enseignants aux nouvelles méthodes', '2027-03-01', '2027-07-31', 250, 'enseignant', [{ id: 'E-IND2', contrib: 250 }]);
+    wk(ln(E.p, '1.3'), 'Distribuer 20 000 manuels dans les écoles', '2027-05-01', '2027-09-15', 20000, 'manuel', [{ id: 'E-IND3', contrib: 20000 }]);
+    /* Cas d'exemple : 1 indicateur servi par 2 lignes, dont une activité créée par le contributeur (hors plan) */
+    COL[E.p].push({ c: 'L01', l: 'Former des enseignants à l’enseignement inclusif', nat: '62', ref: null, dem: 40000000, q: 50, p: 800000, just: 'Besoin remonté par les directeurs d’école', added: true, addedWhy: 'La formation à l’enseignement inclusif n’est pas prévue au plan',
+      wk: { task: 'Former 50 enseignants à l’enseignement inclusif', d1: '2027-08-01', d2: '2027-09-30', vol: 50, unit: 'enseignant', inds: [{ id: 'E-IND2', contrib: 50 }], real: [null, null, null, null], spent: null } });
+    E.lines = COL[E.p];
+    var S = pp(0, 'Composante 2 — Santé'); S.obj = 'Rapprocher les soins de santé des villages.'; S.min = 1000000000; S.env = 1300000000;
+    S.inds = [ind('S-IND1', 'Centres de santé construits', 'centre', 10), ind('S-IND2', 'Agents de santé formés', 'agent', 120), ind('S-IND3', 'Centres équipés en matériel médical', 'centre', 10)];
+    wk(ln(S.p, '2.1'), 'Construire 8 centres de santé', '2027-02-01', '2027-11-30', 8, 'centre', [{ id: 'S-IND1', contrib: 8 }]);
+    wk(ln(S.p, '2.2'), 'Former 120 agents de santé', '2027-03-01', '2027-06-30', 120, 'agent', [{ id: 'S-IND2', contrib: 120 }]);
+    S.lines = COL[S.p];
+    /* --- Campagne 2026 : clôturée et validée (alimente le PTBA et le suivi) --- */
+    var E6 = pp(1, 'Composante 1 — Éducation'); E6.obj = 'Permettre à plus d’enfants d’aller à l’école.';
+    E6.inds = [ind('E26-1', 'Salles de classe construites', 'salle', 9), ind('E26-2', 'Enseignants formés', 'enseignant', 150)];
+    E6.lines = [{ c: '1.1', l: 'Construire des salles de classe', nat: '21', ref: null, dem: 450000000, q: 9, p: 50000000, just: '' }, { c: '1.2', l: 'Former des enseignants', nat: '62', ref: null, dem: 120000000, q: 150, p: 800000, just: '' }];
+    wk(E6.lines[0], 'Construire 9 salles de classe', '2026-02-01', '2026-09-30', 9, 'salle', [{ id: 'E26-1', contrib: 9 }], [2, 5, 9, null], 450000000);
+    wk(E6.lines[1], 'Former 150 enseignants', '2026-03-01', '2026-06-30', 150, 'enseignant', [{ id: 'E26-2', contrib: 150 }], [60, 150, 150, null], 120000000);
+    var S6 = pp(1, 'Composante 2 — Santé'); S6.obj = 'Rapprocher les soins de santé des villages.';
+    S6.inds = [ind('S26-1', 'Centres de santé construits', 'centre', 5), ind('S26-2', 'Agents de santé formés', 'agent', 60)];
+    S6.lines = [{ c: '2.1', l: 'Construire des centres de santé', nat: '21', ref: null, dem: 400000000, q: 5, p: 80000000, just: '' }, { c: '2.2', l: 'Former des agents de santé', nat: '62', ref: null, dem: 60000000, q: 60, p: 1000000, just: '' }];
+    wk(S6.lines[0], 'Construire 5 centres de santé', '2026-06-01', '2026-12-15', 5, 'centre', [{ id: 'S26-1', contrib: 5 }], [0, 0, 2, null], 150000000);
+    wk(S6.lines[1], 'Former 60 agents de santé', '2026-04-01', '2026-08-31', 60, 'agent', [{ id: 'S26-2', contrib: 60 }], [20, 40, 50, null], 60000000);
+    /* axes du plan de financement et de la géographie, pour toutes les lignes */
+    camps.forEach(function (c) { c.perims.forEach(function (p) { (p.lines || []).forEach(function (l) { if (!l.axv) l.axv = { Financier: l.nat === '21' ? 'Don du partenaire' : 'Budget national', Géographique: /Santé/.test(p.p) ? 'Région Sud' : 'Région Nord' }; }); }); });
   })();
   function coMsg(text, kind) {
     var el = document.getElementById('co-msg');
@@ -10431,6 +10445,9 @@ function fmAxes() {
   function coWho() { return document.getElementById('co-as').value; }
   function coPerim(name) { return coCamp().perims.filter(function (p) { return p.p === name; })[0]; }
   function getLines(name) {
+    var cc = null; try { cc = coCamp(); } catch (e) { cc = null; }
+    var pc = cc ? cc.perims.filter(function (x) { return x.p === name; })[0] : null;
+    if (pc && pc.lines) return pc.lines;
     if (!COL[name]) COL[name] = [{ c: 'L1', l: 'Besoin global du périmètre', nat: '—', ref: 100000000, dem: null, just: '' }];
     return COL[name];
   }
@@ -10449,7 +10466,7 @@ function fmAxes() {
     var errs = [], warns = [];
     getLines(name).forEach(function (l) {
       var tag = l.c + ' — ' + l.l;
-      if (l.dem == null) { errs.push({ c: l.c, m: tag + ' : montant non renseigné.' }); return; }
+      if (l.dem == null) { if (l.ref != null && !l.wk) return; errs.push({ c: l.c, m: tag + ' : montant non renseigné.' }); return; }
       if (l.dem < 0) { errs.push({ c: l.c, m: tag + ' : montant négatif.' }); return; }
       if (l.ref && l.dem > l.ref * PLAF) errs.push({ c: l.c, m: tag + ' : plafond dépassé de ' + fmt(l.dem - Math.round(l.ref * PLAF)) + ' MGA (plafond ' + fmt(Math.round(l.ref * PLAF)) + ').' });
       var v = l.ref ? (l.dem - l.ref) / l.ref : 0;
@@ -10654,7 +10671,7 @@ function fmAxes() {
   /* Saisie */
   /* ---------- Plan de travail de la ligne : prévisions (programmation) ; le suivi compare ensuite dépense et réalisation physique ---------- */
   var INDUID = 0;
-  function perimLines(p) { var c = (COL[p.p] || []).filter(function (l) { return l.dem != null; }); return c.length ? c : (VLINES[p.p] || []); }
+  function perimLines(p) { if (p.lines) return p.lines.filter(function (l) { return l.dem != null; }); var c = (COL[p.p] || []).filter(function (l) { return l.dem != null; }); return c.length ? c : (VLINES[p.p] || []); }
   function indCible(p, id) { return perimLines(p).reduce(function (s, l) { var k = l.wk && (l.wk.inds || []).filter(function (z) { return z.id === id; })[0]; return s + (k ? k.contrib : 0); }, 0); }
   function indLines(p, id) { return perimLines(p).filter(function (l) { return l.wk && (l.wk.inds || []).some(function (z) { return z.id === id; }); }); }
   function wkFrac(l) {
@@ -11206,17 +11223,6 @@ function fmAxes() {
 
   /* Trois contributions acceptées pour la démonstration */
   (function () {
-    var c0 = camps.filter(function (c) { return c.code === 'CAMP-2027-01'; })[0];
-    function P(n) { return c0.perims.filter(function (p) { return p.p === n; })[0]; }
-    P('Direction Administrative et Financière').st = 'Acceptée';
-    CH['Direction Administrative et Financière'].unshift({ t: 'Contribution acceptée', by: ME, on: '17/10/2026 09:10' });
-    COL['Inspection générale'] = [
-      { c: 'P5.1', l: 'Missions d’inspection', nat: '62', ref: 280000000, dem: 270000000, just: '' },
-      { c: 'P5.2', l: 'Fournitures et manuels scolaires', nat: '60', ref: 12000000, dem: 15000000, just: 'Manuels de contrôle pédagogique' }
-    ];
-    var ins = P('Inspection générale');
-    ins.st = 'Acceptée'; ins.amt = 285000000;
-    CH['Inspection générale'] = [{ t: 'Contribution acceptée', by: ME, on: '19/10/2026 16:20' }, { t: 'Contribution soumise', by: 'ANDRIA Tiana', on: '18/10/2026 11:00' }];
     renderCamps();
   })();
 
@@ -11532,7 +11538,7 @@ function fmAxes() {
   function cvPerims(r) {
     var c = cvCamp(r); if (!c) return [];
     return c.perims.map(function (p) {
-      var ls = (COL[p.p] || []).filter(function (l) { return l.dem != null; });
+      var ls = perimLines(p);
       return { p: p, lines: ls, dem: ls.length ? cvSum(ls, 'dem') : (p.amt || 0), ref: cvSum(ls, 'ref') };
     });
   }
@@ -11669,12 +11675,7 @@ function fmAxes() {
   /* ---------- PTBA : budgets validés ----------
      Une campagne consolidée validée devient un budget validé, consultable au niveau du PTBA :
      uniquement le détail des lignes (axes, nature, quantité, coût, montant, répartition), sans enveloppes min/max ni pièces jointes. */
-  var VLINES = {
-    '1110101 Hybridation et numérisation des réseaux (17 centres isolés)': [
-      { c: 'H1', l: 'Études de faisabilité des 17 centres', nat: '62', q: 17, p: 400000, dem: 6800000, axv: { Financier: 'IDA 7286-MG', Géographique: 'Atsimo-Andrefana' }, per: [3400000, 3400000, 0, 0], wk: { task: 'Réaliser les études de faisabilité sur les 17 centres isolés', d1: '2026-02-01', d2: '2026-06-30', vol: 17, unit: 'étude', inds: [{ id: 'IC-D1', contrib: 17 }], real: [5, 12, 17, null], spent: 6800000 } },
-      { c: 'H2', l: 'Kits d’équipements hybrides', nat: '21', q: 2, p: 3133000, dem: 6266000, axv: { Financier: 'IDA 7286-MG', Géographique: 'Anosy' }, per: [0, 0, 3133000, 3133000], wk: { task: 'Installer et mettre en service les kits hybrides', d1: '2026-06-01', d2: '2026-12-15', vol: 2, unit: 'centre', inds: [{ id: 'IC-D2', contrib: 2 }], real: [0, 0, 1, null], spent: 3000000 } }
-    ]
-  };
+  var VLINES = {};
   Object.keys(COL).forEach(function (k) { COL[k].forEach(function (l) { if (!l.axv) l.axv = { Analytique: 'Programme ' + l.c.split('.')[0], Financier: 'Budget de l’État' }; }); });
   function bvList() { return CVAL.filter(function (r) { return r.st === 'Validée' && cvCamp(r); }); }
   function bvData(r) {
@@ -11690,7 +11691,7 @@ function fmAxes() {
   function bvPt(r) { if (!r.pt) r.pt = { st: 'À envoyer', ret: '', hist: [] }; return r.pt; }
   function bvInfo(r) {
     var d = bvData(r), pa = d.pa;
-    var P = { 'PAR-008': { name: 'DECIM — Digital and Energy Connectivity for Inclusion in Madagascar', ref: 'P178701 — Crédit IDA 7286-MG', bailleur: 'Banque mondiale — Association internationale de développement (IDA)' } }[pa && pa.id];
+    var P = { 'PAR-008': { name: 'Projet Écoles et Santé du Village', ref: 'PRJ-ESV — financement d’exemple', bailleur: 'Partenaire au développement (exemple)' } }[pa && pa.id];
     return P || { name: pa ? pa.lib : d.c.lib, ref: pa ? pa.id : d.c.code, bailleur: '—' };
   }
   function bvMatrix(r) {
@@ -15657,8 +15658,9 @@ var EXEC_REC = [
     { ref: 'PPM-2026-40', des: 'Dédouanement et transit du matériel', ligne: 'C3.3', cat: 'Services', met: PPM_MET[2], est: 10000000, d1: '2026-09-01', d2: '2026-10-10', d3: '2026-10-25', st: 'Attribué' },
     { ref: 'PPM-2026-41', des: 'Câblage électrique de la salle de contrôle', ligne: 'C2.3', cat: 'Travaux', met: PPM_MET[2], est: 5000000, d1: '2026-11-05', d2: '2026-12-05', d3: '2026-12-20', st: 'Lancé' },
     { ref: 'PPM-2026-50', des: 'Travaux d’aménagement des locaux de formation', ligne: 'C1.2', cat: 'Travaux', met: PPM_MET[1], est: 30000000, d1: '2026-09-15', d2: '2026-10-30', d3: '2026-11-15', st: 'Attribué' },
-    { ref: 'PPM-2026-60', des: 'Études de faisabilité des 17 centres isolés', ligne: 'C1.3', cat: 'Consultants', met: PPM_MET[3], est: 6800000, d1: '2026-02-01', d2: '2026-03-15', d3: '2026-04-10', st: 'En exécution', act: 'CAMP-2026-02|H1' },
-    { ref: 'PPM-2026-61', des: 'Fourniture des kits d’équipements hybrides', ligne: 'C1.1', cat: 'Biens', met: PPM_MET[1], est: 5000000, d1: '2026-06-01', d2: '2026-07-15', d3: '2026-08-10', st: 'Signé', act: 'CAMP-2026-02|H2' }
+    { ref: 'PPM-2026-60', des: 'Construction de 6 salles de classe (lot 1)', ligne: 'C1.1', cat: 'Travaux', met: PPM_MET[1], est: 300000000, d1: '2026-01-15', d2: '2026-03-15', d3: '2026-04-10', st: 'En exécution', act: 'CAMP-2026-02|1.1' },
+    { ref: 'PPM-2026-61', des: 'Construction de 3 salles de classe (lot 2)', ligne: 'C1.1', cat: 'Travaux', met: PPM_MET[1], est: 150000000, d1: '2026-03-01', d2: '2026-05-15', d3: '2026-06-10', st: 'Signé', act: 'CAMP-2026-02|1.1' },
+    { ref: 'PPM-2026-62', des: 'Construction de 4 centres de santé', ligne: 'C1.1', cat: 'Travaux', met: PPM_MET[1], est: 320000000, d1: '2026-04-01', d2: '2026-06-15', d3: '2026-07-10', st: 'Attribué', act: 'CAMP-2026-02|2.1' }
   ] };
   /* Liaison PPM ↔ PTBA : chaque marché découle d'une activité (ligne) d'un lot de collecte validé */
   function ppmActs() {
@@ -15676,9 +15678,9 @@ var EXEC_REC = [
     return escH(a.code + ' — ' + a.lib) + '<div class="hby" style="font-size:12.5px;color:#5B606D">' + escH(a.lot) + '</div>' + (over ? '<div><span class="badge b-ko">Total au-dessus du coût de l’activité</span></div>' : '');
   }
   /* ---------- Cadre de résultats : indicateurs, cibles par période et activités du PTBA rattachées ---------- */
-  var RES = { seq: 2, goal: 'Améliorer durablement l’accès aux services d’énergie et au numérique dans les zones isolées de Madagascar.', items: [
-    { id: 'IND-01', lib: 'Population ayant accès à l’électricité grâce au projet', unit: 'personne', base: 0, final: 250000, finY: 2028, cible: null, t: [null, null, null, null], real: [null, null, null, null], resp: '', node: 'ROOT', niv: 'Objectif de développement' },
-    { id: 'IND-02', lib: 'Réseaux isolés hybridés et numérisés', unit: 'réseau', base: 0, final: 17, finY: 2028, cible: 2, t: [0, 0, 1, 2], real: [0, 0, 1, null], resp: 'RANDIMBIARISON Maminirina', node: 'ROOT', niv: 'Objectif de développement' }
+  var RES = { seq: 2, goal: 'Offrir aux villages de meilleures écoles et de meilleurs soins de santé.', items: [
+    { id: 'IND-01', lib: 'Enfants qui étudient dans une école construite ou rénovée par le projet', unit: 'enfant', base: 0, final: 5000, finY: 2028, cible: null, t: [null, null, null, null], real: [null, null, null, null], resp: '', node: 'ROOT', niv: 'Objectif de développement' },
+    { id: 'IND-02', lib: 'Habitants vivant à moins de 5 km d’un centre de santé', unit: 'habitant', base: 0, final: 40000, finY: 2028, cible: 10000, t: [0, 2000, 6000, 10000], real: [0, 1500, 5200, null], resp: 'RASOARIMALALA Voahangy Lalao', node: 'ROOT', niv: 'Objectif de développement' }
   ] };
   var RES_Q = ['T1', 'T2', 'T3', 'T4'];
   /* Structure du projet (définie à la conception, avant tout PTBA) : les indicateurs s'y rattachent, les activités du PTBA aussi */
@@ -15915,7 +15917,7 @@ var EXEC_REC = [
     document.getElementById('ppm-new').disabled = !cadCan('ppm_edit'); document.getElementById('ppm-new').title = cadCan('ppm_edit') ? '' : 'Réservé : ' + cadRolesTxt('ppm_edit');
     document.getElementById('ppm-b').innerHTML = items.map(function (x) {
       var i = PPM_ST.indexOf(x.st), nx = PPM_ST[i + 1], en = ppmEng(x.ref), sb = 'font-size:12.5px;color:#5B606D';
-      return '<tr><td class="name">' + x.ref + '</td><td>' + escH(x.des) + '</td><td>' + escH(ppmLig(x.ligne)) + '</td><td>' + ppmActCell(x) + '</td><td>' + x.cat + '<div class="hby" style="' + sb + '">' + escH(x.met) + '</div></td><td class="num">' + fmt(x.est) + '</td><td class="num">' + fmt(en) + (en > x.est ? '<div><span class="badge b-ko">Dépasse l’estimatif</span></div>' : '') + '</td><td style="' + sb + '">' + isoToFr(x.d1) + ' · ' + isoToFr(x.d2) + ' · ' + isoToFr(x.d3) + '</td><td><span class="badge ' + PPM_STC[x.st] + '">' + x.st + '</span></td><td>' + (nx ? '<button class="btn small" data-ppm="' + x.ref + '"' + cadTitle('ppm_edit') + '>Passer à « ' + nx + ' »</button>' : '') + '</td></tr>';
+      return '<tr><td class="name">' + x.ref + '</td><td>' + escH(x.des) + '</td><td>' + (x.act ? '—' : escH(ppmLig(x.ligne))) + '</td><td>' + ppmActCell(x) + '</td><td>' + x.cat + '<div class="hby" style="' + sb + '">' + escH(x.met) + '</div></td><td class="num">' + fmt(x.est) + '</td><td class="num">' + fmt(en) + (en > x.est ? '<div><span class="badge b-ko">Dépasse l’estimatif</span></div>' : '') + '</td><td style="' + sb + '">' + isoToFr(x.d1) + ' · ' + isoToFr(x.d2) + ' · ' + isoToFr(x.d3) + '</td><td><span class="badge ' + PPM_STC[x.st] + '">' + x.st + '</span></td><td>' + (nx ? '<button class="btn small" data-ppm="' + x.ref + '"' + cadTitle('ppm_edit') + '>Passer à « ' + nx + ' »</button>' : '') + '</td></tr>';
     }).join('');
     document.getElementById('ppm-n').textContent = pl(items.length, 'marché') + ' · estimatif total ' + fmt(sumK(items, 'est')) + ' MGA';
     ppmCovRender();
@@ -18122,7 +18124,7 @@ var EXEC_REC = [
     { id: 'PAR-005', lib: 'Recettes propres', prof: 'Entreprise', ent: 'Direction Financière', from: 'BUD-2026-008' },
     { id: 'PAR-006', lib: 'Dépenses courantes — suivi trimestriel', prof: 'Entreprise', ent: 'Direction Financière', from: 'BUD-2026-021' },
     { id: 'PAR-007', lib: 'Budget du Ministère de l’Éducation', prof: 'Entité publique', ent: 'Direction Générale', from: 'BUD-2027-001' },
-    { id: 'PAR-008', lib: 'PTBA — DECIM', prof: 'Projet / Programme', ent: 'Direction Générale', from: 'BUD-2026-004' },
+    { id: 'PAR-008', lib: 'Plan de travail — Projet Écoles et Santé', prof: 'Projet / Programme', ent: 'Direction Générale', from: 'BUD-2026-004' },
     { id: 'PAR-009', lib: 'PTBA — Projet Santé Communautaire', prof: 'Projet / Programme', ent: 'Direction Générale', from: 'BUD-2026-005' }
   ];
   var BUDPAR = { 'BUD-2026-001': 'PAR-001', 'BUD-2025-001': 'PAR-001', 'BUD-2024-001': 'PAR-001', 'BUD-2026-002': 'PAR-002', 'BUD-2026-006': 'PAR-003', 'BUD-2026-007': 'PAR-004', 'BUD-2026-008': 'PAR-005', 'BUD-2026-021': 'PAR-006', 'BUD-2026-022': 'PAR-006', 'BUD-2027-001': 'PAR-007', 'BUD-2026-004': 'PAR-008', 'BUD-2026-005': 'PAR-009' };
@@ -18151,7 +18153,7 @@ var EXEC_REC = [
   PARAMS.forEach(function (pa) { if (PARMODEL[pa.id]) pa.model = PARMODEL[pa.id]; });
   BUDGETS.forEach(function (b) { b.par = BUDPAR[b.code]; if (!b.per) b.per = 'Exercice'; var pa = PARAMS.filter(function (x) { return x.id === b.par; })[0]; if (pa) b.period = pa.period; });
   /* Campagnes d’exemple : rattachées à un paramétrage, avec une enveloppe maximale par périmètre */
-  var CAMPPAR = { 'CAMP-2027-01': ['PAR-007', 'BUD-2027-001'], 'CAMP-2026-02': ['PAR-008', 'BUD-2026-004'], 'CAMP-2027-03': ['PAR-009', 'BUD-2026-005'] };
+  var CAMPPAR = { 'CAMP-2027-01': ['PAR-008', 'BUD-2026-004'], 'CAMP-2026-02': ['PAR-008', 'BUD-2026-004'], 'CAMP-2027-03': ['PAR-009', 'BUD-2026-005'] };
   var MIN0 = { 'Direction des Infrastructures': 3950000000, 'Direction Administrative et Financière': 1500000000, 'Cabinet': 300000000 };
   var ENV0 = { 'Direction de l’Enseignement fondamental': 8400000000, 'Direction de l’Enseignement supérieur': 4200000000, 'Direction des Infrastructures': 4000000000, 'Direction Administrative et Financière': 1700000000, 'Inspection générale': 500000000, 'Cabinet': 400000000 };
   camps.forEach(function (c) {
@@ -20724,6 +20726,8 @@ function pcRenderEnv(){
   .env-fields > div { min-width: 0; }
   .env-fields > .full { grid-column: 1 / -1; }
   .env-l { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+  .env-ind { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 10px; align-items: end; padding: 8px 10px; border: 1px dashed var(--border); border-radius: 8px; }
+  .env-ind > div { min-width: 0; }
   .env-fields .cellin, .env-fields select, .env-fields .field { width: 100% !important; box-sizing: border-box; margin: 0 !important; }
   @media (max-width: 700px) { .env-fields { grid-template-columns: 1fr; } }
   /* Détail d'une contribution : blocs séparés, colonnes égales ; le titre est déjà dans l'en-tête de la page */
