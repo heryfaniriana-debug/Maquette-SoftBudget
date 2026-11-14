@@ -4283,6 +4283,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <h2><span id="bv-view-title">Budget validé</span><button class="btn small" id="bv-view-close">Fermer</button></h2>
             <div class="body" id="bv-view-body"></div>
           </div>
+          <div class="panel" id="bv-link" hidden>
+            <h2><span id="bv-link-title">Rattacher aux autres plans</span></h2>
+            <div class="body" id="bv-link-body"></div>
+          </div>
         </div>
         <div class="steps" id="pt-hsteps"></div>
         <div class="callout" id="pt-empty" style="margin-bottom:12px"></div>
@@ -10423,7 +10427,7 @@ function fmAxes() {
     wk(E6.lines[1], 'Former 150 enseignants', '2026-03-01', '2026-06-30', 150, 'enseignant', [{ id: 'E26-2', contrib: 150 }], [60, 150, 150, null], 120000000);
     var S6 = pp(1, 'Composante 2 — Santé'); S6.obj = 'Rapprocher les soins de santé des villages.';
     S6.inds = [ind('S26-1', 'Centres de santé construits', 'centre', 5), ind('S26-2', 'Agents de santé formés', 'agent', 60)];
-    S6.lines = [{ c: '2.1', l: 'Construire des centres de santé', nat: '21', ref: null, dem: 400000000, q: 5, p: 80000000, just: '' }, { c: '2.2', l: 'Former des agents de santé', nat: '62', ref: null, dem: 60000000, q: 60, p: 1000000, just: '' }];
+    S6.lines = [{ c: '2.1', l: 'Construire des centres de santé', nat: '21', ref: null, dem: 400000000, q: 5, p: 80000000, just: '' }, { c: '2.2', l: 'Former des agents de santé', nat: '', ref: null, dem: 60000000, q: 60, p: 1000000, just: '' }];
     wk(S6.lines[0], 'Construire 5 centres de santé', '2026-06-01', '2026-12-15', 5, 'centre', [{ id: 'S26-1', contrib: 5 }], [0, 0, 2, null], 150000000);
     wk(S6.lines[1], 'Former 60 agents de santé', '2026-04-01', '2026-08-31', 60, 'agent', [{ id: 'S26-2', contrib: 60 }], [20, 40, 50, null], 60000000);
     /* axes du plan de financement et de la géographie, pour toutes les lignes */
@@ -10800,7 +10804,7 @@ function fmAxes() {
       var inds = ((w && w.inds) || []).map(function (k) { var i = (p.inds || []).filter(function (z) { return z.id === k.id; })[0]; if (!i) return null; return '• ' + i.lib + ' — apport ' + fmt(k.contrib) + ' ' + i.unit; }).filter(Boolean);
       blk('Indicateurs servis', inds.length ? inds : ['Aucun indicateur lié']);
     }
-    var bd = []; if (l.q != null && l.p != null) bd.push(fmt(l.q) + ' × ' + fmt(l.p) + ' MGA'); if (l.ref) bd.push('Référence : ' + fmt(l.ref) + ' MGA'); bd.push('Nature : ' + (l.nat || '—'));
+    var bd = []; if (l.q != null && l.p != null) bd.push(fmt(l.q) + ' × ' + fmt(l.p) + ' MGA'); if (l.ref) bd.push('Référence : ' + fmt(l.ref) + ' MGA');
     blk('Budget', bd); c.appendChild(g);
     if (l.just) { var cm = cvEl('div', 'lc-foot'); cm.appendChild(cvEl('b', null, 'Commentaire : ')); cm.appendChild(document.createTextNode(l.just)); c.appendChild(cm); }
     if (l.pj && l.pj.length) { var pj = cvEl('div', 'lc-foot'); pj.appendChild(cvEl('b', null, 'Pièces jointes')); pj.appendChild(pjList(l.pj)); c.appendChild(pj); }
@@ -11718,12 +11722,12 @@ function fmAxes() {
   function bvMatrix(r) {
     var d = bvData(r), pa = d.pa, axes = (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }), labs = pa && VTS[pa.vt] ? VTS[pa.vt] : null;
     var showPer = !!labs && d.lines.some(function (x) { return x.l.per; });
-    var head = ['Périmètre de collecte', 'Ligne', 'Nature', 'Travail', 'Début', 'Fin', 'Volume prévu', 'Indicateurs servis'].concat(axes.map(function (a) { return a.n; }), ['Quantité', 'Coût unitaire', 'Montant'], showPer ? labs : []);
+    var head = ['Périmètre de collecte', 'Ligne', 'Nature de dépense', 'Travail', 'Début', 'Fin', 'Volume prévu', 'Indicateurs servis'].concat(axes.map(function (a) { return a.n; }), ['Quantité', 'Coût unitaire', 'Montant'], showPer ? labs : []);
     var tot = 0;
     var rows = d.lines.map(function (x) {
       var l = x.l; tot += l.dem || 0;
       var pr = d.c.perims.filter(function (pp) { return pp.p === x.perim; })[0] || {};
-      return [x.perim, l.c + ' — ' + (l.lib || l.l), l.nat || '', l.wk ? l.wk.task : '', l.wk ? isoToFr(l.wk.d1) : '', l.wk ? isoToFr(l.wk.d2) : '', l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '', l.wk ? wkIndText(pr, l) : ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || ''; }), [l.q != null ? l.q : '', l.p != null ? l.p : '', l.dem || 0], showPer ? labs.map(function (_, i) { return l.per && l.per[i] ? l.per[i] : ''; }) : []);
+      return [x.perim, l.c + ' — ' + (l.lib || l.l), bvNatLbl(l), l.wk ? l.wk.task : '', l.wk ? isoToFr(l.wk.d1) : '', l.wk ? isoToFr(l.wk.d2) : '', l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '', l.wk ? wkIndText(pr, l) : ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || ''; }), [l.q != null ? l.q : '', l.p != null ? l.p : '', l.dem || 0], showPer ? labs.map(function (_, i) { return l.per && l.per[i] ? l.per[i] : ''; }) : []);
     });
     var fin = {}; d.lines.forEach(function (x) { var k = (x.l.axv && x.l.axv.Financier) || 'Non précisé'; fin[k] = (fin[k] || 0) + (x.l.dem || 0); });
     return { head: head, rows: rows, total: tot, fin: Object.keys(fin).map(function (k) { return [k, fin[k], tot ? Math.round(1000 * fin[k] / tot) / 10 : 0]; }), d: d };
@@ -11745,10 +11749,10 @@ function fmAxes() {
   function bvSum(arr) { return arr.reduce(function (s, v) { return s + v; }, 0); }
   function bvPtba(r) {
     var d = bvData(r), pa = d.pa, axes = (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }), ex = d.c.ex;
-    var head = ['Périmètre de collecte', 'Ligne', 'Nature', 'Période'].concat(axes.map(function (a) { return a.n; }), ['Montant annuel (MGA)'], BVMOIS), tot = new Array(13).fill(0);
+    var head = ['Périmètre de collecte', 'Ligne', 'Nature de dépense', 'Période'].concat(axes.map(function (a) { return a.n; }), ['Montant annuel (MGA)'], BVMOIS), tot = new Array(13).fill(0);
     var rows = d.lines.map(function (x) {
       var l = x.l, mo = bvSpread(l.dem, l, ex), amt = l.dem || 0; tot[0] += amt; mo.forEach(function (v, i) { tot[i + 1] += v; });
-      return { c: [x.perim, l.c + ' — ' + (l.lib || l.l), l.nat || '', l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || ''; }), [amt], mo) };
+      return { c: [x.perim, l.c + ' — ' + (l.lib || l.l), bvNatLbl(l), l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : ''].concat(axes.map(function (a) { return (l.axv && l.axv[a.n]) || 'À rattacher'; }), [amt], mo) };
     });
     if (rows.length) rows.push({ k: 'tot', c: ['Total', '', '', ''].concat(axes.map(function () { return ''; }), tot) });
     return { title: 'PTBA — Plan de travail et budget annuel : montants par mois', hint: 'Les montants de chaque ligne sont répartis sur les mois de son travail prévu.', head: head, rows: rows, numFrom: 4 + axes.length };
@@ -11768,6 +11772,54 @@ function fmAxes() {
       });
     });
     return { title: 'PTA — Plan de travail annuel : indicateurs et travaux par mois', hint: 'Chaque indicateur est suivi mois par mois ; les travaux qui y contribuent sont détaillés dessous (volumes répartis sur leur période).', head: head, rows: rows, numFrom: 3 };
+  }
+  /* Rattachement des lignes du PTBA aux autres plans (plan comptable, financement, géographie…) : les techniciens ne saisissent que le plan d'activité */
+  var BVPLANOPT = { 'Financier': ['Don du partenaire', 'Budget national'], 'Géographique': ['Région Nord', 'Région Sud'] };
+  function bvNatLbl(l) { return l.nat && NATL[l.nat] ? NATL[l.nat] : 'À rattacher'; }
+  function bvPlans(r) {
+    var pa = bvData(r).pa, plans = [{ key: null, n: 'Nature de dépense', opts: Object.keys(NATL).map(function (k) { return [k, NATL[k]]; }) }];
+    (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }).forEach(function (a) { plans.push({ key: a.n, n: a.n, opts: (BVPLANOPT[a.n] || []).map(function (v) { return [v, v]; }) }); });
+    return plans;
+  }
+  function bvLinkVal(l, p) { return p.key ? ((l.axv && l.axv[p.key]) || '') : (l.nat && NATL[l.nat] ? l.nat : ''); }
+  function bvLinkMissing(r) {
+    var plans = bvPlans(r), n = 0;
+    bvData(r).lines.forEach(function (x) { if (plans.some(function (p) { return !bvLinkVal(x.l, p); })) n++; });
+    return n;
+  }
+  function bvLinkOpen(r) {
+    var d = bvData(r), plans = bvPlans(r), draft = {}, body = document.getElementById('bv-link-body');
+    function draftVal(x, i, p) { var k = i + '|' + p.n; return k in draft ? draft[k] : bvLinkVal(x.l, p); }
+    function paint() {
+      body.innerHTML = '';
+      var miss = 0; d.lines.forEach(function (x, i) { if (plans.some(function (p) { return !draftVal(x, i, p); })) miss++; });
+      var bar = cvEl('div', 'row-toolbar'), sv = cvEl('button', 'btn primary', 'Enregistrer le rattachement'); sv.type = 'button';
+      sv.addEventListener('click', function () {
+        d.lines.forEach(function (x, i) { plans.forEach(function (p) { var k = i + '|' + p.n; if (!(k in draft)) return; if (p.key) { x.l.axv = x.l.axv || {}; x.l.axv[p.key] = draft[k]; } else x.l.nat = draft[k]; }); });
+        r.pt && r.pt.hist.unshift({ t: 'Lignes rattachées aux autres plans (' + plans.map(function (p) { return p.n; }).join(', ') + ')', by: ME, on: nowStr() });
+        document.getElementById('bv-link').hidden = true; bvAfter(r, 'Rattachement enregistré : ' + (bvLinkMissing(r) ? pl(bvLinkMissing(r), 'ligne') + ' reste à rattacher.' : 'toutes les lignes sont rattachées.'));
+      });
+      bar.appendChild(sv); body.appendChild(bar);
+      var info = cvEl('div', 'callout', 'Les techniciens ne saisissent que les activités du plan de travail. Ici, vous rattachez chaque ligne du PTBA aux autres plans : ' + plans.map(function (p) { return p.n.toLowerCase(); }).join(', ') + '. ' + (miss ? pl(miss, 'ligne') + ' à rattacher.' : 'Toutes les lignes sont rattachées.'));
+      info.style.marginBottom = '14px'; body.appendChild(info);
+      var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = '820px';
+      tb.innerHTML = '<thead><tr><th>Ligne du PTBA</th><th class="num">Montant (MGA)</th>' + plans.map(function (p) { return '<th>' + escH(p.n) + '</th>'; }).join('') + '</tr></thead>';
+      var tbd = cvEl('tbody');
+      d.lines.forEach(function (x, i) {
+        var tr = cvEl('tr'); cell(tr, x.l.c + ' — ' + (x.l.lib || x.l.l), 'name'); cell(tr, fmt(x.l.dem || 0), 'num');
+        plans.forEach(function (p) {
+          var td = cell(tr, ''), sel = cvEl('select', 'field'); sel.style.width = '100%'; sel.setAttribute('aria-label', p.n + ' de la ligne ' + x.l.c);
+          var o0 = cvEl('option', null, '— À rattacher —'); o0.value = ''; sel.appendChild(o0);
+          p.opts.forEach(function (o) { var op = cvEl('option', null, o[1]); op.value = o[0]; sel.appendChild(op); });
+          var cur = draftVal(x, i, p); if (cur && !p.opts.some(function (o) { return o[0] === cur; })) { var oc = cvEl('option', null, cur); oc.value = cur; sel.appendChild(oc); }
+          sel.value = cur; sel.addEventListener('change', function () { draft[i + '|' + p.n] = sel.value; paint(); }); td.appendChild(sel);
+        });
+        tbd.appendChild(tr);
+      });
+      tb.appendChild(tbd); sc.appendChild(tb); body.appendChild(sc);
+    }
+    document.getElementById('bv-link-title').textContent = 'Rattacher aux autres plans — ' + r.camp;
+    paint(); document.getElementById('bv-link').hidden = false;
   }
   function bvExportXlsx(r) {
     var m = bvMatrix(r), info = bvInfo(r), pt = bvPt(r), v = bvView(r), tv = v === 'pta' ? bvPta(r) : bvPtba(r), nm = v === 'pta' ? 'PTA' : 'PTBA';
@@ -11796,6 +11848,7 @@ function fmAxes() {
     var noInd = [];
     [['Exporter en Excel', '', true, function () { bvExportXlsx(r); }],
      ['Exporter en PDF', '', true, function () { bvExportPdf(r); }],
+     ['Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), '', pt.st !== 'Clôturé', function () { bvLinkOpen(r); }],
      [pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', 'primary', canSend, function () {
         if (noInd.length) { cvSay('bv-msg', 'Envoi impossible : ' + pl(noInd.length, 'activité') + ' sans indicateur (' + noInd.map(function (x) { return x.l.c; }).join(', ') + '). Rattachez-' + (noInd.length > 1 ? 'les' : 'la') + ' dans le cadre de résultats.'); var mm = document.getElementById('bv-msg'); mm.style.background = 'var(--ko-bg)'; mm.style.color = 'var(--ko)'; return; }
         cvAsk({ title: 'Marquer le PTBA comme envoyé au bailleur', ok: 'Marquer envoyé', required: false, placeholder: 'Mode d’envoi, référence du courrier…' }, function (com) {
@@ -19839,7 +19892,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link','resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
