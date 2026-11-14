@@ -3795,7 +3795,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="kanban" id="co-kanban"></div>
 
           <div class="panel" id="co-ctrl" hidden>
-          <h2><span id="co-ctrl-title">Détail</span><button class="btn small" id="co-ctrl-close">Fermer</button></h2>
+          <h2><span id="co-ctrl-title">Détail</span><span class="co-ctrl-acts" style="display:inline-flex;gap:8px;margin-left:auto"><button class="btn small primary" id="co-h-close" hidden>Clôturer</button><button class="btn small" id="co-h-return" hidden>Retourner au brouillon</button><button class="btn small" id="co-ctrl-close">Fermer</button></span></h2>
           <div class="body">
             <div id="co-d-head" class="co-kpis"></div>
             <div class="callout" id="co-d-ret" hidden style="margin-bottom:14px;background:var(--warn-bg);color:#B45309"></div>
@@ -10501,11 +10501,7 @@ function fmAxes() {
   function coQuickClose(p) {
     var r = ctrlOf(p.p);
     if (r.errs.length) { coMsg('Clôture impossible pour « ' + p.p + ' » : ' + pl(r.errs.length, 'anomalie bloquante') + '. Vérifiez la contribution, puis retournez-la au brouillon.', 'ko'); openCtrl(p.p); return; }
-    p.st = 'Acceptée'; p.motif = '';
-    coHist(p.p, 'Contribution clôturée', ME);
-    coMsg(p.p + ' : contribution clôturée. ' + (p.who || 'Le contributeur') + ' est notifié(e).', 'ok');
-    renderCoList(); renderCamps(); if (cdCur) renderCamp();
-    var sp = document.getElementById('cs-p').value; if (sp) renderSaisie(sp);
+    openCtrl(p.p); document.getElementById('co-h-close').click();
   }
   function coRelance(p) {
     if (!p.who) { coMsg('Aucun contributeur n’est affecté au périmètre « ' + p.p + ' » : affectez-en un dans la campagne.', 'ko'); return; }
@@ -10525,7 +10521,7 @@ function fmAxes() {
      ['Relancer', col === 'new' || col === 'draft', function () { coRelance(p); }],
      ['Vérifier', col === 'subm', function () { openCtrl(p.p); }],
      ['Clôturer', col === 'subm', function () { coQuickClose(p); }],
-     ['Retourner', col === 'subm', function () { openCtrl(p.p); ctrlDec = 'Retourner'; renderCtrl(); document.getElementById('co-motif').focus(); }]].forEach(function (a) {
+     ['Retourner', col === 'subm', function () { openCtrl(p.p); document.getElementById('co-h-return').click(); }]].forEach(function (a) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'btn' + (a[0] === 'Clôturer' && a[1] ? ' primary' : ''); b.textContent = a[0]; b.disabled = !a[1];
       b.addEventListener('click', a[2]); bar.appendChild(b);
     });
@@ -10628,8 +10624,8 @@ function fmAxes() {
       var w = document.createElement('span'); w.className = 'when'; w.textContent = h.on; row.appendChild(l); row.appendChild(w); hb.appendChild(row);
     });
     var can = p.st === 'Soumise';
-    document.getElementById('co-d-dec').hidden = !can;
-    document.getElementById('co-ctrl-save').hidden = !can;
+    document.getElementById('co-d-dec').hidden = true;
+    document.getElementById('co-h-close').hidden = !can; document.getElementById('co-h-return').hidden = !can;
     document.getElementById('co-ctrl-note').textContent = can ? '' : (p.st === 'Acceptée' ? 'Périmètre clôturé.' : 'La validation de collecte est possible une fois la contribution soumise.');
     document.querySelectorAll('#co-dec button').forEach(function (b) { b.classList.toggle('on', b.dataset.cdec === ctrlDec); });
     document.getElementById('co-motif-l').textContent = ctrlDec === 'Accepter' ? 'Motif (facultatif)' : 'Motif (obligatoire)';
@@ -10646,7 +10642,16 @@ function fmAxes() {
     b.addEventListener('click', function () { ctrlDec = b.dataset.cdec; document.getElementById('co-ctrl-err').textContent = ''; renderCtrl(); });
   });
   document.getElementById('co-ctrl-close').addEventListener('click', function () { document.getElementById('co-ctrl').hidden = true; ctrlP = null; });
-  document.getElementById('co-ctrl-save').addEventListener('click', function () {
+  document.getElementById('co-h-close').addEventListener('click', function () {
+    var r = ctrlOf(ctrlP);
+    if (r.errs.length) { coMsg(ctrlP + ' : clôture impossible, ' + pl(r.errs.length, 'anomalie bloquante') + '. Retournez la contribution au brouillon.', 'warn'); document.getElementById('co-ctrl-note').textContent = 'Clôture impossible : ' + pl(r.errs.length, 'anomalie bloquante') + '. Retournez la contribution au brouillon.'; return; }
+    cvAsk({ title: 'Clôturer la contribution — ' + ctrlP, ok: 'Clôturer', required: false, placeholder: 'Commentaire pour le contributeur' }, function (c) { ctrlDec = 'Accepter'; document.getElementById('co-motif').value = c; coDecide(); });
+  });
+  document.getElementById('co-h-return').addEventListener('click', function () {
+    cvAsk({ title: 'Retourner au brouillon — ' + ctrlP, ok: 'Retourner', required: true, cLabel: 'Motif', placeholder: 'Que doit corriger le contributeur ?' }, function (c) { ctrlDec = 'Retourner'; document.getElementById('co-motif').value = c; coDecide(); });
+  });
+  document.getElementById('co-ctrl-save').addEventListener('click', coDecide);
+  function coDecide() {
     var p = coPerim(ctrlP);
     var motif = document.getElementById('co-motif').value.trim();
     var err = document.getElementById('co-ctrl-err');
@@ -10661,7 +10666,7 @@ function fmAxes() {
     ctrlDec = 'Accepter';
     renderCoList(); document.getElementById('co-ctrl').hidden = true; ctrlP = null; renderCamps(); if (cdCur) renderCamp();
     var sp = document.getElementById('cs-p').value; if (sp) renderSaisie(sp);
-  });
+  }
 
   /* Saisie */
   /* ---------- Plan de travail de la ligne : prévisions (programmation) ; le suivi compare ensuite dépense et réalisation physique ---------- */
