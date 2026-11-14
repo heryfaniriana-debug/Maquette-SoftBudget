@@ -11755,7 +11755,7 @@ function fmAxes() {
     var head = ['Périmètre de collecte', 'Ligne', 'Période'].concat(axes.map(function (a) { return a.n; }), ['Montant annuel (MGA)'], BVMOIS), tot = new Array(13).fill(0);
     var rows = d.lines.map(function (x) {
       var l = x.l, mo = bvSpread(l.dem, l, ex), amt = l.dem || 0; tot[0] += amt; mo.forEach(function (v, i) { tot[i + 1] += v; });
-      return { c: [x.perim, l.c + ' — ' + (l.lib || l.l), l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : ''].concat(axes.map(function (a) { return bvAxVal(l, a.n) || 'À rattacher'; }), [amt], mo) };
+      return { c: [x.perim, l.c + ' — ' + (l.lib || l.l), l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : ''].concat(axes.map(function (a) { return bvAxVal(l, a.n) || 'À rattacher'; }), [amt], mo), ref: { perim: x.perim, c: l.c } };
     });
     if (rows.length) rows.push({ k: 'tot', c: ['Total', '', ''].concat(axes.map(function () { return ''; }), tot) });
     return { title: 'PTBA — Plan de travail et budget annuel : montants par mois', hint: 'Les montants de chaque ligne sont répartis sur les mois de son travail prévu.', head: head, rows: rows, numFrom: 3 + axes.length };
@@ -11769,7 +11769,7 @@ function fmAxes() {
         ls.forEach(function (x) {
           var k = x.l.wk && (x.l.wk.inds || []).filter(function (z) { return z.id === ind.id; })[0]; if (!k) return;
           var mo = bvSpread(k.contrib, x.l, ex); mo.forEach(function (v, i) { tot[i] += v; });
-          sub.push({ c: ['', '   ' + x.l.c + ' — ' + (x.l.wk.task || x.l.l), ind.unit, k.contrib].concat(mo, [bvSum(mo)]) });
+          sub.push({ c: ['', '   ' + x.l.c + ' — ' + (x.l.wk.task || x.l.l), ind.unit, k.contrib].concat(mo, [bvSum(mo)]), ref: { perim: x.perim, c: x.l.c, id: ind.id } });
         });
         rows.push({ k: 'ind', c: [pr.p, ind.lib, ind.unit, ind.cible != null ? ind.cible : ''].concat(tot, [bvSum(tot)]) }); sub.forEach(function (s) { rows.push(s); });
       });
@@ -11843,11 +11843,72 @@ function fmAxes() {
     sbPrint(nm + ' ' + info.name + ' ' + m.d.c.code, html);
   }
   function bvOpen(r) {
+    bvSel = null; bvVers(r);
     document.getElementById('bv-view-title').textContent = (bvKind === 'pta' ? 'PTA' : 'PTBA') + ' — ' + r.camp;
     bvRender(document.getElementById('bv-view-body'), r);
     document.getElementById('bv-view').hidden = false;
   }
   function bvAfter(r, msg) { bvRender(document.getElementById('bv-view-body'), r); renderBv(); cvSay('bv-msg', msg); }
+  /* Révision : on sélectionne une ligne dans le PTBA ou le PTA ; chaque révision ajoute une version (V2, V3…) et le budget initial V1 est conservé pour comparer */
+  var bvSel = null;
+  function bvSelLine(r) {
+    if (!bvSel) return null;
+    var f = bvData(r).lines.filter(function (x) { return x.perim === bvSel.perim && x.l.c === bvSel.c; })[0];
+    return f ? { x: f, id: bvSel.id } : null;
+  }
+  function bvSnap(r) {
+    var s = {}; bvData(r).lines.forEach(function (x) { var l = x.l; s[x.perim + '|' + l.c] = { dem: l.dem || 0, q: l.q, p: l.p, inds: ((l.wk && l.wk.inds) || []).map(function (k) { return [k.id, k.contrib]; }) }; });
+    return s;
+  }
+  function bvVers(r) {
+    if (!r.vers) { var vd = r.hist.filter(function (h) { return /^Validée/.test(h.t); })[0]; r.vers = [{ v: 1, on: vd ? vd.on : nowStr(), by: vd ? vd.by : ME, why: 'Budget initial validé', snap: bvSnap(r) }]; }
+    return r.vers;
+  }
+  function bvRevise(r) {
+    var sel = bvSelLine(r); if (!sel) return; bvVers(r);
+    var l = sel.x.l, isPta = bvView() === 'pta', k = isPta ? ((l.wk && l.wk.inds) || []).filter(function (z) { return z.id === sel.id; })[0] : null;
+    if (isPta && !k) return;
+    var ind = isPta ? ((bvData(r).c.perims.filter(function (p) { return p.p === sel.x.perim; })[0] || {}).inds || []).filter(function (z) { return z.id === sel.id; })[0] : null;
+    cvAsk({ title: 'Réviser la ligne ' + l.c + ' — ' + (isPta ? (l.wk.task || l.l) : (l.lib || l.l)), ok: 'Créer la version ' + (r.vers.length + 1), required: true, cLabel: 'Motif de la révision',
+      placeholder: 'Pourquoi cette révision ?', num: isPta ? 'Nouveau volume (' + (ind ? ind.unit : '') + ') — actuellement ' + fmt(k.contrib) : 'Nouveau montant (MGA) — actuellement ' + fmt(l.dem || 0) }, function (motif, _s, nv) {
+      var n = Math.round(parseFloat(String(nv).replace(/\s/g, '').replace(',', '.')));
+      if (isNaN(n) || n < 0) { cvSay('bv-msg', 'Révision annulée : la valeur saisie n’est pas un nombre valide.'); return; }
+      var what;
+      if (isPta) { what = 'Ligne ' + l.c + ' · volume : ' + fmt(k.contrib) + ' → ' + fmt(n) + ' ' + (ind ? ind.unit : ''); if (l.wk.inds.length === 1) l.wk.vol = n; k.contrib = n; }
+      else { what = 'Ligne ' + l.c + ' · montant : ' + fmt(l.dem || 0) + ' → ' + fmt(n) + ' MGA'; l.dem = n; if (l.q) l.p = Math.round(n / l.q); }
+      r.vers.push({ v: r.vers.length + 1, on: nowStr(), by: ME, why: motif, what: what, snap: bvSnap(r) });
+      bvPt(r).hist.unshift({ t: 'Révision — version V' + r.vers.length + ' : ' + what + ' — « ' + motif + ' »', by: ME, on: nowStr() });
+      bvAfter(r, 'Version V' + r.vers.length + ' créée. Le budget initial V1 est conservé pour la comparaison.');
+    });
+  }
+  /* Comparaison V1 / version actuelle */
+  function bvCompareBlock(r) {
+    var vs = bvVers(r), sec = cvEl('section', 'co-blk'); if (vs.length < 2) return null;
+    var last = vs[vs.length - 1], v1 = vs[0], d = bvData(r), isPta = bvView() === 'pta', rows = [], head;
+    if (isPta) {
+      head = ['Indicateur', 'Cible V1', 'Cible V' + last.v, 'Écart'];
+      d.c.perims.forEach(function (pr) { (pr.inds || []).forEach(function (ind) {
+        function sum(s) { var t = 0; Object.keys(s).forEach(function (key) { if (key.split('|')[0] !== pr.p) return; s[key].inds.forEach(function (z) { if (z[0] === ind.id) t += z[1]; }); }); return t; }
+        rows.push([pr.p + ' — ' + ind.lib + ' (' + ind.unit + ')', sum(v1.snap), sum(last.snap)]);
+      }); });
+    } else {
+      head = ['Ligne', 'Montant V1 (MGA)', 'Montant V' + last.v + ' (MGA)', 'Écart (MGA)'];
+      d.lines.forEach(function (x) { var k = x.perim + '|' + x.l.c, a = v1.snap[k] ? v1.snap[k].dem : 0, b = last.snap[k] ? last.snap[k].dem : 0; rows.push([x.l.c + ' — ' + (x.l.lib || x.l.l), a, b]); });
+      var ta = 0, tb = 0; rows.forEach(function (rw) { ta += rw[1]; tb += rw[2]; }); rows.push(['Total', ta, tb]);
+    }
+    sec.appendChild(cvEl('div', 'kb-h', 'Comparaison avec le budget initial (V1)'));
+    var sc = cvEl('div', 'scroll'), tb2 = cvEl('table'); tb2.innerHTML = '<thead><tr>' + head.map(function (h, i) { return '<th' + (i ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr></thead>';
+    var tbd = cvEl('tbody'); rows.forEach(function (rw) {
+      var tr = cvEl('tr'), e = rw[2] - rw[1]; if (rw[0] === 'Total') tr.style.fontWeight = '600';
+      cell(tr, rw[0], 'name'); cell(tr, fmt(rw[1]), 'num'); cell(tr, fmt(rw[2]), 'num'); var ce = cell(tr, e ? (e > 0 ? '+' : '−') + fmt(Math.abs(e)) : '—', 'num'); if (e) ce.style.color = e > 0 ? 'var(--ok)' : 'var(--ko)'; tbd.appendChild(tr);
+    });
+    tb2.appendChild(tbd); sc.appendChild(tb2); sec.appendChild(sc); return sec;
+  }
+  function bvVersBlock(r) {
+    var sec = cvEl('section', 'co-blk'); sec.appendChild(cvEl('div', 'kb-h', 'Versions du budget'));
+    bvVers(r).slice().reverse().forEach(function (v) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'V' + v.v + (v.v === 1 ? ' — budget initial' : '') + (v.what ? ' · ' + v.what : ''))); l.appendChild(cvEl('div', 'hby', v.by + (v.v > 1 ? ' — « ' + v.why + ' »' : ''))); row.appendChild(l); row.appendChild(cvEl('span', 'when', v.on)); sec.appendChild(row); });
+    return sec;
+  }
   function bvBar(root, r) {
     var pt = bvPt(r), bar = cvEl('div', 'row-toolbar'); bar.style.marginBottom = '14px';
     var canSend = pt.st === 'À envoyer' || pt.st === 'Correction demandée par le bailleur', canRet = pt.st === 'Envoyé au bailleur', canClose = pt.st === 'Retour notifié : approuvé';
@@ -11855,6 +11916,7 @@ function fmAxes() {
     var isPta = bvView() === 'pta';
     [['Exporter en Excel', '', true, function () { bvExportXlsx(r); }],
      ['Exporter en PDF', '', true, function () { bvExportPdf(r); }],
+     ['Réviser la ligne', 'primary', !!bvSelLine(r), function () { bvRevise(r); }],
      ['Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), '', pt.st !== 'Clôturé' && bvPlans(r).length > 0, function () { bvLinkOpen(r); }],
      [pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', 'primary', canSend, function () {
         if (bvLinkMissing(r)) { cvSay('bv-msg', 'Envoi impossible : ' + pl(bvLinkMissing(r), 'ligne') + ' à rattacher aux plans de la configuration (' + bvPlans(r).map(function (p) { return p.n; }).join(', ') + ').'); var m0 = document.getElementById('bv-msg'); m0.style.background = 'var(--ko-bg)'; m0.style.color = 'var(--ko)'; return; }
@@ -11870,7 +11932,7 @@ function fmAxes() {
      ['Clôturer', 'primary', canClose, function () {
         cvAsk({ title: 'Clôturer le PTBA', ok: 'Clôturer', required: false, placeholder: 'Commentaire de clôture' }, function (com) {
           pt.st = 'Clôturé'; pt.hist.unshift({ t: 'PTBA clôturé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA clôturé : il est verrouillé.'); });
-      }]].slice(0, isPta ? 2 : 99).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
+      }]].filter(function (a, i) { return !isPta || i < 2 || a[0] === 'Réviser la ligne'; }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
     root.appendChild(bar);
   }
   function bvRender(root, r) {
@@ -11881,7 +11943,7 @@ function fmAxes() {
     bvBar(root, r);
     var k = cvEl('div', 'co-kpis'); k.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
     k.appendChild(cvKpi('Configuration', pa ? pa.lib : '—'));
-    k.appendChild(cvKpi('Exercice', d.c.ex));
+    k.appendChild(cvKpi('Exercice · version', d.c.ex + ' · V' + bvVers(r).length));
     k.appendChild(cvKpi('Montant validé', fmt(tot) + ' MGA' + (vd ? ' · le ' + vd.on.slice(0, 10) : '')));
     if (bvView() === 'pta') k.appendChild(cvKpi('Indicateurs suivis', String(d.c.perims.reduce(function (s, p) { return s + (p.inds || []).length; }, 0))));
     else k.appendChild(cvKpi('Statut du PTBA', badge(bvPt(r).st, PTST[bvPt(r).st] || 'b-neutral')));
@@ -11895,10 +11957,18 @@ function fmAxes() {
     m.rows.forEach(function (rw) {
       var tr = cvEl('tr'); if (rw.k) tr.style.fontWeight = '600'; if (rw.k === 'ind') tr.style.background = 'var(--surface-2, #F1F5F9)';
       rw.c.forEach(function (v, i) { cell(tr, typeof v === 'number' ? (v ? fmt(v) : '—') : (v === '' || v == null ? '—' : v), i >= m.numFrom ? 'num' : (i === 1 ? 'name' : '')); });
+      if (rw.ref) {
+        tr.style.cursor = 'pointer'; tr.tabIndex = 0;
+        var on = bvSel && bvSel.perim === rw.ref.perim && bvSel.c === rw.ref.c && bvSel.id === rw.ref.id; if (on) tr.style.background = 'var(--brand-50, #E0ECFF)';
+        function pick() { bvSel = on ? null : rw.ref; bvRender(root, r); }
+        tr.addEventListener('click', pick); tr.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+      }
       tbd.appendChild(tr);
     });
     tb.appendChild(tbd); sc.appendChild(tb); bl.appendChild(sc); root.appendChild(bl);
-    var hs = cvEl('section', 'co-blk'); hs.appendChild(cvEl('div', 'kb-h', 'Suivi du PTBA'));
+    var sh = cvEl('div', 'hint', bvSel ? 'Ligne sélectionnée : utilisez « Réviser la ligne » en haut.' : 'Cliquez sur une ligne pour la réviser : la révision ajoute une version, le budget initial V1 est conservé.'); sh.style.margin = '-6px 0 14px'; root.appendChild(sh);
+    var cmp = bvCompareBlock(r); if (cmp) root.appendChild(cmp); root.appendChild(bvVersBlock(r));
+    var hs =cvEl('section', 'co-blk'); hs.appendChild(cvEl('div', 'kb-h', 'Suivi du PTBA'));
     var ph = bvPt(r).hist; if (!ph.length) hs.appendChild(cvEl('div', 'hint', 'Aucune action enregistrée : le PTBA est prêt à être envoyé au bailleur.'));
     ph.forEach(function (h) { var row = cvEl('div', 'list-row'); var l = cvEl('div'); l.appendChild(cvEl('b', null, h.t)); l.appendChild(cvEl('div', 'hby', h.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', h.on)); hs.appendChild(row); });
     if (bvView() !== 'pta') root.appendChild(hs);
@@ -14466,8 +14536,8 @@ var EXEC_REC = [
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
     put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['resu']]);
-    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud'], ['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)']].concat(revCA ? [] : [['revis']]));
-    if (revCA) put('g-cadm', [['cadcred'], ['revis', 'Révisions et virements', 'Révisions budgétaires et virements de crédits'], ['cadeng'], ['cadliq'], ['cadreg'], ['cadtab'], ['cadclot'], ['cadint']]);
+    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud'], ['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)']]);
+    if (revCA) put('g-cadm', [['cadeng'], ['cadliq'], ['cadreg'], ['cadtab'], ['cadclot'], ['cadint']]);
     put('g-treso', [['dfon'], ['pdec'], ['bkacc'], ['bkrel'], ['bkrap']]);
     put('g-suivi', [['appr'], ['avanc'], ['engage', circ ? 'Engagements importés' : ''], ['real', circ ? 'Réalisations importées' : ''], ['decaiss', circ ? 'Paiements importés' : ''], ['encaiss', circ ? 'Recettes importées' : '']]);
     var avb = document.querySelector('.sub button[data-go="avanc"]'); if (avb) avb.style.display = '';
@@ -14493,6 +14563,7 @@ var EXEC_REC = [
     applyProjectMenu(code, cfg);
     regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso);
     regSetVis('.sub button[data-go="pluri"]', cfg.mods.pluri); regSetVis('.sub button[data-go="bkdvr"]', cfg.mods.treso); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso && code !== 'prj'); regSetVis('.sub button[data-go="pdec"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="dfon"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="ppm"]', code === 'prj'); regSetVis('.sub button[data-go="pta"]', code === 'prj'); regSetVis('.sub button[data-go="inv"]', code === 'ent'); regSetVis('.sub button[data-go="pad"]', code === 'prj'); regSetVis('.sub button.epub', cfg.regime === 'public'); regSetVis('.sub button[data-go="revis"]', cfg.regime !== 'public');
+    if (code === 'prj') regSetVis('.sub button[data-go="cadcred"], .sub button[data-go="revis"]', false); /* projet : la révision se fait dans le PTBA / PTA (versions) */
     regSetVis('.sub button[data-go="cadm"]', !circ);
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
