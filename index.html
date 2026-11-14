@@ -3806,8 +3806,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
               <div id="co-d-envst" style="margin-top:8px"></div>
             </section>
             <section class="co-blk">
-              <div class="kb-h">Lignes de la contribution</div>
-              <div class="scroll"><table style="min-width:980px"><thead><tr><th>Ligne</th><th>Nature</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire du contributeur</th><th>Pièces jointes</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
+              <div class="kb-h">Objectif de l’exercice, indicateurs et couverture</div>
+              <div id="co-d-objtxt" style="margin-bottom:10px;font-size:13px"></div>
+              <div class="scroll"><table style="min-width:900px"><thead><tr><th>Indicateur</th><th>Origine</th><th>Unité</th><th class="num">Cible fixée</th><th class="num">Planifié par les travaux</th><th>Couverture</th><th>Position du contributeur</th></tr></thead><tbody id="co-d-ind"></tbody></table></div>
+            </section>
+            <section class="co-blk">
+              <div class="kb-h">Lignes de la contribution et plan de travail</div>
+              <div class="scroll"><table style="min-width:1500px"><thead><tr><th>Ligne</th><th>Nature</th><th>Travail et période</th><th class="num">Volume prévu</th><th>Indicateurs servis</th><th class="num">Quantité</th><th class="num">Coût unitaire</th><th class="num">Budget de référence</th><th class="num">Demandé</th><th class="num">Variation</th><th>Commentaire du contributeur</th><th>Pièces jointes</th></tr></thead><tbody id="co-d-lines"></tbody></table></div>
             </section>
             <section class="co-blk"><div class="kb-h">Pièces jointes de la contribution</div><div id="co-d-pj"></div></section>
             <section class="co-blk"><div class="kb-h">Contrôles</div><div id="co-ctrl-list"></div></section>
@@ -10579,10 +10584,22 @@ function fmAxes() {
     if (!rt.hidden) rt.textContent = 'Retourné au brouillon' + (p.motif ? ' — motif : « ' + p.motif + ' »' : '') + '. Le contributeur corrige puis soumet à nouveau.';
     var lb = document.getElementById('co-d-lines'); lb.innerHTML = '';
     var dl = getLines(name).filter(function (l) { return l.dem != null; });
-    if (!dl.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, 'Aucune ligne saisie.'); td0.colSpan = 9; td0.style.textAlign = 'left'; lb.appendChild(tr0); }
+    var ot = document.getElementById('co-d-objtxt'); ot.innerHTML = ''; var ob = document.createElement('b'); ob.textContent = 'Objectif fixé au cadrage : '; ot.appendChild(ob); ot.appendChild(document.createTextNode(p.obj || 'non défini'));
+    var ib = document.getElementById('co-d-ind'); ib.innerHTML = '';
+    (p.inds || []).forEach(function (x) {
+      var tr = document.createElement('tr'), pn = indCible(p, x.id), nl2 = indLines(p, x.id).length;
+      cell(tr, x.lib, 'name'); cell(tr, x.fixed ? 'Cadrage' : 'Proposé par le contributeur'); cell(tr, x.unit); cell(tr, x.fixed ? fmt(x.cible) : '—', 'num'); cell(tr, fmt(pn) + ' (' + pl(nl2, 'ligne') + ')', 'num');
+      var cc = cell(tr, ''); if (x.fixed) { var rt2 = x.cible ? pn / x.cible : 0; cc.appendChild(badge(Math.round(100 * rt2) + ' %' + (rt2 < 1 ? ' · écart de ' + fmt(x.cible - pn) + ' ' + x.unit : ' · couvert'), rt2 >= 1 ? 'b-ok' : 'b-ko')); } else cc.textContent = '—';
+      var pc = cell(tr, ''), pb = posBadge(x);
+      if (pb) { pc.appendChild(pb); var pd = document.createElement('div'); pd.className = 'hby'; pd.style.cssText = 'font-size:12.5px;color:#5B606D'; pd.textContent = x.pos.why + (x.pos.alt != null ? ' · valeur jugée réaliste : ' + fmt(x.pos.alt) + ' ' + x.unit : '') + (x.pos.decision ? ' · décision : ' + x.pos.decision : ''); pc.appendChild(pd); } else pc.textContent = x.fixed ? (pn >= x.cible ? 'Non requise : objectif couvert' : 'Aucune position') : '—';
+      ib.appendChild(tr);
+    });
+    if (!(p.inds || []).length) { var ti0 = document.createElement('tr'), ci0 = cell(ti0, 'Aucun indicateur pour ce périmètre.'); ci0.colSpan = 7; ci0.style.textAlign = 'left'; ib.appendChild(ti0); }
+    if (!dl.length) { var tr0 = document.createElement('tr'); var td0 = cell(tr0, 'Aucune ligne saisie.'); td0.colSpan = 12; td0.style.textAlign = 'left'; lb.appendChild(tr0); }
     dl.forEach(function (l) {
       var tr = document.createElement('tr');
-      cell(tr, l.c + ' — ' + l.l, 'name'); cell(tr, l.nat || '—');
+      var lcc = cell(tr, l.c + ' — ' + l.l, 'name'); if (l.added) { var hp2 = badge('Hors plan', 'b-warn'); hp2.style.marginLeft = '8px'; lcc.appendChild(hp2); var hw2 = document.createElement('div'); hw2.className = 'hby'; hw2.style.cssText = 'font-size:12.5px;color:#5B606D'; hw2.textContent = 'Motif : ' + (l.addedWhy || '—'); lcc.appendChild(hw2); } cell(tr, l.nat || '—');
+      cell(tr, l.wk ? l.wk.task + ' · ' + isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : 'Non renseigné'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num'); cell(tr, wkIndText(p, l));
       cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num');
       cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num');
       var vr = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : 0; cell(tr, l.ref ? (vr > 0 ? '+' : '') + vr + ' %' : '—', 'num');
@@ -11490,7 +11507,7 @@ function fmAxes() {
           cell(tr, it.lib + (it.fixed ? '' : ' (proposé par le contributeur)'), 'name'); cell(tr, it.unit); cell(tr, it.fixed ? fmt(it.cible) : '—', 'num'); cell(tr, fmt(pn) + ' (' + pl(nl, 'ligne') + ')', 'num');
           var cc = cell(tr, ''); if (it.fixed) { var rt = it.cible ? pn / it.cible : 0; cc.appendChild(badge(Math.round(100 * rt) + ' %' + (rt < 1 ? ' · écart de ' + fmt(it.cible - pn) + ' ' + it.unit : ''), rt >= 1 ? 'b-ok' : 'b-ko')); } else cc.textContent = '—';
           var pc = cell(tr, ''), pbg = posBadge(it);
-          if (pbg) { pc.appendChild(pbg); var pd = cvEl('div', 'hby'); pd.style.cssText = 'font-size:12.5px;color:#5B606D'; pd.textContent = it.pos.why + (it.pos.alt != null ? ' · valeur jugée réaliste : ' + fmt(it.pos.alt) + ' ' + it.unit : '') + (it.pos.decision ? ' · décision : ' + it.pos.decision : ''); pc.appendChild(pd); } else pc.textContent = it.fixed ? 'Aucune position' : '—';
+          if (pbg) { pc.appendChild(pbg); var pd = cvEl('div', 'hby'); pd.style.cssText = 'font-size:12.5px;color:#5B606D'; pd.textContent = it.pos.why + (it.pos.alt != null ? ' · valeur jugée réaliste : ' + fmt(it.pos.alt) + ' ' + it.unit : '') + (it.pos.decision ? ' · décision : ' + it.pos.decision : ''); pc.appendChild(pd); } else pc.textContent = it.fixed ? (pn >= it.cible ? 'Non requise : objectif couvert' : 'Aucune position') : '—';
           tib.appendChild(tr);
         });
         ti.appendChild(tib); body.appendChild(ti);
