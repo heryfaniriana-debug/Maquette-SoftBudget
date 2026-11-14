@@ -3855,6 +3855,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="callout" id="cs-ret" hidden style="margin-bottom:12px;background:var(--ko-bg);color:var(--ko)"></div>
           <div class="callout" id="cs-note" hidden style="margin-bottom:12px"></div>
           <div class="callout" id="cs-obj" hidden style="margin-bottom:12px;background:var(--info-bg);color:#2E427B"></div>
+          <div class="kb-h" style="margin:0 0 8px;font-weight:600">Objectif chiffré du cadrage et couverture par vos travaux</div>
+          <div class="card" style="margin-bottom:12px"><div class="scroll"><table style="min-width:980px">
+            <thead><tr><th>Objectif</th><th class="num">Cible fixée</th><th class="num">Planifié par vos travaux</th><th>Couverture</th><th>Votre position</th><th>Actions</th></tr></thead><tbody id="cs-tgt-b"></tbody></table></div></div>
           <div class="card" style="margin-bottom:12px">
             <div class="scroll">
               <table style="min-width:1180px">
@@ -9954,7 +9957,8 @@ function fmAxes() {
     body.innerHTML = '';
     c.perims.forEach(function (p) {
       var tr = document.createElement('tr');
-      cell(tr, p.p, 'name'); cell(tr, p.who || 'Non affecté'); cell(tr, p.obj || '—');
+      var tg = (p.inds || []).filter(function (z) { return z.fixed; })[0];
+      cell(tr, p.p, 'name'); cell(tr, p.who || 'Non affecté'); cell(tr, (p.obj || '—') + (tg ? ' · cible : ' + fmt(tg.cible) + ' ' + tg.unit : ''));
       cell(tr, p.min != null ? fmt(p.min) : '—', 'num'); cell(tr, p.env != null ? fmt(p.env) : '—', 'num');
       body.appendChild(tr);
     });
@@ -10160,7 +10164,7 @@ function fmAxes() {
     (PERIMS[prof] || []).forEach(function (p) { var l = mkChk(true, p, function () { cmEnvRender(); cmDdSync(); }); l.dataset.p = p; box.appendChild(l); });
     cmEnvRender(); cmDdSync();
   }
-  var cmEnv = {}, cmMin = {}, cmWho = {}, cmObj = {}, cmLibAuto = true, cmDry = false;
+  var cmEnv = {}, cmMin = {}, cmWho = {}, cmObj = {}, cmTgt = {}, cmUnit = {}, cmLibAuto = true, cmDry = false;
   function cmDdSync() {
     var all = Array.prototype.slice.call(document.querySelectorAll('#cm-perims label'));
     var on = all.filter(function (l) { return l.querySelector('input').checked; }).map(function (l) { return l.dataset.p; });
@@ -10197,30 +10201,26 @@ function fmAxes() {
   function cmEnvRender() {
     var box = document.getElementById('cm-env'); box.innerHTML = '';
     var labs = Array.prototype.slice.call(document.querySelectorAll('#cm-perims label'));
-    var on = labs.map(function (l) { return l.querySelector('input').checked ? l.dataset.p : null; }).filter(Boolean);
-    if (labs.length) { var hd = document.createElement('div'); hd.className = 'list-row env-head env-grid'; hd.innerHTML = '<div>Périmètre de collecte</div><div>Contributeur</div><div>Objectif de l’exercice</div><div>Minimum (MGA)</div><div>Maximum (MGA)</div>'; box.appendChild(hd); }
     labs.forEach(function (lab) {
       var p = lab.dataset.p, ck = lab.querySelector('input');
-      var row = document.createElement('div'); row.className = 'list-row env-grid';
-      var nm = document.createElement('label'); nm.className = 'chk sm';
+      var card = document.createElement('div'); card.className = 'env-card'; if (!ck.checked) card.style.opacity = '.55';
+      var nm = document.createElement('label'); nm.className = 'chk sm env-title';
       var inc = document.createElement('input'); inc.type = 'checkbox'; inc.checked = ck.checked; inc.setAttribute('aria-label', 'Inclure ' + p);
       inc.addEventListener('change', function () { ck.checked = inc.checked; cmDdSync(); cmEnvRender(); });
-      nm.appendChild(inc); nm.appendChild(document.createTextNode(' ' + p));
+      nm.appendChild(inc); nm.appendChild(document.createTextNode(' ' + p)); card.appendChild(nm);
+      var grid = document.createElement('div'); grid.className = 'env-fields';
+      function fld(label, el, cls) { var d = document.createElement('div'); if (cls) d.className = cls; var s = document.createElement('span'); s.className = 'env-l'; s.textContent = label; d.appendChild(s); d.appendChild(el); grid.appendChild(d); return el; }
+      function txt(aria, ph, val, onin, num) { var i = document.createElement('input'); i.type = 'text'; i.className = 'cellin'; i.setAttribute('aria-label', aria); i.placeholder = ph; i.value = val; if (num) i.setAttribute('inputmode', 'numeric'); i.addEventListener('input', function () { onin(i); }); i.disabled = !ck.checked; return i; }
       var wsel = mkSelect([['', '— Non affecté —']].concat(CONTRIB.map(function (x) { return [x, x]; })), cmWho[p] || '', 'stepsel', 'Contributeur du périmètre ' + p, function (v) { cmWho[p] = v; });
-      wsel.disabled = !ck.checked;
-      if (!ck.checked) row.style.opacity = '.55';
-      var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'cellin'; inp.setAttribute('inputmode', 'numeric'); inp.setAttribute('aria-label', 'Enveloppe maximale de ' + p); inp.placeholder = 'Sans plafond';
-      inp.value = cmEnv[p] != null ? fmt(cmEnv[p]) : '';
-      inp.addEventListener('input', function () { cmEnv[p] = parseInt0(inp.value); });
-      inp.addEventListener('blur', function () { inp.value = cmEnv[p] != null ? fmt(cmEnv[p]) : ''; });
-      var mi = document.createElement('input'); mi.type = 'text'; mi.className = 'cellin'; mi.setAttribute('inputmode', 'numeric'); mi.setAttribute('aria-label', 'Enveloppe minimale de ' + p); mi.placeholder = 'Sans minimum';
-    mi.value = cmMin[p] != null ? fmt(cmMin[p]) : '';
-    mi.addEventListener('input', function () { cmMin[p] = parseInt0(mi.value); });
-    mi.addEventListener('blur', function () { mi.value = cmMin[p] != null ? fmt(cmMin[p]) : ''; });
-    var oi = document.createElement('input'); oi.type = 'text'; oi.className = 'cellin'; oi.setAttribute('aria-label', 'Objectif de l’exercice pour ' + p); oi.placeholder = 'Ex. 17 centres équipés'; oi.value = cmObj[p] || '';
-    oi.addEventListener('input', function () { cmObj[p] = oi.value; });
-    mi.disabled = inp.disabled = oi.disabled = !ck.checked;
-    row.appendChild(nm); row.appendChild(wsel); row.appendChild(oi); row.appendChild(mi); row.appendChild(inp); box.appendChild(row);
+      wsel.disabled = !ck.checked; fld('Contributeur', wsel);
+      var mi = txt('Enveloppe minimale de ' + p, 'Sans minimum', cmMin[p] != null ? fmt(cmMin[p]) : '', function (i) { cmMin[p] = parseInt0(i.value); }, true);
+      mi.addEventListener('blur', function () { mi.value = cmMin[p] != null ? fmt(cmMin[p]) : ''; }); fld('Minimum (MGA)', mi);
+      var inp = txt('Enveloppe maximale de ' + p, 'Sans plafond', cmEnv[p] != null ? fmt(cmEnv[p]) : '', function (i) { cmEnv[p] = parseInt0(i.value); }, true);
+      inp.addEventListener('blur', function () { inp.value = cmEnv[p] != null ? fmt(cmEnv[p]) : ''; }); fld('Maximum (MGA)', inp);
+      fld('Objectif de l’exercice', txt('Objectif de l’exercice pour ' + p, 'Ex. Équiper des centres isolés en kits hybrides', cmObj[p] || '', function (i) { cmObj[p] = i.value; }), 'full');
+      fld('Cible chiffrée', txt('Cible chiffrée pour ' + p, 'Ex. 17', cmTgt[p] != null ? String(cmTgt[p]) : '', function (i) { var v = parseFloat(i.value.replace(/\s/g, '').replace(',', '.')); cmTgt[p] = isNaN(v) ? null : v; }, true));
+      fld('Unité de la cible', txt('Unité de la cible pour ' + p, 'Ex. centre', cmUnit[p] || '', function (i) { cmUnit[p] = i.value; }));
+      card.appendChild(grid); box.appendChild(card);
     });
     if (!labs.length) { var h = document.createElement('div'); h.className = 'hint'; h.textContent = 'Aucun périmètre de collecte : choisissez d’abord une configuration.'; box.appendChild(h); }
   }
@@ -10252,7 +10252,7 @@ function fmAxes() {
     document.getElementById('cm-tpl').value = pa.tpl || TPLS[1];
     document.getElementById('cm-par-hint').textContent = ['Sources : ' + parSrcText(pa), 'Ventilation : ' + (pa.vt && pa.vt !== 'Aucune' ? pa.vt : 'non ventilée'), 'Périmètre de collecte : ' + collectText(pa.axes), 'Circuit de validation : ' + ((models.filter(function (m) { return m.id === pa.model; })[0] || { steps: [] }).steps.some(function (s) { return s.act && (s.t === 'Validation' || s.t === 'Approbation'); }) ? 'défini' : 'aucun')].join(' · ');
     var vals = prjAxisValues(pa) || PERIMS['Projet / Programme'], box = document.getElementById('cm-perims'), pref = false;
-    box.innerHTML = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {};
+    box.innerHTML = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmTgt = {}; cmUnit = {};
     vals.forEach(function (p) { var l = mkChk(true, p, function () { cmEnvRender(); cmDdSync(); }); l.dataset.p = p; box.appendChild(l); var v = prjPadEnv(p, pa); if (v) { cmEnv[p] = v; pref = true; } });
     var pe = document.getElementById('cm-env-pad'); pe.hidden = !pref;
     pe.textContent = pref ? 'Maximum prérempli avec l’enveloppe de chaque composante au PAD ' + CPAD.code + ' (version ' + CPAD.ver + ') pour l’exercice ' + document.getElementById('cm-ex').value + '. Il reste modifiable.' : '';
@@ -10293,7 +10293,7 @@ function fmAxes() {
     var act = el[0], ps = PARAMS.filter(function (x) { return x.prof === act && x.st === 'Actif' && x.id !== 'PAR-009'; });
     if (!ps.length) { var o1 = document.createElement('option'); o1.value = ''; o1.textContent = 'Aucun paramétrage actif'; sp.appendChild(o1); }
     ps.forEach(function (x) { var o2 = document.createElement('option'); o2.value = x.id; o2.textContent = x.lib; sp.appendChild(o2); });
-    cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmLibAuto = true; document.getElementById('cm-lib').value = '';
+    cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmTgt = {}; cmUnit = {}; cmLibAuto = true; document.getElementById('cm-lib').value = '';
     cmParChanged(); cmEnvRender();
   }
   document.getElementById('cm-prof').addEventListener('change', cmProfileChanged);
@@ -10318,6 +10318,8 @@ function fmAxes() {
       if (!perims.length) { err.textContent = 'Sélectionnez au moins un périmètre de contribution.'; return; }
   var badMM = perims.filter(function (q) { return cmMin[q] != null && cmEnv[q] != null && cmMin[q] > cmEnv[q]; })[0];
   if (badMM) { err.textContent = 'Périmètre « ' + badMM + ' » : le minimum dépasse le maximum.'; return; }
+  var badTgt = perims.filter(function (q) { return cmTgt[q] != null && (!(cmObj[q] || '').trim() || !(cmUnit[q] || '').trim() || cmTgt[q] <= 0); })[0];
+  if (badTgt) { err.textContent = 'Périmètre « ' + badTgt + ' » : une cible chiffrée demande un objectif, une unité et une valeur positive.'; return; }
 
     var ex = document.getElementById('cm-ex').value;
     if (!document.getElementById('cm-dp-w').hidden) {
@@ -10336,10 +10338,10 @@ function fmAxes() {
     BUDGETS.unshift(nbud);
     auditAdd('Création', 'Budget ' + nbud.code, 'Budget créé par la campagne ' + code + ' (' + paC.lib + ', ' + perLabel(nbud) + ')', nbud.prof);
     camps.unshift({ code: code, bud: nbud.code, par: paC.id, per: perV, lib: lib, prof: prof, ex: ex, model: mid, mver: m.ver, open: d2f(d1), close: d2f(d2), st: 'Brouillon', tpl: document.getElementById('cm-tpl').value, instr: document.getElementById('cm-instr').value,
-      perims: perims.map(function (p) { return { p: p, who: cmWho[p] || '', obj: (cmObj[p] || '').trim(), inds: [], st: 'Non démarrée', amt: 0, env: cmEnv[p] != null ? cmEnv[p] : null, min: cmMin[p] != null ? cmMin[p] : null }; }),
+      perims: perims.map(function (p) { return { p: p, who: cmWho[p] || '', obj: (cmObj[p] || '').trim(), inds: (cmTgt[p] != null && cmTgt[p] > 0 ? [{ id: 'IF-' + (++INDUID), lib: (cmObj[p] || '').trim(), unit: (cmUnit[p] || '').trim(), base: 0, cible: cmTgt[p], fixed: true }] : []), st: 'Non démarrée', amt: 0, env: cmEnv[p] != null ? cmEnv[p] : null, min: cmMin[p] != null ? cmMin[p] : null }; }),
       hist: [{ t: 'Campagne créée (brouillon) pour ' + paC.lib + ' — ' + perLabel(nbud), by: ME, on: nowStr() }] });
     renderBudgets();
-    document.getElementById('cm-lib').value = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmLibAuto = true; cmGo(1);
+    document.getElementById('cm-lib').value = ''; cmEnv = {}; cmMin = {}; cmWho = {}; cmObj = {}; cmTgt = {}; cmUnit = {}; cmLibAuto = true; cmGo(1);
     document.getElementById('cm-form').hidden = true;
     renderCamps();
     document.getElementById('cd').hidden = true; cdCur = null;
@@ -10402,16 +10404,16 @@ function fmAxes() {
   (function () {
     function pp(ci, name) { return camps[ci].perims.filter(function (x) { return x.p.indexOf(name) === 0; })[0]; }
     var a = pp(0, 'Direction de l’Enseignement fondamental'); a.obj = 'Scolariser 3 000 000 d’élèves et renouveler les manuels du primaire.';
-    a.inds = [{ id: 'IC-E1', lib: 'Élèves scolarisés au fondamental', unit: 'élève', base: 2800000 }, { id: 'IC-E2', lib: 'Manuels distribués', unit: 'manuel', base: 0 }];
+    a.inds = [{ id: 'IC-E1', lib: 'Élèves scolarisés au fondamental', unit: 'élève', base: 2800000, fixed: true, cible: 3000000 }, { id: 'IC-E2', lib: 'Manuels distribués', unit: 'manuel', base: 0, fixed: true, cible: 460000 }];
     function ln(name, code) { return (COL[name] || []).filter(function (l) { return l.c === code; })[0]; }
     function wk(l, task, d1, d2, vol, unit, inds) { if (l) l.wk = { task: task, d1: d1, d2: d2, vol: vol, unit: unit, inds: inds, real: [null, null, null, null], spent: null }; }
     wk(ln(a.p, 'P1.1'), 'Assurer la rémunération des enseignants et la scolarisation des élèves', '2027-01-01', '2027-12-31', 3000000, 'élève', [{ id: 'IC-E1', contrib: 3000000 }]);
     wk(ln(a.p, 'P1.2'), 'Acheter et distribuer les manuels du primaire', '2027-03-01', '2027-09-30', 460000, 'manuel', [{ id: 'IC-E2', contrib: 460000 }]);
-    var b = pp(0, 'Direction de l’Enseignement supérieur'); b.obj = 'Accueillir 50 000 boursiers supplémentaires.'; b.inds = [{ id: 'IC-E3', lib: 'Boursiers supplémentaires', unit: 'étudiant', base: 0 }];
+    var b = pp(0, 'Direction de l’Enseignement supérieur'); b.obj = 'Accueillir 50 000 boursiers supplémentaires.'; b.inds = [{ id: 'IC-E3', lib: 'Boursiers supplémentaires', unit: 'étudiant', base: 0, fixed: true, cible: 50000 }];
     wk(ln(b.p, 'P2.1'), 'Attribuer et verser les bourses aux étudiants', '2027-01-15', '2027-12-15', 50000, 'étudiant', [{ id: 'IC-E3', contrib: 50000 }]);
-    var c = pp(0, 'Direction des Infrastructures'); c.obj = 'Réhabiliter 120 écoles.'; c.inds = [];
+    var c = pp(0, 'Direction des Infrastructures'); c.obj = 'Réhabiliter 120 écoles.'; c.inds = [{ id: 'IC-E4', lib: 'Écoles réhabilitées', unit: 'école', base: 0, fixed: true, cible: 120 }];
     var d = pp(1, '1110101'); d.obj = 'Équiper 17 centres isolés d’ici 2028, dont 2 en 2026.';
-    d.inds = [{ id: 'IC-D1', lib: 'Études de faisabilité réalisées', unit: 'étude', base: 0 }, { id: 'IC-D2', lib: 'Centres équipés de kits hybrides', unit: 'centre', base: 0 }];
+    d.inds = [{ id: 'IC-D1', lib: 'Études de faisabilité réalisées', unit: 'étude', base: 0, fixed: true, cible: 17 }, { id: 'IC-D2', lib: 'Centres équipés de kits hybrides', unit: 'centre', base: 0, fixed: true, cible: 2 }];
   })();
   function coMsg(text, kind) {
     var el = document.getElementById('co-msg');
@@ -10673,6 +10675,34 @@ function fmAxes() {
     if (ex != null && ph < ex - 0.1) return { t: 'En retard', cls: 'b-ko', ph: ph, fin: fin, ex: ex };
     return { t: 'À jour', cls: 'b-ok', ph: ph, fin: fin, ex: ex };
   }
+  /* Objectifs chiffrés fixés au cadrage, couverture par les travaux planifiés, position du contributeur */
+  function tgtInds(p) { return (p.inds || []).filter(function (x) { return x.fixed; }); }
+  function covOf(p, x) { var pn = indCible(p, x.id); return { planned: pn, rate: x.cible ? pn / x.cible : 0 }; }
+  function posOk(x) { return !!(x.pos && x.pos.st !== 'Atteignable' && x.pos.why); }
+  function gapsOf(p) { return tgtInds(p).filter(function (x) { return covOf(p, x).planned < x.cible && !posOk(x); }); }
+  function posBadge(x) { if (!x.pos) return null; return badge(x.pos.st, x.pos.st === 'Atteignable' ? 'b-ok' : (x.pos.st === 'Non atteignable' ? 'b-ko' : 'b-warn')); }
+  function renderCsTargets(p, editable) {
+    var body = document.getElementById('cs-tgt-b'); if (!body) return; body.innerHTML = '';
+    var ts = tgtInds(p);
+    ts.forEach(function (x) {
+      var cv = covOf(p, x), tr = document.createElement('tr');
+      cell(tr, x.lib, 'name'); cell(tr, fmt(x.cible) + ' ' + x.unit, 'num'); cell(tr, fmt(cv.planned) + ' ' + x.unit, 'num');
+      var c = cell(tr, ''); c.appendChild(badge(Math.round(100 * cv.rate) + ' % ' + (cv.rate >= 1 ? '· couvert' : '· écart de ' + fmt(x.cible - cv.planned) + ' ' + x.unit), cv.rate >= 1 ? 'b-ok' : 'b-ko'));
+      var pc = cell(tr, ''), pb = posBadge(x);
+      if (pb) { pc.appendChild(pb); if (x.pos.why) { var d = document.createElement('div'); d.className = 'hby'; d.style.cssText = 'font-size:12.5px;color:#5B606D'; d.textContent = x.pos.why + (x.pos.alt != null ? ' · valeur jugée réaliste : ' + fmt(x.pos.alt) + ' ' + x.unit : ''); pc.appendChild(d); } }
+      else if (cv.rate < 1) pc.appendChild(badge('Position à donner', 'b-warn')); else pc.textContent = '—';
+      var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Prendre position'); b.type = 'button'; b.disabled = !editable; if (!editable) b.title = 'La contribution n’est plus modifiable.';
+      b.addEventListener('click', function () {
+        cvAsk({ title: 'Position sur l’objectif — ' + x.lib, ok: 'Enregistrer ma position', required: function (v) { return v !== 'Atteignable'; }, reqLabel: ' (obligatoire si l’objectif n’est pas atteignable tel quel)', optLabel: 'Position *', options: ['Atteignable', 'Atteignable sous conditions', 'Non atteignable'], num: 'Valeur que vous jugez réaliste (' + x.unit + ')', numOpt: true, cLabel: 'Justification, hypothèses ou risques', value: x.pos ? x.pos.why : '', placeholder: 'Pourquoi, sous quelles conditions, avec quels risques' }, function (com, st, n) {
+          var alt = n ? parseFloat(String(n).replace(/\s/g, '').replace(',', '.')) : null;
+          x.pos = { st: st, why: com, alt: isNaN(alt) ? null : alt, on: nowStr(), by: coWho() };
+          renderSaisie(p.p); coMsg('Position enregistrée pour « ' + x.lib + ' » : ' + st + '.', 'ok');
+        });
+      });
+      act.appendChild(b); body.appendChild(tr);
+    });
+    if (!ts.length) { var t0 = document.createElement('tr'), c0 = cell(t0, 'Aucun objectif chiffré fixé au cadrage pour ce périmètre : planifiez vos travaux selon l’objectif ci-dessus.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); }
+  }
   function wkIndText(p, l) {
     return ((l.wk && l.wk.inds) || []).map(function (k) { var i = (p.inds || []).filter(function (z) { return z.id === k.id; })[0]; return i ? i.lib + ' (' + fmt(k.contrib) + ' ' + i.unit + ')' : k.id; }).join(' ; ') || '—';
   }
@@ -10725,10 +10755,10 @@ function fmAxes() {
     var body = document.getElementById('cs-ind-b'); body.innerHTML = ''; p.inds = p.inds || [];
     p.inds.forEach(function (x, k) {
       var tr = document.createElement('tr');
-      var nl = indLines(p, x.id).length, ci = indCible(p, x.id);
-      cell(tr, x.lib, 'name'); cell(tr, x.unit); cell(tr, String(x.base || 0), 'num'); cell(tr, ci ? fmt(ci) : 'Calculée par les lignes', 'num');
+      var nl = indLines(p, x.id).length, ci = x.fixed ? x.cible : indCible(p, x.id);
+      cell(tr, x.lib + (x.fixed ? ' (objectif du cadrage)' : ''), 'name'); cell(tr, x.unit); cell(tr, String(x.base || 0), 'num'); cell(tr, ci ? fmt(ci) : 'Calculée par les lignes', 'num');
       cell(tr, nl ? pl(nl, 'ligne') + ' liée' + (nl > 1 ? 's' : '') : 'Aucune ligne liée');
-      var act = cell(tr, ''); var b = cvEl('button', 'btn small', 'Retirer'); b.type = 'button'; b.disabled = !editable; if (!editable) b.title = 'La contribution n’est plus modifiable.';
+      var act = cell(tr, ''); var b = cvEl('button', 'btn small', 'Retirer'); b.type = 'button'; b.disabled = !editable || !!x.fixed; if (x.fixed) b.title = 'Objectif fixé au cadrage : il ne peut pas être retiré.'; else if (!editable) b.title = 'La contribution n’est plus modifiable.';
       b.addEventListener('click', function () { var id = x.id; p.inds.splice(k, 1); lines.forEach(function (l) { if (l.wk && l.wk.inds) l.wk.inds = l.wk.inds.filter(function (z) { return z.id !== id; }); }); renderSaisie(p.p); }); act.appendChild(b);
       body.appendChild(tr);
     });
@@ -10809,7 +10839,9 @@ function fmAxes() {
     var pa7 = c.par ? parById(c.par) : null, labs7 = pa7 ? (VTS[pa7.vt] || null) : null;
     lines2.forEach(function (l) {
       var tr = document.createElement('tr');
-      cell(tr, l.c + ' — ' + (l.lib || l.l), 'name');
+      var lnc = cell(tr, l.c + ' — ' + (l.lib || l.l), 'name');
+      if (l.added) { var hb = badge('Hors plan', 'b-warn'); hb.style.marginLeft = '8px'; hb.title = 'Ligne ajoutée par le contributeur : ' + (l.addedWhy || ''); lnc.appendChild(hb); }
+      else if (l.ref != null) { var pb2 = badge('Sous-activité du plan', 'b-neutral'); pb2.style.marginLeft = '8px'; lnc.appendChild(pb2); }
       cell(tr, l.axv ? Object.keys(l.axv).map(function (k) { return l.axv[k]; }).filter(Boolean).join(' · ') || '—' : '—');
       var tm = cell(tr, '', 'num');
       var tpr = cell(tr, '');
@@ -10865,6 +10897,7 @@ function fmAxes() {
     var ob = document.getElementById('cs-obj'); ob.hidden = !p.obj; ob.textContent = p.obj ? 'Objectif de l’exercice fixé au cadrage : ' + p.obj : '';
     document.getElementById('cs-ind-add').disabled = !editable;
     renderCsInds(p, editable, lines2);
+    renderCsTargets(p, editable);
     totals();
     var hist = document.getElementById('cs-hist');
     hist.innerHTML = '';
@@ -10882,7 +10915,7 @@ function fmAxes() {
   }
   function coSaveLine(name, line, edit) {
     var lines = getLines(name), tgt;
-    if (edit) { for (var k in line) edit[k] = line[k]; tgt = edit; } else { lines.push(line); tgt = line; }
+    if (edit) { for (var k in line) edit[k] = line[k]; tgt = edit; } else { lines.push(line); tgt = line; if (pendingAdd) { tgt.added = true; tgt.addedWhy = pendingAdd; } }
     tgt.dem = lineAmt(tgt); if (tgt.ref === undefined) tgt.ref = null; tgt.nat = tgt.nat || '—'; if (tgt.just == null) tgt.just = '';
     var pp = coPerim(name);
     if (pp.st === 'Non démarrée') { pp.st = 'Brouillon'; coHist(name, 'Brouillon enregistré (première ligne saisie)', coWho()); coMsg('« ' + name + ' » est passée en brouillon : poursuivez la saisie puis soumettez.', 'info'); }
@@ -10899,7 +10932,11 @@ function fmAxes() {
     svLines = lines;
     openLineForm(line || null, false, false);
   }
-  document.getElementById('cs-add').addEventListener('click', function () { coOpenLine(document.getElementById('cs-p').value); });
+  var pendingAdd = null;
+  document.getElementById('cs-add').addEventListener('click', function () {
+    var pn = document.getElementById('cs-p').value;
+    cvAsk({ title: 'Ajouter une ligne hors plan', ok: 'Continuer', required: true, cLabel: 'Motif', placeholder: 'Pourquoi cette ligne manque-t-elle dans les sous-activités du plan ?' }, function (motif) { pendingAdd = motif; coOpenLine(pn); });
+  });
   document.getElementById('cs-p').addEventListener('change', function () { renderSaisie(this.value); });
   document.getElementById('cs-save').addEventListener('click', function () {
     var name = document.getElementById('cs-p').value;
@@ -10919,6 +10956,8 @@ function fmAxes() {
     var envErr = r.errs.filter(function (e) { return e.c === '*'; })[0];
     if (envErr) { coMsg('Soumission impossible : ' + envErr.m, 'ko'); return; }
     var p = coPerim(name);
+    var gaps = gapsOf(p);
+    if (gaps.length) { coMsg('Soumission impossible : ' + (gaps.length > 1 ? 'les objectifs « ' : 'l’objectif « ') + gaps.map(function (x) { return x.lib; }).join(' », « ') + (gaps.length > 1 ? ' » ne sont pas couverts' : ' » n’est pas couvert') + ' par vos travaux. Ajoutez des travaux ou prenez position (atteignable sous conditions, non atteignable) avec une justification.', 'ko'); return; }
     p.st = 'Soumise'; p.motif = '';
     syncAmt(name);
     coHist(name, 'Contribution soumise', coWho());
@@ -11429,7 +11468,11 @@ function fmAxes() {
     pe.forEach(function (x) {
       var d = cvEl('details', 'val-cfg'); var s = cvEl('summary', 'cv-sum');
       var nmd = cvEl('div'); nmd.appendChild(cvEl('b', null, x.p.p));
-      var nI = (x.p.inds || []).length, bI = badge(nI ? pl(nI, 'indicateur') : 'Sans indicateur', nI ? 'b-info' : 'b-warn'); bI.style.marginLeft = '8px'; nmd.appendChild(bI);
+      var tg = tgtInds(x.p), nI = (x.p.inds || []).length, bI;
+      var worst = tg.filter(function (z) { return z.pos && z.pos.st === 'Non atteignable'; })[0], cond = tg.filter(function (z) { return z.pos && z.pos.st === 'Atteignable sous conditions'; })[0], unc = tg.filter(function (z) { return covOf(x.p, z).rate < 1; })[0];
+      if (worst) bI = badge('Objectif non atteignable', 'b-ko'); else if (cond) bI = badge('Atteignable sous conditions', 'b-warn'); else if (unc) bI = badge('Objectif non couvert', 'b-ko'); else if (tg.length) bI = badge('Objectif couvert', 'b-ok'); else bI = badge(nI ? pl(nI, 'indicateur') : 'Sans indicateur', nI ? 'b-info' : 'b-warn');
+      bI.style.marginLeft = '8px'; nmd.appendChild(bI);
+      var nAdd = x.lines.filter(function (z) { return z.added; }).length; if (nAdd) { var bA = badge(pl(nAdd, 'ligne') + ' hors plan', 'b-warn'); bA.style.marginLeft = '6px'; nmd.appendChild(bA); }
       s.appendChild(nmd); s.appendChild(cvEl('span', null, x.p.who || 'Non affecté'));
       s.appendChild(cvEl('span', 'num', fmt(x.dem) + ' MGA'));
       var vr = x.ref ? Math.round((x.dem - x.ref) / x.ref * 100) : null; s.appendChild(cvEl('span', 'num', vr == null ? '—' : (vr > 0 ? '+' : '') + vr + ' %'));
@@ -11441,8 +11484,15 @@ function fmAxes() {
       body.appendChild(obj);
       if ((x.p.inds || []).length) {
         var ti = cvEl('table'); ti.style.cssText = 'width:100%;margin:0 0 10px';
-        ti.innerHTML = '<thead><tr><th>Indicateur proposé</th><th>Unité</th><th class="num">Départ</th><th class="num">Cible de l’exercice</th><th>Lignes de travail liées</th></tr></thead>';
-        var tib = cvEl('tbody'); x.p.inds.forEach(function (it) { var tr = cvEl('tr'), ci = indCible(x.p, it.id), nl = indLines(x.p, it.id).length; cell(tr, it.lib, 'name'); cell(tr, it.unit); cell(tr, String(it.base || 0), 'num'); cell(tr, ci ? fmt(ci) : '—', 'num'); cell(tr, nl ? pl(nl, 'ligne') : 'Aucune ligne liée'); tib.appendChild(tr); });
+        ti.innerHTML = '<thead><tr><th>Indicateur</th><th>Unité</th><th class="num">Cible fixée</th><th class="num">Planifié par les travaux</th><th>Couverture</th><th>Position du contributeur</th></tr></thead>';
+        var tib = cvEl('tbody'); x.p.inds.forEach(function (it) {
+          var tr = cvEl('tr'), pn = indCible(x.p, it.id), nl = indLines(x.p, it.id).length;
+          cell(tr, it.lib + (it.fixed ? '' : ' (proposé par le contributeur)'), 'name'); cell(tr, it.unit); cell(tr, it.fixed ? fmt(it.cible) : '—', 'num'); cell(tr, fmt(pn) + ' (' + pl(nl, 'ligne') + ')', 'num');
+          var cc = cell(tr, ''); if (it.fixed) { var rt = it.cible ? pn / it.cible : 0; cc.appendChild(badge(Math.round(100 * rt) + ' %' + (rt < 1 ? ' · écart de ' + fmt(it.cible - pn) + ' ' + it.unit : ''), rt >= 1 ? 'b-ok' : 'b-ko')); } else cc.textContent = '—';
+          var pc = cell(tr, ''), pbg = posBadge(it);
+          if (pbg) { pc.appendChild(pbg); var pd = cvEl('div', 'hby'); pd.style.cssText = 'font-size:12.5px;color:#5B606D'; pd.textContent = it.pos.why + (it.pos.alt != null ? ' · valeur jugée réaliste : ' + fmt(it.pos.alt) + ' ' + it.unit : '') + (it.pos.decision ? ' · décision : ' + it.pos.decision : ''); pc.appendChild(pd); } else pc.textContent = it.fixed ? 'Aucune position' : '—';
+          tib.appendChild(tr);
+        });
         ti.appendChild(tib); body.appendChild(ti);
       } else body.appendChild(cvEl('div', 'hint', 'Aucun indicateur proposé par le contributeur : à juger par rapport à l’objectif de l’exercice.'));
       if (!x.lines.length) body.appendChild(cvEl('div', 'hint', 'Aucune ligne détaillée.'));
@@ -11452,7 +11502,7 @@ function fmAxes() {
         var tbd = cvEl('tbody');
         x.lines.forEach(function (l) {
           var tr = cvEl('tr'); var v2 = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : null;
-          cell(tr, l.c + ' — ' + l.l, 'name'); cell(tr, l.nat || '—');
+          var lcell = cell(tr, l.c + ' — ' + l.l, 'name'); if (l.added) { var hp = badge('Hors plan', 'b-warn'); hp.style.marginLeft = '8px'; hp.title = 'Ajoutée par le contributeur : ' + (l.addedWhy || ''); lcell.appendChild(hp); var hw = cvEl('div', 'hby'); hw.style.cssText = 'font-size:12.5px;color:#5B606D'; hw.textContent = 'Motif : ' + (l.addedWhy || '—'); lcell.appendChild(hw); } cell(tr, l.nat || '—');
           cell(tr, l.wk ? l.wk.task + ' · ' + isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : 'Non renseigné'); cell(tr, l.wk && l.wk.vol ? fmt(l.wk.vol) + ' ' + l.wk.unit : '—', 'num'); cell(tr, wkIndText(x.p, l));
           cell(tr, l.q != null ? (Number.isInteger(l.q) ? fmt(l.q) : String(l.q).replace('.', ',')) : '—', 'num'); cell(tr, l.p != null ? fmt(l.p) : '—', 'num');
           cell(tr, l.ref ? fmt(l.ref) : '—', 'num'); cell(tr, fmt(l.dem), 'num'); cell(tr, v2 == null ? '—' : (v2 > 0 ? '+' : '') + v2 + ' %', 'num'); cell(tr, l.just || '—');
@@ -11478,7 +11528,7 @@ function fmAxes() {
     if (o.options) { var l1 = cvEl('label', null, o.optLabel); box.appendChild(l1); sel = cvEl('select', 'field'); o.options.forEach(function (x) { var op = cvEl('option', null, x); op.value = x; sel.appendChild(op); }); box.appendChild(sel); }
     var nin = null;
     if (o.num) { box.appendChild(cvEl('label', null, o.num)); nin = cvEl('input', 'field'); nin.type = 'text'; nin.setAttribute('inputmode', 'decimal'); box.appendChild(nin); }
-    box.appendChild(cvEl('label', null, (o.cLabel || 'Commentaire') + (typeof o.required === 'function' ? ' (obligatoire sauf approbation)' : (o.required ? ' *' : ' (facultatif)'))));
+    box.appendChild(cvEl('label', null, (o.cLabel || 'Commentaire') + (typeof o.required === 'function' ? (o.reqLabel || ' (obligatoire sauf approbation)') : (o.required ? ' *' : ' (facultatif)'))));
     var ta = cvEl('textarea', 'field'); ta.placeholder = o.placeholder || ''; ta.value = o.value || ''; box.appendChild(ta);
     var err = cvEl('div', 'err'); box.appendChild(err);
     var ft = cvEl('div', 'form-foot'); var bc = cvEl('button', 'btn', 'Annuler'); bc.type = 'button'; var bo = cvEl('button', 'btn primary', o.ok); bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
@@ -11486,7 +11536,7 @@ function fmAxes() {
     bc.addEventListener('click', close); bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
     bo.addEventListener('click', function () {
       var v = ta.value.trim(), need = typeof o.required === 'function' ? o.required(sel ? sel.value : null) : o.required; if (need && !v) { err.textContent = o.cLabel ? 'Le champ « ' + o.cLabel + ' » est obligatoire.' : 'Le commentaire est obligatoire.'; return; }
-      if (nin && !nin.value.trim()) { err.textContent = 'La valeur est obligatoire.'; return; }
+      if (nin && !o.numOpt && !nin.value.trim()) { err.textContent = 'La valeur est obligatoire.'; return; }
       close(); cb(v, sel ? sel.value : null, nin ? nin.value : null);
     });
     bd.appendChild(box); document.body.appendChild(bd); (sel || ta).focus();
@@ -11510,6 +11560,22 @@ function fmAxes() {
      ['Corriger', '', function () {
         cvAsk({ title: 'Corriger la consolidation', ok: 'Enregistrer la correction', required: true, placeholder: 'Quelle correction apportez-vous ?' }, function (com) {
           r.st = 'Corrigée'; r.step = 'Corrigée par le validateur'; r.hist.unshift({ t: 'Corrigée par le validateur — ' + com, by: ME, on: nowStr() }); cvAfter('Correction enregistrée pour ' + r.camp + '.'); });
+      }],
+     ['Arbitrer un objectif', '', function () {
+        var map = {}, opts = [];
+        cvPerims(r).forEach(function (x) { tgtInds(x.p).forEach(function (t) {
+          if (covOf(x.p, t).rate >= 1 && !(t.pos && t.pos.st !== 'Atteignable')) return;
+          var key = x.p.p + ' — ' + t.lib, a = 'Maintenir l’objectif (' + fmt(t.cible) + ' ' + t.unit + ') · ' + key; map[a] = { t: t, mode: 'keep' }; opts.push(a);
+          if (t.pos && t.pos.alt != null) { var b = 'Ajuster à ' + fmt(t.pos.alt) + ' ' + t.unit + ' (valeur proposée) · ' + key; map[b] = { t: t, mode: 'adjust' }; opts.push(b); }
+        }); });
+        if (!opts.length) { cvAsk({ title: 'Arbitrer un objectif', ok: 'Fermer', required: false, placeholder: 'Tous les objectifs sont couverts par les travaux planifiés : rien à arbitrer.' }, function () {}); return; }
+        cvAsk({ title: 'Arbitrer un objectif', ok: 'Enregistrer la décision', required: true, optLabel: 'Décision *', options: opts, cLabel: 'Motif de la décision', placeholder: 'Pourquoi maintenir ou ajuster l’objectif' }, function (com, choice) {
+          var d = map[choice]; if (!d) return; var t = d.t; t.pos = t.pos || { st: 'Non précisée', why: '' };
+          if (d.mode === 'adjust') { var old = t.cible; t.cible = t.pos.alt; t.pos.decision = 'objectif ajusté de ' + fmt(old) + ' à ' + fmt(t.cible); }
+          else t.pos.decision = 'objectif maintenu';
+          r.hist.unshift({ t: 'Arbitrage de l’objectif « ' + t.lib + ' » : ' + t.pos.decision + ' — ' + com, by: ME, on: nowStr() });
+          cvRender(document.getElementById('cv-dec-body'), r, false);
+        });
       }],
      ['Demander une correction au contributeur', '', function () {
         var names = cvPerims(r).map(function (x) { return x.p.p; });
@@ -15708,7 +15774,7 @@ var EXEC_REC = [
           b.addEventListener('click', function () { lineAvance(l); }); act.appendChild(b); bl.appendChild(tr);
         });
         (p.inds || []).forEach(function (x) {
-          ni++; var ls = indLines(p, x.id), cible = indCible(p, x.id), real = 0, exp = 0, tr = document.createElement('tr');
+          ni++; var ls = indLines(p, x.id), cible = x.fixed ? x.cible : indCible(p, x.id), real = 0, exp = 0, tr = document.createElement('tr');
           ls.forEach(function (l) { var k = l.wk.inds.filter(function (z) { return z.id === x.id; })[0], rl = wkReal(l); real += k.contrib * (rl == null ? 0 : Math.min(1, rl / l.wk.vol)); exp += k.contrib * (wkFrac(l) || 0); });
           cell(tr, x.lib, 'name'); cell(tr, p.p); cell(tr, x.unit); cell(tr, String(x.base || 0), 'num'); cell(tr, cible ? fmt(cible) : '—', 'num');
           cell(tr, ls.length ? pl(ls.length, 'ligne') : 'Aucune ligne liée'); cell(tr, fmt(Math.round(real * 10) / 10), 'num'); cell(tr, fmt(Math.round(exp * 10) / 10), 'num');
@@ -20553,6 +20619,15 @@ function pcRenderEnv(){
 <style>
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
+  /* Cadrage de campagne : une fiche par périmètre, champs de même largeur */
+  .env-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: var(--surface); }
+  .env-title { font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .env-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .env-fields > div { min-width: 0; }
+  .env-fields > .full { grid-column: 1 / -1; }
+  .env-l { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+  .env-fields .cellin, .env-fields select, .env-fields .field { width: 100% !important; box-sizing: border-box; margin: 0 !important; }
+  @media (max-width: 700px) { .env-fields { grid-template-columns: 1fr; } }
   /* Détail d'une contribution : blocs séparés, colonnes égales ; le titre est déjà dans l'en-tête de la page */
   /* PTBA du profil Projet : à l'entrée, seulement la liste des lots de collecte validés */
   #v-ptba.ptba-lots > :not(#bv-wrap):not(.sb-fp-head) { display: none !important; }
