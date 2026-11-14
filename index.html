@@ -10410,7 +10410,11 @@ function fmAxes() {
     wk(ln(a.p, 'P1.1'), 'Assurer la rémunération des enseignants et la scolarisation des élèves', '2027-01-01', '2027-12-31', 3000000, 'élève', [{ id: 'IC-E1', contrib: 3000000 }]);
     wk(ln(a.p, 'P1.2'), 'Acheter et distribuer les manuels du primaire', '2027-03-01', '2027-09-30', 460000, 'manuel', [{ id: 'IC-E2', contrib: 460000 }]);
     var b = pp(0, 'Direction de l’Enseignement supérieur'); b.obj = 'Accueillir 50 000 boursiers supplémentaires.'; b.inds = [{ id: 'IC-E3', lib: 'Boursiers supplémentaires', unit: 'étudiant', base: 0, fixed: true, cible: 50000 }];
-    wk(ln(b.p, 'P2.1'), 'Attribuer et verser les bourses aux étudiants', '2027-01-15', '2027-12-15', 50000, 'étudiant', [{ id: 'IC-E3', contrib: 50000 }]);
+    wk(ln(b.p, 'P2.1'), 'Attribuer et verser les bourses aux étudiants', '2027-01-15', '2027-12-15', 40000, 'étudiant', [{ id: 'IC-E3', contrib: 40000 }]);
+    /* Cas de démonstration : 1 indicateur servi par 2 lignes, dont une activité créée par le contributeur (hors plan) */
+    COL[b.p].push({ c: 'L01', l: 'Bourses d’excellence en sciences et technologies', nat: '65', ref: null, dem: 100000000, q: 10000, p: 10000, just: 'Programme prioritaire annoncé après le cadrage', added: true, addedWhy: 'Les bourses d’excellence n’existent pas parmi les sous-activités du plan', axv: { Analytique: 'Programme P2', Financier: 'Budget de l’État' },
+      wk: { task: 'Attribuer 10 000 bourses d’excellence en sciences et technologies', d1: '2027-03-01', d2: '2027-10-31', vol: 10000, unit: 'étudiant', inds: [{ id: 'IC-E3', contrib: 10000 }], real: [null, null, null, null], spent: null } });
+    b.amt = 4200000000;
     var c = pp(0, 'Direction des Infrastructures'); c.obj = 'Réhabiliter 120 écoles.'; c.inds = [{ id: 'IC-E4', lib: 'Écoles réhabilitées', unit: 'école', base: 0, fixed: true, cible: 120 }];
     var d = pp(1, '1110101'); d.obj = 'Équiper 17 centres isolés d’ici 2028, dont 2 en 2026.';
     d.inds = [{ id: 'IC-D1', lib: 'Études de faisabilité réalisées', unit: 'étude', base: 0, fixed: true, cible: 17 }, { id: 'IC-D2', lib: 'Centres équipés de kits hybrides', unit: 'centre', base: 0, fixed: true, cible: 2 }];
