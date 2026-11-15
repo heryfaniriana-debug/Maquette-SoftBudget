@@ -1974,7 +1974,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="dprap" title="Rapprochement de l’exécution saisie et importée" style="display:none">Rapprochement saisie / import</button>
           <button data-go="sxeng" style="display:none">Engagements</button>
           <button data-go="sxliq" style="display:none">Réalisations</button>
-          <button data-go="sxpay" style="display:none">Paiements</button>
+          <button data-go="sxpay" style="display:none">Décaissements</button>
           <button data-go="sxenc" style="display:none">Encaissements</button>
           <button data-go="trpos" title="Encaissements et décaissements" style="display:none">Trésorerie</button>
           <button data-go="engage">Engagements</button>
@@ -6533,7 +6533,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     pad: ['Cadre du projet', 'Plan de financement (PAD)'],
     resu: ['Cadre du projet', 'Cadre de résultats'],
     avini: ['Cadre du projet', 'Avance initiale'],
-    sxeng: ['Suivi', 'Engagements'], sxliq: ['Suivi', 'Réalisations'], sxpay: ['Suivi', 'Paiements'], sxenc: ['Suivi', 'Encaissements'], trpos: ['Suivi', 'Trésorerie'],
+    sxeng: ['Suivi', 'Engagements'], sxliq: ['Suivi', 'Réalisations'], sxpay: ['Suivi', 'Décaissements'], sxenc: ['Suivi', 'Encaissements'], trpos: ['Suivi', 'Trésorerie'],
     avanc: ['Suivi', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
     pdec: ['Plans annuels', 'Plan de décaissement'],
@@ -14463,7 +14463,7 @@ var EXEC_REC = [
       { g: 'Élaboration', items: [['Configuration', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso]] },
       { g: 'Compte administratif', items: ca },
-      { g: 'Suivi', items: [['Avancement physique', rAlways], [rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Paiements', 'Paiements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
+      { g: 'Suivi', items: [['Avancement physique', rAlways], [rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
       grp('Analyses'),
       { g: 'Paramètres', items: grp('Paramètres').items.filter(function (it) { return it[0] !== 'Bailleurs' && it[0] !== 'Sources de financement' && it[0] !== 'Taux de change'; }) }
     ];
@@ -14519,7 +14519,7 @@ var EXEC_REC = [
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
     gT.style.display = 'none';
-    put('g-suivi', [['avanc'], ['sxeng'], ['sxliq'], ['sxpay'], ['sxenc'], ['trpos'], ['dfon'], ['dprap'], ['bkacc'], ['bkrel'], ['bkrap']]);
+    put('g-suivi', [['sxeng'], ['sxliq'], ['avanc'], ['sxpay'], ['sxenc'], ['trpos'], ['dfon'], ['dprap'], ['bkacc'], ['bkrel'], ['bkrap']]);
     var avb = document.querySelector('.sub button[data-go="avanc"]'); if (avb) avb.style.display = '';
     Object.keys(PRJ_GROUP_LBL).forEach(function (id) { navSetGroup(document.getElementById(id), PRJ_GROUP_LBL[id][0], PRJ_GROUP_LBL[id][1]); });
   }
@@ -14543,9 +14543,9 @@ var EXEC_REC = [
     applyProjectMenu(code, cfg);
     regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso && code !== 'prj');
     regSetVis('.sub button[data-go="pluri"]', cfg.mods.pluri); regSetVis('.sub button[data-go="bkdvr"]', cfg.mods.treso); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso && code !== 'prj'); regSetVis('.sub button[data-go="pdec"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="dfon"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="ppm"]', code === 'prj'); regSetVis('.sub button[data-go="pta"]', code === 'prj'); regSetVis('.sub button[data-go="inv"]', code === 'ent'); regSetVis('.sub button[data-go="pad"]', code === 'prj'); regSetVis('.sub button.epub', cfg.regime === 'public'); regSetVis('.sub button[data-go="revis"]', cfg.regime !== 'public');
-    regSetVis('.sub button[data-go="dprap"]', code === 'prj' && cfg.regime === 'projet' && !!cfg.mods.sync);
+    regSetVis('.sub button[data-go="dprap"]', false); /* masqué pour l’instant */
     regSetVis('.sub button[data-go="sxeng"], .sub button[data-go="sxliq"], .sub button[data-go="sxpay"], .sub button[data-go="sxenc"]', code === 'prj');
-    regSetVis('#g-suivi .sub button[data-go="trpos"], #g-suivi .sub button[data-go="dfon"], #g-suivi .sub button[data-go="bkacc"], #g-suivi .sub button[data-go="bkrel"], #g-suivi .sub button[data-go="bkrap"]', code === 'prj' && !!cfg.mods.treso);
+    regSetVis('#g-suivi .sub button[data-go="trpos"], #g-suivi .sub button[data-go="dfon"], #g-suivi .sub button[data-go="bkacc"], #g-suivi .sub button[data-go="bkrel"], #g-suivi .sub button[data-go="bkrap"]', false); /* masqués pour l’instant : Trésorerie, Demandes de fonds, comptes et relevés bancaires */
     regSetVis('.sub button[data-go="appr"], .sub button[data-go="engage"], .sub button[data-go="real"], .sub button[data-go="decaiss"], .sub button[data-go="encaiss"]', code !== 'prj');
 
     if (code === 'prj') regSetVis('.sub button[data-go="cadcred"], .sub button[data-go="revis"]', false); /* projet : la révision se fait dans le PTBA / PTA (versions) */
@@ -20736,7 +20736,7 @@ var EXEC_REC = [
   var SX_K = {
     eng: { h: 'Engagements', p: 'Engagements récupérés de la comptabilité, importés ou saisis directement, puis rapprochés de ceux du compte administratif.', ref: 'N° d’engagement ou de marché', tg: 'Bénéficiaire' },
     liq: { h: 'Réalisations', p: 'Réalisations (service fait, factures) récupérées de la comptabilité, importées ou saisies directement.', ref: 'N° de facture', tg: 'Fournisseur' },
-    pay: { h: 'Paiements', p: 'Paiements (décaissements) récupérés de la comptabilité, importés ou saisis directement.', ref: 'N° de paiement ou de mandat', tg: 'Bénéficiaire' },
+    pay: { h: 'Décaissements', p: 'Décaissements (paiements) récupérés de la comptabilité, importés ou saisis directement.', ref: 'N° de paiement ou de mandat', tg: 'Bénéficiaire' },
     enc: { h: 'Encaissements', p: 'Fonds reçus du bailleur et autres recettes, récupérés de la comptabilité, importés ou saisis directement.', ref: 'Référence de l’encaissement', tg: 'Origine' }
   };
   function sxId() { return 'SX-' + ('000' + (++SX.seq)).slice(-4); }
@@ -20766,7 +20766,7 @@ var EXEC_REC = [
   function sxRender() {
     sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
     document.querySelector('#v-sx > .head h1').textContent = K.h; document.querySelector('#v-sx > .head p').textContent = K.p;
-    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = dpRapOn() ? '' : 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : 'un paiement')));
+    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : 'un décaissement')));
     var sum = function (s) { return items.filter(function (i) { return !s || i.src === s; }).reduce(function (a, i) { return a + i.mt; }, 0); };
     var kb = document.getElementById('sx-k'); kb.innerHTML = ''; kb.appendChild(dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Récupéré de la compta', fmt(sum('Compta')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
     var tb = document.getElementById('sx-b'); tb.innerHTML = '';
