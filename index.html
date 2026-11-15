@@ -5352,17 +5352,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       <!-- ===== Projet : plan de décaissement prévisionnel ===== -->
       <section class="view" id="v-pdec">
-        <div class="head"><div><h1>Plan de décaissement</h1><p>Décaissements prévus à partir du PTBA et du PPM, en partant de l’avance initiale : le plan indique quand déposer chaque demande de réapprovisionnement.</p></div>
-          <div class="actions"><button class="btn" id="pdc-go">Voir les demandes de fonds</button></div></div>
+        <div class="head"><div><h1>Plan de décaissement</h1><p>Les demandes de réapprovisionnement à prévoir, à partir de l’avance initiale, du PTBA et du PPM.</p></div>
+          <div class="actions"><button class="btn primary" id="pdc-open">Voir le détail</button><button class="btn" id="pdc-go">Voir les demandes de fonds</button></div></div>
         <div class="callout" id="pdc-msg" hidden style="margin-bottom:12px"></div>
         <div id="pdc-k"></div>
-        <section class="co-blk"><div class="kb-h">Hypothèses</div><div id="pdc-hyp"></div></section>
         <section class="co-blk"><div class="kb-h">Demandes de réapprovisionnement à déposer</div><div class="card" id="pdc-req"></div></section>
-        <section class="co-blk"><div class="kb-h">Évolution du solde du compte spécial</div><div class="card" id="pdc-chart" style="padding:14px 16px"></div></section>
-        <section class="co-blk"><div class="kb-h">Détail mensuel</div><div id="pdc-tab"></div></section>
-        <section class="co-blk"><div class="kb-h">Origine des décaissements prévus</div><div id="pdc-orig"></div></section>
-      </section>
-      <!-- ===== Projet : demandes de fonds (DRF et DPD) ===== -->
+        <div class="panel" id="pdc-det" hidden><h2><span>Plan de décaissement : détail</span></h2><div class="body" id="pdc-det-body"></div></div>
+      </section>      <!-- ===== Projet : demandes de fonds (DRF et DPD) ===== -->
       <section class="view" id="v-dfon">
         <div class="head"><div><h1>Demandes de fonds</h1><p>Demandes de retrait de fonds (DRF) et de paiement direct (DPD) adressées au bailleur : préparation, soumission, réponse et fonds reçus</p></div>
           <div class="actions"><button class="btn primary" id="dfo-new">+ Nouvelle demande</button></div></div>
@@ -5401,6 +5397,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div><label for="avini-mt">Montant de l’avance initiale (MGA) <em>*</em></label><input id="avini-mt" class="field" type="text" inputmode="numeric"></div>
             <div><label for="avini-plaf">Plafond du compte spécial (MGA) <em>*</em></label><input id="avini-plaf" class="field" type="text" inputmode="numeric"></div>
             <div><label for="avini-seuil">Seuil d’alerte du solde (% du plafond) <em>*</em></label><input id="avini-seuil" class="field" type="text" inputmode="numeric"></div>
+            <div><label for="avini-delai">Délai de traitement du bailleur <em>*</em></label><select id="avini-delai" class="field"><option value="1">1 mois</option><option value="2">2 mois</option><option value="3">3 mois</option></select></div>
           </div>
           <div class="err" id="avini-err"></div>
           <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="avini-cancel">Annuler</button><button class="btn primary" id="avini-save">Enregistrer</button></div>
@@ -16127,7 +16124,7 @@ var EXEC_REC = [
   function pdcKey(grp) { return grp === 'comp' ? function (l) { return 'Composante ' + l.comp.slice(1) + ' — ' + CAD.comps[l.comp]; } : (grp === 'cat' ? function (l) { return l.cat; } : function (l) { return l.srcLib + ' (' + l.src + ')'; }); }
   function pdcSums(keyFn, upto) { var L = cadLines(2), P = pdcPlan(), R = pdcReal(), o = {}; L.forEach(function (l) { var k = keyFn(l); o[k] = o[k] || { p: 0, r: 0 }; for (var m = 1; m <= 12; m++) { if (m <= upto) { o[k].p += P[l.code][m]; o[k].r += R[l.code][m]; } } }); return o; }
   /* ----- Plan de décaissement : besoins du compte spécial dérivés du PTBA et du PPM, à partir de l'avance initiale ----- */
-  var PDC = { delai: 1 }, PDC_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  var PDC_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   function pdcNeeds() {
     dpSeed(); var z12 = function () { return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; }, out = z12(), ppmM = z12(), rows = [], ex = '2026';
     dpLines().forEach(function (z) {
@@ -16142,7 +16139,7 @@ var EXEC_REC = [
   }
   /* Simulation mois par mois : l'avance initiale arrive, les dépenses la consomment, et une demande de réapprovisionnement est déposée dès que le solde, après le délai du bailleur, passerait sous le seuil */
   function pdcSim(N) {
-    var v0 = DFS.versements[0], seuil = DFS.plaf * DFS.seuil / 100, dl = PDC.delai, s = v0.date.slice(0, 4) === N.ex ? +v0.date.slice(5, 7) - 1 : 0, inflow = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], bal = [], req = [], unj = 0, b = 0;
+    var v0 = DFS.versements[0], seuil = DFS.plaf * DFS.seuil / 100, dl = DFS.delai, s = v0.date.slice(0, 4) === N.ex ? +v0.date.slice(5, 7) - 1 : 0, inflow = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], bal = [], req = [], unj = 0, b = 0;
     for (var m = 0; m < 12; m++) {
       if (m === s) inflow[m] += v0.mt;
       b += inflow[m] - N.out[m]; if (m >= s) unj += N.out[m]; bal[m] = b;
@@ -16161,32 +16158,32 @@ var EXEC_REC = [
     var N = pdcNeeds(), S = pdcSim(N), v0 = DFS.versements[0], tot = bvSum(N.out), lowI = S.s, i;
     for (i = S.s; i < 12; i++) if (S.bal[i] < S.bal[lowI]) lowI = i;
     var low = S.bal[lowI], neg = []; for (i = S.s; i < 12; i++) if (S.bal[i] < 0) neg.push(PDC_MOIS[i]);
-    dpKpis('pdc-k', [['Décaissements prévus', fmt(tot) + ' MGA', 'brand'], ['Avance initiale', fmt(v0.mt) + ' MGA', 'info'], ['Demandes à déposer', String(S.req.length), 'warn'], ['Solde prévu le plus bas (' + BVMOIS[lowI].replace('.', '') + ')', fmt(low) + ' MGA', low < 0 ? 'ko' : (low < S.seuil ? 'warn' : 'ok')]]);
+    /* Page d'accueil : l'essentiel (combien, quand déposer) */
+    dpKpis('pdc-k', [['Avance initiale', fmt(v0.mt) + ' MGA', 'info'], ['Décaissements prévus', fmt(tot) + ' MGA', 'brand'], ['Demandes à déposer', String(S.req.length), 'warn']]);
     dpMsg('pdc-msg', neg.length ? 'Le solde du compte spécial serait négatif en ' + neg.join(', ') + ' : avancez une demande, augmentez l’avance ou relevez le plafond.' : '', true);
-    var hy = document.getElementById('pdc-hyp'); hy.innerHTML = '';
-    var row = cvEl('div'); row.style.cssText = 'display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px'; var f = cvEl('div'); f.appendChild(cvEl('label', null, 'Délai de traitement du bailleur')); var sl = cvEl('select', 'field'); [1, 2, 3].forEach(function (n) { var o = cvEl('option', null, n + ' mois'); o.value = String(n); sl.appendChild(o); }); sl.value = String(PDC.delai); sl.style.minWidth = '160px'; sl.addEventListener('change', function () { PDC.delai = +sl.value; pdcRender(); }); f.appendChild(sl); row.appendChild(f);
-    var ht = cvEl('div', 'hint', 'Avance initiale de ' + fmt(v0.mt) + ' MGA le ' + isoToFr(v0.date) + ' · plafond ' + fmt(DFS.plaf) + ' MGA · seuil d’alerte ' + fmt(Math.round(S.seuil)) + ' MGA (modifiables dans Cadre du projet › Avance initiale). Les décaissements viennent du PTBA (reste à programmer) et du PPM (paiement à la fin de chaque marché).'); ht.style.flex = '1 1 320px'; row.appendChild(ht); hy.appendChild(row);
     var rq = document.getElementById('pdc-req'); rq.innerHTML = '';
     if (!S.req.length) rq.appendChild(cvEl('div', 'hint', 'Aucune demande nécessaire : l’avance couvre les décaissements prévus.'));
     S.req.forEach(function (r, j) {
-      var rw = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'Demande ' + (j + 1) + ' : à déposer en ' + PDC_MOIS[r.m] + ', avant la fin du mois'));
-      l.appendChild(cvEl('div', 'hby', 'Montant ' + fmt(r.mt) + ' MGA (dépenses payées depuis la dernière demande) · fonds attendus ' + (r.arr < 12 ? 'en ' + PDC_MOIS[r.arr] : 'après la fin de l’exercice'))); rw.appendChild(l);
+      var rw = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'Demande ' + (j + 1) + ' : à déposer en ' + PDC_MOIS[r.m]));
+      l.appendChild(cvEl('div', 'hby', 'Fonds attendus ' + (r.arr < 12 ? 'en ' + PDC_MOIS[r.arr] : 'après la fin de l’exercice'))); rw.appendChild(l);
       var bd = badge(fmt(r.mt) + ' MGA', 'b-warn'); bd.style.marginLeft = 'auto'; rw.appendChild(bd); rq.appendChild(rw);
     });
-    var ch = document.getElementById('pdc-chart'); ch.innerHTML = '';
+    /* Détail : hypothèses, courbe, tableau mensuel, origine des montants */
+    var body = document.getElementById('pdc-det-body'); body.innerHTML = '';
+    function block(title, node) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); }
+    block('Hypothèses', dpDl([['Avance initiale', fmt(v0.mt) + ' MGA · ' + isoToFr(v0.date)], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte', fmt(Math.round(S.seuil)) + ' MGA'], ['Délai de traitement du bailleur', DFS.delai + ' mois'], ['Origine des décaissements', 'PTBA (reste à programmer) et PPM (paiement à la fin de chaque marché) ; paramètres à modifier dans Cadre du projet › Avance initiale', true]]));
     var cl = function (a) { return a.map(function (v) { return Math.max(0, v); }); };
-    ch.appendChild(dpLineChart([{ name: 'Solde prévu', color: DPC.brand, data: cl(S.bal) }, { name: 'Seuil d’alerte', color: DPC.warn, dash: true, data: S.bal.map(function () { return S.seuil; }) }], BVMOIS));
-    var tb = document.getElementById('pdc-tab'); tb.innerHTML = ''; var nz = function (v) { return v ? fmt(v) : '—'; };
-    var reqM = {}; S.req.forEach(function (r) { reqM[r.m] = r; });
-    tb.appendChild(dpMini(['MGA'].concat(BVMOIS, ['Total']), [
+    var chart = cvEl('div', 'card'); chart.style.padding = '14px 16px'; chart.appendChild(dpLineChart([{ name: 'Solde prévu', color: DPC.brand, data: cl(S.bal) }, { name: 'Seuil d’alerte', color: DPC.warn, dash: true, data: S.bal.map(function () { return S.seuil; }) }], BVMOIS)); block('Évolution du solde du compte spécial', chart);
+    var nz = function (v) { return v ? fmt(v) : '—'; }, reqM = {}; S.req.forEach(function (r) { reqM[r.m] = r; });
+    block('Détail mensuel (MGA)', dpMini(['MGA'].concat(BVMOIS, ['Total']), [
       ['Décaissements prévus (PTBA et PPM)'].concat(N.out.map(nz), [fmt(tot)]), ['dont marchés du PPM'].concat(N.ppmM.map(nz), [fmt(bvSum(N.ppmM))]),
-      ['Fonds prévus (avance et réapprovisionnements)'].concat(S.inflow.map(nz), [fmt(bvSum(S.inflow))]), ['Solde prévu en fin de mois'].concat(S.bal.map(function (v) { return v ? fmt(v) : '—'; }), ['']),
+      ['Fonds prévus (avance et réapprovisionnements)'].concat(S.inflow.map(nz), [fmt(bvSum(S.inflow))]), ['Solde prévu en fin de mois'].concat(S.bal.map(nz), ['']),
       ['Demande à déposer'].concat(S.bal.map(function (v, m) { return reqM[m] ? badge(fmt(reqM[m].mt), 'b-warn') : '—'; }), [''])
     ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
-    var og = document.getElementById('pdc-orig'); og.innerHTML = '';
-    og.appendChild(dpMini(['Ligne du PTBA', 'Source de financement', 'Marchés du PPM', 'Reste à programmer (PTBA)', 'Total prévu'], N.rows.map(function (r) { return [r.z.l.c + ' — ' + (r.z.l.lib || r.z.l.l), (r.z.l.axv && r.z.l.axv.Financier) || '—', fmt(r.ppm), fmt(r.ptba), fmt(r.ppm + r.ptba)]; }), [2, 3, 4], 'Aucune ligne financée par le bailleur.'));
+    block('Origine des décaissements prévus', dpMini(['Ligne du PTBA', 'Source de financement', 'Marchés du PPM', 'Reste à programmer (PTBA)', 'Total prévu'], N.rows.map(function (r) { return [r.z.l.c + ' — ' + (r.z.l.lib || r.z.l.l), (r.z.l.axv && r.z.l.axv.Financier) || '—', fmt(r.ppm), fmt(r.ptba), fmt(r.ppm + r.ptba)]; }), [2, 3, 4], 'Aucune ligne financée par le bailleur.'));
   }
   document.getElementById('pdc-go').addEventListener('click', function () { show('dfon'); });
+  document.getElementById('pdc-open').addEventListener('click', function () { document.getElementById('pdc-det').hidden = false; });
 
   /* ----- Demandes de fonds (DRF et DPD) : rattachées aux dépenses du compte administratif, avec l'avance initiale et le compte spécial du projet ----- */
   var DFO_ST = { 'Préparée': 'b-neutral', 'Soumise': 'b-warn', 'Acceptée': 'b-info', 'Rejetée': 'b-ko', 'Payée': 'b-ok' };
@@ -16200,7 +16197,7 @@ var EXEC_REC = [
   ] };
   CDF.items.forEach(function (d) { d.hist = [{ on: isoToFr(d.date), role: 'AFC', t: 'Demande préparée' }]; if (d.dsoum) d.hist.unshift({ on: isoToFr(d.dsoum), role: 'AFC', t: 'Soumise au bailleur' }); if (d.dRep) d.hist.unshift({ on: isoToFr(d.dRep), role: 'Bailleur', t: d.st === 'Rejetée' ? 'Rejetée : ' + d.motif : 'Acceptée pour ' + fmt(d.mtAcc) + ' MGA' }); if (d.dPaie) d.hist.unshift({ on: isoToFr(d.dPaie), role: 'AFC', t: 'Reconstitution du compte constatée' }); });
   /* Avance initiale : fonds versés par le bailleur sur le compte spécial dès le démarrage, dans la limite d'un plafond fixé par la lettre de décaissement */
-  var DFS = { plaf: 500000000, seuil: 30, versements: [{ id: 'VS-001', date: '2026-02-12', lib: 'Avance initiale', mt: 400000000, ref: 'LD-2026-014' }] };
+  var DFS = { plaf: 500000000, seuil: 30, delai: 1, versements: [{ id: 'VS-001', date: '2026-02-12', lib: 'Avance initiale', mt: 400000000, ref: 'LD-2026-014' }] };
   function dfoSrc(c) { return CAD.src.filter(function (s) { return s.code === c; })[0] || { code: c, lib: c }; }
   function dfoDocSrc(d) { var z = dpLine(d.key), f = (z && z.l.axv && z.l.axv.Financier) || ''; return /Don|Bailleur|Subvention/i.test(f) ? '02' : (/Prêt/i.test(f) ? '01' : null); }
   function dfoAmt(d) { return d.kind === 'avance' ? d.mt : dpNet(d); }
@@ -16244,24 +16241,24 @@ var EXEC_REC = [
   function aviniRender() {
     var v = DFS.versements[0], box = document.getElementById('avini-fiche'); box.innerHTML = '';
     var card = cvEl('div', 'card'); card.style.padding = '16px 18px'; card.style.marginBottom = '14px';
-    card.appendChild(dpDl([['Source de financement', dfoSrc('02').lib], ['Lettre de décaissement', v.ref], ['Date de l’avance initiale', isoToFr(v.date)], ['Montant de l’avance initiale', fmt(v.mt) + ' MGA'], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte du solde', DFS.seuil + ' % du plafond (' + fmt(Math.round(DFS.plaf * DFS.seuil / 100)) + ' MGA)']]));
+    card.appendChild(dpDl([['Source de financement', dfoSrc('02').lib], ['Lettre de décaissement', v.ref], ['Date de l’avance initiale', isoToFr(v.date)], ['Montant de l’avance initiale', fmt(v.mt) + ' MGA'], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte du solde', DFS.seuil + ' % du plafond (' + fmt(Math.round(DFS.plaf * DFS.seuil / 100)) + ' MGA)'], ['Délai de traitement du bailleur', DFS.delai + ' mois']]));
     box.appendChild(card);
     var go = cvEl('div'); go.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap'; go.appendChild(cvEl('span', 'hint', 'Le solde actuel, les reconstitutions et les alertes se suivent dans Trésorerie › Demandes de fonds.'));
     var b = cvEl('button', 'btn', 'Suivre le compte spécial'); b.type = 'button'; b.addEventListener('click', function () { show('dfon'); }); go.appendChild(b); box.appendChild(go);
   }
   document.getElementById('avini-edit').addEventListener('click', function () {
     if (!cadPerm('dfo_resp', 'avini-msg')) return; var v = DFS.versements[0];
-    document.getElementById('avini-ref').value = v.ref; document.getElementById('avini-date').value = v.date; document.getElementById('avini-mt').value = fmt(v.mt); document.getElementById('avini-plaf').value = fmt(DFS.plaf); document.getElementById('avini-seuil').value = String(DFS.seuil); document.getElementById('avini-err').textContent = ''; document.getElementById('avini-form').hidden = false;
+    document.getElementById('avini-ref').value = v.ref; document.getElementById('avini-date').value = v.date; document.getElementById('avini-mt').value = fmt(v.mt); document.getElementById('avini-plaf').value = fmt(DFS.plaf); document.getElementById('avini-seuil').value = String(DFS.seuil); document.getElementById('avini-delai').value = String(DFS.delai); document.getElementById('avini-err').textContent = ''; document.getElementById('avini-form').hidden = false;
   });
   document.getElementById('avini-cancel').addEventListener('click', function () { document.getElementById('avini-form').hidden = true; });
   document.getElementById('avini-save').addEventListener('click', function () {
-    var err = document.getElementById('avini-err'), ref = document.getElementById('avini-ref').value.trim(), dt = document.getElementById('avini-date').value, mt = parseInt0(document.getElementById('avini-mt').value), pl0 = parseInt0(document.getElementById('avini-plaf').value), se = parseInt0(document.getElementById('avini-seuil').value), v = DFS.versements[0], a = dfoAcc();
+    var err = document.getElementById('avini-err'), ref = document.getElementById('avini-ref').value.trim(), dt = document.getElementById('avini-date').value, mt = parseInt0(document.getElementById('avini-mt').value), pl0 = parseInt0(document.getElementById('avini-plaf').value), se = parseInt0(document.getElementById('avini-seuil').value), dl = +document.getElementById('avini-delai').value, v = DFS.versements[0], a = dfoAcc();
     if (!cadPerm('dfo_resp', 'avini-msg')) return;
     if (ref.length < 3) { err.textContent = 'Indiquez la référence de la lettre de décaissement.'; return; } if (!dt) { err.textContent = 'Indiquez la date de l’avance.'; return; }
     if (!mt || mt <= 0 || !pl0 || pl0 <= 0) { err.textContent = 'Les montants doivent être positifs.'; return; } if (mt > pl0) { err.textContent = 'L’avance initiale ne peut pas dépasser le plafond du compte spécial.'; return; }
     if (!se || se < 5 || se > 80) { err.textContent = 'Le seuil d’alerte doit être compris entre 5 et 80 %.'; return; }
     if (a.enCours - v.mt + mt > pl0) { err.textContent = 'Le plafond ne peut pas être inférieur à l’avance en cours (' + fmt(a.enCours - v.mt + mt) + ' MGA avec ces conditions).'; return; }
-    v.ref = ref; v.date = dt; v.mt = mt; DFS.plaf = pl0; DFS.seuil = se; document.getElementById('avini-form').hidden = true; cadAudit('Avance initiale', 'Conditions modifiées : avance ' + fmt(mt) + ' MGA, plafond ' + fmt(pl0) + ' MGA'); bkMsg('avini-msg', 'Conditions de l’avance initiale enregistrées.', 'ok'); aviniRender();
+    v.ref = ref; v.date = dt; v.mt = mt; DFS.plaf = pl0; DFS.seuil = se; DFS.delai = dl; document.getElementById('avini-form').hidden = true; cadAudit('Avance initiale', 'Conditions modifiées : avance ' + fmt(mt) + ' MGA, plafond ' + fmt(pl0) + ' MGA'); bkMsg('avini-msg', 'Conditions de l’avance initiale enregistrées.', 'ok'); aviniRender();
   });
   /* Prépare en un clic la demande de reconstitution avec toutes les dépenses payées et non justifiées */
   function dfoRecon() {
@@ -20031,7 +20028,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
