@@ -20756,6 +20756,9 @@ var EXEC_REC = [
     CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') add('enc', null, x.dPaie, x.id, 'Bailleur — reconstitution du compte', x.mtAcc); });
     var k21 = sxLineKey('2.1');
     SX.pool = { 'SoftAccounting': { eng: [{ key: k21, date: today, ref: 'BC-2026-0190', tiers: 'FOURNITEC SARL', mt: 12000000 }], liq: [], pay: [{ key: k21, date: today, ref: 'VIR-0471', tiers: 'Cabinet RAKOTO Conseil', mt: 12000000 }], enc: [] }, 'Soft e-Procurement': { eng: [{ key: k21, date: '2026-11-10', ref: 'M-2026-070', tiers: 'ELECTRO-MED Madagascar', mt: 18000000 }, { key: sxLineKey('1.1'), date: '2026-11-12', ref: 'M-2026-071', tiers: 'BTP Andriana', mt: 8000000 }], liq: [], pay: [], enc: [] } }; SX.extra = SX.pool['SoftAccounting'];
+    SX.store = { 'SoftAccounting': {}, 'Soft e-Procurement': {} };
+    ['eng', 'liq', 'pay', 'enc'].forEach(function (k) { SX.store['SoftAccounting'][k] = SX.items.filter(function (i) { return i.kind === k; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt }; }).concat(SX.pool['SoftAccounting'][k]); SX.store['Soft e-Procurement'][k] = SX.pool['Soft e-Procurement'][k].slice(); });
+    SX.store['SoftAccounting'].eng.forEach(function (r) { if (r.ref === 'BC-2026-0171') r.mt = 40000000; });
     SX.log = [{ on: '10/11/2026 08:30', src: 'Synchronisation de la comptabilité', n: SX.items.length, by: 'Système' }]; DP.impLog = SX.log;
   }
   /* Ce que la comptabilité ou le fichier dit, ligne du PTBA par ligne : base du rapprochement avec le compte administratif */
@@ -20777,45 +20780,77 @@ var EXEC_REC = [
     var lg = document.getElementById('sx-log'); lg.innerHTML = ''; SX.log.forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.src)); l.appendChild(cvEl('div', 'hby', pl(n.n, 'écriture') + ' · ' + n.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); lg.appendChild(row); });
   }
   function sxMsg(t, bad) { dpMsg('sx-msg', t, bad); }
-  /* Synchronisation en deux temps : choix de la source, puis liste des écritures à confirmer */
-  var SXS = { stage: 1, src: '', cand: [] };
+  /* Synchronisation : on précise d'abord la source, la période, la ligne et le mode (ajouter, mettre à jour, remplacer), puis on contrôle la liste des changements avant de confirmer */
+  var SXS = { stage: 1, src: '', d1: '', d2: '', line: '', mode: 'add', plan: [] };
+  var SX_MODES = [['add', 'Ajouter les nouvelles', 'Seules les écritures absentes du suivi sont ajoutées. Rien d’existant n’est modifié.'], ['upd', 'Ajouter et mettre à jour', 'Les nouvelles sont ajoutées et les écritures déjà synchronisées sont corrigées si la source a changé.'], ['rep', 'Remplacer (écraser)', 'Les écritures déjà synchronisées depuis cette source, sur la période, sont supprimées puis remplacées par celles de la source.']];
+  var SX_ACT = { 'new': ['Nouvelle', 'b-ok'], 'upd': ['Mise à jour', 'b-info'], 'same': ['Inchangée', 'b-neutral'], 'skip': ['Ignorée (mode « Ajouter »)', 'b-neutral'], 'conflict': ['Conflit : écriture saisie ou importée', 'b-warn'], 'del': ['Supprimée', 'b-ko'] };
   function sxSources() { return SX.kind === 'eng' ? ['SoftAccounting', 'Soft e-Procurement', 'Compte administratif'] : ['SoftAccounting', 'Compte administratif']; }
-  function sxCands(src, kind) {
-    sxSeed(); if (src !== 'Compte administratif') return ((SX.pool[src] || {})[kind] || []).slice();
-    var have = {}, out = []; SX.items.forEach(function (i) { if (i.kind === kind) have[i.ref] = true; });
+  /* Ce que contient chaque source, indépendamment de ce qui est déjà dans le suivi */
+  function sxSrcData(src, kind) {
+    sxSeed(); if (src !== 'Compte administratif') return ((SX.store[src] || {})[kind] || []).map(function (r) { return { key: r.key, date: r.date, ref: r.ref, tiers: r.tiers, mt: r.mt }; });
+    var out = [];
     (DP.docs || []).forEach(function (d) {
       var q = d.dt || {}, c = null;
       if (kind === 'eng' && d.kind !== 'avance' && DP_RANK[d.st] >= 2) c = { key: d.key, date: q.eng, ref: d.ref, tiers: d.tiers, mt: d.mt };
       if (kind === 'liq' && d.kind !== 'avance' && DP_RANK[d.st] >= 3) c = { key: d.key, date: q.liq, ref: d.fac, tiers: d.tiers, mt: d.mt };
       if (kind === 'pay' && DP_RANK[d.st] >= 6) c = { key: d.key, date: q.pay, ref: d.mandat, tiers: d.tiers, mt: dfoAmt(d) };
-      if (c && c.ref && !have[c.ref]) out.push(c);
+      if (c && c.ref) out.push(c);
     });
-    if (kind === 'enc') { DFS.versements.forEach(function (v) { if (!have[v.ref]) out.push({ key: null, date: v.date, ref: v.ref, tiers: 'Bailleur — ' + v.lib.toLowerCase(), mt: v.mt }); }); CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée' && !have[x.id]) out.push({ key: null, date: x.dPaie, ref: x.id, tiers: 'Bailleur — reconstitution du compte', mt: x.mtAcc }); }); }
+    if (kind === 'enc') { DFS.versements.forEach(function (v) { out.push({ key: null, date: v.date, ref: v.ref, tiers: 'Bailleur — ' + v.lib.toLowerCase(), mt: v.mt }); }); CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') out.push({ key: null, date: x.dPaie, ref: x.id, tiers: 'Bailleur — reconstitution du compte', mt: x.mtAcc }); }); }
+    return out;
+  }
+  function sxPlan() {
+    var P = SXS, kind = SX.kind, out = [], seen = {};
+    sxSrcData(P.src, kind).filter(function (r) { return r.date >= P.d1 && r.date <= P.d2 && (!P.line || r.key === P.line); }).forEach(function (r) {
+      var st = SX.items.filter(function (i) { return i.kind === kind && i.ref === r.ref; })[0]; seen[r.ref] = true;
+      if (!st) out.push({ act: 'new', r: r });
+      else if (st.src !== P.src) out.push({ act: st.mt === r.mt ? 'same' : 'conflict', r: r, st: st });
+      else if (st.mt === r.mt && st.date === r.date && (st.tiers || '') === (r.tiers || '')) out.push({ act: 'same', r: r, st: st });
+      else out.push({ act: P.mode === 'add' ? 'skip' : 'upd', r: r, st: st });
+    });
+    if (P.mode === 'rep') SX.items.forEach(function (i) { if (i.kind === kind && i.src === P.src && i.date >= P.d1 && i.date <= P.d2 && (!P.line || i.key === P.line) && !seen[i.ref]) out.push({ act: 'del', r: i, st: i }); });
     return out;
   }
   function sxSyPaint() {
-    var body = document.getElementById('sx-sy-body'); body.innerHTML = ''; var K = SX_K[SX.kind]; document.getElementById('sx-sy-title').textContent = 'Synchroniser : ' + K.h.toLowerCase();
-    if (SXS.stage === 1) {
-      var hint = cvEl('div', 'hint', 'Choisissez la source. Les écritures à récupérer vous sont d’abord présentées : rien n’est ajouté avant votre confirmation.'); hint.style.marginBottom = '12px'; body.appendChild(hint);
-      var d = cvEl('div'); d.style.maxWidth = '420px'; d.appendChild(cvEl('label', null, 'Source de la synchronisation')); var sl = cvEl('select', 'field'); sxSources().forEach(function (x) { var o = cvEl('option', null, x); o.value = x; sl.appendChild(o); }); sl.value = SXS.src || sxSources()[0]; d.appendChild(sl);
-      var inf = cvEl('div', 'hint', ''); d.appendChild(inf); var tx = { 'SoftAccounting': 'Écritures comptables du projet.', 'Soft e-Procurement': 'Marchés et commandes passés dans la plateforme de passation.', 'Compte administratif': 'Dossiers saisis dans le compte administratif du projet.' }; function upd() { inf.textContent = tx[sl.value]; } sl.addEventListener('change', upd); upd(); body.appendChild(d);
-      var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:12px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Voir les écritures à récupérer'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); body.appendChild(ft);
+    var body = document.getElementById('sx-sy-body'), K = SX_K[SX.kind], P = SXS; body.innerHTML = ''; document.getElementById('sx-sy-title').textContent = 'Synchroniser : ' + K.h.toLowerCase();
+    var steps = cvEl('div', 'hint', P.stage === 1 ? 'Étape 1 sur 2 · Paramètres de la synchronisation' : 'Étape 2 sur 2 · Contrôle des changements avant confirmation'); steps.style.cssText = 'font-weight:600;margin-bottom:12px'; body.appendChild(steps);
+    if (P.stage === 1) {
+      var g = cvEl('div', 'fgrid'); function fld(label, el, full, hint) { var d = cvEl('div', full ? 'full' : ''); d.appendChild(cvEl('label', null, label)); d.appendChild(el); if (hint) { var h = cvEl('div', 'hint', hint); d.appendChild(h); } g.appendChild(d); return el; }
+      var tx = { 'SoftAccounting': 'Écritures comptables du projet.', 'Soft e-Procurement': 'Marchés et commandes de la plateforme de passation.', 'Compte administratif': 'Dossiers saisis dans le compte administratif du projet.' };
+      var sl = cvEl('select', 'field'); sxSources().forEach(function (x) { var o = cvEl('option', null, x); o.value = x; sl.appendChild(o); }); sl.value = P.src || sxSources()[0]; var sh = fld('Source', sl, false, tx[sl.value]); sl.addEventListener('change', function () { P.src = sl.value; sh.parentNode.querySelector('.hint').textContent = tx[sl.value]; });
+      var ln = cvEl('select', 'field'); var o0 = cvEl('option', null, 'Toutes les lignes'); o0.value = ''; ln.appendChild(o0); dpLines().forEach(function (z) { var o = cvEl('option', null, z.l.c + ' — ' + (z.l.lib || z.l.l)); o.value = z.key; ln.appendChild(o); }); ln.value = P.line; ln.disabled = SX.kind === 'enc'; ln.addEventListener('change', function () { P.line = ln.value; }); fld('Ligne du PTBA', ln, false, SX.kind === 'enc' ? 'Les encaissements ne sont pas rattachés à une ligne.' : 'Limitez la synchronisation à une seule ligne si besoin.');
+      var pr = cvEl('div'); pr.style.cssText = 'display:flex;gap:10px;align-items:center;flex-wrap:wrap'; var i1 = cvEl('input', 'field'), i2 = cvEl('input', 'field'); i1.type = i2.type = 'date'; i1.style.cssText = i2.style.cssText = 'width:170px;flex:0 0 170px'; i1.value = P.d1; i2.value = P.d2; i1.addEventListener('change', function () { P.d1 = i1.value; }); i2.addEventListener('change', function () { P.d2 = i2.value; }); pr.appendChild(cvEl('span', null, 'Du')); pr.appendChild(i1); pr.appendChild(cvEl('span', null, 'au')); pr.appendChild(i2); fld('Période à synchroniser', pr, true, 'Seules les écritures datées dans cette période sont concernées : vous pouvez par exemple ne remettre à jour que le dernier mois.');
+      var sg = cvEl('div', 'seg'), mh = cvEl('div', 'hint', ''); function mk() { sg.innerHTML = ''; SX_MODES.forEach(function (m) { var b = cvEl('button', P.mode === m[0] ? 'on' : '', m[1]); b.type = 'button'; b.addEventListener('click', function () { P.mode = m[0]; mk(); }); sg.appendChild(b); }); mh.textContent = SX_MODES.filter(function (m) { return m[0] === P.mode; })[0][2]; } mk(); var md = fld('Mode d’intégration', sg, true); md.parentNode.appendChild(mh);
+      body.appendChild(g);
+      var nt = cvEl('div', 'callout', 'Les écritures saisies directement ou importées ne sont jamais écrasées : en cas de même référence, elles sont signalées comme conflit.'); nt.style.margin = '14px 0 0'; body.appendChild(nt);
+      var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:12px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Voir les changements'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); body.appendChild(ft);
       bc.addEventListener('click', function () { document.getElementById('sx-sy').hidden = true; });
-      bo.addEventListener('click', function () { SXS.src = sl.value; SXS.cand = sxCands(SXS.src, SX.kind); SXS.stage = 2; sxSyPaint(); });
+      bo.addEventListener('click', function () { P.src = sl.value; if (!P.d1 || !P.d2 || P.d1 > P.d2) { var e = cvEl('div', 'err', 'La période est invalide : la date de début doit précéder la date de fin.'); if (!body.querySelector('.err')) ft.parentNode.insertBefore(e, ft); return; } P.plan = sxPlan(); P.stage = 2; sxSyPaint(); });
     } else {
-      var tot = SXS.cand.reduce(function (a, c) { return a + c.mt; }, 0), hd = cvEl('div', 'hint', 'Source : ' + SXS.src + ' · ' + (SXS.cand.length ? pl(SXS.cand.length, 'écriture') + ' à récupérer, ' + fmt(tot) + ' MGA.' : 'aucune nouvelle écriture à récupérer.')); hd.style.marginBottom = '12px'; body.appendChild(hd);
-      body.appendChild(dpMini(['Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', 'Montant (MGA)'], SXS.cand.map(function (c) { return [isoToFr(c.date), c.ref, c.tiers || '—', c.key ? dpShort({ key: c.key }) : 'Compte spécial du bailleur', fmt(c.mt)]; }), [4], 'Aucune nouvelle écriture : tout ce que cette source contient est déjà enregistré.'));
-      var ft2 = cvEl('div', 'form-foot'); ft2.style.cssText = 'margin-top:12px;padding-top:12px'; var bb = cvEl('button', 'btn', 'Changer de source'), bk = cvEl('button', 'btn primary', 'Confirmer la synchronisation' + (SXS.cand.length ? ' (' + SXS.cand.length + ')' : '')); bb.type = bk.type = 'button'; bk.disabled = !SXS.cand.length; ft2.appendChild(bb); ft2.appendChild(bk); body.appendChild(ft2);
-      bb.addEventListener('click', function () { SXS.stage = 1; sxSyPaint(); });
+      var c = function (a) { return P.plan.filter(function (x) { return x.act === a; }); }, sm = function (a) { return a.reduce(function (s, x) { return s + x.r.mt; }, 0); }, applied = c('new').length + c('upd').length + c('del').length;
+      var ctx = cvEl('div', 'hint', 'Source : ' + P.src + ' · du ' + isoToFr(P.d1) + ' au ' + isoToFr(P.d2) + ' · ' + (P.line ? dpShort({ key: P.line }) : 'toutes les lignes') + ' · mode « ' + SX_MODES.filter(function (m) { return m[0] === P.mode; })[0][1] + ' »'); ctx.style.marginBottom = '12px'; body.appendChild(ctx);
+      body.appendChild(dpTiles([['Nouvelles', String(c('new').length), 'ok'], ['Mises à jour', String(c('upd').length), 'info'], ['Inchangées', String(c('same').length + c('skip').length + c('conflict').length), 'n'], ['Supprimées', String(c('del').length), c('del').length ? 'ko' : 'n']], { cols: 4 }));
+      var rows = P.plan.slice().sort(function (a, b) { var o = { 'new': 0, upd: 1, del: 2, conflict: 3, skip: 4, same: 5 }; return o[a.act] - o[b.act] || (a.r.date < b.r.date ? 1 : -1); }).map(function (x) {
+        var A = SX_ACT[x.act], mt = x.act === 'upd' ? fmt(x.st.mt) + ' → ' + fmt(x.r.mt) : fmt(x.r.mt);
+        return [badge(A[0], A[1]), isoToFr(x.r.date), x.r.ref, x.r.tiers || '—', x.r.key ? dpShort({ key: x.r.key }) : 'Compte spécial du bailleur', mt];
+      });
+      body.appendChild(dpMini(['Changement', 'Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', 'Montant (MGA)'], rows, [5], 'Aucune écriture de cette source sur la période choisie.'));
+      var ft2 = cvEl('div', 'form-foot'); ft2.style.cssText = 'margin-top:12px;padding-top:12px'; var bb = cvEl('button', 'btn', 'Modifier les paramètres'), bk = cvEl('button', 'btn primary', applied ? 'Confirmer la synchronisation (' + applied + ' changement' + (applied > 1 ? 's' : '') + ')' : 'Rien à synchroniser'); bb.type = bk.type = 'button'; bk.disabled = !applied; ft2.appendChild(bb); ft2.appendChild(bk); body.appendChild(ft2);
+      bb.addEventListener('click', function () { P.stage = 1; sxSyPaint(); });
       bk.addEventListener('click', function () {
-        var n = 0, pool = SX.pool[SXS.src];
-        SXS.cand.forEach(function (c) { SX.items.push({ id: sxId(), kind: SX.kind, key: c.key, date: c.date, ref: c.ref, tiers: c.tiers, mt: c.mt, src: SXS.src }); n++; });
-        if (pool) pool[SX.kind] = [];
-        SX.log.unshift({ on: nowStr(), src: 'Synchronisation : ' + SXS.src, n: n, by: ME }); document.getElementById('sx-sy').hidden = true; sxMsg('Synchronisation depuis ' + SXS.src + ' terminée : ' + pl(n, 'écriture') + ' récupérée' + (n > 1 ? 's' : '') + '.'); sxRender();
+        var n = { 'new': 0, upd: 0, del: 0 }, done = {};
+        P.plan.forEach(function (x) {
+          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, src: P.src }); n['new']++; done[x.r.ref] = true; }
+          if (x.act === 'upd') { x.st.mt = x.r.mt; x.st.date = x.r.date; x.st.tiers = x.r.tiers; x.st.key = x.r.key; x.st.src = P.src; n.upd++; done[x.r.ref] = true; }
+          if (x.act === 'del') { SX.items.splice(SX.items.indexOf(x.st), 1); n.del++; }
+        });
+        SX.extra[SX.kind] = SX.extra[SX.kind].filter(function (e) { return !done[e.ref]; });
+        SX.log.unshift({ on: nowStr(), src: 'Synchronisation : ' + P.src + ' (' + n['new'] + ' nouvelle(s), ' + n.upd + ' mise(s) à jour, ' + n.del + ' supprimée(s))', n: n['new'] + n.upd + n.del, by: ME });
+        document.getElementById('sx-sy').hidden = true; sxMsg('Synchronisation depuis ' + P.src + ' terminée : ' + n['new'] + ' ajoutée(s), ' + n.upd + ' mise(s) à jour, ' + n.del + ' supprimée(s).'); sxRender();
       });
     }
   }
-  document.getElementById('sx-sync').addEventListener('click', function () { sxSeed(); SXS = { stage: 1, src: '', cand: [] }; sxSyPaint(); document.getElementById('sx-sy').hidden = false; });
+  document.getElementById('sx-sync').addEventListener('click', function () { sxSeed(); var t = cadToday(); SXS = { stage: 1, src: '', d1: t.slice(0, 4) + '-01-01', d2: t, line: '', mode: 'add', plan: [] }; sxSyPaint(); document.getElementById('sx-sy').hidden = false; });
   document.getElementById('sx-imp').addEventListener('click', function () { cvAsk({ title: 'Importer un fichier Excel', ok: 'Importer', required: true, cLabel: 'Nom du fichier', placeholder: 'Ex. execution_novembre_2026.xlsx' }, function (f) { var n = sxPull('Fichier Excel « ' + f + ' »', 'Import'); sxMsg(n ? 'Fichier importé : ' + pl(n, 'nouvelle écriture') + '.' : 'Fichier importé : aucune nouvelle écriture.'); sxRender(); }); });
   document.getElementById('sx-rap').addEventListener('click', function () { show('dprap'); });
   document.getElementById('sx-new').addEventListener('click', function () {
