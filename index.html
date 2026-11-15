@@ -5414,7 +5414,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div><label for="revpl-cn">Nouveau montant (MGA) <em>*</em></label><input id="revpl-cn" class="field" type="text" inputmode="decimal"></div>
             <div id="revpl-cqw"><label for="revpl-cq" id="revpl-cql">Nouvelle cible</label><input id="revpl-cq" class="field" type="text" inputmode="decimal"></div>
                         <div data-n="1" hidden><label for="revpl-np">Composante <em>*</em></label><select id="revpl-np" class="field"></select></div>
-            <div data-n="1" hidden><label for="revpl-nc">Code de la ligne <em>*</em></label><input id="revpl-nc" class="field" type="text" placeholder="Ex. 1.4"></div>
+            <div data-n="1" hidden><label for="revpl-nc">Code de la ligne <em>*</em></label><select id="revpl-nc" class="field"></select></div>
             <div class="full" data-n="1" hidden><label for="revpl-nl">Libellé de la ligne <em>*</em></label><input id="revpl-nl" class="field" type="text"></div>
             <div data-n="1" hidden><label for="revpl-nf">Source de financement</label><select id="revpl-nf" class="field"></select></div>
             <div data-n="1" hidden><label for="revpl-ni">Indicateur servi</label><select id="revpl-ni" class="field"></select></div>
@@ -21701,23 +21701,36 @@ var EXEC_REC = [
     var r = revLot(REVC.rev), k = document.getElementById('revpl-ct').value, e = document.getElementById('revpl-ce'); e.innerHTML = '';
     document.querySelectorAll('#revpl-chg [data-n]').forEach(function (x) { x.hidden = k !== 'N'; }); document.getElementById('revpl-cew').hidden = k === 'N'; document.getElementById('revpl-cvw').hidden = k === 'N';
     document.querySelector('label[for="revpl-cn"]').firstChild.nodeValue = k === 'N' ? 'Montant de la ligne (MGA) ' : 'Nouveau montant (MGA) ';
-    if (k === 'N') { revChgFillN(); return; }
+    if (k === 'N') { document.getElementById('revpl-cqw').hidden = true; document.getElementById('revpl-cdw').hidden = true; revChgFillN(); return; }
     var opts = k === 'L' ? dpLines().filter(function (z) { return z.r === r; }).map(function (z) { return [z.key, z.l.c + ' — ' + (z.l.lib || z.l.l)]; }) : ppmLotItems(r).map(function (x) { return [x.ref, x.ref + ' — ' + x.des]; });
     opts.forEach(function (o) { var op = cvEl('option', null, o[1]); op.value = o[0]; e.appendChild(op); }); if (sel) e.value = sel; e.disabled = !!REVC.ch; revChgSync();
   }
   function revNextCode(r, perim) {
     var mx = 0, pre = '';
     dpLines().filter(function (z) { return z.r === r && z.perim === perim; }).forEach(function (z) { var p = z.l.c.split('.'); pre = pre || p[0]; mx = Math.max(mx, +p[1] || 0); });
+    (PLAN[perim] || []).forEach(function (l) { var p = l.c.split('.'); pre = pre || p[0]; mx = Math.max(mx, +p[1] || 0); });
     REVC.rev.changes.forEach(function (c) { if (c.k === 'N' && c.perim === perim && c !== REVC.ch) { var p = c.code.split('.'); mx = Math.max(mx, +p[1] || 0); } });
     return pre ? pre + '.' + (mx + 1) : '';
+  }
+  /* Code de la nouvelle ligne : liste des activités du plan non encore au PTBA, ou nouvelle activité hors plan */
+  function revCodeFill(perim, sel) {
+    var r = revLot(REVC.rev), s = document.getElementById('revpl-nc'), used = {}; s.innerHTML = '';
+    dpLines().filter(function (z) { return z.r === r && z.perim === perim; }).forEach(function (z) { used[z.l.c] = 1; });
+    REVC.rev.changes.forEach(function (c) { if (c.k === 'N' && c.perim === perim && c !== REVC.ch) used[c.code] = 1; });
+    (PLAN[perim] || []).forEach(function (l) { if (!used[l.c]) { var o = cvEl('option', null, l.c + ' — ' + l.l); o.value = l.c; s.appendChild(o); } });
+    var nx = revNextCode(r, perim), on = cvEl('option', null, 'Nouvelle activité hors plan (code ' + nx + ')'); on.value = '__new'; s.appendChild(on);
+    if (sel) s.value = [].some.call(s.options, function (o) { return o.value === sel; }) ? sel : '__new';
+  }
+  function revCodeChange() {
+    var s = document.getElementById('revpl-nc'), p = document.getElementById('revpl-np').value, l = (PLAN[p] || []).filter(function (x) { return x.c === s.value; })[0]; if (l) document.getElementById('revpl-nl').value = l.l;
   }
   function revChgFillN() {
     var r = revLot(REVC.rev), ch = REVC.ch, c = cvCamp(r), np = document.getElementById('revpl-np'), nf = document.getElementById('revpl-nf'), ni = document.getElementById('revpl-ni');
     if (!np.options.length) { c.perims.forEach(function (p) { var o = cvEl('option', null, p.p); o.value = p.p; np.appendChild(o); }); var fin = {}; dpLines().forEach(function (z) { fin[(z.l.axv && z.l.axv.Financier) || 'Budget de l’État'] = 1; }); Object.keys(fin).forEach(function (f) { var o = cvEl('option', null, f); o.value = f; nf.appendChild(o); }); }
     if (ch) { np.value = ch.perim; nf.value = ch.fin; }
     function inds() { ni.innerHTML = '<option value="">Aucun</option>'; var pr = bvData(r).c.perims.filter(function (p) { return p.p === np.value; })[0] || {}; (pr.inds || []).forEach(function (i) { var o = cvEl('option', null, i.lib + ' (' + i.unit + ')'); o.value = i.id; ni.appendChild(o); }); }
-    inds(); np.onchange = function () { inds(); if (!REVC.ch) document.getElementById('revpl-nc').value = revNextCode(r, np.value); };
-    document.getElementById('revpl-nc').value = ch ? ch.code : revNextCode(r, np.value); document.getElementById('revpl-nl').value = ch ? ch.lib : ''; document.getElementById('revpl-nt').value = ch ? ch.task : '';
+    inds(); np.onchange = function () { inds(); revCodeFill(np.value, null); document.getElementById('revpl-nl').value = ''; revCodeChange(); };
+    revCodeFill(np.value, ch ? ch.code : null); document.getElementById('revpl-nc').onchange = revCodeChange; document.getElementById('revpl-nl').value = ch ? ch.lib : ''; if (!ch) revCodeChange(); document.getElementById('revpl-nt').value = ch ? ch.task : '';
     document.getElementById('revpl-nd1').value = ch ? ch.d1 : ''; document.getElementById('revpl-nd2').value = ch ? ch.d2 : ''; document.getElementById('revpl-nv').value = ch && ch.vol != null ? fmt(ch.vol) : ''; document.getElementById('revpl-nu').value = ch ? ch.unit : ''; if (ch) ni.value = ch.ind || '';
     document.getElementById('revpl-cn').value = ch ? fmt(ch.to) : (REVC.add ? fmt(REVC.add) : '');
   }
@@ -21760,7 +21773,7 @@ var EXEC_REC = [
   document.getElementById('revpl-csave').addEventListener('click', function () {
     var err = document.getElementById('revpl-cerr'), rev = REVC.rev, r = revLot(rev), k = document.getElementById('revpl-ct').value, to = parseInt0(document.getElementById('revpl-cn').value), c;
     if (k === 'N') {
-      var perim = document.getElementById('revpl-np').value, code = document.getElementById('revpl-nc').value.trim(), lib = document.getElementById('revpl-nl').value.trim(), task = document.getElementById('revpl-nt').value.trim(), vol = parseInt0(document.getElementById('revpl-nv').value), unit = document.getElementById('revpl-nu').value.trim(), d1 = document.getElementById('revpl-nd1').value, d2 = document.getElementById('revpl-nd2').value;
+      var perim = document.getElementById('revpl-np').value, code = document.getElementById('revpl-nc').value === '__new' ? revNextCode(r, perim) : document.getElementById('revpl-nc').value, lib = document.getElementById('revpl-nl').value.trim(), task = document.getElementById('revpl-nt').value.trim(), vol = parseInt0(document.getElementById('revpl-nv').value), unit = document.getElementById('revpl-nu').value.trim(), d1 = document.getElementById('revpl-nd1').value, d2 = document.getElementById('revpl-nd2').value;
       if (!code) { err.textContent = 'Indiquez le code de la ligne.'; return; } if (!lib) { err.textContent = 'Indiquez le libellé de la ligne.'; return; } if (to == null || to <= 0) { err.textContent = 'Le montant de la ligne doit être positif.'; return; }
       if (dpLines().some(function (z) { return z.r === r && z.perim === perim && z.l.c === code; }) || rev.changes.some(function (x) { return x.k === 'N' && x.perim === perim && x.code === code && x !== REVC.ch; })) { err.textContent = 'Ce code existe déjà dans cette composante.'; return; }
       if (task && (!vol || vol <= 0 || !unit)) { err.textContent = 'Pour un travail prévu, indiquez le volume et l’unité.'; return; } if (d1 && d2 && d2 < d1) { err.textContent = 'La fin du travail doit suivre son début.'; return; }
