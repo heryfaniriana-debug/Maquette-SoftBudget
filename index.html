@@ -5374,7 +5374,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="head"><div><h1>Demandes de fonds</h1><p>Demandes de retrait de fonds (DRF) et de paiement direct (DPD) adressées au bailleur : préparation, soumission, réponse et fonds reçus</p></div>
           <div class="actions"><button class="btn primary" id="dfo-new">+ Nouvelle demande</button></div></div>
         <div class="callout" id="dfo-msg" hidden style="margin-bottom:12px"></div>
-        <div class="kpis" id="dfo-k"></div>
+        <div id="dfo-k"></div>
+        <section class="co-blk"><div class="kb-h">Avance initiale et compte spécial du projet</div><div id="dfo-cs"></div></section>
         <div class="panel" id="dfo-form" hidden style="margin-bottom:14px"><h2>Nouvelle demande <small id="dfo-no"></small></h2><div class="body">
           <div class="fgrid">
             <div><label for="dfo-type">Type de demande</label><select id="dfo-type" class="field"><option value="DRF">Demande de retrait de fonds (DRF)</option><option value="DPD">Demande de paiement direct (DPD)</option></select></div>
@@ -16150,22 +16151,74 @@ var EXEC_REC = [
     document.getElementById('pdc-m').value = ''; document.getElementById('pdc-mo').value = ''; bkMsg('pdc-msg', 'Version ' + CPD.ver + ' du plan créée : la précédente reste consultable dans l’historique.', 'ok'); pdcRender();
   });
 
-  /* ----- Demandes de fonds (DRF et DPD) ----- */
+  /* ----- Demandes de fonds (DRF et DPD) : rattachées aux dépenses du compte administratif, avec l'avance initiale et le compte spécial du projet ----- */
   var DFO_ST = { 'Préparée': 'b-neutral', 'Soumise': 'b-warn', 'Acceptée': 'b-info', 'Rejetée': 'b-ko', 'Payée': 'b-ok' };
+  var DFO_DIRECT = 'Paiement direct (bailleur)';
   var CDF = { seq: { DRF: 8, DPD: 12 }, items: [
-    { id: 'DRF-2026-005', type: 'DRF', date: '2026-07-06', per: 'T2 2026', src: '02', mt: 180000000, dev: 'MGA', justif: 'Relevé de dépenses', regs: [], pj: 14, st: 'Payée', dsoum: '2026-07-10', mtAcc: 180000000, dRep: '2026-07-18', motif: '', dPaie: '2026-07-28', hist: [] },
-    { id: 'DRF-2026-006', type: 'DRF', date: '2026-10-01', per: 'T3 2026', src: '02', mt: 150000000, dev: 'MGA', justif: 'Relevé de dépenses', regs: [], pj: 11, st: 'Soumise', dsoum: '2026-10-05', mtAcc: 0, dRep: '', motif: '', dPaie: '', hist: [] },
-    { id: 'DRF-2026-007', type: 'DRF', date: '2026-10-08', per: 'T3 2026', src: '01', mt: 120000000, dev: 'MGA', justif: 'Pièces justificatives', regs: [], pj: 7, st: 'Rejetée', dsoum: '2026-10-12', mtAcc: 0, dRep: '2026-10-20', motif: 'Pièces justificatives incomplètes : retenues non justifiées', dPaie: '', hist: [] },
-    { id: 'DPD-2026-011', type: 'DPD', date: '2026-08-28', per: 'T3 2026', src: '01', mt: 93610000, dev: 'EUR', mtD: 18500, fourn: 'ÉQUIPEMENTS OCÉAN', marche: 'M-2026-012', fac: 'FAC-8841', regs: [], pj: 6, justif: 'Pièces justificatives', st: 'Acceptée', dsoum: '2026-09-01', mtAcc: 93610000, dRep: '2026-09-08', motif: '', dPaie: '', hist: [] },
-    { id: 'DRF-2026-008', type: 'DRF', date: '2026-11-09', per: 'T4 2026', src: '01', mt: 60000000, dev: 'MGA', justif: 'Relevé de dépenses', regs: [], pj: 6, st: 'Préparée', dsoum: '', mtAcc: 0, dRep: '', motif: '', dPaie: '', hist: [] }
+    { id: 'DRF-2026-005', type: 'DRF', date: '2026-07-06', per: 'T2 2026', src: '02', mt: 300000000, dev: 'MGA', justif: 'Relevé de dépenses', regs: ['ENG-2026-0001'], pj: 14, st: 'Payée', dsoum: '2026-07-10', mtAcc: 300000000, dRep: '2026-07-18', motif: '', dPaie: '2026-07-28', hist: [] },
+    { id: 'DRF-2026-006', type: 'DRF', date: '2026-10-01', per: 'T3 2026', src: '02', mt: 60000000, dev: 'MGA', justif: 'Relevé de dépenses', regs: ['ENG-2026-0009', 'ENG-2026-0010'], pj: 11, st: 'Soumise', dsoum: '2026-10-05', mtAcc: 0, dRep: '', motif: '', dPaie: '', hist: [] },
+    { id: 'DRF-2026-007', type: 'DRF', date: '2026-10-08', per: 'T3 2026', src: '02', mt: 25000000, dev: 'MGA', justif: 'Pièces justificatives', regs: ['ENG-2026-0007'], pj: 4, st: 'Rejetée', dsoum: '2026-10-12', mtAcc: 0, dRep: '2026-10-20', motif: 'Facture FAC-0518 non visée : pièce à compléter avant de redemander', dPaie: '', hist: [] },
+    { id: 'DPD-2026-011', type: 'DPD', date: '2026-10-26', per: 'T4 2026', src: '02', mt: 30000000, dev: 'EUR', mtD: 5930, fourn: 'FOURNITEC SARL', marche: 'BC-2026-0180', fac: 'FAC-0574', regs: ['ENG-2026-0011'], pj: 6, justif: 'Pièces justificatives', st: 'Acceptée', dsoum: '2026-10-28', mtAcc: 30000000, dRep: '2026-11-06', motif: '', dPaie: '', hist: [] },
+    { id: 'DRF-2026-008', type: 'DRF', date: '2026-11-09', per: 'T4 2026', src: '02', mt: 10000000, dev: 'MGA', justif: 'Relevé de dépenses', regs: ['ENG-2026-0008'], pj: 3, st: 'Préparée', dsoum: '', mtAcc: 0, dRep: '', motif: '', dPaie: '', hist: [] }
   ] };
-  CDF.items.forEach(function (d) { d.hist = [{ on: isoToFr(d.date), role: 'AFC', t: 'Demande préparée' }]; });
-  function dfoSrc(c) { return CAD.src.filter(function (s) { return s.code === c; })[0]; }
+  CDF.items.forEach(function (d) { d.hist = [{ on: isoToFr(d.date), role: 'AFC', t: 'Demande préparée' }]; if (d.dsoum) d.hist.unshift({ on: isoToFr(d.dsoum), role: 'AFC', t: 'Soumise au bailleur' }); if (d.dRep) d.hist.unshift({ on: isoToFr(d.dRep), role: 'Bailleur', t: d.st === 'Rejetée' ? 'Rejetée : ' + d.motif : 'Acceptée pour ' + fmt(d.mtAcc) + ' MGA' }); if (d.dPaie) d.hist.unshift({ on: isoToFr(d.dPaie), role: 'AFC', t: 'Reconstitution du compte constatée' }); });
+  /* Avance initiale : fonds versés par le bailleur sur le compte spécial dès le démarrage, dans la limite d'un plafond fixé par la lettre de décaissement */
+  var DFS = { plaf: 500000000, versements: [{ id: 'VS-001', date: '2026-02-12', lib: 'Avance initiale', mt: 400000000, ref: 'Lettre de décaissement LD-2026-014' }] };
+  function dfoSrc(c) { return CAD.src.filter(function (s) { return s.code === c; })[0] || { code: c, lib: c }; }
+  function dfoDocSrc(d) { var z = dpLine(d.key), f = (z && z.l.axv && z.l.axv.Financier) || ''; return /Don|Bailleur|Subvention/i.test(f) ? '02' : (/Prêt/i.test(f) ? '01' : null); }
+  function dfoAmt(d) { return d.kind === 'avance' ? d.mt : dpNet(d); }
+  function dfoDoc(id) { return (DP.docs || []).filter(function (x) { return x.id === id; })[0]; }
   function dfoAttached() { var a = {}; CDF.items.forEach(function (d) { if (d.st !== 'Rejetée') d.regs.forEach(function (r) { a[r] = true; }); }); return a; }
-  function dfoElig(type) { var at = dfoAttached(); return CAD.reg.filter(function (r) { return r.mod === type && !at[r.id] && (type === 'DRF' ? r.st === 'Payé' : !!r.br); }); }
+  /* Dépenses que l'on peut rattacher : DRF = payées sur le compte spécial et non encore justifiées ; DPD = mandatées, que le bailleur peut payer directement */
+  function dfoElig(type) { dpSeed(); var at = dfoAttached(); return (DP.docs || []).filter(function (d) { if (at[d.id] || !dfoDocSrc(d)) return false; return type === 'DRF' ? (DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT) : (d.st === 'ordonnance' && d.kind !== 'avance'); }); }
+  function dfoAcc() {
+    dpSeed(); var paid = 0, just = 0, recu = 0, ini = DFS.versements.reduce(function (a, v) { return a + v.mt; }, 0);
+    (DP.docs || []).forEach(function (d) { if (dfoDocSrc(d) && DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT) paid += dfoAmt(d); });
+    CDF.items.forEach(function (x) { if (x.type !== 'DRF') return; if (['Soumise', 'Acceptée', 'Payée'].indexOf(x.st) >= 0) just += x.mt; if (x.st === 'Payée') recu += x.mtAcc; });
+    var fonds = ini + recu; return { plaf: DFS.plaf, ini: ini, recu: recu, paid: paid, just: just, fonds: fonds, solde: fonds - paid, enCours: fonds - just, nonJust: Math.max(0, paid - just) };
+  }
+  function dfoAccRender() {
+    var a = dfoAcc(), box = document.getElementById('dfo-cs'); box.innerHTML = '';
+    var bar = cvEl('div'); bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px';
+    [['Reconstituer le compte', true, dfoRecon], ['Enregistrer un versement du bailleur', false, dfoVers], ['Modifier le plafond', false, dfoPlaf]].forEach(function (x) { var b = cvEl('button', 'btn' + (x[1] ? ' primary' : ''), x[0]); b.type = 'button'; b.addEventListener('click', x[2]); bar.appendChild(b); }); box.appendChild(bar);
+    var card = cvEl('div', 'card'); card.style.padding = '16px 18px'; card.style.marginBottom = '14px';
+    card.appendChild(dpMeter('Avance en cours : fonds avancés et non encore justifiés', a.enCours, a.plaf, a.enCours > a.plaf ? DPC.ko : DPC.brand, 'du plafond'));
+    card.appendChild(dpMeter('Solde du compte spécial', Math.max(a.solde, 0), a.fonds, a.solde < 0 ? DPC.ko : (a.solde < a.plaf * 0.3 ? DPC.warn : DPC.ok), 'des fonds reçus'));
+    var st = a.solde < 0 ? ['Fonds insuffisants : demandez une reconstitution', 'b-ko'] : (a.enCours > a.plaf ? ['Plafond de l’avance dépassé : justifiez les dépenses', 'b-ko'] : (a.solde < a.plaf * 0.3 ? ['Solde bas : préparez une reconstitution', 'b-warn'] : ['Trésorerie du projet suffisante', 'b-ok']));
+    var bd = cvEl('div'); bd.style.margin = '4px 0 12px'; bd.appendChild(badge(st[0], st[1])); card.appendChild(bd);
+    var v0 = DFS.versements[0], vc = DFS.versements.slice(1).reduce(function (s, v) { return s + v.mt; }, 0);
+    card.appendChild(dpDl([['Avance initiale', fmt(v0.mt) + ' MGA · versée le ' + isoToFr(v0.date)], ['Plafond du compte spécial', fmt(a.plaf) + ' MGA'], ['Versements complémentaires', fmt(vc) + ' MGA'], ['Reconstitutions reçues', fmt(a.recu) + ' MGA'], ['Dépenses payées sur le compte', fmt(a.paid) + ' MGA'], ['Payé non encore justifié', fmt(a.nonJust) + ' MGA']]));
+    box.appendChild(card);
+    var mv = cvEl('div', 'card'), rows = [];
+    DFS.versements.forEach(function (v) { rows.push([v.date, v.lib, v.ref, v.mt]); });
+    CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') rows.push([x.dPaie, 'Reconstitution ' + x.id, x.per + ' · ' + pl(x.regs.length, 'dépense'), x.mtAcc]); });
+    var np = (DP.docs || []).filter(function (d) { return dfoDocSrc(d) && DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT; }).length; rows.push([cadToday(), 'Dépenses payées sur le compte', pl(np, 'paiement') + ' depuis l’ouverture', -a.paid]);
+    rows.sort(function (p, q) { return p[0] < q[0] ? 1 : -1; }).forEach(function (r) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, r[1])); l.appendChild(cvEl('div', 'hby', r[2])); row.appendChild(l); var m = cvEl('b', null, (r[3] < 0 ? '− ' : '+ ') + fmt(Math.abs(r[3])) + ' MGA'); m.style.marginLeft = 'auto'; m.style.color = r[3] < 0 ? '#BE123C' : '#047857'; row.appendChild(m); row.appendChild(cvEl('span', 'when', isoToFr(r[0]))); mv.appendChild(row); });
+    box.appendChild(mv);
+  }
+  function dfoVers() {
+    if (!cadPerm('dfo_resp', 'dfo-msg')) return;
+    cvAsk({ title: 'Versement du bailleur sur le compte spécial', ok: 'Enregistrer', required: true, cLabel: 'Référence ou motif', num: 'Montant reçu (MGA) *', placeholder: 'Ex. avance complémentaire accordée par le bailleur' }, function (ref, x, n) {
+      var m = parseInt0(n), a = dfoAcc(); if (!m || m <= 0) { bkMsg('dfo-msg', 'Montant invalide.', 'ko'); return; } if (a.enCours + m > a.plaf) { bkMsg('dfo-msg', 'Versement refusé : l’avance en cours dépasserait le plafond de ' + fmt(a.plaf) + ' MGA. Justifiez d’abord des dépenses ou relevez le plafond.', 'ko'); return; }
+      DFS.versements.push({ id: 'VS-' + ('00' + (DFS.versements.length + 1)).slice(-3), date: cadToday(), lib: 'Versement complémentaire', mt: m, ref: ref }); cadAudit('Compte spécial', 'Versement du bailleur ' + fmt(m) + ' MGA'); bkMsg('dfo-msg', 'Versement de ' + fmt(m) + ' MGA enregistré sur le compte spécial.', 'ok'); dfoRender();
+    });
+  }
+  function dfoPlaf() {
+    if (!cadPerm('dfo_resp', 'dfo-msg')) return;
+    cvAsk({ title: 'Plafond du compte spécial', ok: 'Enregistrer', required: true, cLabel: 'Référence de l’avenant ou de la lettre', num: 'Nouveau plafond (MGA) *', placeholder: 'Ex. avenant n° 1 à la lettre de décaissement' }, function (ref, x, n) {
+      var m = parseInt0(n), a = dfoAcc(); if (!m || m <= 0) { bkMsg('dfo-msg', 'Montant invalide.', 'ko'); return; } if (m < a.enCours) { bkMsg('dfo-msg', 'Le plafond ne peut pas être inférieur à l’avance en cours (' + fmt(a.enCours) + ' MGA).', 'ko'); return; }
+      DFS.plaf = m; cadAudit('Compte spécial', 'Plafond porté à ' + fmt(m) + ' MGA — ' + ref); bkMsg('dfo-msg', 'Plafond du compte spécial porté à ' + fmt(m) + ' MGA.', 'ok'); dfoRender();
+    });
+  }
+  /* Prépare en un clic la demande de reconstitution avec toutes les dépenses payées et non justifiées */
+  function dfoRecon() {
+    if (!cadPerm('dfo_prep', 'dfo-msg')) return; var e = dfoElig('DRF'); if (!e.length) { bkMsg('dfo-msg', 'Aucune dépense payée à justifier : le compte est à jour.', 'info'); return; }
+    document.getElementById('dfo-type').value = 'DRF'; document.getElementById('dfo-err').textContent = ''; document.getElementById('dfo-form').hidden = false; dfoFormList(true); document.getElementById('dfo-form').scrollIntoView({ block: 'start' });
+  }
   function dfoRender() {
-    var I = CDF.items, sm = function (st, k) { return I.filter(function (d) { return st.indexOf(d.st) >= 0; }).reduce(function (a, d) { return a + d[k]; }, 0); };
-    cadKpi('dfo-k', [['Demandé au bailleur', fmt(sm(['Soumise', 'Acceptée', 'Rejetée', 'Payée'], 'mt')) + ' MGA', pl(I.filter(function (d) { return d.st !== 'Préparée'; }).length, 'demande') + ' soumise' + (I.filter(function (d) { return d.st !== 'Préparée'; }).length > 1 ? 's' : '')], ['Accepté', fmt(sm(['Acceptée', 'Payée'], 'mtAcc')) + ' MGA', 'après réponse du bailleur'], ['Fonds reçus', fmt(sm(['Payée'], 'mtAcc')) + ' MGA', pl(I.filter(function (d) { return d.st === 'Payée'; }).length, 'demande') + ' payée'], ['En attente de réponse', fmt(sm(['Soumise'], 'mt')) + ' MGA', pl(I.filter(function (d) { return d.st === 'Soumise'; }).length, 'demande')]]);
+    dpSeed(); var I = CDF.items, sm = function (st, k) { return I.filter(function (d) { return st.indexOf(d.st) >= 0; }).reduce(function (a, d) { return a + d[k]; }, 0); };
+    dpKpis('dfo-k', [['Demandé au bailleur', fmt(sm(['Soumise', 'Acceptée', 'Rejetée', 'Payée'], 'mt')) + ' MGA', 'brand'], ['Accepté', fmt(sm(['Acceptée', 'Payée'], 'mtAcc')) + ' MGA', 'info'], ['Fonds reçus', fmt(sm(['Payée'], 'mtAcc')) + ' MGA', 'ok'], ['En attente de réponse', fmt(sm(['Soumise'], 'mt')) + ' MGA', 'warn']]);
+    dfoAccRender();
     document.getElementById('dfo-new').disabled = !cadCan('dfo_prep'); document.getElementById('dfo-new').title = cadCan('dfo_prep') ? '' : 'Réservé : ' + cadRolesTxt('dfo_prep');
     var sb = 'font-size:12.5px;color:#5B606D';
     document.getElementById('dfo-b').innerHTML = I.slice().sort(function (a, b) { return a.id < b.id ? 1 : -1; }).map(function (d) {
@@ -16174,22 +16227,27 @@ var EXEC_REC = [
       if (d.st === 'Soumise') acts = '<button class="btn small primary" data-df="rep" data-id="' + d.id + '"' + cadTitle('dfo_resp') + '>Enregistrer la réponse</button> ';
       if (d.st === 'Acceptée') acts = '<button class="btn small primary" data-df="pay" data-id="' + d.id + '"' + cadTitle('dfo_resp') + '>' + (d.type === 'DPD' ? 'Constater le paiement' : 'Constater la reconstitution') + '</button> ';
       if (d.st === 'Rejetée') acts = '<button class="btn small" data-df="redo" data-id="' + d.id + '"' + cadTitle('dfo_prep') + '>Reprendre</button> ';
-      var obj = d.type === 'DPD' ? '<b>' + escH(d.fourn) + '</b><div style="' + sb + '">' + escH(d.marche) + ' · facture ' + escH(d.fac) + '</div>' : '<b>Réapprovisionnement · ' + escH(d.per) + '</b><div style="' + sb + '">' + escH(d.justif) + ' · ' + (d.regs.length ? pl(d.regs.length, 'dépense') : 'pièces : ' + d.pj) + '</div>';
+      var dep = d.regs.map(function (r) { var x = dfoDoc(r); return x ? x.tiers : r; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(', ');
+      var obj = d.type === 'DPD' ? '<b>' + escH(d.fourn) + '</b><div style="' + sb + '">' + escH(d.marche) + ' · facture ' + escH(d.fac) + '</div>' : '<b>Reconstitution du compte · ' + escH(d.per) + '</b><div style="' + sb + '">' + escH(d.justif) + ' · ' + pl(d.regs.length, 'dépense') + (dep ? ' · ' + escH(dep) : '') + ' · ' + pl(d.pj, 'pièce') + '</div>';
       var dts = 'Préparée ' + isoToFr(d.date) + (d.dsoum ? '<br>Soumise ' + isoToFr(d.dsoum) : '') + (d.dRep ? '<br>Réponse ' + isoToFr(d.dRep) : '') + (d.dPaie ? '<br>Payée ' + isoToFr(d.dPaie) : '');
       return '<tr><td class="name">' + d.id + '</td><td>' + obj + '</td><td>' + escH(dfoSrc(d.src).lib) + '</td><td class="num">' + fmt(d.mt) + (d.dev !== 'MGA' ? '<div style="' + sb + '">' + fmt(d.mtD) + ' ' + d.dev + '</div>' : '') + '</td><td class="num">' + (d.mtAcc ? fmt(d.mtAcc) : '—') + '</td><td style="' + sb + '">' + dts + '</td><td><span class="badge ' + DFO_ST[d.st] + '">' + d.st + '</span>' + (d.motif ? '<div style="' + sb + ';margin-top:4px">' + escH(d.motif) + '</div>' : '') + '</td><td>' + acts + '<button class="btn small" data-df="hist" data-id="' + d.id + '">Historique</button></td></tr>';
     }).join('');
     document.getElementById('dfo-n').textContent = pl(I.length, 'demande') + ' · une dépense ne peut être rattachée qu’à une seule demande non rejetée';
     document.querySelectorAll('#dfo-b button[data-df]').forEach(function (b) { b.addEventListener('click', function () { dfoAct(b.dataset.df, b.dataset.id); }); });
-    var L = cadLines(2), pay = sumK(L, 'pay'), eng = sumK(L, 'eng'), just = sm(['Soumise', 'Acceptée', 'Payée'], 'mt'), rec = sm(['Payée'], 'mtAcc');
+    var DD = (DP.docs || []).filter(function (x) { return dfoDocSrc(x); }), eng = DD.filter(function (x) { return x.kind !== 'avance' && DP_RANK[x.st] >= 2; }).reduce(function (a, x) { return a + x.mt; }, 0), pay = DD.filter(function (x) { return DP_RANK[x.st] >= 6; }).reduce(function (a, x) { return a + dfoAmt(x); }, 0), just = sm(['Soumise', 'Acceptée', 'Payée'], 'mt'), rec = sm(['Payée'], 'mtAcc');
     var row = function (k, v, h) { return '<div class="list-row"><div><b>' + k + '</b><div class="hby">' + h + '</div></div><b style="margin-left:auto">' + fmt(v) + ' MGA</b></div>'; };
-    document.getElementById('dfo-chain').innerHTML = row('Dépenses engagées', eng, 'engagements visés du circuit et importés') + row('Dépenses payées', pay, 'paiements effectués') + row('Dépenses justifiées auprès du bailleur', just, 'demandes soumises, acceptées ou payées') + row('Fonds reçus du bailleur', rec, 'demandes payées ou reconstituées') + row('Payé non encore justifié', Math.max(0, pay - just), 'dépenses à inclure dans une prochaine demande') + row('Justifié non encore reçu', Math.max(0, just - rec), 'demandes en attente de réponse ou de paiement');
+    document.getElementById('dfo-chain').innerHTML = row('Dépenses engagées', eng, 'engagements visés financés par le bailleur') + row('Dépenses payées', pay, 'paiements effectués sur ces engagements') + row('Dépenses justifiées auprès du bailleur', just, 'demandes soumises, acceptées ou payées') + row('Fonds reçus du bailleur', rec, 'demandes payées ou reconstituées') + row('Payé non encore justifié', Math.max(0, pay - just), 'dépenses à inclure dans une prochaine demande') + row('Justifié non encore reçu', Math.max(0, just - rec), 'demandes en attente de réponse ou de paiement');
   }
   function dfoAct(a, id) {
     var d = CDF.items.filter(function (x) { return x.id === id; })[0];
-    if (a === 'hist') { bkMsg('dfo-msg', d.id + ' — ' + d.hist.map(function (h) { return h.on + ' ' + h.role + ' : ' + h.t; }).join(' | '), 'info'); return; }
+    if (a === 'hist') { bkMsg('dfo-msg', d.id + ' — dépenses : ' + (d.regs.map(function (r) { var x = dfoDoc(r); return r + (x ? ' (' + x.tiers + ', ' + fmt(dfoAmt(x)) + ' MGA)' : ''); }).join(', ') || 'aucune') + ' — ' + d.hist.map(function (h) { return h.on + ' ' + h.role + ' : ' + h.t; }).join(' | '), 'info'); return; }
     if (a === 'sub') { if (!cadPerm('dfo_submit', 'dfo-msg')) return; if (!(d.pj >= 1)) { bkMsg('dfo-msg', 'Soumission impossible : aucune pièce justificative jointe.', 'ko'); return; } d.st = 'Soumise'; d.dsoum = cadToday(); d.hist.unshift({ on: nowStr(), role: cadRoleName(), t: 'Soumise au bailleur' }); cadAudit(d.id, 'Demande soumise (' + fmt(d.mt) + ' MGA)'); bkMsg('dfo-msg', d.id + ' soumise au bailleur.', 'ok'); }
     if (a === 'rep') { if (!cadPerm('dfo_resp', 'dfo-msg')) return; CAD.dfoId = id; document.getElementById('dfo-resp').hidden = false; document.getElementById('dfo-rt').textContent = 'Réponse du bailleur — ' + id; document.getElementById('dfo-dec').value = 'ok'; document.getElementById('dfo-acc').value = String(d.mt); document.getElementById('dfo-mot').value = ''; document.getElementById('dfo-rerr').textContent = ''; return; }
-    if (a === 'pay') { if (!cadPerm('dfo_resp', 'dfo-msg')) return; d.st = 'Payée'; d.dPaie = cadToday(); d.hist.unshift({ on: nowStr(), role: cadRoleName(), t: d.type === 'DPD' ? 'Paiement direct constaté' : 'Reconstitution du compte constatée' }); cadAudit(d.id, 'Fonds reçus ' + fmt(d.mtAcc) + ' MGA'); bkMsg('dfo-msg', d.id + ' : ' + fmt(d.mtAcc) + ' MGA reçus du bailleur.', 'ok'); }
+    if (a === 'pay') {
+      if (!cadPerm('dfo_resp', 'dfo-msg')) return; d.st = 'Payée'; d.dPaie = cadToday(); d.hist.unshift({ on: nowStr(), role: cadRoleName(), t: d.type === 'DPD' ? 'Paiement direct constaté' : 'Reconstitution du compte constatée' });
+      var soldes = 0; if (d.type === 'DPD') d.regs.forEach(function (r) { var x = dfoDoc(r); if (x && x.st === 'ordonnance') { x.st = 'paye'; x.mode = DFO_DIRECT; (x.dt = x.dt || {}).pay = cadToday(); soldes++; } });
+      cadAudit(d.id, 'Fonds reçus ' + fmt(d.mtAcc) + ' MGA'); bkMsg('dfo-msg', d.id + ' : ' + fmt(d.mtAcc) + ' MGA ' + (d.type === 'DPD' ? 'payés directement au fournisseur' + (soldes ? ' (' + pl(soldes, 'mandat') + ' soldé' + (soldes > 1 ? 's' : '') + ' dans le compte administratif)' : '') : 'reçus du bailleur : le compte spécial est reconstitué') + '.', 'ok');
+    }
     if (a === 'redo') { if (!cadPerm('dfo_prep', 'dfo-msg')) return; d.st = 'Préparée'; d.dsoum = ''; d.dRep = ''; d.motif = ''; d.hist.unshift({ on: nowStr(), role: cadRoleName(), t: 'Reprise après rejet' }); bkMsg('dfo-msg', d.id + ' repris en préparation.', 'info'); }
     dfoRender();
   }
@@ -16202,23 +16260,27 @@ var EXEC_REC = [
     else { if (mot.length < 5) { err.textContent = 'Le motif du rejet est obligatoire.'; return; } d.st = 'Rejetée'; d.mtAcc = 0; d.dRep = cadToday(); d.motif = mot; d.hist.unshift({ on: nowStr(), role: cadRoleName(), t: 'Rejetée : ' + mot }); }
     err.textContent = ''; document.getElementById('dfo-resp').hidden = true; cadAudit(d.id, 'Réponse du bailleur : ' + d.st); bkMsg('dfo-msg', d.id + ' : réponse enregistrée (' + d.st.toLowerCase() + ').', d.st === 'Acceptée' ? 'ok' : 'warn'); dfoRender();
   });
-  function dfoFormList() {
-    var type = document.getElementById('dfo-type').value, el = document.getElementById('dfo-regs'), e = dfoElig(type);
-    el.innerHTML = e.length ? e.map(function (r) { return '<label class="chk"><input type="' + (type === 'DPD' ? 'radio' : 'checkbox') + '" name="dfo-r" value="' + r.id + '"> <b>' + r.id + '</b> · ' + escH(r.sup) + ' · ligne ' + r.ligne + ' · ' + escH(dfoSrc(cadSrcOf(r.ligne).code).lib) + ' · ' + fmt(r.ttc) + ' MGA' + (r.dev !== 'MGA' ? ' (' + fmt(r.netD) + ' ' + r.dev + ')' : '') + '</label>'; }).join('') : '<div class="hint">Aucune dépense disponible.</div>';
-    document.getElementById('dfo-reg-h').textContent = type === 'DPD' ? 'Règlements en paiement direct dont le bordereau est édité et qui ne sont pas déjà rattachés à une demande.' : 'Règlements payés sur le compte spécial et non encore justifiés au bailleur. Une demande ne regroupe qu’une seule source de financement.';
+  function dfoSum() {
+    var ids = [].slice.call(document.querySelectorAll('input[name="dfo-r"]:checked')).map(function (i) { return dfoDoc(i.value); }).filter(Boolean), t = ids.reduce(function (a, d) { return a + dfoAmt(d); }, 0), type = document.getElementById('dfo-type').value;
+    document.getElementById('dfo-reg-h').textContent = (ids.length ? 'Sélection : ' + pl(ids.length, 'dépense') + ', ' + fmt(t) + ' MGA. ' : '') + (type === 'DPD' ? 'Mandats émis et non encore payés : le bailleur paie directement le fournisseur.' : 'Dépenses payées sur le compte spécial et non encore justifiées au bailleur. Une demande ne regroupe qu’une seule source de financement.');
   }
-  document.getElementById('dfo-type').addEventListener('change', dfoFormList);
-  document.getElementById('dfo-new').addEventListener('click', function () { if (!cadPerm('dfo_prep', 'dfo-msg')) return; document.getElementById('dfo-err').textContent = ''; document.getElementById('dfo-no').textContent = ''; document.getElementById('dfo-form').hidden = false; dfoFormList(); });
+  function dfoFormList(all) {
+    var type = document.getElementById('dfo-type').value, el = document.getElementById('dfo-regs'), e = dfoElig(type), s0 = e.length ? dfoDocSrc(e[0]) : null;
+    el.innerHTML = e.length ? e.map(function (d) { var dt = d.dt || {}; return '<label class="chk"><input type="' + (type === 'DPD' ? 'radio' : 'checkbox') + '" name="dfo-r" value="' + d.id + '"' + (all && type === 'DRF' && dfoDocSrc(d) === s0 ? ' checked' : '') + '> <b>' + d.id + '</b> · ' + escH(d.tiers) + ' · ' + escH(d.objet) + ' · ligne ' + escH(dpShort(d).split(' — ')[0]) + ' · ' + escH(dfoSrc(dfoDocSrc(d)).lib) + ' · <b>' + fmt(dfoAmt(d)) + ' MGA</b>' + (type === 'DRF' && dt.pay ? ' · payé le ' + isoToFr(dt.pay) : (d.mandat ? ' · mandat ' + escH(d.mandat) : '')) + '</label>'; }).join('') : '<div class="hint">Aucune dépense disponible : toutes les dépenses payées sont déjà justifiées.</div>';
+    el.querySelectorAll('input').forEach(function (i) { i.addEventListener('change', dfoSum); }); dfoSum();
+  }
+  document.getElementById('dfo-type').addEventListener('change', function () { dfoFormList(false); });
+  document.getElementById('dfo-new').addEventListener('click', function () { if (!cadPerm('dfo_prep', 'dfo-msg')) return; document.getElementById('dfo-err').textContent = ''; document.getElementById('dfo-no').textContent = ''; document.getElementById('dfo-form').hidden = false; dfoFormList(false); });
   document.getElementById('dfo-cancel').addEventListener('click', function () { document.getElementById('dfo-form').hidden = true; });
   document.getElementById('dfo-save').addEventListener('click', function () {
-    var err = document.getElementById('dfo-err'), type = document.getElementById('dfo-type').value, sel = [].slice.call(document.querySelectorAll('input[name="dfo-r"]:checked')).map(function (i) { return crgGet(i.value); }), pj = parseInt0(document.getElementById('dfo-pj').value);
+    var err = document.getElementById('dfo-err'), type = document.getElementById('dfo-type').value, sel = [].slice.call(document.querySelectorAll('input[name="dfo-r"]:checked')).map(function (i) { return dfoDoc(i.value); }).filter(Boolean), pj = parseInt0(document.getElementById('dfo-pj').value);
     if (!cadPerm('dfo_prep', 'dfo-msg')) return;
     if (!sel.length) { err.textContent = 'Rattachez au moins une dépense : une demande de fonds doit être liée à des dépenses et à leurs pièces.'; return; }
-    var srcs = uniq(sel.map(function (r) { return cadSrcOf(r.ligne).code; })); if (srcs.length > 1) { err.textContent = 'Une demande ne peut regrouper qu’une seule source de financement.'; return; }
+    var srcs = uniq(sel.map(dfoDocSrc)); if (srcs.length > 1) { err.textContent = 'Une demande ne peut regrouper qu’une seule source de financement.'; return; }
     if (isNaN(pj) || pj < 1) { err.textContent = 'Indiquez le nombre de pièces justificatives (1 au moins).'; return; }
-    err.textContent = ''; var id = type + '-2026-' + ('000' + (++CDF.seq[type])).slice(-3), mt = sumK(sel, 'ttc'), r0 = sel[0];
-    var d = { id: id, type: type, date: cadToday(), per: document.getElementById('dfo-per').value.trim() || '—', src: srcs[0], mt: mt, dev: type === 'DPD' ? r0.dev : 'MGA', justif: document.getElementById('dfo-justif').value, regs: sel.map(function (r) { return r.id; }), pj: pj, st: 'Préparée', dsoum: '', mtAcc: 0, dRep: '', motif: '', dPaie: '', hist: [{ on: nowStr(), role: cadRoleName(), t: 'Demande préparée' }] };
-    if (type === 'DPD') { var en = cegGet(r0.eng), lq = cliGet(r0.liq); d.mtD = r0.netD; d.fourn = r0.sup; d.marche = en.ref; d.fac = lq.fno; }
+    err.textContent = ''; var id = type + '-2026-' + ('000' + (++CDF.seq[type])).slice(-3), mt = sel.reduce(function (a, x) { return a + dfoAmt(x); }, 0), r0 = sel[0];
+    var d = { id: id, type: type, date: cadToday(), per: document.getElementById('dfo-per').value.trim() || '—', src: srcs[0], mt: mt, dev: type === 'DPD' ? 'EUR' : 'MGA', justif: document.getElementById('dfo-justif').value, regs: sel.map(function (r) { return r.id; }), pj: pj, st: 'Préparée', dsoum: '', mtAcc: 0, dRep: '', motif: '', dPaie: '', hist: [{ on: nowStr(), role: cadRoleName(), t: 'Demande préparée' }] };
+    if (type === 'DPD') { d.mtD = Math.round(mt / 5060); d.fourn = r0.tiers; d.marche = r0.ref; d.fac = r0.fac || '—'; }
     CDF.items.push(d); cadAudit(id, 'Demande préparée (' + fmt(mt) + ' MGA, ' + pl(sel.length, 'dépense') + ')'); document.getElementById('dfo-form').hidden = true; bkMsg('dfo-msg', id + ' préparée : ' + pl(sel.length, 'dépense') + ' rattachée' + (sel.length > 1 ? 's' : '') + ', ' + fmt(mt) + ' MGA.', 'ok'); dfoRender();
   });
 
@@ -20260,7 +20322,7 @@ var EXEC_REC = [
   });
 
   /* ===== Chaîne de la dépense du projet (menu Compte administratif) : engagements, liquidations, ordonnancement, paiements — chaque dépense est rattachée à une ligne du PTBA validé ===== */
-  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 7, seqM: 3, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
+  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 13, seqM: 10, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
   var DP_ST = { soumis: ['En attente de visa CF', 'b-warn'], vise: ['Visé · à liquider', 'b-info'], liquide: ['Liquidé · à ordonnancer', 'b-info'], ordonnance: ['Mandaté · chez le comptable', 'b-warn'], paye: ['Payé', 'b-ok'] };
   var DP_RANK = { soumis: 1, vise: 2, liquide: 3, ordonnance: 4, paye: 6 };
   var DP_TIERS = ['BTP Andriana', 'Entreprise Sud Bâtiment', 'Centre de formation Vatsy', 'Hôtel Les Flamboyants', 'MEDIFROID SARL', 'FOURNITEC SARL', 'Cabinet RAKOTO Conseil', 'Imprimerie nationale'];
@@ -20278,10 +20340,17 @@ var EXEC_REC = [
       d(3, '1.2', 'Centre de formation Vatsy', 'Formation de 150 enseignants aux nouvelles méthodes', 'Contrat', 'CT-2026-007', 90000000, 'liquide', { fac: 'FAC-2231' }),
       d(4, '2.1', 'Entreprise Sud Bâtiment', 'Construction de 3 centres de santé', 'Marché', 'M-2026-051', 180000000, 'vise', { av: { pct: 20, amt: 36000000, garantie: 'GRA-2026-014', st: 'prevue' } }),
       d(5, '2.2', 'Hôtel Les Flamboyants', 'Séminaire de formation des agents de santé', 'Bon de commande', 'BC-2026-0121', 20000000, 'liquide', { fac: 'FAC-0460', rejet: DP_MOTIFS[0] }),
-      d(6, '2.1', 'MEDIFROID SARL', 'Réfrigérateurs solaires pour les centres de santé', 'Bon de commande', 'BC-2026-0157', 45000000, 'soumis')
+      d(6, '2.1', 'MEDIFROID SARL', 'Réfrigérateurs solaires pour les centres de santé', 'Bon de commande', 'BC-2026-0157', 45000000, 'soumis'),
+      /* Dépenses d'exemple financées par le bailleur, pour simuler les demandes de fonds (DRF et DPD) */
+      d(7, '2.1', 'Cabinet RAKOTO Conseil', 'Études techniques des centres de santé', 'Contrat', 'CT-2026-012', 25000000, 'paye', { fac: 'FAC-0518', mandat: 'MD-2026-0003', mode: 'Virement bancaire', dt: { eng: '2026-06-12', liq: '2026-07-10', ord: '2026-07-20', pay: '2026-07-28' } }),
+      d(8, '2.1', 'Imprimerie nationale', 'Guides techniques à destination des centres de santé', 'Bon de commande', 'BC-2026-0166', 10000000, 'paye', { fac: 'FAC-0533', mandat: 'MD-2026-0004', mode: 'Virement bancaire', dt: { eng: '2026-07-05', liq: '2026-08-04', ord: '2026-08-12', pay: '2026-08-20' } }),
+      d(9, '2.1', 'FOURNITEC SARL', 'Mobilier médical des centres de santé (lot 1)', 'Bon de commande', 'BC-2026-0171', 40000000, 'paye', { fac: 'FAC-0547', mandat: 'MD-2026-0005', mode: 'Virement bancaire', dt: { eng: '2026-07-15', liq: '2026-08-25', ord: '2026-09-03', pay: '2026-09-10' } }),
+      d(10, '2.1', 'Centre de formation Vatsy', 'Formation à l’entretien des équipements', 'Contrat', 'CT-2026-015', 20000000, 'paye', { fac: 'FAC-0561', mandat: 'MD-2026-0006', mode: 'Mobile money', dt: { eng: '2026-08-10', liq: '2026-09-15', ord: '2026-09-22', pay: '2026-09-30' } }),
+      d(11, '2.1', 'FOURNITEC SARL', 'Équipements de laboratoire des centres de santé (lot 2)', 'Bon de commande', 'BC-2026-0180', 30000000, 'ordonnance', { fac: 'FAC-0574', mandat: 'MD-2026-0009', dt: { eng: '2026-09-01', liq: '2026-10-12', ord: '2026-10-22' } }),
+      d(12, '2.1', 'Cabinet RAKOTO Conseil', 'Supervision des travaux des centres de santé', 'Contrat', 'CT-2026-016', 12000000, 'paye', { fac: 'FAC-0589', mandat: 'MD-2026-0007', mode: 'Virement bancaire', dt: { eng: '2026-09-20', liq: '2026-10-20', ord: '2026-10-28', pay: '2026-11-05' } })
     ].filter(function (x) { return x.key; });
     function dd(m, j) { return '2026-' + ('0' + m).slice(-2) + '-' + ('0' + j).slice(-2); }
-    DP.docs.forEach(function (x, i) { var k = i + 1; x.dt = { eng: dd(k + 1, 10) }; if (DP_RANK[x.st] >= 3) x.dt.liq = dd(k + 3, 15); if (DP_RANK[x.st] >= 4) x.dt.ord = dd(k + 3, 25); if (DP_RANK[x.st] >= 6) x.dt.pay = dd(k + 4, 5); });
+    DP.docs.forEach(function (x, i) { var k = i + 1; if (x.dt) return; x.dt = { eng: dd(k + 1, 10) }; if (DP_RANK[x.st] >= 3) x.dt.liq = dd(k + 3, 15); if (DP_RANK[x.st] >= 4) x.dt.ord = dd(k + 3, 25); if (DP_RANK[x.st] >= 6) x.dt.pay = dd(k + 4, 5); });
   }
   function dpStat(key) {
     var ln = dpLine(key), s = { ouv: ln ? ln.ouv : 0, e: 0, r: 0, l: 0, o: 0, p: 0 };
@@ -20493,7 +20562,7 @@ var EXEC_REC = [
       cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.mandat, a, dpShort(d), d.fac, fmt(dpNet(d)), dpStatBadge(d)]; } });
   }
   /* Détail complet d'un mandat : le comptable y trouve tout ce qu'il faut pour contrôler, puis payer ou rejeter */
-  function dpPayChecks(d) { var z = dpLine(d.key), s = dpStat(d.key); return [['Qualité de l’ordonnateur (délégation en vigueur)', true], ['Disponibilité des crédits sur la ligne', s.dispo >= 0], ['Exacte imputation budgétaire (plans de la configuration renseignés)', !!z && bvLinkMissing(z.r) === 0], [d.kind === 'avance' ? 'Garantie de restitution d’avance fournie (' + (d.garantie || '—') + ')' : 'Validité de la créance : service fait certifié', d.kind === 'avance' ? !!d.garantie : (!!d.fac && !!(d.dt && d.dt.liq))], ['Pièces justificatives', !!d.fac]]; }
+  function dpPayChecks(d) { var z = dpLine(d.key), s = dpStat(d.key), fs = dfoDocSrc(d), direct = fs && CDF.items.some(function (x) { return x.type === 'DPD' && x.st === 'Acceptée' && x.regs.indexOf(d.id) >= 0; }), acc = fs ? dfoAcc() : null; return (fs ? [[direct ? 'Paiement direct accepté par le bailleur : à constater dans Demandes de fonds' : 'Fonds disponibles sur le compte spécial du bailleur (' + fmt(acc.solde) + ' MGA)', direct || acc.solde >= dfoAmt(d)]] : []).concat([['Qualité de l’ordonnateur (délégation en vigueur)', true], ['Disponibilité des crédits sur la ligne', s.dispo >= 0], ['Exacte imputation budgétaire (plans de la configuration renseignés)', !!z && bvLinkMissing(z.r) === 0], [d.kind === 'avance' ? 'Garantie de restitution d’avance fournie (' + (d.garantie || '—') + ')' : 'Validité de la créance : service fait certifié', d.kind === 'avance' ? !!d.garantie : (!!d.fac && !!(d.dt && d.dt.liq))], ['Pièces justificatives', !!d.fac]]); }
   function dpPayOpen(d) {
     var body = document.getElementById('dp-pay-body'), z = dpLine(d.key), s = dpStat(d.key), dd = d.dt || {}, ch = dpPayChecks(d), ko = ch.filter(function (c) { return !c[1]; }).length; body.innerHTML = '';
     document.getElementById('dp-pay-title').textContent = 'Mandat ' + d.mandat;
