@@ -5404,7 +5404,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div id="sx-k"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead id="sx-th"></thead><tbody id="sx-b"></tbody></table></div></div>
         <section class="co-blk"><div class="kb-h">Récupérations, imports et saisies</div><div class="card" id="sx-log"></div></section>
-                <div class="panel" id="sx-suivi" hidden><h2><span>Suivi des engagements sur une période</span></h2><div class="body" id="sx-suivi-body"></div></div>
+                <div class="panel" id="sx-det" hidden><h2><span id="sx-det-title">Détail</span></h2><div class="body" id="sx-det-body"></div></div>
+        <div class="panel" id="sx-suivi" hidden><h2><span>Suivi des engagements sur une période</span></h2><div class="body" id="sx-suivi-body"></div></div>
         <div class="panel" id="sx-ech" hidden><h2><span id="sx-ech-title">Échéancier</span></h2><div class="body" id="sx-ech-body"></div></div>
 <div class="panel" id="sx-sy" hidden><h2><span id="sx-sy-title">Synchroniser</span></h2><div class="body" id="sx-sy-body"></div></div>
         <div class="panel" id="sx-form" hidden><h2><span id="sx-form-title">Saisie directe</span></h2><div class="body">
@@ -20141,7 +20142,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -21182,8 +21183,8 @@ var EXEC_REC = [
   function sxCols() {
     var K = SX_K[SX.kind];
     if (SX.kind === 'eng') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Période', 'Montant (MGA)', 'Réalisé (MGA)', 'Reste à réaliser (MGA)', 'Source', ''];
-    if (SX.kind === 'liq' || SX.kind === 'pay') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Engagement', 'Montant (MGA)', 'Source'];
-    return ['Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)', 'Source'];
+    if (SX.kind === 'liq' || SX.kind === 'pay') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Engagement', 'Montant (MGA)', 'Source', ''];
+    return ['Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)', 'Source', ''];
   }
   function sxRow(i) {
     var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur');
@@ -21195,7 +21196,8 @@ var EXEC_REC = [
       cell(tr, fmt(i.mt), 'num');
     } else cell(tr, fmt(i.mt) + (i.unit ? ' ' + i.unit : ''), 'num');
     var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); if (SX.kind === 'pay' && sxIsDpd(i)) { var bd2 = badge('Paiement direct', 'b-warn'); bd2.style.marginLeft = '6px'; sc.appendChild(bd2); }
-    if (SX.kind === 'eng') { var ac = cell(tr, ''), b = cvEl('button', 'btn small', 'Échéancier'); b.type = 'button'; b.addEventListener('click', function () { sxEchOpen(i); }); ac.appendChild(b); }
+    var ac = cell(tr, ''), bc = cvEl('button', 'btn small', 'Consulter'); bc.type = 'button'; bc.addEventListener('click', function () { sxDetOpen(i); }); ac.appendChild(bc);
+    if (SX.kind === 'eng') { var b = cvEl('button', 'btn small', 'Échéancier'); b.type = 'button'; b.style.marginLeft = '6px'; b.addEventListener('click', function () { sxEchOpen(i); }); ac.appendChild(b); }
     return tr;
   }
   /* Échéancier d'un engagement : période et part de chaque exercice */
@@ -21249,6 +21251,34 @@ var EXEC_REC = [
     (SX.items || []).filter(function (i) { return i.kind === 'liq' && i.date >= P.d1 && i.date <= P.d2; }).forEach(function (i) { if (!i.eng) an.push([i.ref, i.tiers || '—', fmt(i.mt), badge('Sans engagement', 'b-warn')]); else if (!sxEngOf(i.eng)) an.push([i.ref, i.tiers || '—', fmt(i.mt), badge('Engagement ' + i.eng + ' introuvable', 'b-ko')]); });
     sxEngs().forEach(function (i) { var z = sxRealz(i.ref) - i.mt; if (z > 0) an.push([i.ref, i.tiers || '—', fmt(z), badge('Réalisations supérieures à l’engagement', 'b-ko')]); });
     var b2 = cvEl('section', 'co-blk'); b2.appendChild(cvEl('div', 'kb-h', 'Anomalies de rattachement')); b2.appendChild(dpMini(['Référence', 'Tiers', 'Montant (MGA)', 'Anomalie'], an, [2], 'Aucune anomalie : toutes les réalisations sont rattachées à un engagement.')); body.appendChild(b2);
+  }
+  /* Détail d'une ligne d'exécution : informations, engagement rattaché, réalisations et décaissements liés */
+  function sxDetOpen(i) {
+    var body = document.getElementById('sx-det-body'); body.innerHTML = ''; var K = SX_K[i.kind], items = SX.items || [];
+    var doc = (DP.docs || []).filter(function (d) { return i.kind === 'eng' ? d.ref === i.ref : (i.kind === 'liq' ? d.fac === i.ref : (i.kind === 'pay' ? d.mandat === i.ref : false)); })[0];
+    document.getElementById('sx-det-title').textContent = K.h.replace(/s$/, '') + ' ' + (i.ref || '');
+    var pr = [['Référence', i.ref || '—'], ['Date', isoToFr(i.date)], [K.tg, i.tiers || '—'], [i.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'], [i.kind === 'phy' ? 'Quantité réalisée' : 'Montant', fmt(i.mt) + (i.unit ? ' ' + i.unit : ' MGA')], ['Source', i.src]];
+    if (i.kind === 'eng') { var p = sxPer(i); pr.push(['Période', isoToFr(p.d1) + ' → ' + isoToFr(p.d2)]); }
+    if (i.kind === 'pay') pr.push(['Type de paiement', sxIsDpd(i) ? 'Paiement direct du bailleur' : 'Décaissement du projet']);
+    if (doc) pr.push(['Dossier du compte administratif', doc.id + ' · ' + (DP_ST[doc.st] ? DP_ST[doc.st][0] : doc.st)]);
+    anaBlock(body, 'Informations', dpDl(pr));
+    function list(kind, ref, skip) { return items.filter(function (x) { return x.kind === kind && x.eng === ref && x !== skip; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; }); }
+    function tab(l) { return dpMini(['Date', 'Référence', 'Tiers', 'Montant (MGA)', 'Source'], l.map(function (x) { return [isoToFr(x.date), x.ref || '—', x.tiers || '—', fmt(x.mt), x.src]; }), [3], 'Aucune écriture.'); }
+    if (i.kind === 'eng') {
+      var rz = sxRealz(i.ref), lb = sxFreed(i.ref), card = cvEl('div', 'card'); card.style.padding = '14px 16px';
+      card.appendChild(dpMeter('Réalisé', rz, i.mt, DPC.ok)); card.appendChild(dpMeter('Libéré', lb, i.mt, DPC.grey)); card.appendChild(dpMeter('Reste à réaliser', sxReste(i), i.mt, DPC.warn)); anaBlock(body, 'Consommation de l’engagement', card);
+      var ech = sxEch(i); anaBlock(body, 'Échéancier par exercice', dpMini(['Exercice', 'Part prévue (MGA)', 'Réalisé (MGA)', 'Reste (MGA)'], Object.keys(ech).map(function (y) { var r = sxRealz(i.ref, y + '-01-01', y + '-12-31'); return [y, fmt(ech[y]), fmt(r), fmt(Math.max(0, ech[y] - r))]; }), [1, 2, 3], ''));
+      anaBlock(body, 'Réalisations rattachées', tab(list('liq', i.ref)));
+      anaBlock(body, 'Décaissements rattachés', tab(list('pay', i.ref)));
+      anaBlock(body, 'Reliquats libérés', dpMini(['Date', 'Montant (MGA)', 'Motif', 'Par'], (SX.free || []).filter(function (f) { return f.eng === i.ref; }).map(function (f) { return [isoToFr(f.date), fmt(f.amt), f.motif, f.by]; }), [1], 'Aucun reliquat libéré.'));
+    } else if (i.kind === 'liq' || i.kind === 'pay') {
+      var en = i.eng ? sxEngOf(i.eng) : null;
+      if (en) { anaBlock(body, 'Engagement rattaché', dpDl([['Engagement', en.ref + ' · ' + (en.tiers || '—')], ['Montant engagé', fmt(en.mt) + ' MGA'], ['Réalisé au total', fmt(sxRealz(en.ref)) + ' MGA'], ['Reste à réaliser', fmt(sxReste(en)) + ' MGA']])); anaBlock(body, i.kind === 'liq' ? 'Autres réalisations sur cet engagement' : 'Autres décaissements sur cet engagement', tab(list(i.kind, i.eng, i))); }
+      else { var w = cvEl('div', 'callout', i.eng ? 'L’engagement ' + i.eng + ' est introuvable.' : 'Cette écriture n’est rattachée à aucun engagement.'); w.style.margin = '0 0 14px'; body.appendChild(w); }
+    }
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px'; var bf = cvEl('button', 'btn', 'Fermer'); bf.type = 'button'; bf.addEventListener('click', function () { document.getElementById('sx-det').hidden = true; }); ft.appendChild(bf);
+    if (i.kind === 'eng') { var be = cvEl('button', 'btn primary', 'Modifier l’échéancier'); be.type = 'button'; be.addEventListener('click', function () { sxEchOpen(i); }); ft.appendChild(be); }
+    body.appendChild(ft); document.getElementById('sx-det').hidden = false;
   }
   function sxFormSetup() {
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
