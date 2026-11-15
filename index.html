@@ -21597,22 +21597,22 @@ var EXEC_REC = [
     dpLines().filter(function (z) { return z.r === r; }).forEach(function (z) {
       var c = CL.filter(function (x) { return x.key === z.key; })[0], v0 = z.l.dem || 0, v1 = c ? c.to : v0; t0 += v0; t1 += v1; if (!c) return;
       var s = dpStat(z.key), eng = s.e + s.r, act = r.camp + '|' + z.l.c, pp = ppmActTotal(act) + CP.filter(function (x) { var it = CPP.items.filter(function (q) { return q.ref === x.key; })[0]; return it && it.act === act; }).reduce(function (a, x) { return a + x.to - x.from; }, 0);
-      if (v1 < eng) { out.push(['ko', 'Engagé', c.label + ' : le nouveau montant (' + fmt(v1) + ' MGA) est inférieur à l’engagé (' + fmt(eng) + ' MGA). La révision ne peut pas être soumise.']); block++; } else out.push(['ok', 'Engagé', c.label + ' : conforme à l’engagé (' + fmt(eng) + ' MGA).']);
-      if (pp > v1) out.push(['warn', 'PPM', c.label + ' : les marchés du PPM (' + fmt(pp) + ' MGA) dépassent la ligne révisée.']);
+      if (v1 < eng) { out.push(['ko', 'Engagé', c.label + ' : le nouveau montant (' + fmt(v1) + ' MGA) est inférieur à l’engagé (' + fmt(eng) + ' MGA). La révision ne peut pas être soumise.', { t: 'min', c: c, eng: eng }]); block++; } else out.push(['ok', 'Engagé', c.label + ' : conforme à l’engagé (' + fmt(eng) + ' MGA).']);
+      if (pp > v1) out.push(['warn', 'PPM', c.label + ' : les marchés du PPM (' + fmt(pp) + ' MGA) dépassent la ligne révisée.', { t: 'ppm', c: c, pp: pp, items: ppmLotItems(r).filter(function (x) { return x.act === act; }) }]);
       if (c.qTo != null && c.qTo !== c.qFrom) out.push(['info', 'PTA', c.label + ' : cible ' + fmt(c.qFrom) + ' → ' + fmt(c.qTo) + ' ' + c.unit + '.']);
       out.push(['info', 'Plan de décaissement', c.label + ' : ' + anaSg(v1 - v0) + ' MGA sur les besoins de l’exercice.']);
     });
     var CN = rev.changes.filter(function (c) { return c.k === 'N'; });
     CN.forEach(function (c) {
       t1 += c.to; var dup = dpLines().some(function (z) { return z.r === r && z.perim === c.perim && z.l.c === c.code; });
-      if (dup) { out.push(['ko', 'Nouvelle ligne', c.label + ' : ce code existe déjà dans cette composante.']); block++; }
+      if (dup) { out.push(['ko', 'Nouvelle ligne', c.label + ' : ce code existe déjà dans cette composante.', { t: 'dup', c: c }]); block++; }
       else out.push(['info', 'Nouvelle ligne', c.label + ' : ' + fmt(c.to) + ' MGA dans « ' + c.perim + ' »' + (c.task ? ', travail « ' + c.task + ' »' + (c.vol ? ' (' + fmt(c.vol) + ' ' + c.unit + ')' : '') : '') + '.']);
       if (c.task && !c.ind) out.push(['warn', 'PTA', c.label + ' : aucun indicateur servi, à rattacher dans le cadre de résultats.']);
     });
     CP.forEach(function (c) { out.push(['info', 'PPM', c.label + ' : estimatif ' + fmt(c.from) + ' → ' + fmt(c.to) + ' MGA' + (c.dTo ? ', signature le ' + isoToFr(c.dTo) : '') + '.']); });
     if (yi >= 0) env = CPAD.comps.reduce(function (a, cp) { return a + (padComp(cp.code)[yi] || 0); }, 0);
     if (CL.length || CN.length) out.push(env && t1 > env && t1 > t0 ? ['warn', 'Financement', 'Total révisé ' + fmt(t1) + ' MGA : supérieur au financement prévu (' + fmt(env) + ' MGA).'] : ['ok', 'Financement', 'Total révisé ' + fmt(t1) + ' MGA (' + anaSg(t1 - t0) + ' MGA) : la révision n’augmente pas le budget au-delà du financement.']);
-    rev.changes.filter(function (c) { return (c.k === 'L' || c.k === 'N') && c.months; }).forEach(function (c) { var s = c.months.reduce(function (a, v) { return a + v; }, 0); if (Math.abs(s - c.to) > 0.5) { out.push(['ko', 'Répartition', c.label + ' : la répartition mensuelle (' + fmt(s) + ' MGA) ne correspond pas au montant (' + fmt(c.to) + ' MGA).']); block++; } });
+    rev.changes.filter(function (c) { return (c.k === 'L' || c.k === 'N') && c.months; }).forEach(function (c) { var s = c.months.reduce(function (a, v) { return a + v; }, 0); if (Math.abs(s - c.to) > 0.5) { out.push(['ko', 'Répartition', c.label + ' : la répartition mensuelle (' + fmt(s) + ' MGA) ne correspond pas au montant (' + fmt(c.to) + ' MGA).', { t: 'mois', c: c }]); block++; } });
     return { out: out, block: block, t0: t0, t1: t1 };
   }
   function revRender() {
@@ -21659,9 +21659,10 @@ var EXEC_REC = [
   function revDetPaint() {
     var rev = revGet(REVD), body = document.getElementById('revpl-det-body'); if (!rev) return; body.innerHTML = ''; document.getElementById('revpl-det-title').textContent = 'Révision ' + rev.id;
     var r = revLot(rev), draft = rev.st === 'Brouillon', stb = cvEl('div'); stb.style.marginBottom = '12px'; stb.appendChild(badge(rev.st, REV_CLS[rev.st])); body.appendChild(stb);
+    if (REVN) { var nb = cvEl('div', 'callout', REVN.t); nb.style.cssText = 'margin-bottom:12px;background:' + (REVN.ok ? 'var(--ok-bg)' : 'var(--ko-bg)') + ';color:' + (REVN.ok ? 'var(--ok)' : 'var(--ko)'); body.appendChild(nb); REVN = null; }
     anaBlock(body, 'Informations', dpDl([['Exercice', rev.ex], ['Créée par', rev.by + ' · ' + rev.on], ['Motif', rev.motif, true], ['ANO du bailleur', rev.ano ? rev.ano.ref + ' du ' + isoToFr(rev.ano.date) + (rev.ano.doc ? ' · ' + rev.ano.doc : '') : '—']]));
     var done = rev.st === 'Approuvée' || rev.st === 'Rejetée', I = done ? null : revImpact(rev), alerts = I ? I.out.filter(function (x) { return x[0] === 'warn' || x[0] === 'ko'; }).length : 0;
-    var tabs = [['mod', 'Modifications (' + rev.changes.length + ')']]; if (!done) { tabs.push(['imp', 'Impact' + (alerts ? ' (' + alerts + ' alerte' + (alerts > 1 ? 's' : '') + ')' : '')]); tabs.push(['rep', 'Répartition']); } tabs.push(['his', 'Historique']);
+    var tabs = [['mod', 'Modifications (' + rev.changes.length + ')']]; if (!done) { tabs.push(['imp', 'Impact' + (alerts ? ' (' + alerts + ' alerte' + (alerts > 1 ? 's' : '') + ')' : '')]); tabs.push(['rep', 'Répartition']); } tabs.push(['ver', 'Versions des plans']); tabs.push(['his', 'Historique']);
     if (!tabs.some(function (t) { return t[0] === REVT; })) REVT = 'mod';
     var tb = cvEl('div', 'seg dp-tabs'); tb.style.marginBottom = '14px'; tabs.forEach(function (t) { var b = cvEl('button', REVT === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { REVT = t[0]; revDetPaint(); }); tb.appendChild(b); }); body.appendChild(tb);
     if (REVT === 'mod') {
@@ -21680,13 +21681,13 @@ var EXEC_REC = [
         ga.addEventListener('click', function () { revChgOpen(rev, null, { type: 'L', add: free }); }); gb.addEventListener('click', function () { revChgOpen(rev, null, { type: 'N', add: free }); }); fr.appendChild(ga); fr.appendChild(gb); card.appendChild(fr);
       } else if (I.out.length && free < 0) { var fr2 = cvEl('div', 'list-row'); fr2.style.alignItems = 'center'; fr2.appendChild(badge('Budget en hausse', 'b-info')); var ft2 = cvEl('div', null, 'La révision augmente le budget de ' + fmt(-free) + ' MGA : vérifiez le financement.'); ft2.style.marginLeft = '12px'; fr2.appendChild(ft2); card.appendChild(fr2); }
       if (!I.out.length) card.appendChild(cvEl('div', 'list-row', 'Aucun impact à afficher : ajoutez d’abord une modification.'));
-      I.out.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x[1], { ok: 'b-ok', warn: 'b-warn', ko: 'b-ko', info: 'b-info' }[x[0]])); var t = cvEl('div', null, x[2]); t.style.marginLeft = '12px'; row.appendChild(t); card.appendChild(row); });
+      I.out.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x[1], { ok: 'b-ok', warn: 'b-warn', ko: 'b-ko', info: 'b-info' }[x[0]])); var t = cvEl('div', null, x[2]); t.style.cssText = 'margin-left:12px;flex:1'; row.appendChild(t); if (x[3] && draft) { var bf = cvEl('button', 'btn small', 'Corriger'); bf.type = 'button'; bf.addEventListener('click', function () { revFix(rev, x[3]); }); row.appendChild(bf); } card.appendChild(row); });
       body.appendChild(card);
     } else if (REVT === 'rep') {
       var cs = rev.changes.filter(function (c) { return c.k === 'L' || c.k === 'N'; });
       if (!cs.length) { var nm = cvEl('div', 'card', 'Aucune ligne modifiée ou créée : la répartition du nouveau montant apparaît ici.'); nm.style.padding = '14px 16px'; body.appendChild(nm); }
       cs.forEach(function (c) { revDistBlock(body, rev, c, draft); });
-    } else body.appendChild(dpMini(['Date', 'Événement', 'Par'], rev.hist.map(function (h) { return [h.on, h.t, h.by]; }), [], ''));
+    } else if (REVT === 'ver') { revVersionsTab(body, rev); } else body.appendChild(dpMini(['Date', 'Événement', 'Par'], rev.hist.map(function (h) { return [h.on, h.t, h.by]; }), [], ''));
     var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px';
     function btn(txt, cls, fn, dis) { var b = cvEl('button', 'btn' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; b.disabled = !!dis; b.addEventListener('click', fn); ft.appendChild(b); return b; }
     btn('Fermer', '', function () { document.getElementById('revpl-det').hidden = true; revRender(); });
@@ -21752,17 +21753,75 @@ var EXEC_REC = [
     var ln = { c: c.code, l: c.lib, lib: c.lib, nat: '', ref: 0, dem: c.to, q: null, p: null, just: 'Ligne créée par la révision ' + rev.id, axv: { Analytique: 'Programme ' + c.code.split('.')[0], Financier: c.fin || 'Budget de l’État' } };
     if (c.months) ln.spread = c.months.slice();
     if (c.task) ln.wk = { task: c.task, d1: c.d1, d2: c.d2, vol: c.vol, unit: c.unit, inds: c.ind ? [{ id: c.ind, contrib: c.vol }] : [], real: [null, null, null, null], spent: null };
-    arr.push(ln);
+    arr.push(ln); return function () { var i = arr.indexOf(ln); if (i >= 0) arr.splice(i, 1); };
+  }
+  /* Applique les modifications aux plans et renvoie de quoi les annuler (sert à l'approbation et à la projection des versions) */
+  function revApplyCore(r, rev, what) {
+    var undo = [];
+    rev.changes.forEach(function (c) {
+      if (c.k === 'N') { undo.push(revAddLine(r, rev, c)); what.push('Nouvelle ligne ' + c.code + ' : ' + fmt(c.to) + ' MGA'); return; }
+      var o = revCurOf(r, c.k, c.key); if (!o) return;
+      if (c.k === 'L') {
+        var l = o.z.l, sv = { dem: l.dem, p: l.p, spread: l.spread, vol: l.wk ? l.wk.vol : undefined, contrib: l.wk && l.wk.inds && l.wk.inds.length === 1 ? l.wk.inds[0].contrib : undefined };
+        undo.push(function () { l.dem = sv.dem; l.p = sv.p; if (sv.spread === undefined) delete l.spread; else l.spread = sv.spread; if (l.wk) { l.wk.vol = sv.vol; if (sv.contrib !== undefined) l.wk.inds[0].contrib = sv.contrib; } });
+        what.push('Ligne ' + l.c + ' : ' + fmt(l.dem || 0) + ' → ' + fmt(c.to) + ' MGA'); l.dem = c.to; if (l.q) l.p = Math.round(c.to / l.q); if (c.months) l.spread = c.months.slice();
+        if (c.qTo != null && l.wk) { l.wk.vol = c.qTo; if (l.wk.inds && l.wk.inds.length === 1) l.wk.inds[0].contrib = c.qTo; }
+      } else {
+        var x = o.x, sx = { est: x.est, d3: x.d3 }; undo.push(function () { x.est = sx.est; x.d3 = sx.d3; });
+        what.push('Marché ' + x.ref + ' : ' + fmt(x.est) + ' → ' + fmt(c.to) + ' MGA'); x.est = c.to; if (c.dTo) x.d3 = c.dTo;
+      }
+    });
+    return undo;
   }
   function revApply(rev, ano) {
-    var r = revLot(rev), vs = bvVers(r), what = [];
-    rev.changes.forEach(function (c) {
-      if (c.k === 'N') { revAddLine(r, rev, c); what.push('Nouvelle ligne ' + c.code + ' : ' + fmt(c.to) + ' MGA'); return; } var o = revCurOf(r, c.k, c.key); if (!o) return;
-      if (c.k === 'L') { var l = o.z.l; what.push('Ligne ' + l.c + ' : ' + fmt(l.dem || 0) + ' → ' + fmt(c.to) + ' MGA'); l.dem = c.to; if (l.q) l.p = Math.round(c.to / l.q); if (c.months) l.spread = c.months.slice(); if (c.qTo != null && l.wk) { l.wk.vol = c.qTo; if (l.wk.inds && l.wk.inds.length === 1) l.wk.inds[0].contrib = c.qTo; } }
-      else { var x = o.x; what.push('Marché ' + x.ref + ' : ' + fmt(x.est) + ' → ' + fmt(c.to) + ' MGA'); x.est = c.to; if (c.dTo) { x.d3 = c.dTo; } }
-    });
+    var r = revLot(rev), vs = bvVers(r), what = []; revApplyCore(r, rev, what);
     var v = vs.length + 1; vs.push({ v: v, on: nowStr(), by: ME, why: rev.motif, what: what.join(' ; '), snap: bvSnap(r), rev: rev.id }); bvPt(r).hist.unshift({ t: 'Révision approuvée — version V' + v + ' (' + rev.id + ')', by: ME, on: nowStr() });
     rev.ano = ano; rev.st = 'Approuvée'; rev.version = v; ANA.ver = 0; revStamp(rev, 'Approuvée par le bailleur (ANO ' + ano.ref + ') — version V' + v + ' en vigueur');
+  }
+  /* Versions des plans telles qu'elles seraient après la révision : officielles seulement après l'ANO du bailleur */
+  function revSnapAll(r, ex) {
+    return { lines: dpLines().filter(function (z) { return z.r === r; }).map(function (z) { return { key: z.key, label: z.l.c + ' — ' + (z.l.lib || z.l.l), dem: z.l.dem || 0, vol: z.l.wk ? z.l.wk.vol : null, unit: z.l.wk ? z.l.wk.unit : '', task: z.l.wk ? z.l.wk.task : '' }; }),
+      ppm: ppmLotItems(r).map(function (x) { return { ref: x.ref, label: x.ref + ' — ' + x.des, est: x.est, d: x.d3 || x.d2 || x.d1 }; }), S: anaSeries(ex) };
+  }
+  function revProject(rev) {
+    var r = revLot(rev), before = revSnapAll(r, rev.ex), undo = revApplyCore(r, rev, []), after = revSnapAll(r, rev.ex); undo.reverse().forEach(function (f) { f(); });
+    return { before: before, after: after, n: bvVers(r).length };
+  }
+  function revVersionsTab(body, rev) {
+    var r = revLot(rev), vs = bvVers(r), done = rev.st === 'Approuvée' || rev.st === 'Rejetée', sum = function (v) { return Object.keys(v.snap).reduce(function (a, k) { return a + (v.snap[k].dem || 0); }, 0); };
+    if (done) {
+      var rows = vs.map(function (v, i) { var bd = cvEl('div'); if (i === vs.length - 1) bd.appendChild(badge('Référence', 'b-ok')); if (rev.version === v.v) { var b2 = badge('Cette révision', 'b-info'); b2.style.marginLeft = '6px'; bd.appendChild(b2); } return ['V' + v.v, v.on, v.by, (v.why || '') + (v.what ? ' — ' + v.what : ''), fmt(sum(v)), i ? anaSg(sum(v) - sum(vs[i - 1])) : '—', bd]; });
+      body.appendChild(dpMini(['Version', 'Date', 'Auteur', 'Motif et modification', 'PTBA (MGA)', 'Écart avec la précédente', ''], rows, [4, 5], '')); return;
+    }
+    var P = revProject(rev), vo = 'V' + P.n, vp = 'V' + (P.n + 1), hd = cvEl('div'); hd.style.marginBottom = '14px'; hd.appendChild(badge('Officielle : ' + vo, 'b-ok')); var bp = badge('Projetée : ' + vp + ' (officielle après l’ANO du bailleur)', 'b-warn'); bp.style.marginLeft = '8px'; hd.appendChild(bp); body.appendChild(hd);
+    var key = {}; P.before.lines.forEach(function (x) { key[x.key] = x; });
+    var lrows = P.after.lines.map(function (a) { var b = key[a.key]; return [a.label + (b ? '' : ' (nouvelle)'), fmt(b ? b.dem : 0), fmt(a.dem), anaSg(a.dem - (b ? b.dem : 0))]; });
+    anaBlock(body, 'PTBA — ' + vo + ' et ' + vp, dpMini(['Ligne', vo + ' officielle (MGA)', vp + ' projetée (MGA)', 'Écart'], lrows, [1, 2, 3], ''));
+    var trows = P.after.lines.filter(function (a) { return a.vol != null; }).map(function (a) { var b = key[a.key]; return [a.label + (a.task ? ' — ' + a.task : ''), b && b.vol != null ? fmt(b.vol) + ' ' + a.unit : '—', fmt(a.vol) + ' ' + a.unit]; });
+    anaBlock(body, 'PTA — cibles ' + vo + ' et ' + vp, dpMini(['Travail', vo + ' officielle', vp + ' projetée'], trows, [], 'Aucune cible.'));
+    var pk = {}; P.before.ppm.forEach(function (x) { pk[x.ref] = x; });
+    anaBlock(body, 'PPM — ' + vo + ' et ' + vp, dpMini(['Marché', vo + ' officielle (MGA)', vp + ' projetée (MGA)', 'Signature prévue'], P.after.ppm.map(function (a) { var b = pk[a.ref]; return [a.label, fmt(b ? b.est : 0), fmt(a.est), isoToFr(a.d)]; }), [1, 2], 'Aucun marché.'));
+    var z = function (S) { return S.pdcCs.map(function (v, i) { return v + S.pdcDp[i]; }); }, zb = z(P.before.S), za = z(P.after.S), sm = function (a) { return a.reduce(function (s, v) { return s + v; }, 0); };
+    anaBlock(body, 'Plan de décaissement — ' + vo + ' et ' + vp + ' (recalculé)', dpMini(['MGA'].concat(BVMOIS, ['Total']), [[vo + ' officielle'].concat(zb.map(function (v) { return fmt(v); }), [fmt(sm(zb))]), [vp + ' projetée'].concat(za.map(function (v) { return fmt(v); }), [fmt(sm(za))]), ['Écart'].concat(za.map(function (v, i) { return anaSg(v - zb[i]); }), [anaSg(sm(za) - sm(zb))])], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
+  }
+  /* Corrections proposées directement depuis l'impact, dans une fenêtre */
+  var REVN = null;
+  function revFix(rev, fx) {
+    var c = fx.c, r = revLot(rev), opts, num = null, title = 'Corriger — ' + c.label;
+    if (fx.t === 'min') { opts = ['Ramener le montant à l’engagé (' + fmt(fx.eng) + ' MGA)', 'Saisir un autre montant', 'Retirer cette modification']; num = 1; }
+    else if (fx.t === 'ppm') opts = ['Relever la ligne au total des marchés (' + fmt(fx.pp) + ' MGA)', 'Réduire les marchés au montant de la ligne (proportionnellement)'];
+    else if (fx.t === 'dup') { REVC = { rev: rev, ch: c, add: 0 }; fx.next = revNextCode(r, c.perim); opts = ['Utiliser le prochain code libre (' + fx.next + ')', 'Retirer cette modification']; }
+    else opts = ['Ajuster décembre pour obtenir le total', 'Répartir au prorata'];
+    cvAsk({ title: title, ok: 'Appliquer la correction', required: false, optLabel: 'Proposition de correction', options: opts, num: 'Nouveau montant (MGA)', numFor: function (v) { return num && v === opts[1]; }, placeholder: 'Commentaire (facultatif)' }, function (m, opt, nv) {
+      var i = opts.indexOf(opt), ok = true, msg = 'Correction appliquée.';
+      if (fx.t === 'min') { if (i === 0) { c.to = fx.eng; delete c.months; } else if (i === 1) { var n = parseInt0(nv); if (n == null || n < fx.eng) { ok = false; msg = 'Montant refusé : il doit être au moins égal à l’engagé (' + fmt(fx.eng) + ' MGA).'; } else { c.to = n; delete c.months; } } else rev.changes = rev.changes.filter(function (x) { return x !== c; }); }
+      else if (fx.t === 'ppm') {
+        if (i === 0) { c.to = fx.pp; delete c.months; }
+        else { var tot = fx.items.reduce(function (a, x) { return a + x.est; }, 0), acc = 0; fx.items.forEach(function (x, k) { var v = k === fx.items.length - 1 ? c.to - acc : Math.round(x.est * c.to / tot); acc += v; rev.changes = rev.changes.filter(function (q) { return !(q.k === 'P' && q.key === x.ref); }); if (v !== x.est) rev.changes.push({ k: 'P', key: x.ref, label: x.ref + ' — ' + x.des, from: x.est, to: v, qFrom: null, qTo: null, unit: '', dTo: '' }); }); }
+      } else if (fx.t === 'dup') { if (i === 0) { c.code = fx.next; c.key = 'N|' + c.perim + '|' + c.code; c.label = c.code + ' — ' + c.lib; } else rev.changes = rev.changes.filter(function (x) { return x !== c; }); }
+      else { if (i === 0) { var arr = revMonths(rev, c).slice(), s = arr.reduce(function (a, v) { return a + v; }, 0); arr[11] = Math.max(0, arr[11] + c.to - s); c.months = arr; } else delete c.months; }
+      REVN = { ok: ok, t: msg }; revDetPaint();
+    });
   }
   function revFromLine(r) {
     var sel = bvSelLine(r); if (!sel) return; var key = r.camp + '|' + sel.x.perim + '|' + sel.x.l.c;
