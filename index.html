@@ -5352,7 +5352,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div><label for="dfo-per">Période concernée</label><input id="dfo-per" class="field" type="text" value="T4 2026"></div>
             <div><label for="dfo-justif">Méthode de justification</label><select id="dfo-justif" class="field"><option>Relevé de dépenses</option><option>Pièces justificatives</option><option>Rapport financier intermédiaire</option></select></div>
             <div><label for="dfo-pj">Pièces jointes (nombre)</label><input id="dfo-pj" class="field" type="text" inputmode="numeric" value="4"></div>
-            <div class="full"><label>Dépenses concernées <em>*</em></label><div id="dfo-regs" style="display:flex;flex-direction:column;gap:6px"></div><div class="hint" id="dfo-reg-h"></div></div>
+            <div class="full"><label>Dépenses concernées <em>*</em></label><div id="dfo-regs" style="display:flex;flex-direction:column;gap:6px"></div><div class="hint" id="dfo-reg-h" data-keep></div></div>
           </div>
           <div class="err" id="dfo-err"></div>
           <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="dfo-cancel">Annuler</button><button class="btn primary" id="dfo-save">Préparer la demande</button></div>
@@ -16114,7 +16114,7 @@ var EXEC_REC = [
   function ppmGuide(a) { var s = ppmSuggest(ppmCatOf(a), Math.max(a.cost - ppmActTotal(a.key), 0)), d = ppmDates(a, s.i); PPMG.g = { a: a, des: a.lib, cat: ppmCatOf(a), mi: s.i, est: Math.max(a.cost - ppmActTotal(a.key), 0), d: d, mT: false, dT: false }; ppmGuidePaint(); document.getElementById('ppm-guide').hidden = false; }
   function ppmGuidePaint() {
     var g = PPMG.g; if (!g) return; var body = document.getElementById('ppm-guide-body'); body.innerHTML = ''; document.getElementById('ppm-guide-title').textContent = 'Planifier la passation : ligne ' + g.a.code + ' · ' + g.a.lib;
-    var hint = cvEl('div', 'hint', 'Trois étapes : ce que l’on acquiert, comment (méthode proposée selon le montant), quand (dates calculées d’après le travail prévu).'); hint.style.marginBottom = '12px'; body.appendChild(hint);
+
       var card = cvEl('div', 'card'); card.style.padding = '16px 18px'; var grid = cvEl('div', 'fgrid'); card.appendChild(grid);
       function fld(label, el, full, hint) { var d = cvEl('div', full ? 'full' : ''); d.appendChild(cvEl('label', null, label)); d.appendChild(el); if (hint) d.appendChild(cvEl('div', 'hint', hint)); grid.appendChild(d); return el; }
       var des = cvEl('input', 'field'); des.type = 'text'; des.value = g.des; des.addEventListener('change', function () { g.des = des.value; }); fld('1. Que va-t-on acquérir ? Désignation', des, true);
@@ -16147,7 +16147,7 @@ var EXEC_REC = [
       var nm = cvEl('div'); nm.appendChild(cvEl('b', null, a.code + ' — ' + a.lib)); nm.appendChild(cvEl('div', 'hint', a.perim));
       return [nm, badge(ppmCatOf(a), 'b-neutral'), fmt(a.cost), fmt(tot), fmt(Math.max(rest, 0)), bt, bt2];
     });
-    block('Besoins identifiés dans le PTBA', dpMini(['Ligne du PTBA', 'Besoin', 'Coût au PTBA', 'Programmé', 'Reste', 'Couverture', ''], needs, [2, 3, 4], 'Aucune ligne dans ce lot.'), 'Le plan se construit ligne par ligne : le système propose ce qu’il faut acquérir (travaux, biens, services ou consultance) et la méthode de passation d’après le montant ; vous ajustez.');
+    block('Besoins identifiés dans le PTBA', dpMini(['Ligne du PTBA', 'Besoin', 'Coût au PTBA', 'Programmé', 'Reste', 'Couverture', ''], needs, [2, 3, 4], 'Aucune ligne dans ce lot.'));
     /* Marchés du plan : planification pure, sans suivi d'exécution */
     var mk = items.map(function (x) {
       var cm = cvEl('div'); cm.appendChild(cvEl('b', null, x.cat)); cm.appendChild(cvEl('div', 'hint', x.met));
@@ -16294,7 +16294,7 @@ var EXEC_REC = [
     var card = cvEl('div', 'card'); card.style.padding = '16px 18px'; card.style.marginBottom = '14px';
     card.appendChild(dpDl([['Source de financement', dfoSrc('02').lib], ['Lettre de décaissement', v.ref], ['Date de l’avance initiale', isoToFr(v.date)], ['Montant de l’avance initiale', fmt(v.mt) + ' MGA'], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte du solde', DFS.seuil + ' % du plafond (' + fmt(Math.round(DFS.plaf * DFS.seuil / 100)) + ' MGA)'], ['Délai de traitement du bailleur', DFS.delai + ' mois']]));
     box.appendChild(card);
-    var go = cvEl('div'); go.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap'; go.appendChild(cvEl('span', 'hint', 'Le solde actuel, les reconstitutions et les alertes se suivent dans Trésorerie › Demandes de fonds.'));
+    var go = cvEl('div'); go.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap';
     var b = cvEl('button', 'btn', 'Suivre le compte spécial'); b.type = 'button'; b.addEventListener('click', function () { show('dfon'); }); go.appendChild(b); box.appendChild(go);
   }
   document.getElementById('avini-edit').addEventListener('click', function () {
@@ -16363,7 +16363,7 @@ var EXEC_REC = [
   });
   function dfoSum() {
     var ids = [].slice.call(document.querySelectorAll('input[name="dfo-r"]:checked')).map(function (i) { return dfoDoc(i.value); }).filter(Boolean), t = ids.reduce(function (a, d) { return a + dfoAmt(d); }, 0), type = document.getElementById('dfo-type').value;
-    document.getElementById('dfo-reg-h').textContent = (ids.length ? 'Sélection : ' + pl(ids.length, 'dépense') + ', ' + fmt(t) + ' MGA. ' : '') + (type === 'DPD' ? 'Mandats émis et non encore payés : le bailleur paie directement le fournisseur.' : 'Dépenses payées sur le compte spécial et non encore justifiées au bailleur. Une demande ne regroupe qu’une seule source de financement.');
+        document.getElementById('dfo-reg-h').textContent = ids.length ? 'Sélection : ' + pl(ids.length, 'dépense') + ', ' + fmt(t) + ' MGA.' : '';
   }
   function dfoFormList(all) {
     var type = document.getElementById('dfo-type').value, el = document.getElementById('dfo-regs'), e = dfoElig(type), s0 = e.length ? dfoDocSrc(e[0]) : null;
@@ -20822,11 +20822,9 @@ var EXEC_REC = [
       var ln = cvEl('select', 'field'); var o0 = cvEl('option', null, 'Toutes les lignes'); o0.value = ''; ln.appendChild(o0); dpLines().forEach(function (z) { var o = cvEl('option', null, z.l.c + ' — ' + (z.l.lib || z.l.l)); o.value = z.key; ln.appendChild(o); }); ln.value = P.line; ln.disabled = SX.kind === 'enc'; ln.addEventListener('change', function () { P.line = ln.value; });
       var g = cvEl('div', 'fgrid'), ds = lab('Source', sl, tx[sl.value]), dl = lab('Ligne du PTBA', ln, SX.kind === 'enc' ? 'Les encaissements ne sont pas rattachés à une ligne.' : 'Limitez la synchronisation à une seule ligne si besoin.'); g.appendChild(ds); g.appendChild(dl);
       sl.addEventListener('change', function () { P.src = sl.value; ds.querySelector('.hint').textContent = tx[sl.value]; });
+      var i1 = cvEl('input', 'field'), i2 = cvEl('input', 'field'); i1.type = i2.type = 'date'; i1.value = P.d1; i2.value = P.d2; i1.addEventListener('change', function () { P.d1 = i1.value; }); i2.addEventListener('change', function () { P.d2 = i2.value; });
+      g.appendChild(lab('Début de la période', i1)); g.appendChild(lab('Fin de la période', i2));
       sec('', '', g);
-      var pr = cvEl('div'); pr.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap'; var i1 = cvEl('input', 'field'), i2 = cvEl('input', 'field'); i1.type = i2.type = 'date'; i1.style.cssText = i2.style.cssText = 'width:190px;flex:0 0 190px'; i1.value = P.d1; i2.value = P.d2; i1.addEventListener('change', function () { P.d1 = i1.value; }); i2.addEventListener('change', function () { P.d2 = i2.value; });
-      pr.appendChild(cvEl('span', null, 'Du')); pr.appendChild(i1); pr.appendChild(cvEl('span', null, 'au')); pr.appendChild(i2);
-      [['Cette année', function () { var t = cadToday(); return [t.slice(0, 4) + '-01-01', t]; }], ['Ce mois', function () { var t = cadToday(); return [t.slice(0, 8) + '01', t]; }]].forEach(function (q) { var b = cvEl('button', 'btn small', q[0]); b.type = 'button'; b.style.marginLeft = '6px'; b.addEventListener('click', function () { var r = q[1](); P.d1 = i1.value = r[0]; P.d2 = i2.value = r[1]; }); pr.appendChild(b); });
-      sec('', 'Période à synchroniser', pr, 'Seules les écritures datées dans cette période sont concernées : vous pouvez par exemple ne remettre à jour que le dernier mois.');
       var wrap = cvEl('div'), sg = cvEl('div', 'seg dp-tabs'), mh = cvEl('div', 'hint', ''); sg.style.marginBottom = '8px'; function mk() { sg.innerHTML = ''; SX_MODES.forEach(function (m) { var b = cvEl('button', P.mode === m[0] ? 'on' : '', m[1]); b.type = 'button'; b.addEventListener('click', function () { P.mode = m[0]; mk(); }); sg.appendChild(b); }); mh.textContent = SX_MODES.filter(function (m) { return m[0] === P.mode; })[0][2]; } mk(); wrap.appendChild(sg); wrap.appendChild(mh);
       sec('', 'Mode d’intégration', wrap);
       var nt = cvEl('div', 'callout', 'Les écritures saisies directement ou importées ne sont jamais écrasées : en cas de même référence, elles sont signalées comme conflit.'); nt.style.margin = '0'; card.appendChild(nt);
@@ -21673,6 +21671,7 @@ function pcRenderEnv(){
   .dp-dl .k { color: var(--muted); font-size: 13px; flex: 0 0 auto; }
   .dp-dl .v { font-weight: 600; text-align: right; overflow-wrap: anywhere; min-width: 0; }
   @media (max-width: 1100px) { .dp-dl { grid-template-columns: 1fr; } .dp-dl > div:nth-last-child(2):not(.full) { border-bottom: 1px solid var(--border); } }  .dp-tabs { display: flex; width: 100%; margin-bottom: 16px; }
+.hint-off { display: none !important; }
   .dp-tabs button { flex: 1 1 0; min-width: 0; padding-left: 6px; padding-right: 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .dp-meter { margin: 0 0 14px; }
   .dp-meter .t { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 5px; flex-wrap: wrap; }
@@ -21918,6 +21917,20 @@ function pcRenderEnv(){
       dfill(bar, rec);
     });
   }
+  /* Pas de petits textes explicatifs sous les champs : ils sont masqués partout (messages d'erreur, états vides et données restent) */
+  (function () {
+    var FIELD = 'input, select, textarea, .seg, .field, .perin, .chk, label, .rpbud-fld';
+    function strip() {
+      document.querySelectorAll('.hint:not(.hint-off), .rpbud-hint:not(.hint-off)').forEach(function (h) {
+        if (h.hasAttribute('data-keep') || h.style.color || /err/i.test(h.id || '') || h.closest('td, th, .list-row, .dp-dl, .dp-tile, .kpi, .pager, .toasts')) return;
+        var t = h.textContent.trim(); if (!t || /^Aucun/i.test(t)) return;
+        var prev = h.previousElementSibling;
+        if (h.closest('.fgrid') || h.classList.contains('rpbud-hint') || (prev && prev.matches(FIELD))) h.classList.add('hint-off');
+      });
+    }
+    var tm = null; new MutationObserver(function () { if (!tm) tm = setTimeout(function () { tm = null; strip(); }, 40); }).observe(document.body, { childList: true, subtree: true, characterData: true });
+    setTimeout(strip, 100);
+  })();
   var dockTimer = null;
   new MutationObserver(function (ms) {
     if (ms.every(function (m) { var t = m.target.nodeType === 1 ? m.target : m.target.parentElement; return !t || t.closest('.dock-mirror, .row-toolbar'); })) return;
