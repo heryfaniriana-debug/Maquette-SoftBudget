@@ -11818,6 +11818,7 @@ function fmAxes() {
   function bvView() { return bvKind; }
   /* Répartit un total sur les mois couverts par le travail prévu de la ligne (sur l'exercice), le reste allant aux premiers mois */
   function bvSpread(total, l, ex) {
+    if (l && l.spread && l.spread.length === 12) { var sp0 = l.spread.reduce(function (a, v) { return a + v; }, 0), t0 = Math.round(total || 0); if (sp0) { var o0 = l.spread.map(function (v) { return Math.round(v * t0 / sp0); }), d0 = t0 - o0.reduce(function (a, v) { return a + v; }, 0), k0 = o0.length - 1; while (k0 > 0 && !o0[k0]) k0--; o0[k0] += d0; return o0; } }
     var m = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], a = 0, b = 11, y = parseInt(ex, 10);
     if (l.wk && l.wk.d1 && l.wk.d2) {
       var d1 = new Date(l.wk.d1), d2 = new Date(l.wk.d2);
@@ -21611,6 +21612,7 @@ var EXEC_REC = [
     CP.forEach(function (c) { out.push(['info', 'PPM', c.label + ' : estimatif ' + fmt(c.from) + ' → ' + fmt(c.to) + ' MGA' + (c.dTo ? ', signature le ' + isoToFr(c.dTo) : '') + '.']); });
     if (yi >= 0) env = CPAD.comps.reduce(function (a, cp) { return a + (padComp(cp.code)[yi] || 0); }, 0);
     if (CL.length || CN.length) out.push(env && t1 > env && t1 > t0 ? ['warn', 'Financement', 'Total révisé ' + fmt(t1) + ' MGA : supérieur au financement prévu (' + fmt(env) + ' MGA).'] : ['ok', 'Financement', 'Total révisé ' + fmt(t1) + ' MGA (' + anaSg(t1 - t0) + ' MGA) : la révision n’augmente pas le budget au-delà du financement.']);
+    rev.changes.filter(function (c) { return (c.k === 'L' || c.k === 'N') && c.months; }).forEach(function (c) { var s = c.months.reduce(function (a, v) { return a + v; }, 0); if (Math.abs(s - c.to) > 0.5) { out.push(['ko', 'Répartition', c.label + ' : la répartition mensuelle (' + fmt(s) + ' MGA) ne correspond pas au montant (' + fmt(c.to) + ' MGA).']); block++; } });
     return { out: out, block: block, t0: t0, t1: t1 };
   }
   function revRender() {
@@ -21628,12 +21630,37 @@ var EXEC_REC = [
     var rows = []; anaLots(ex).forEach(function (r) { var vs = bvVers(r), sum = function (v) { return Object.keys(v.snap).reduce(function (a, q) { return a + (v.snap[q].dem || 0); }, 0); }; vs.forEach(function (v, i) { var bd = cvEl('div'); if (i === vs.length - 1) bd.appendChild(badge('Référence', 'b-ok')); rows.push(['V' + v.v + ' — ' + cvCamp(r).ex, v.on, v.by, (v.why || '') + (v.what ? ' — ' + v.what : ''), fmt(sum(v)), i ? anaSg(sum(v) - sum(vs[i - 1])) : '—', bd]); }); });
     vb.appendChild(dpMini(['Version', 'Date', 'Auteur', 'Motif et modification', 'PTBA (MGA)', 'Écart avec la précédente', ''], rows, [4, 5], 'Aucune version.'));
   }
+  /* Répartition du nouveau montant, modifiable directement dans l'aperçu d'impact : mois et marchés du PPM */
+  function revMonths(rev, c) {
+    if (c.months) return c.months;
+    if (c.k === 'N') return bvSpread(c.to, { wk: c.task && c.d1 && c.d2 ? { d1: c.d1, d2: c.d2 } : null }, rev.ex);
+    return bvSpread(c.to, revCurOf(revLot(rev), 'L', c.key).z.l, rev.ex);
+  }
+  function revDistBlock(body, rev, c, draft) {
+    var r = revLot(rev), cur = c.k === 'N' ? anaZ() : bvSpread(c.from, revCurOf(r, 'L', c.key).z.l, rev.ex), mo = revMonths(rev, c), sum = mo.reduce(function (a, v) { return a + v; }, 0), box = cvEl('div');
+    var inputs = mo.map(function (v, i) { var inp = cvEl('input', 'field'); inp.type = 'text'; inp.setAttribute('inputmode', 'decimal'); inp.value = fmt(v); inp.style.cssText = 'width:100px;text-align:right'; inp.disabled = !draft; inp.addEventListener('change', function () { var arr = mo.slice(); arr[i] = parseInt0(inp.value) || 0; c.months = arr; revDetPaint(); }); return inp; });
+    var tot = badge(Math.abs(sum - c.to) <= 0.5 ? fmt(sum) : fmt(sum) + ' ≠ ' + fmt(c.to), Math.abs(sum - c.to) <= 0.5 ? 'b-ok' : 'b-ko');
+    box.appendChild(dpMini(['MGA'].concat(BVMOIS, ['Total']), [['Actuel'].concat(cur.map(function (v) { return fmt(v); }), [fmt(c.from)]), ['Révisé'].concat(inputs, [tot])], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
+    if (draft && Math.abs(sum - c.to) > 0.5) { var bd = cvEl('button', 'btn small', 'Ajuster décembre (' + anaSg(c.to - sum) + ')'); bd.type = 'button'; bd.style.cssText = 'margin:10px 8px 4px 0'; bd.addEventListener('click', function () { var arr = mo.slice(); arr[11] = Math.max(0, arr[11] + c.to - sum); c.months = arr; revDetPaint(); }); box.appendChild(bd); }
+    if (draft && c.months) { var bp = cvEl('button', 'btn small', 'Répartir au prorata'); bp.type = 'button'; bp.style.margin = '10px 0 4px'; bp.addEventListener('click', function () { delete c.months; revDetPaint(); }); box.appendChild(bp); }
+    var items = c.k === 'L' ? ppmLotItems(r).filter(function (x) { return x.act === rev.lot + '|' + c.key.split('|')[2]; }) : [];
+    if (items.length) {
+      var rows = items.map(function (x) {
+        var pc = rev.changes.filter(function (q) { return q.k === 'P' && q.key === x.ref; })[0], inp = cvEl('input', 'field'); inp.type = 'text'; inp.setAttribute('inputmode', 'decimal'); inp.value = fmt(pc ? pc.to : x.est); inp.style.cssText = 'width:130px;text-align:right'; inp.disabled = !draft;
+        inp.addEventListener('change', function () { var v = parseInt0(inp.value); if (v == null) return; rev.changes = rev.changes.filter(function (q) { return q !== pc; }); if (v !== x.est) rev.changes.push({ k: 'P', key: x.ref, label: x.ref + ' — ' + x.des, from: x.est, to: v, qFrom: null, qTo: null, unit: '', dTo: '' }); revDetPaint(); });
+        return [x.ref + ' — ' + x.des, fmt(x.est), inp, anaSg((pc ? pc.to : x.est) - x.est)];
+      });
+      var ps = items.reduce(function (a, x) { var pc = rev.changes.filter(function (q) { return q.k === 'P' && q.key === x.ref; })[0]; return a + (pc ? pc.to : x.est); }, 0), pt = cvEl('div'); pt.style.margin = '12px 0 6px'; pt.appendChild(cvEl('b', null, 'Marchés du PPM rattachés à la ligne ')); pt.appendChild(badge(ps > c.to ? 'Total ' + fmt(ps) + ' MGA : dépasse la ligne (' + fmt(c.to) + ')' : 'Total ' + fmt(ps) + ' MGA : couvert par la ligne', ps > c.to ? 'b-warn' : 'b-ok')); box.appendChild(pt);
+      box.appendChild(dpMini(['Marché', 'Estimatif actuel (MGA)', 'Estimatif révisé (MGA)', 'Écart'], rows, [1, 2, 3], ''));
+    }
+    anaBlock(body, 'Répartition du nouveau montant — ' + c.label, box);
+  }
   function revDetOpen(rev) { REVD = rev.id; revDetPaint(); document.getElementById('revpl-det').hidden = false; }
   function revDetPaint() {
     var rev = revGet(REVD), body = document.getElementById('revpl-det-body'); if (!rev) return; body.innerHTML = ''; document.getElementById('revpl-det-title').textContent = 'Révision ' + rev.id;
     var r = revLot(rev), draft = rev.st === 'Brouillon', stb = cvEl('div'); stb.style.marginBottom = '12px'; stb.appendChild(badge(rev.st, REV_CLS[rev.st])); body.appendChild(stb);
     anaBlock(body, 'Informations', dpDl([['Exercice', rev.ex], ['Créée par', rev.by + ' · ' + rev.on], ['Motif', rev.motif, true], ['ANO du bailleur', rev.ano ? rev.ano.ref + ' du ' + isoToFr(rev.ano.date) + (rev.ano.doc ? ' · ' + rev.ano.doc : '') : '—']]));
-    if (draft) { var ab = cvEl('div'); ab.style.marginBottom = '10px'; var ba = cvEl('button', 'btn', '+ Ajouter une modification'); ba.type = 'button'; ba.addEventListener('click', function () { revChgOpen(rev, null); }); ab.appendChild(ba); body.appendChild(ab); }
+    if (draft) { var ab = cvEl('div'); ab.style.marginBottom = '10px'; var ba = cvEl('button', 'btn', 'Modifier une ligne ou un marché'), bn = cvEl('button', 'btn primary', '+ Créer une nouvelle ligne'); ba.type = bn.type = 'button'; bn.style.marginLeft = '8px'; ba.addEventListener('click', function () { revChgOpen(rev, null); }); bn.addEventListener('click', function () { revChgOpen(rev, null, { type: 'N' }); }); ab.appendChild(ba); ab.appendChild(bn); body.appendChild(ab); }
     var rows = rev.changes.map(function (c) {
       var n = cvEl('div'); n.appendChild(cvEl('b', null, c.label)); n.appendChild(cvEl('div', 'hby', c.k === 'L' ? 'Ligne du PTBA' : (c.k === 'P' ? 'Marché du PPM' : 'Nouvelle ligne du PTBA')));
       var a = cvEl('div'); if (draft) { var bm = cvEl('button', 'btn small', 'Modifier'), br = cvEl('button', 'btn small', 'Retirer'); bm.type = br.type = 'button'; bm.addEventListener('click', function () { revChgOpen(rev, c); }); br.addEventListener('click', function () { rev.changes = rev.changes.filter(function (x) { return x !== c; }); revDetPaint(); }); a.appendChild(bm); a.appendChild(br); }
@@ -21652,6 +21679,7 @@ var EXEC_REC = [
       if (!I.out.length) card.appendChild(cvEl('div', 'list-row', 'Aucun impact à afficher.'));
       I.out.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x[1], { ok: 'b-ok', warn: 'b-warn', ko: 'b-ko', info: 'b-info' }[x[0]])); var t = cvEl('div', null, x[2]); t.style.marginLeft = '12px'; row.appendChild(t); card.appendChild(row); });
       anaBlock(body, 'Aperçu d’impact', card);
+      rev.changes.filter(function (c) { return c.k === 'L' || c.k === 'N'; }).forEach(function (c) { revDistBlock(body, rev, c, draft); });
     }
     anaBlock(body, 'Historique', dpMini(['Date', 'Événement', 'Par'], rev.hist.map(function (h) { return [h.on, h.t, h.by]; }), [], ''));
     var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px';
@@ -21704,6 +21732,7 @@ var EXEC_REC = [
     var p = cvCamp(r).perims.filter(function (q) { return q.p === c.perim; })[0], arr;
     if (p.lines) arr = p.lines; else if ((COL[p.p] || []).some(function (l) { return l.dem != null; })) arr = COL[p.p]; else arr = VLINES[p.p] = VLINES[p.p] || [];
     var ln = { c: c.code, l: c.lib, lib: c.lib, nat: '', ref: 0, dem: c.to, q: null, p: null, just: 'Ligne créée par la révision ' + rev.id, axv: { Analytique: 'Programme ' + c.code.split('.')[0], Financier: c.fin || 'Budget de l’État' } };
+    if (c.months) ln.spread = c.months.slice();
     if (c.task) ln.wk = { task: c.task, d1: c.d1, d2: c.d2, vol: c.vol, unit: c.unit, inds: c.ind ? [{ id: c.ind, contrib: c.vol }] : [], real: [null, null, null, null], spent: null };
     arr.push(ln);
   }
@@ -21711,7 +21740,7 @@ var EXEC_REC = [
     var r = revLot(rev), vs = bvVers(r), what = [];
     rev.changes.forEach(function (c) {
       if (c.k === 'N') { revAddLine(r, rev, c); what.push('Nouvelle ligne ' + c.code + ' : ' + fmt(c.to) + ' MGA'); return; } var o = revCurOf(r, c.k, c.key); if (!o) return;
-      if (c.k === 'L') { var l = o.z.l; what.push('Ligne ' + l.c + ' : ' + fmt(l.dem || 0) + ' → ' + fmt(c.to) + ' MGA'); l.dem = c.to; if (l.q) l.p = Math.round(c.to / l.q); if (c.qTo != null && l.wk) { l.wk.vol = c.qTo; if (l.wk.inds && l.wk.inds.length === 1) l.wk.inds[0].contrib = c.qTo; } }
+      if (c.k === 'L') { var l = o.z.l; what.push('Ligne ' + l.c + ' : ' + fmt(l.dem || 0) + ' → ' + fmt(c.to) + ' MGA'); l.dem = c.to; if (l.q) l.p = Math.round(c.to / l.q); if (c.months) l.spread = c.months.slice(); if (c.qTo != null && l.wk) { l.wk.vol = c.qTo; if (l.wk.inds && l.wk.inds.length === 1) l.wk.inds[0].contrib = c.qTo; } }
       else { var x = o.x; what.push('Marché ' + x.ref + ' : ' + fmt(x.est) + ' → ' + fmt(c.to) + ' MGA'); x.est = c.to; if (c.dTo) { x.d3 = c.dTo; } }
     });
     var v = vs.length + 1; vs.push({ v: v, on: nowStr(), by: ME, why: rev.motif, what: what.join(' ; '), snap: bvSnap(r), rev: rev.id }); bvPt(r).hist.unshift({ t: 'Révision approuvée — version V' + v + ' (' + rev.id + ')', by: ME, on: nowStr() });
