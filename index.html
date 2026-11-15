@@ -2008,7 +2008,15 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <svg class="ico chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="sub">
-          <button data-go="synth" title="Synthèse du contrôleur de gestion">Synthèse</button>
+                    <button class="anp" data-go="anfin" title="Du financement prévu aux encaissements" style="display:none">Vue d’ensemble</button>
+          <button class="anp" data-go="aneng" title="Engagements comparés au PPM" style="display:none">Engagements et PPM</button>
+          <button class="anp" data-go="anrea" title="Réalisations comparées au PTBA" style="display:none">Réalisations et PTBA</button>
+          <button class="anp" data-go="andec" title="Décaissements comparés au plan de décaissement" style="display:none">Décaissements et plan</button>
+          <button class="anp" data-go="anphy" title="Avancement physique comparé au PTA" style="display:none">Physique et PTA</button>
+          <button class="anp" data-go="anfp" title="Dépenses comparées à l’avancement physique" style="display:none">Finances et physique</button>
+          <button class="anp" data-go="anplu" title="Suivi pluriannuel" style="display:none">Pluriannuel</button>
+          <button class="anp" data-go="anale" title="Règles et alertes" style="display:none">Alertes</button>
+          <button class="anp" data-go="anver" title="Versions des plans" style="display:none">Versions des plans</button><button data-go="synth" title="Synthèse du contrôleur de gestion">Synthèse</button>
           <button data-go="ecarts" title="Écarts à expliquer et commentés">Écarts commentés</button>
           <button data-go="dispo">Disponibilités</button>
           <button data-go="alertes" title="Dépassements et alertes">Alertes</button>
@@ -2438,6 +2446,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           </div>
         </div>
         <div class="kpis" id="db-kpis"></div>
+        <div class="panel" id="db-curve" hidden style="margin-bottom:12px"><h2>Réalisation et prévision de l’exercice <small id="db-curve-n"></small></h2><div class="body" id="db-curve-b"></div></div>
+        <div class="panel" id="db-axes" hidden style="margin-bottom:12px"><h2>Axes d’amélioration</h2><div class="body" id="db-axes-b"></div></div>
         <div class="grid2">
           <div class="panel"><h2>Budgets par statut <small id="db-status-n"></small></h2><div class="body" id="db-status"></div></div>
           <div class="panel"><h2 id="db-bars-t">Budget versus réalisations</h2><div class="body" id="db-bars"></div></div>
@@ -5367,6 +5377,25 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="panel"><h2>Chaîne de financement <small>dépenses engagées, justifiées, payées et fonds reçus</small></h2><div class="body" id="dfo-chain" style="padding:0"></div></div>
       </section>
 
+      <!-- ===== Projet : analyses (écarts entre les plans et l'exécution) ===== -->
+      <section class="view" id="v-ana">
+        <div class="head"><div><h1>Analyses</h1><p></p></div>
+          <div class="actions"><button class="btn primary" id="ana-new" style="display:none">+ Nouvelle règle</button></div></div>
+        <div class="callout" id="ana-msg" hidden style="margin-bottom:12px"></div>
+        <div id="ana-body"></div>
+        <div class="panel" id="ana-rule" hidden><h2>Nouvelle règle d’alerte</h2><div class="body">
+          <div class="fgrid">
+            <div><label for="ar-real">Réalisation suivie</label><select id="ar-real" class="field"></select></div>
+            <div><label for="ar-plan">Plan de référence</label><select id="ar-plan" class="field"></select></div>
+            <div><label for="ar-seuil">Écart toléré (%)</label><input id="ar-seuil" class="field" type="text" inputmode="numeric" value="15"></div>
+            <div><label for="ar-sens">Déclencher quand</label><select id="ar-sens" class="field"><option value="sous">L’objectif n’est pas atteint</option><option value="sur">Le prévu est dépassé</option></select></div>
+            <div class="full"><label for="ar-nom">Nom de la règle</label><input id="ar-nom" class="field" type="text"></div>
+          </div>
+          <div class="err" id="ar-err"></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="ar-cancel">Annuler</button><button class="btn primary" id="ar-save">Enregistrer la règle</button></div>
+        </div></div>
+      </section>
+
       <!-- ===== Projet : suivi de l'exécution (engagements, réalisations, paiements, encaissements) ===== -->
       <section class="view" id="v-sx">
         <div class="head"><div><h1>Engagements</h1><p></p></div>
@@ -6466,7 +6495,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6538,6 +6567,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     resu: ['Cadre du projet', 'Cadre de résultats'],
     avini: ['Cadre du projet', 'Avance et paiement direct'],
     sxeng: ['Exécution', 'Engagements'], sxliq: ['Exécution', 'Réalisations'], sxpay: ['Exécution', 'Décaissements'], sxenc: ['Exécution', 'Encaissements'], trpos: ['Exécution', 'Trésorerie'], sxphy: ['Exécution', 'Avancement physique'],
+    anfin: ['Analyses', 'Financement et exécution'], aneng: ['Analyses', 'Engagements et PPM'], anrea: ['Analyses', 'Réalisations et PTBA'], andec: ['Analyses', 'Décaissements et plan de décaissement'], anphy: ['Analyses', 'Avancement physique et PTA'], anfp: ['Analyses', 'Réalisations et avancement physique'], anplu: ['Analyses', 'Suivi pluriannuel'], anale: ['Analyses', 'Alertes'], anver: ['Analyses', 'Versions des plans'],
     avanc: ['Exécution', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
     pdec: ['Plans annuels', 'Plan de décaissement'],
@@ -6561,13 +6591,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-plan': ['ptba', 'pta', 'ppm', 'pdec'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
-    'nav-rapports': ['synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
+    'nav-rapports': ['anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
   };
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
   var MENU_OF = { create: 'list', detail: 'bud', saisie: 'bud', valid: 'arb' };
   var LABELLED = ['soon', 'params', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl', 'appr'];
-  var VIEWALIAS = { sxphy: 'sx', sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
+  var VIEWALIAS = { anfin: 'ana', aneng: 'ana', anrea: 'ana', andec: 'ana', anphy: 'ana', anfp: 'ana', anplu: 'ana', anale: 'ana', anver: 'ana', sxphy: 'sx', sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
   function show(name, label) {
     var vn = VIEWALIAS[name] || name;
     views.forEach(function (v) {
@@ -6603,6 +6633,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'resu' && typeof resuRender === 'function') resuRender();
     if (name === 'avini' && typeof aviniRender === 'function') aviniRender();
     if (/^sx(eng|liq|pay|enc|phy)$/.test(name) && typeof sxRender === 'function') { SX.kind = name.slice(2); sxRender(); }
+    if (/^an(fin|eng|rea|dec|phy|fp|plu|ale|ver)$/.test(name) && typeof anaRender === 'function') { ANA.kind = name.slice(2); anaRender(); }
     if (name === 'trpos' && typeof trpRender === 'function') trpRender();
     if (name === 'avanc' && typeof avancRender === 'function') avancRender();
     if (name === 'synth' && typeof renderSynth === 'function') renderSynth();
@@ -14468,7 +14499,7 @@ var EXEC_REC = [
       { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso]] },
       { g: 'Compte administratif', items: ca },
       { g: 'Exécution', items: [[rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Avancement physique', rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
-      grp('Analyses'),
+      { g: 'Analyses', items: [['Vue d’ensemble', rAlways], ['Engagements et PPM', rAlways], ['Réalisations et PTBA', rAlways], ['Décaissements et plan', treso], ['Physique et PTA', rAlways], ['Finances et physique', rAlways], ['Pluriannuel', rAlways], ['Alertes', rAlways], ['Versions des plans', rAlways]] },
       { g: 'Paramètres', items: grp('Paramètres').items.filter(function (it) { return it[0] !== 'Bailleurs' && it[0] !== 'Sources de financement' && it[0] !== 'Taux de change'; }) }
     ];
   })();
@@ -14545,6 +14576,7 @@ var EXEC_REC = [
     if (typeof REG === 'undefined' || !REG) return;
     var code = activeCode(), cfg = REG[code], adv = modes[code] === 'Avancé', circ = cfg.regime !== 'importe';
     applyProjectMenu(code, cfg);
+    regSetVis('#g-rapports .sub button:not(.anp)', true); regSetVis('#g-rapports .sub button.anp', code === 'prj');
     regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso && code !== 'prj');
     regSetVis('.sub button[data-go="pluri"]', cfg.mods.pluri); regSetVis('.sub button[data-go="bkdvr"]', cfg.mods.treso); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso && code !== 'prj'); regSetVis('.sub button[data-go="pdec"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="dfon"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="ppm"]', code === 'prj'); regSetVis('.sub button[data-go="pta"]', code === 'prj'); regSetVis('.sub button[data-go="inv"]', code === 'ent'); regSetVis('.sub button[data-go="pad"]', code === 'prj'); regSetVis('.sub button.epub', cfg.regime === 'public'); regSetVis('.sub button[data-go="revis"]', cfg.regime !== 'public');
     regSetVis('.sub button[data-go="dprap"]', false); /* masqué pour l’instant */
@@ -14558,6 +14590,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
     regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso);
+    if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
   }
   var CAD_SOON = {
     circuits: ['Circuits de visa et délégations', 'Matrice des rôles (SPSE, RPM, AFC, RAF, Directeur de projet), délégations limitées dans le temps, séparation ordonnateur et payeur.', 'Étape 2 du déploiement.']
@@ -20104,7 +20137,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20712,15 +20745,306 @@ var EXEC_REC = [
   }
   function dpNo(id) { return document.getElementById(id) || { addEventListener: function () {} }; }
   var DP_RENDER = { dpeng: dpEngRender, dpliq: dpLiqRender, dpord: dpOrdRender, dppay: dpPayRender };
+  /* ----- Analyses du projet : écarts entre les plans et l'exécution, commentaires, décisions de glissement, alertes, pluriannuel et versions ----- */
+  var ANA = { kind: 'fin', ex: null, com: {}, dec: [], ver: 0, rules: null, seq: 0 };
+  var ANA_K = {
+    fin: ['Financement et exécution', 'Du financement prévu aux encaissements : où en est l’exercice à la date du jour'],
+    eng: ['Engagements et PPM', 'Les engagements comparés aux marchés planifiés au PPM'],
+    rea: ['Réalisations et PTBA', 'Les réalisations comparées aux montants du PTBA, ligne par ligne'],
+    dec: ['Décaissements et plan de décaissement', 'Les décaissements du projet et les paiements directs comparés au plan de décaissement'],
+    phy: ['Avancement physique et PTA', 'Les quantités réalisées comparées aux cibles du PTA'],
+    fp: ['Réalisations et avancement physique', 'Ce qui est dépensé comparé à ce qui est réalisé sur le terrain'],
+    plu: ['Suivi pluriannuel', 'Le cumul depuis le début du projet, exercice par exercice'],
+    ale: ['Alertes', 'Choisissez ce qui est surveillé, par rapport à quel plan, et à partir de quel écart une alerte apparaît'],
+    ver: ['Versions des plans', 'Les versions du plan de financement, du PTBA, du PTA, du PPM et du plan de décaissement, et la version prise comme référence']
+  };
+  var ANA_OPT = ['Reporter au mois suivant', 'Reporter au trimestre suivant', 'Reporter à l’exercice suivant', 'Annuler le reliquat', 'Maintenir le prévu'];
+  var ANA_REAL = [['eng', 'Engagements'], ['liq', 'Réalisations'], ['pay', 'Décaissements du projet'], ['dpd', 'Paiements directs du bailleur'], ['enc', 'Encaissements'], ['phy', 'Avancement physique']];
+  var ANA_PLAN = [['ppm', 'PPM'], ['ptba', 'PTBA'], ['pdcCs', 'Plan de décaissement (compte spécial)'], ['pdcDp', 'Plan de décaissement (paiements directs)'], ['pad', 'Plan de financement (PAD)'], ['pta', 'PTA']];
+  var ANA_HIST = { '2025': { ptba: 680000000, eng: 640000000, liq: 612000000, pay: 598000000, enc: 600000000 } };
+  function anaZ() { return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; }
+  function anaSum(a, to) { var s = 0; for (var i = 0; i <= Math.min(to, 11); i++) s += a[i] || 0; return s; }
+  function anaCum(a) { var s = 0; return a.map(function (v) { s += v; return s; }); }
+  function anaLab(l, k) { var o = l.filter(function (x) { return x[0] === k; })[0]; return o ? o[1] : k; }
+  function anaExs() { var o = []; bvList().forEach(function (r) { var e = cvCamp(r).ex; if (o.indexOf(e) < 0) o.push(e); }); return o; }
+  function anaEx() { var l = anaExs(); if (ANA.ex && l.indexOf(ANA.ex) >= 0) return ANA.ex; return l.indexOf('2026') >= 0 ? '2026' : (l[0] || '2026'); }
+  function anaLots(ex) { return bvList().filter(function (r) { return cvCamp(r).ex === ex; }); }
+  function anaLines(ex) { return dpLines().filter(function (z) { return cvCamp(z.r).ex === ex; }); }
+  function anaCm(ex) { var t = cadToday(), y = t.slice(0, 4); return y === ex ? +t.slice(5, 7) - 1 : (y > ex ? 11 : -1); }
+  function anaSnap(z) { if (!ANA.ver) return null; var v = bvVers(z.r)[ANA.ver - 1]; return v ? v.snap[z.perim + '|' + z.l.c] : null; }
+  function anaCred(z) { var s = anaSnap(z); return s ? s.dem : (z.l.dem || 0); }
+  function anaVol(z) { var w = z.l.wk; if (!w) return 0; var s = anaSnap(z); if (s && s.inds && s.inds.length === 1) return s.inds[0][1]; return w.vol || 0; }
+  function anaSx(kind, key, ex, upto) { sxSeed(); return (SX.items || []).filter(function (i) { return i.kind === kind && (key == null || i.key === key) && i.date && i.date.slice(0, 4) === ex && (!upto || i.date <= upto); }).reduce(function (a, i) { return a + i.mt; }, 0); }
+  function anaRules() {
+    if (!ANA.rules) { ANA.seq = 5; ANA.rules = [
+      { id: 1, nom: 'Engagements en retard sur le PPM', real: 'eng', plan: 'ppm', seuil: 20, sens: 'sous', on: true },
+      { id: 2, nom: 'Réalisations en retard sur le PTBA', real: 'liq', plan: 'ptba', seuil: 15, sens: 'sous', on: true },
+      { id: 3, nom: 'Décaissements en retard sur le plan de décaissement', real: 'pay', plan: 'pdcCs', seuil: 15, sens: 'sous', on: true },
+      { id: 4, nom: 'Avancement physique en retard sur le PTA', real: 'phy', plan: 'pta', seuil: 20, sens: 'sous', on: true },
+      { id: 5, nom: 'Encaissements inférieurs au financement prévu', real: 'enc', plan: 'pad', seuil: 25, sens: 'sous', on: false }]; }
+    return ANA.rules;
+  }
+  /* Séries mensuelles de l'exercice : prévu (plans) et réalisé (exécution) */
+  function anaSeries(ex) {
+    sxSeed(); dpSeed(); var S = { pad: anaZ(), ptba: anaZ(), ppm: anaZ(), pdcCs: anaZ(), pdcDp: anaZ(), inf: anaZ(), eng: anaZ(), liq: anaZ(), pay: anaZ(), dpd: anaZ(), enc: anaZ() }, yi = CPAD.years.indexOf(+ex), pad = 0, m;
+    if (yi >= 0) CPAD.comps.forEach(function (cp) { pad += padComp(cp.code)[yi] || 0; });
+    S.padTot = pad; for (m = 0; m < 12; m++) S.pad[m] = Math.round(pad / 12);
+    anaLots(ex).forEach(function (r) {
+      var N = pdcNeeds(r), P = pdcSim(N); for (m = 0; m < 12; m++) { S.pdcCs[m] += N.out[m]; S.pdcDp[m] += N.dpdM[m]; S.inf[m] += P.inflow[m]; }
+      ppmLotItems(r).forEach(function (x) { var d = x.d3 || x.d2 || x.d1; if (d && d.slice(0, 4) === ex) S.ppm[+d.slice(5, 7) - 1] += x.est; });
+    });
+    anaLines(ex).forEach(function (z) { var sp = bvSpread(anaCred(z), z.l, ex); for (m = 0; m < 12; m++) S.ptba[m] += sp[m]; });
+    (SX.items || []).forEach(function (i) { if (!i.date || i.date.slice(0, 4) !== ex) return; var k = i.kind === 'pay' && sxIsDpd(i) ? 'dpd' : i.kind; if (S[k] && k !== 'inf') S[k][+i.date.slice(5, 7) - 1] += i.mt; });
+    return S;
+  }
+  /* Lignes de comparaison : une ligne par marché, par ligne du PTBA, par travail ou par mois */
+  function anaRows(kind, ex) {
+    var S = anaSeries(ex), cm = anaCm(ex), today = cadToday(), rows = [], R = { S: S, cm: cm, ex: ex, rows: rows }, m;
+    if (kind === 'eng') {
+      anaLots(ex).forEach(function (r) { ppmLotItems(r).forEach(function (x) { var d = x.d3 || x.d2 || x.d1; rows.push({ id: x.ref, label: x.ref + ' — ' + x.des, sub: 'Signature prévue le ' + isoToFr(d), plan: x.est, planTo: d && d <= today ? x.est : 0, real: ppmEngDp(x.ref) }); }); });
+      var hors = (DP.docs || []).filter(function (d) { return d.kind !== 'avance' && DP_RANK[d.st] >= 2 && !d.ppm; }).reduce(function (a, d) { return a + d.mt; }, 0);
+      if (hors) rows.push({ id: 'hors', label: 'Engagements hors PPM', sub: 'Non rattachés à un marché du PPM', plan: 0, planTo: 0, real: hors });
+      R.planM = S.ppm; R.realM = S.eng;
+    } else if (kind === 'rea') {
+      anaLines(ex).forEach(function (z) { var c = anaCred(z), sp = bvSpread(c, z.l, ex); rows.push({ id: z.key, label: z.l.c + ' — ' + (z.l.lib || z.l.l), sub: z.perim, plan: c, planTo: anaSum(sp, cm), real: anaSx('liq', z.key, ex, today) }); });
+      R.planM = S.ptba; R.realM = S.liq;
+    } else if (kind === 'dec') {
+      for (m = 0; m <= cm; m++) rows.push({ id: 'm' + m, label: PDC_MOIS[m].charAt(0).toUpperCase() + PDC_MOIS[m].slice(1) + ' ' + ex, plan: S.pdcCs[m], planTo: S.pdcCs[m], real: S.pay[m], plan2: S.pdcDp[m], real2: S.dpd[m] });
+      R.planM = S.pdcCs; R.realM = S.pay;
+    } else if (kind === 'phy' || kind === 'fp') {
+      anaLines(ex).forEach(function (z) {
+        var w = z.l.wk, vol = anaVol(z); if (!w || !vol) return;
+        var d1 = new Date(w.d1), d2 = new Date(w.d2), t = new Date(today), fr = d2 > d1 ? Math.max(0, Math.min(1, (t - d1) / (d2 - d1))) : 1, c = anaCred(z), liq = anaSx('liq', z.key, ex, today);
+        rows.push({ id: z.key, label: z.l.c + ' — ' + (w.task || z.l.lib || z.l.l), sub: z.perim + ' · ' + w.unit, plan: vol, planTo: Math.round(vol * fr), real: wkReal(z.l) || 0, unit: w.unit, cred: c, liq: liq, tf: c ? liq / c : 0 });
+      });
+    } else if (kind === 'fin') {
+      var pt = function (a) { return anaSum(a, cm); }, tp = S.ptba.reduce(function (a, v) { return a + v; }, 0), sm = function (a) { return a.reduce(function (s, v) { return s + v; }, 0); };
+      rows.push({ id: 'ptba0', label: 'Budget validé (PTBA) rapporté au financement prévu', sub: 'Plan de financement ' + CPAD.code, plan: S.padTot, planTo: S.padTot, real: tp });
+      rows.push({ id: 'eng', label: 'Engagements', sub: 'Prévu : marchés du PPM', plan: sm(S.ppm), planTo: pt(S.ppm), real: pt(S.eng) });
+      rows.push({ id: 'liq', label: 'Réalisations', sub: 'Prévu : PTBA', plan: sm(S.ptba), planTo: pt(S.ptba), real: pt(S.liq) });
+      rows.push({ id: 'pay', label: 'Décaissements du projet', sub: 'Prévu : plan de décaissement (compte spécial)', plan: sm(S.pdcCs), planTo: pt(S.pdcCs), real: pt(S.pay) });
+      rows.push({ id: 'dpd', label: 'Paiements directs du bailleur', sub: 'Prévu : plan de décaissement (paiements directs)', plan: sm(S.pdcDp), planTo: pt(S.pdcDp), real: pt(S.dpd) });
+      rows.push({ id: 'enc', label: 'Encaissements', sub: 'Prévu : avance et réapprovisionnements', plan: sm(S.inf), planTo: pt(S.inf), real: pt(S.enc) });
+    }
+    rows.forEach(function (x) { x.ecart = x.real - x.planTo; });
+    return R;
+  }
+  function anaThr(kind) {
+    var m = { eng: ['eng', 'ppm'], rea: ['liq', 'ptba'], dec: ['pay', 'pdcCs'], phy: ['phy', 'pta'] }[kind], r = m && anaRules().filter(function (q) { return q.real === m[0] && q.plan === m[1]; })[0];
+    return r ? r.seuil : 15;
+  }
+  function anaState(x, thr) {
+    if (!x.planTo) return x.real ? ['Hors prévision', 'b-info'] : ['Rien de prévu', 'b-neutral'];
+    var t = x.real / x.planTo; if (t >= 1 - thr / 100 && t <= 1 + thr / 100) return ['Conforme', 'b-ok'];
+    if (t < 1 - thr / 100) return t < 1 - 2 * thr / 100 ? ['En retard', 'b-ko'] : ['Léger retard', 'b-warn'];
+    return ['Au-dessus du prévu', 'b-info'];
+  }
+  /* Courbes cumulées d'un exercice, avec le repère « aujourd'hui » et des points signalés */
+  function anaChart(series, cm, marks) {
+    var W = 720, H = 250, L = 62, R = 14, T = 20, B = 30, max = 0, g;
+    series.forEach(function (s) { s.data.forEach(function (v) { if (v != null && v > max) max = v; }); }); (marks || []).forEach(function (k) { if (k.v > max) max = k.v; }); if (!max) max = 1;
+    var X = function (i) { return L + (W - L - R) * i / 11; }, Y = function (v) { return T + (H - T - B) * (1 - v / max); };
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Courbes cumulées de l’exercice" style="max-width:100%;display:block">';
+    for (g = 0; g <= 4; g++) { var y = T + (H - T - B) * (1 - g / 4); svg += '<line x1="' + L + '" y1="' + y + '" x2="' + (W - R) + '" y2="' + y + '" stroke="#E9EBF0"/><text x="' + (L - 8) + '" y="' + (y + 4) + '" font-size="11" text-anchor="end" fill="#5B606D">' + Math.round(max * g / 4 / 1e6) + ' M</text>'; }
+    BVMOIS.forEach(function (m, i) { svg += '<text x="' + X(i) + '" y="' + (H - 10) + '" font-size="10.5" text-anchor="middle" fill="#5B606D">' + m.replace('.', '') + '</text>'; });
+    if (cm >= 0 && cm < 11) svg += '<line x1="' + X(cm) + '" y1="' + T + '" x2="' + X(cm) + '" y2="' + (H - B) + '" stroke="#BE123C" stroke-dasharray="3 3"/><text x="' + (X(cm) + 5) + '" y="' + (T - 6) + '" font-size="10.5" fill="#BE123C">Aujourd’hui</text>';
+    series.forEach(function (s) {
+      var seg = [], all = [];
+      s.data.forEach(function (v, i) { if (v == null) { if (seg.length) all.push(seg); seg = []; } else seg.push(X(i).toFixed(1) + ',' + Y(v).toFixed(1)); }); if (seg.length) all.push(seg);
+      all.forEach(function (p) { svg += '<polyline points="' + p.join(' ') + '" fill="none" stroke="' + s.color + '" stroke-width="2.5"' + (s.dash ? ' stroke-dasharray="6 4"' : '') + ' stroke-linejoin="round"/>'; });
+    });
+    (marks || []).forEach(function (k) { if (k.i < 0) return; svg += '<circle cx="' + X(k.i) + '" cy="' + Y(k.v) + '" r="5" fill="' + k.c + '" stroke="#fff" stroke-width="1.5"/><text x="' + (X(k.i) - 9) + '" y="' + (Y(k.v) - 7) + '" font-size="11" font-weight="600" text-anchor="end" fill="' + k.c + '">' + escH(k.t) + '</text>'; });
+    svg += '</svg>';
+    var box = cvEl('div', 'dp-chart'); box.innerHTML = svg; var lg = cvEl('div', 'dp-stack'), l2 = cvEl('div', 'lg');
+    series.forEach(function (s) { var l = cvEl('span'), sw = cvEl('i'); sw.style.background = s.color; l.appendChild(sw); l.appendChild(document.createTextNode(s.name)); l2.appendChild(l); }); lg.appendChild(l2); box.appendChild(lg); return box;
+  }
+  /* Effet des décisions de glissement sur le prévu cumulé */
+  function anaAdj(kind, cum, cm) {
+    var ds = ANA.dec.filter(function (d) { return d.kind === kind && d.opt !== 'Maintenir le prévu'; }); if (!ds.length || cm < 0) return null; var out = cum.slice();
+    ds.forEach(function (d) { var t = d.opt === 'Reporter au mois suivant' ? cm + 1 : (d.opt === 'Reporter au trimestre suivant' ? cm + 3 : 12); for (var i = cm; i < Math.min(t, 12); i++) out[i] -= d.amt; });
+    return out;
+  }
+  function anaSg(v, u) { return (v > 0 ? '+' : '') + fmt(v) + (u ? ' ' + u : ''); }
+  function anaPc(a, b) { return b ? pctf(a / b) : '—'; }
+  function anaBlock(body, title, node) { var x = cvEl('section', 'co-blk'); if (title) x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); return x; }
+  /* Commentaire de l'écart et décision de glissement */
+  function anaActions(kind, x) {
+    var box = cvEl('div'), key = kind + '|' + x.id; box.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
+    var c = ANA.com[key], b1 = cvEl('button', 'btn small', c ? 'Modifier le commentaire' : 'Commenter'); b1.type = 'button';
+    b1.addEventListener('click', function () { cvAsk({ title: 'Commenter l’écart — ' + x.label, ok: 'Enregistrer', required: true, cLabel: 'Commentaire', placeholder: 'Expliquez l’écart constaté', value: c ? c.t : '' }, function (t) { ANA.com[key] = { t: t, by: ME, on: nowStr() }; anaRender(); }); }); box.appendChild(b1);
+    var gap = x.planTo - x.real;
+    if (['eng', 'rea', 'dec', 'phy'].indexOf(kind) >= 0 && gap > 0) {
+      var d0 = ANA.dec.filter(function (d) { return d.key === key; })[0], b2 = cvEl('button', 'btn small', d0 ? 'Changer la décision' : 'Décider du glissement'); b2.type = 'button';
+      b2.addEventListener('click', function () { cvAsk({ title: 'Glissement — ' + x.label, ok: 'Enregistrer la décision', required: true, cLabel: 'Motif de la décision', optLabel: 'Que faire du reliquat de ' + fmt(gap) + (x.unit ? ' ' + x.unit : ' MGA') + ' ?', options: ANA_OPT, placeholder: 'Pourquoi cette décision ?' }, function (motif, opt) { ANA.dec = ANA.dec.filter(function (d) { return d.key !== key; }); ANA.dec.push({ key: key, kind: kind, id: x.id, label: x.label, amt: gap, unit: x.unit || 'MGA', opt: opt, motif: motif, by: ME, on: nowStr() }); anaRender(); }); }); box.appendChild(b2);
+    }
+    return box;
+  }
+  function anaComCell(kind, x) {
+    var c = ANA.com[kind + '|' + x.id], d = ANA.dec.filter(function (q) { return q.key === kind + '|' + x.id; })[0], n = cvEl('div');
+    if (c) { n.appendChild(cvEl('div', null, c.t)); n.appendChild(cvEl('div', 'hby', c.by + ' · ' + c.on)); } else n.appendChild(document.createTextNode('—'));
+    if (d) { var bd = badge(d.opt, 'b-info'); bd.style.marginTop = '6px'; bd.style.display = 'inline-block'; n.appendChild(bd); }
+    return n;
+  }
+  function anaSit(kind, x, sb) { var n = cvEl('div'), c = anaComCell(kind, x), a = anaActions(kind, x); n.style.minWidth = '230px'; n.style.textAlign = 'left'; n.appendChild(sb); if (c.textContent !== '—' && c.textContent !== '—') { c.style.margin = '6px 0'; n.appendChild(c); } a.style.marginTop = '6px'; n.appendChild(a); return n; }
+  function anaLabel(x) { var n = cvEl('div'); n.appendChild(cvEl('b', null, x.label)); if (x.sub) n.appendChild(cvEl('div', 'hby', x.sub)); return n; }
+  /* Écran type : indicateurs, graphique, tableau d'écarts commentables, décisions */
+  function anaCompare(b, kind, ex) {
+    var R = anaRows(kind, ex), S = R.S, cm = R.cm, rows = R.rows, thr = anaThr(kind), T = { plan: 0, planTo: 0, real: 0, plan2: 0, real2: 0 }, up = function (a) { return anaCum(a).map(function (v, i) { return i <= cm ? v : null; }); };
+    rows.forEach(function (x) { T.plan += x.plan; T.planTo += x.planTo; T.real += x.real; T.plan2 += x.plan2 || 0; T.real2 += x.real2 || 0; });
+    var nb = function (f) { return rows.filter(f).length; };
+    if (kind === 'dec') b.appendChild(dpTiles([['Prévu à date · compte spécial', fmt(T.planTo) + ' MGA', 'brand'], ['Décaissé par le projet', fmt(T.real) + ' MGA', 'ok'], ['Prévu à date · paiements directs', fmt(T.plan2) + ' MGA', 'brand'], ['Payé directement par le bailleur', fmt(T.real2) + ' MGA', 'warn']], { cols: 4 }));
+    else if (kind === 'phy') b.appendChild(dpTiles([['Travaux suivis', String(rows.length), 'brand'], ['En retard', String(nb(function (x) { return anaState(x, thr)[1] === 'b-ko' || anaState(x, thr)[1] === 'b-warn'; })), 'warn'], ['Conformes', String(nb(function (x) { return anaState(x, thr)[1] === 'b-ok'; })), 'ok'], ['Taux moyen', rows.length ? pctf(rows.reduce(function (a, x) { return a + (x.planTo ? x.real / x.planTo : 1); }, 0) / rows.length) : '—', 'info']], { cols: 4 }));
+    else if (kind === 'fp') b.appendChild(dpTiles([['Lignes suivies', String(rows.length), 'brand'], ['Dépenses en avance sur le physique', String(nb(function (x) { return x.tf - (x.plan ? x.real / x.plan : 0) > 0.2; })), 'warn'], ['Physique en avance sur les dépenses', String(nb(function (x) { return (x.plan ? x.real / x.plan : 0) - x.tf > 0.2; })), 'info'], ['Cohérentes', String(nb(function (x) { return Math.abs(x.tf - (x.plan ? x.real / x.plan : 0)) <= 0.2; })), 'ok']], { cols: 4 }));
+    else if (kind === 'fin') b.appendChild(dpTiles([['Financement prévu', fmt(S.padTot) + ' MGA', 'brand'], ['Réalisé à date', fmt(anaSum(S.liq, cm)) + ' MGA', 'ok'], ['Décaissé à date', fmt(anaSum(S.pay, cm) + anaSum(S.dpd, cm)) + ' MGA', 'warn'], ['Encaissé à date', fmt(anaSum(S.enc, cm)) + ' MGA', 'info']], { cols: 4 }));
+    else b.appendChild(dpTiles([['Prévu à date', fmt(T.planTo) + ' MGA', 'brand'], ['Réalisé', fmt(T.real) + ' MGA', 'ok'], ['Écart', anaSg(T.real - T.planTo) + ' MGA', T.real >= T.planTo ? 'ok' : 'warn'], ['Taux', anaPc(T.real, T.planTo), 'info']], { cols: 4 }));
+    /* Graphique */
+    var card = cvEl('div', 'card'); card.style.padding = '14px 16px';
+    if (kind === 'fin') { var C = function (a) { return up(a); }; card.appendChild(anaChart([{ name: 'Financement prévu (cumul)', color: DPC.grey, dash: true, data: anaCum(S.pad) }, { name: 'PTBA prévu', color: DPC.brand, dash: true, data: anaCum(S.ptba) }, { name: 'Engagé', color: DPC.info, data: C(S.eng) }, { name: 'Réalisé', color: DPC.ok, data: C(S.liq) }, { name: 'Décaissé', color: DPC.warn, data: C(S.pay) }, { name: 'Encaissé', color: DPC.ko, data: C(S.enc) }], cm)); anaBlock(b, 'Prévu et réalisé cumulés de l’exercice', card); }
+    else if (kind === 'phy') { rows.forEach(function (x) { card.appendChild(dpMeter(x.label, x.real, x.plan, anaState(x, thr)[1] === 'b-ok' ? DPC.ok : DPC.warn, '', x.unit)); }); if (!rows.length) card.appendChild(document.createTextNode('Aucun travail avec une cible au PTA.')); anaBlock(b, 'Réalisé par rapport à la cible annuelle', card); }
+    else if (kind === 'fp') { rows.forEach(function (x) { var w = cvEl('div'); w.style.cssText = 'padding:8px 0;border-bottom:1px solid var(--border)'; w.appendChild(cvEl('b', null, x.label)); w.appendChild(dpMeter('Dépensé', x.liq, x.cred, DPC.warn)); w.appendChild(dpMeter('Réalisé physique', x.real, x.plan, DPC.ok, '', x.unit)); card.appendChild(w); }); anaBlock(b, 'Dépenses et réalisation physique de chaque ligne', card); }
+    else {
+      var ser = [{ name: kind === 'eng' ? 'Marchés prévus au PPM' : (kind === 'rea' ? 'PTBA prévu' : 'Plan de décaissement'), color: DPC.brand, dash: true, data: anaCum(R.planM) }], adj = anaAdj(kind, anaCum(R.planM), cm);
+      if (adj) ser.push({ name: 'Prévu après glissement', color: DPC.info, dash: true, data: adj });
+      ser.push({ name: kind === 'eng' ? 'Engagements' : (kind === 'rea' ? 'Réalisations' : 'Décaissements du projet'), color: DPC.ok, data: up(R.realM) });
+      if (kind === 'dec') { ser.push({ name: 'Plan : paiements directs', color: DPC.grey, dash: true, data: anaCum(S.pdcDp) }); ser.push({ name: 'Payé directement', color: DPC.warn, data: up(S.dpd) }); }
+      card.appendChild(anaChart(ser, cm)); anaBlock(b, 'Prévu et réalisé cumulés', card);
+    }
+    /* Tableau */
+    var head, num, trs;
+    if (kind === 'dec') { head = ['Mois', 'Prévu (compte spécial)', 'Décaissé', 'Écart', 'Prévu (paiements directs)', 'Payé directement', 'Écart', 'Situation et commentaire']; num = [1, 2, 3, 4, 5, 6]; }
+    else if (kind === 'fp') { head = ['Ligne', 'Dépensé', 'Réalisé physique', 'Attendu au vu des dépenses', 'Écart', 'Reste à réaliser', 'Situation et commentaire']; num = [1, 2, 3, 4, 5]; }
+    else if (kind === 'phy') { head = ['Travail', 'Cible annuelle', 'Cible à date', 'Réalisé', 'Écart', 'Taux', 'Situation et commentaire']; num = [1, 2, 3, 4, 5]; }
+    else { head = [kind === 'eng' ? 'Marché' : (kind === 'rea' ? 'Ligne du PTBA' : 'Étape'), kind === 'eng' ? 'Prévu au PPM' : (kind === 'rea' ? 'PTBA' : 'Prévu sur l’exercice'), 'Prévu à date', kind === 'eng' ? 'Engagé' : 'Réalisé', 'Écart', 'Taux', 'Situation et commentaire']; num = [1, 2, 3, 4, 5]; }
+    trs = rows.map(function (x) {
+      var st, u = x.unit, sb;
+      if (kind === 'fp') {
+        var tp = x.plan ? x.real / x.plan : 0, gp = tp - x.tf, att = Math.round(x.plan * x.tf); x.planTo = att; x.ecart = x.real - att;
+        st = gp < -0.35 ? ['Dépenses très en avance', 'b-ko'] : (gp < -0.2 ? ['Dépenses en avance', 'b-warn'] : (gp > 0.2 ? ['Physique en avance', 'b-info'] : ['Cohérent', 'b-ok']));
+        return [anaLabel(x), anaPc(x.liq, x.cred), anaPc(x.real, x.plan), fmt(att) + ' ' + u, anaSg(x.real - att, u), fmt(Math.max(0, x.plan - x.real)) + ' ' + u, anaSit(kind, x, badge(st[0], st[1]))];
+      }
+      st = anaState(x, thr); sb = badge(st[0], st[1]);
+      if (kind === 'dec') return [x.label, fmt(x.plan), fmt(x.real), anaSg(x.real - x.plan), fmt(x.plan2), fmt(x.real2), anaSg(x.real2 - x.plan2), anaSit(kind, x, sb)];
+      return [anaLabel(x), fmt(x.plan) + (u ? ' ' + u : ''), fmt(x.planTo) + (u ? ' ' + u : ''), fmt(x.real) + (u ? ' ' + u : ''), anaSg(x.ecart, u), anaPc(x.real, x.planTo), anaSit(kind, x, sb)];
+    });
+    anaBlock(b, kind === 'fin' ? 'Du financement prévu aux encaissements' : 'Écarts à date', dpMini(head, trs, num, 'Aucune donnée pour cet exercice.'));
+    /* Décisions de glissement */
+    var ds = ANA.dec.filter(function (d) { return d.kind === kind; });
+    if (ds.length) anaBlock(b, 'Décisions de glissement', dpMini(['Écart', 'Montant', 'Décision', 'Motif', 'Prise le', ''], ds.map(function (d) { var bt = cvEl('button', 'btn small', 'Annuler la décision'); bt.type = 'button'; bt.addEventListener('click', function () { ANA.dec = ANA.dec.filter(function (q) { return q !== d; }); anaRender(); }); return [d.label, fmt(d.amt) + ' ' + d.unit, badge(d.opt, 'b-info'), d.motif, d.by + ' · ' + d.on, bt]; }), [1], ''));
+  }
+  /* Alertes : règles choisies par l'utilisateur, évaluées à la date du jour */
+  function anaEval(q, ex) {
+    var S = anaSeries(ex), cm = anaCm(ex);
+    if (q.real === 'phy') { var rs = anaRows('phy', ex).rows.filter(function (x) { return x.planTo > 0; }); if (!rs.length) return null; return { t: rs.reduce(function (a, x) { return a + x.real / x.planTo; }, 0) / rs.length }; }
+    var pl = anaSum(S[q.plan] || anaZ(), cm), rl = anaSum(S[q.real] || anaZ(), cm); if (!pl) return null; return { t: rl / pl, plan: pl, real: rl };
+  }
+  function anaAlerts(ex) {
+    var out = [];
+    anaRules().forEach(function (q) {
+      if (!q.on) return; var e = anaEval(q, ex); if (!e) return; var hit = q.sens === 'sous' ? e.t < 1 - q.seuil / 100 : e.t > 1 + q.seuil / 100; if (!hit) return;
+      var sev = q.sens === 'sous' ? e.t < 1 - 2 * q.seuil / 100 : e.t > 1 + 2 * q.seuil / 100;
+      out.push({ q: q, e: e, k: sev ? 'ko' : 'warn', m: q.nom + ' : ' + (e.plan != null ? fmt(e.real) + ' MGA réalisés pour ' + fmt(e.plan) + ' MGA prévus à date' : 'taux moyen de réalisation') + ' (' + pctf(e.t) + ', écart toléré ' + q.seuil + ' %)' });
+    });
+    return out;
+  }
+  function anaAle(b, ex) {
+    var rl = anaRules(), tb = dpMini(['Règle', 'Réalisation suivie', 'Plan de référence', 'Écart toléré', 'Déclenchement', 'État', ''], rl.map(function (q) {
+      var a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px'; var b1 = cvEl('button', 'btn small', q.on ? 'Désactiver' : 'Activer'), b2 = cvEl('button', 'btn small', 'Supprimer'); b1.type = b2.type = 'button';
+      b1.addEventListener('click', function () { q.on = !q.on; anaRender(); }); b2.addEventListener('click', function () { ANA.rules = ANA.rules.filter(function (z) { return z !== q; }); anaRender(); }); a.appendChild(b1); a.appendChild(b2);
+      return [q.nom, anaLab(ANA_REAL, q.real), anaLab(ANA_PLAN, q.plan), q.seuil + ' %', q.sens === 'sous' ? 'Objectif non atteint' : 'Prévu dépassé', badge(q.on ? 'Active' : 'Désactivée', q.on ? 'b-ok' : 'b-neutral'), a];
+    }), [3], 'Aucune règle : créez-en une.');
+    anaBlock(b, 'Règles d’alerte', tb);
+    var al = anaAlerts(ex), box = cvEl('div', 'card'); box.style.padding = '4px 16px';
+    if (!al.length) box.appendChild(cvEl('div', 'list-row', 'Aucune alerte : tous les objectifs surveillés sont tenus à la date du jour.'));
+    al.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x.k === 'ko' ? 'Critique' : 'À surveiller', x.k === 'ko' ? 'b-ko' : 'b-warn')); var t = cvEl('div', null, x.m); t.style.marginLeft = '12px'; row.appendChild(t); box.appendChild(row); });
+    anaBlock(b, 'Alertes à ce jour', box);
+  }
+  /* Suivi pluriannuel */
+  function anaPlu(b) {
+    var yrs = CPAD.years, rows = [], cumP = 0, cumD = 0, cur = anaEx(), tot = 0;
+    yrs.forEach(function (y, yi) {
+      var ys = String(y), pad = CPAD.comps.reduce(function (a, cp) { return a + (padComp(cp.code)[yi] || 0); }, 0), h = ANA_HIST[ys], ptba = 0, eng = 0, liq = 0, pay = 0, enc = 0, st;
+      if (h) { ptba = h.ptba; eng = h.eng; liq = h.liq; pay = h.pay; enc = h.enc; st = ['Clôturé', 'b-neutral']; }
+      else if (anaExs().indexOf(ys) >= 0) { ptba = anaLines(ys).reduce(function (a, z) { return a + anaCred(z); }, 0); eng = anaSx('eng', null, ys); liq = anaSx('liq', null, ys); pay = anaSx('pay', null, ys); enc = anaSx('enc', null, ys); st = ['En cours', 'b-ok']; }
+      else st = ['À venir', 'b-info'];
+      cumP += pad; cumD += pay; tot += pad; rows.push({ y: ys, pad: pad, ptba: ptba, eng: eng, liq: liq, pay: pay, enc: enc, st: st, cumP: cumP, cumD: cumD });
+    });
+    var tp = rows.reduce(function (a, x) { return a + x.pay; }, 0), te = rows.reduce(function (a, x) { return a + x.enc; }, 0);
+    b.appendChild(dpTiles([['Financement total du projet', fmt(tot) + ' MGA', 'brand'], ['Décaissé depuis le début', fmt(tp) + ' MGA', 'ok'], ['Encaissé depuis le début', fmt(te) + ' MGA', 'info'], ['Taux de décaissement', anaPc(tp, tot), 'warn']], { cols: 4 }));
+    var card = cvEl('div', 'card'); card.style.padding = '14px 16px'; rows.forEach(function (x) { card.appendChild(dpMeter('Exercice ' + x.y + ' — décaissé par rapport au financement prévu', x.pay, x.pad, x.st[0] === 'À venir' ? DPC.grey : DPC.ok)); }); card.appendChild(dpMeter('Depuis le début du projet', tp, tot, DPC.brand));
+    anaBlock(b, 'Décaissé par rapport au financement prévu', card);
+    anaBlock(b, 'Exercice par exercice', dpMini(['Exercice', 'Financement prévu', 'PTBA', 'Engagé', 'Réalisé', 'Décaissé', 'Encaissé', 'Taux de décaissement', 'Situation'], rows.map(function (x) { return [x.y, fmt(x.pad), x.ptba ? fmt(x.ptba) : '—', x.eng ? fmt(x.eng) : '—', x.liq ? fmt(x.liq) : '—', x.pay ? fmt(x.pay) : '—', x.enc ? fmt(x.enc) : '—', x.pay ? anaPc(x.pay, x.pad) : '—', badge(x.st[0], x.st[1])]; }), [1, 2, 3, 4, 5, 6, 7], ''));
+    anaBlock(b, 'Cumul depuis le début (MGA)', dpMini(['Exercice', 'Financement prévu cumulé', 'Décaissé cumulé', 'Taux cumulé'], rows.map(function (x) { return [x.y, fmt(x.cumP), x.pay || x.st[0] === 'Clôturé' ? fmt(x.cumD) : '—', x.pay ? anaPc(x.cumD, x.cumP) : '—']; }), [1, 2, 3], ''));
+  }
+  /* Versions des plans */
+  function anaVer(b, ex) {
+    var r = anaLots(ex)[0], vs = r ? bvVers(r) : [], n = vs.length, cur = ANA.ver || n, sumV = function (v) { return Object.keys(v.snap).reduce(function (a, k) { return a + (v.snap[k].dem || 0); }, 0); };
+    var ppm = r ? ppmLotItems(r) : [];
+    anaBlock(b, 'Plans de référence', dpDl([['Plan de financement (PAD)', 'Version ' + CPAD.ver + ' · approuvé le ' + CPAD.approuve], ['PTBA et PTA', 'Version V' + cur + (ANA.ver ? ' (choisie)' : ' (dernière version)')], ['PPM', 'Version en vigueur · ' + pl(ppm.length, 'marché')], ['Plan de décaissement', 'Recalculé à partir du PTBA et du PPM de référence']]));
+    var rows = vs.map(function (v, i) {
+      var t = sumV(v), nd = cvEl('div'); if (v.v === cur) nd.appendChild(badge('Référence', 'b-ok')); else { var bt = cvEl('button', 'btn small', 'Prendre pour référence'); bt.type = 'button'; bt.addEventListener('click', function () { ANA.ver = v.v === n ? 0 : v.v; anaRender(); }); nd.appendChild(bt); }
+      return ['V' + v.v, v.on, v.by, (v.why || '') + (v.what ? ' — ' + v.what : ''), fmt(t), i ? anaSg(t - sumV(vs[i - 1])) : '—', nd];
+    });
+    anaBlock(b, 'PTBA et PTA', dpMini(['Version', 'Date', 'Auteur', 'Motif et modification', 'PTBA (MGA)', 'Écart avec la version précédente', 'Référence'], rows, [4, 5], 'Aucune version : aucun PTBA validé.'));
+    if (ANA.ver) { var bd = cvEl('div'); bd.style.marginBottom = '14px'; var bl = cvEl('button', 'btn', 'Revenir à la dernière version'); bl.type = 'button'; bl.addEventListener('click', function () { ANA.ver = 0; anaRender(); }); bd.appendChild(bl); b.appendChild(bd); }
+    if (n >= 2) {
+      var v1 = vs[0], vl = vs[n - 1], cm = anaLines(ex).map(function (z) { var k = z.perim + '|' + z.l.c, a = v1.snap[k] ? v1.snap[k].dem : 0, c = vl.snap[k] ? vl.snap[k].dem : 0; return [z.l.c + ' — ' + (z.l.lib || z.l.l), fmt(a), fmt(c), anaSg(c - a)]; });
+      anaBlock(b, 'Écarts entre la V1 et la V' + vl.v, dpMini(['Ligne', 'V1 (MGA)', 'V' + vl.v + ' (MGA)', 'Écart'], cm, [1, 2, 3], ''));
+    } else anaBlock(b, 'Écarts entre versions', cvEl('div', 'card', 'Aucune révision depuis la validation : la V1 est la seule version.')).lastChild.style.padding = '14px 16px';
+    var ch = ppm.filter(function (x) { return (x.pmHist || []).length; });
+    anaBlock(b, 'PPM : modifications du mode de paiement', dpMini(['Marché', 'Désignation', 'Dernière modification'], ch.map(function (x) { return [x.ref, x.des, x.pmHist[0].on.slice(0, 10)]; }), [], 'Aucune modification depuis l’approbation du PPM.'));
+  }
+  /* Tableau de bord : courbe générale de l'exercice et axes d'amélioration */
+  function anaAxes(ex) {
+    var out = [], rea = anaRows('rea', ex), eng = anaRows('eng', ex), phy = anaRows('phy', ex), dec = anaRows('dec', ex), S = rea.S, cm = rea.cm;
+    var late = rea.rows.filter(function (x) { return x.planTo - x.real > 0 && x.planTo && x.real / x.planTo < 0.85; }).sort(function (a, b) { return (b.planTo - b.real) - (a.planTo - a.real); }), gap = late.reduce(function (a, x) { return a + x.planTo - x.real; }, 0);
+    if (late.length) out.push({ k: 'warn', b: 'Réalisations', go: 'anrea', m: 'Rattraper le retard de ' + fmt(gap) + ' MGA sur le PTBA, surtout sur ' + late.slice(0, 2).map(function (x) { return x.label.split(' — ')[0]; }).join(' et ') + '.' });
+    var ne = eng.rows.filter(function (x) { return x.id !== 'hors' && x.planTo > 0 && x.real === 0; }); if (ne.length) out.push({ k: 'warn', b: 'Engagements', go: 'aneng', m: 'Engager ' + pl(ne.length, 'marché') + ' prévu' + (ne.length > 1 ? 's' : '') + ' au PPM et pas encore engagé' + (ne.length > 1 ? 's' : '') + ' : ' + ne.slice(0, 2).map(function (x) { return x.id; }).join(', ') + '.' });
+    var dp = dec.rows.reduce(function (a, x) { return a + x.plan - x.real; }, 0); if (dp > 0) out.push({ k: 'warn', b: 'Décaissements', go: 'andec', m: 'Les décaissements du projet sont inférieurs de ' + fmt(dp) + ' MGA au plan : vérifier les paiements en attente.' });
+    var lp = phy.rows.filter(function (x) { return x.planTo && x.real / x.planTo < 0.85; }); if (lp.length) out.push({ k: 'warn', b: 'Avancement physique', go: 'anphy', m: 'Accélérer ' + (lp.length > 1 ? lp.length + ' travaux' : '1 travail') + ' en retard sur la cible du PTA : ' + lp.slice(0, 2).map(function (x) { return x.label.split(' — ')[0]; }).join(' et ') + '.' });
+    var fp = phy.rows.filter(function (x) { return x.plan && x.tf - x.real / x.plan > 0.2; }); if (fp.length) out.push({ k: 'ko', b: 'Dépenses et physique', go: 'anfp', m: 'Vérifier ' + pl(fp.length, 'ligne') + ' dont les dépenses dépassent nettement le réalisé physique.' });
+    var nc = 0; ['rea', 'eng', 'dec', 'phy'].forEach(function (k) { anaRows(k, ex).rows.forEach(function (x) { if (x.planTo - x.real > 0 && !ANA.com[k + '|' + x.id]) nc++; }); }); if (nc) out.push({ k: 'warn', b: 'Écarts', go: 'anrea', m: pl(nc, 'écart') + ' à commenter et à arbitrer (glissement).' });
+    lots_req: { var lots = anaLots(ex); for (var i = 0; i < lots.length; i++) { var P = pdcSim(pdcNeeds(lots[i])), q = P.req.filter(function (z) { return z.m >= cm; })[0]; if (q) { out.push({ k: 'warn', b: 'Trésorerie', go: 'pdec', m: 'Déposer la demande de réapprovisionnement de ' + fmt(q.mt) + ' MGA avant fin ' + PDC_MOIS[q.m] + ' pour éviter un solde négatif.' }); break lots_req; } } }
+    return out;
+  }
+  function anaDash() {
+    var ex = anaEx(), S = anaSeries(ex), cm = anaCm(ex), b = document.getElementById('db-curve-b'), ax = document.getElementById('db-axes-b'), c0 = Math.max(cm, 0); b.innerHTML = ''; ax.innerHTML = '';
+    var cp = anaCum(S.ptba), cl = anaCum(S.liq), pc = cp[c0], rl = cl[c0], rate = cm >= 0 ? rl / (cm + 1) : 0;
+    document.getElementById('db-curve-n').textContent = 'exercice ' + ex + ' · situation au ' + isoToFr(cadToday());
+    b.appendChild(anaChart([{ name: 'Prévu (PTBA de référence)', color: DPC.brand, dash: true, data: cp }, { name: 'Réalisé', color: DPC.ok, data: cl.map(function (v, i) { return i <= cm ? v : null; }) }, { name: 'À ce rythme jusqu’à la fin', color: DPC.ko, dash: true, data: cl.map(function (v, i) { return i >= cm ? rl + rate * (i - cm) : null; }) }], cm, [{ i: cm, v: pc, c: DPC.brand, t: 'Objectif à ce jour' }, { i: cm, v: rl, c: DPC.ok, t: 'Vous êtes ici' }]));
+    var d = cvEl('div'); d.style.marginTop = '12px'; d.appendChild(dpDl([['Objectif à ce jour', fmt(pc) + ' MGA'], ['Réalisé', fmt(rl) + ' MGA · ' + anaPc(rl, pc)], ['Écart', anaSg(rl - pc) + ' MGA'], ['Prévu en fin d’exercice', fmt(cp[11]) + ' MGA'], ['À ce rythme, fin d’exercice', fmt(Math.round(rl + rate * (11 - cm))) + ' MGA'], ['Plans de référence', 'PTBA et PTA V' + (ANA.ver || (anaLots(ex)[0] ? bvVers(anaLots(ex)[0]).length : 1)) + ' · PPM et plan de décaissement en vigueur']])); b.appendChild(d);
+    var bt = cvEl('button', 'btn small', 'Choisir les plans de référence'); bt.type = 'button'; bt.style.marginTop = '10px'; bt.addEventListener('click', function () { show('anver'); }); b.appendChild(bt);
+    var al = anaAxes(ex); if (!al.length) ax.appendChild(cvEl('div', 'hint', 'Aucun axe d’amélioration : l’exécution suit les plans.'));
+    al.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x.b, x.k === 'ko' ? 'b-ko' : 'b-warn')); var t = cvEl('div', null, x.m); t.style.marginLeft = '12px'; row.appendChild(t); var o = cvEl('button', 'btn small', 'Ouvrir'); o.type = 'button'; o.style.marginLeft = 'auto'; o.addEventListener('click', function () { show(x.go); }); row.appendChild(o); ax.appendChild(row); });
+  }
+  function anaRender() {
+    var ex = anaEx(), K = ANA_K[ANA.kind], b = document.getElementById('ana-body'); if (!b) return; b.innerHTML = '';
+    document.querySelector('#v-ana > .head h1').textContent = K[0]; document.querySelector('#v-ana > .head p').textContent = K[1] + (['plu', 'ale', 'ver'].indexOf(ANA.kind) >= 0 ? '' : ' — exercice ' + ex + ', situation au ' + isoToFr(cadToday()));
+    document.getElementById('ana-new').style.display = ANA.kind === 'ale' ? '' : 'none';
+    if (ANA.kind === 'ale') anaAle(b, ex); else if (ANA.kind === 'plu') anaPlu(b); else if (ANA.kind === 'ver') anaVer(b, ex); else anaCompare(b, ANA.kind, ex);
+  }
+  (function () {
+    function opts(id, l) { var s = document.getElementById(id); if (!s) return; l.forEach(function (x) { var o = cvEl('option', null, x[1]); o.value = x[0]; s.appendChild(o); }); }
+    opts('ar-real', ANA_REAL); opts('ar-plan', ANA_PLAN);
+    var nw = document.getElementById('ana-new'), pn = document.getElementById('ana-rule'); if (!nw || !pn) return;
+    nw.addEventListener('click', function () { document.getElementById('ar-nom').value = ''; document.getElementById('ar-seuil').value = '15'; document.getElementById('ar-err').textContent = ''; pn.hidden = false; });
+    document.getElementById('ar-cancel').addEventListener('click', function () { pn.hidden = true; });
+    document.getElementById('ar-save').addEventListener('click', function () {
+      var re = document.getElementById('ar-real').value, pa = document.getElementById('ar-plan').value, se = parseInt(document.getElementById('ar-seuil').value.replace(/\s/g, ''), 10), sn = document.getElementById('ar-sens').value, nm = document.getElementById('ar-nom').value.trim(), er = document.getElementById('ar-err');
+      if ((re === 'phy') !== (pa === 'pta')) { er.textContent = 'Le PTA se compare à l’avancement physique, et inversement.'; return; }
+      if (isNaN(se) || se < 0 || se > 100) { er.textContent = 'L’écart toléré doit être un pourcentage entre 0 et 100.'; return; }
+      anaRules(); ANA.rules.push({ id: ++ANA.seq, nom: nm || (anaLab(ANA_REAL, re) + ' par rapport à ' + anaLab(ANA_PLAN, pa)), real: re, plan: pa, seuil: se, sens: sn, on: true }); pn.hidden = true; anaRender(); bkMsg('ana-msg', 'Règle enregistrée : elle est évaluée dès maintenant.', 'ok');
+    });
+  })();
+
   /* ----- Tableau de bord du projet : chiffres tirés des écrans de détail (PTBA validé, compte administratif, trésorerie, plans) ----- */
   function dashTitles(prj) {
     var h = document.querySelector('#v-dashboard .head p'), h1 = document.getElementById('db-status').previousElementSibling, h2 = document.getElementById('db-bars-t');
     if (prj) { h.textContent = 'Budget validé, exécution de la dépense, trésorerie et alertes du projet : chiffres cohérents avec les écrans de détail'; h1.firstChild.nodeValue = 'Chaîne de la dépense '; h2.textContent = 'Engagement par ligne du PTBA'; }
     else { h.textContent = 'Budgets, exécution, alertes et échéances selon votre profil d’accès — chiffres cohérents avec les écrans de détail'; h1.firstChild.nodeValue = 'Budgets par statut '; }
-    ['db-prof', 'db-ex', 'db-per'].forEach(function (id) { document.getElementById(id).style.display = prj ? 'none' : ''; });
+    ['db-prof', 'db-ex', 'db-per'].forEach(function (id) { document.getElementById(id).style.display = prj ? 'none' : ''; }); ['db-curve', 'db-axes'].forEach(function (id) { document.getElementById(id).hidden = !prj; });
   }
   function dashPrj() {
-    dpSeed(); dashTitles(true);
+    dpSeed(); dashTitles(true); anaDash();
     var t = dpTot(), a = dfoAcc(), docs = DP.docs || [], lots = bvList(), pct = function (v, d) { return d ? pctf(v / d) : '—'; };
     var k = document.getElementById('db-kpis'); k.innerHTML = ''; k.className = '';
     k.appendChild(dpTiles([['Budget validé (PTBA)', fmt(t.ouv) + ' MGA', 'brand'], ['Engagé · ' + pct(t.e, t.ouv), fmt(t.e) + ' MGA', 'info'], ['Payé · ' + pct(t.p, t.ouv), fmt(t.p) + ' MGA', 'ok'], ['Solde du compte spécial', fmt(a.solde) + ' MGA', a.solde < 0 ? 'ko' : (a.solde < a.plaf * DFS.seuil / 100 ? 'warn' : 'ok')]], { cols: 4 }));
@@ -20745,6 +21069,7 @@ var EXEC_REC = [
     CDF.items.filter(function (x) { return x.st === 'Rejetée'; }).forEach(function (x) { al.push({ k: 'warn', b: 'Bailleur', m: x.id + ' rejetée : ' + x.motif }); });
     lots.forEach(function (r) { var S = pdcSim(pdcNeeds(r)), neg = []; S.bal.forEach(function (v, m) { if (m >= S.s && v < 0) neg.push(PDC_MOIS[m]); }); if (neg.length) al.push({ k: 'ko', b: 'Plan de décaissement', m: 'Solde négatif prévu en ' + neg.join(', ') + ' (exercice ' + cvCamp(r).ex + ')' }); });
     lots.forEach(function (r) { var ac = ppmLotActs(r), no = ac.filter(function (x) { return !ppmActTotal(x.key); }).length; if (no) al.push({ k: 'warn', b: 'PPM', m: pl(no, 'ligne') + ' du PTBA sans marché planifié (exercice ' + cvCamp(r).ex + ')' }); });
+    anaAlerts(anaEx()).forEach(function (x) { al.push({ k: x.k, b: 'Analyse', m: x.m }); });
     var ab = document.getElementById('db-alerts'); ab.innerHTML = '';
     if (!al.length) ab.appendChild(cvEl('div', 'hint', 'Aucune alerte pour ce projet.'));
     al.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x.b, x.k === 'ko' ? 'b-ko' : 'b-warn')); row.appendChild(cvEl('div', null, x.m)); ab.appendChild(row); });
