@@ -5065,6 +5065,32 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="row-toolbar" id="dpeng-bar" style="margin-bottom:12px"></div>
         <div id="dpeng-k"></div>
         <div class="card"><div class="scroll"><table style="min-width:900px"><thead id="dpeng-h"></thead><tbody id="dpeng-b"></tbody></table></div></div>
+                <div class="panel" id="av-form" hidden><h2><span>Nouvelle avance</span></h2><div class="body">
+          <div class="fgrid">
+            <div><label for="av-type">Type d’avance</label><select id="av-type" class="field"><option value="mission">Avance sur mission</option><option value="regie">Régie d’avances</option></select></div>
+            <div><label for="av-agent">Bénéficiaire <em>*</em></label><input id="av-agent" class="field" type="text"></div>
+            <div class="full"><label for="av-objet">Objet <em>*</em></label><input id="av-objet" class="field" type="text"></div>
+            <div><label for="av-ligne">Ligne du PTBA <em>*</em></label><select id="av-ligne" class="field"></select></div>
+            <div><label for="av-mt">Montant de l’avance (MGA) <em>*</em></label><input id="av-mt" class="field" type="text" inputmode="decimal"></div>
+            <div data-m="1"><label for="av-d1">Début de la mission</label><input id="av-d1" class="field" type="date"></div>
+            <div data-m="1"><label for="av-d2">Fin de la mission</label><input id="av-d2" class="field" type="date"></div>
+          </div>
+          <div class="err" id="av-err"></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="av-cancel">Annuler</button><button class="btn primary" id="av-save">Enregistrer l’avance</button></div>
+        </div></div>
+        <div class="panel" id="av-jus" hidden><h2><span id="av-jus-title">Justifier l’avance</span></h2><div class="body">
+          <div id="av-jinfo"></div>
+          <div class="fgrid" style="margin-top:14px">
+            <div><label for="av-j1">Transport (MGA)</label><input id="av-j1" class="field" type="text" inputmode="decimal"></div>
+            <div><label for="av-j2">Hébergement (MGA)</label><input id="av-j2" class="field" type="text" inputmode="decimal"></div>
+            <div><label for="av-j3">Per diem et indemnités (MGA)</label><input id="av-j3" class="field" type="text" inputmode="decimal"></div>
+            <div><label for="av-j4">Autres frais (MGA)</label><input id="av-j4" class="field" type="text" inputmode="decimal"></div>
+            <div class="full"><label for="av-jp">Pièces justificatives (noms des fichiers, séparés par une virgule) <em>*</em></label><input id="av-jp" class="field" type="text" placeholder="Ex. Billets_Toliara.pdf, Factures_hotel.pdf"></div>
+          </div>
+          <div id="av-jres" style="margin:12px 0"></div>
+          <div class="err" id="av-jerr"></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="av-jcancel">Annuler</button><button class="btn primary" id="av-jok">Enregistrer la justification</button></div>
+        </div></div>
         <div class="panel" id="dp-eng-form" hidden><h2><span>Nouvel engagement</span></h2><div class="body" id="dp-eng-body"></div></div>
       </section>
       <section class="view" id="v-dpliq">
@@ -16381,7 +16407,7 @@ var EXEC_REC = [
   function dfoDoc(id) { return (DP.docs || []).filter(function (x) { return x.id === id; })[0]; }
   function dfoAttached() { var a = {}; CDF.items.forEach(function (d) { if (d.st !== 'Rejetée') d.regs.forEach(function (r) { a[r] = true; }); }); return a; }
   /* Dépenses que l'on peut rattacher : DRF = payées sur le compte spécial et non encore justifiées ; DPD = mandatées, que le bailleur peut payer directement */
-  function dfoElig(type) { dpSeed(); var at = dfoAttached(); return (DP.docs || []).filter(function (d) { if (at[d.id] || !dfoDocSrc(d)) return false; return type === 'DRF' ? (DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT) : (d.st === 'ordonnance' && d.kind !== 'avance' && dpPm(d) === 'dpd'); }); }
+  function dfoElig(type) { dpSeed(); var at = dfoAttached(); return (DP.docs || []).filter(function (d) { if (at[d.id] || !dfoDocSrc(d)) return false; return type === 'DRF' ? (DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT && (!d.mis || d.mis.jus)) : (d.st === 'ordonnance' && d.kind !== 'avance' && dpPm(d) === 'dpd'); }); }
   function dfoAcc() {
     dpSeed(); var paid = 0, just = 0, recu = 0, ini = DFS.versements.reduce(function (a, v) { return a + v.mt; }, 0);
     (DP.docs || []).forEach(function (d) { if (dfoDocSrc(d) && DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT) paid += dfoAmt(d); });
@@ -20207,7 +20233,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'revpl-dos', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'revpl-dos', 'av-form', 'av-jus', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20551,7 +20577,7 @@ var EXEC_REC = [
   });
 
   /* ===== Chaîne de la dépense du projet (menu Compte administratif) : engagements, liquidations, ordonnancement, paiements — chaque dépense est rattachée à une ligne du PTBA validé ===== */
-  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 14, seqM: 10, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
+  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 17, seqM: 10, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
   var DP_ST = { soumis: ['En attente de visa CF', 'b-warn'], vise: ['Visé · à liquider', 'b-info'], liquide: ['Liquidé · à ordonnancer', 'b-info'], ordonnance: ['Mandaté · chez le comptable', 'b-warn'], paye: ['Payé', 'b-ok'] };
   var DP_RANK = { soumis: 1, vise: 2, liquide: 3, ordonnance: 4, paye: 6 };
   var DP_TIERS = ['BTP Andriana', 'Entreprise Sud Bâtiment', 'Centre de formation Vatsy', 'Hôtel Les Flamboyants', 'MEDIFROID SARL', 'FOURNITEC SARL', 'Cabinet RAKOTO Conseil', 'Imprimerie nationale'];
@@ -20577,14 +20603,17 @@ var EXEC_REC = [
       d(10, '2.1', 'Centre de formation Vatsy', 'Formation à l’entretien des équipements', 'Contrat', 'CT-2026-015', 20000000, 'paye', { fac: 'FAC-0561', mandat: 'MD-2026-0006', mode: 'Mobile money', dt: { eng: '2026-08-10', liq: '2026-09-15', ord: '2026-09-22', pay: '2026-09-30' } }),
       d(11, '2.1', 'FOURNITEC SARL', 'Équipements de laboratoire des centres de santé (lot 2)', 'Bon de commande', 'BC-2026-0180', 30000000, 'ordonnance', { pm: 'dpd', pmNote: 'Passé en paiement direct après le PPM : fournisseur étranger', fac: 'FAC-0574', mandat: 'MD-2026-0009', dt: { eng: '2026-09-01', liq: '2026-10-12', ord: '2026-10-22' } }),
       d(12, '2.1', 'Cabinet RAKOTO Conseil', 'Supervision des travaux des centres de santé', 'Contrat', 'CT-2026-016', 12000000, 'paye', { fac: 'FAC-0589', mandat: 'MD-2026-0007', mode: 'Virement bancaire', dt: { eng: '2026-09-20', liq: '2026-10-20', ord: '2026-10-28', pay: '2026-11-05' } }),
-       d(13, '1.2', 'Imprimerie nationale', 'Impression des supports de formation', 'Bon de commande', 'BC-2026-0125', 6000000, 'vise', { fin: '2026-06-30', dt: { eng: '2026-02-10' } })
+       d(13, '1.2', 'Imprimerie nationale', 'Impression des supports de formation', 'Bon de commande', 'BC-2026-0125', 6000000, 'vise', { fin: '2026-06-30', dt: { eng: '2026-02-10' } }),
+       d(14, '2.1', 'RAKOTONDRAVAO Jean', 'Mission de supervision des centres de santé à Toliara', 'Avance sur mission', 'AM-2026-001', 4500000, 'paye', { mandat: 'CAI-2026-0031', mode: 'Espèces', dt: { eng: '2026-11-05', pay: '2026-11-10' }, mis: { type: 'mission', agent: 'RAKOTONDRAVAO Jean', d1: '2026-11-12', d2: '2026-11-16', stage: 'remise', jus: null } }),
+       d(15, '2.2', 'RASOLOFO Miora', 'Mission de formation des agents de santé à Fianarantsoa', 'Avance sur mission', 'AM-2026-002', 3000000, 'paye', { mandat: 'CAI-2026-0027', mode: 'Espèces', dt: { eng: '2026-09-25', pay: '2026-09-28' }, mis: { type: 'mission', agent: 'RASOLOFO Miora', d1: '2026-10-01', d2: '2026-10-05', stage: 'remise', jus: null } }),
+       d(16, '1.2', 'RANDRIA Hery', 'Mission de suivi des formations à Antsirabe', 'Avance sur mission', 'AM-2026-003', 4500000, 'paye', { mandat: 'CAI-2026-0019', mode: 'Espèces', net: 4100000, dt: { eng: '2026-08-20', pay: '2026-08-24' }, mis: { type: 'mission', agent: 'RANDRIA Hery', d1: '2026-08-26', d2: '2026-08-30', stage: 'justifiee', jus: { date: '2026-09-03', frais: [['Transport', 1800000], ['Hébergement', 1400000], ['Per diem et indemnités', 900000], ['Autres frais', 0]], total: 4100000, pieces: ['Billets_Antsirabe.pdf', 'Factures_hotel.pdf'], reverse: 400000, compl: 0 } } })
     ].filter(function (x) { return x.key; });
     function dd(m, j) { return '2026-' + ('0' + m).slice(-2) + '-' + ('0' + j).slice(-2); }
     DP.docs.forEach(function (x, i) { var k = i + 1; if (x.dt) return; x.dt = { eng: dd(k + 1, 10) }; if (DP_RANK[x.st] >= 3) x.dt.liq = dd(k + 3, 15); if (DP_RANK[x.st] >= 4) x.dt.ord = dd(k + 3, 25); if (DP_RANK[x.st] >= 6) x.dt.pay = dd(k + 4, 5); });
   }
   function dpStat(key) {
     var ln = dpLine(key), s = { ouv: ln ? ln.ouv : 0, e: 0, r: 0, l: 0, o: 0, p: 0 };
-    (DP.docs || []).forEach(function (d) { if (d.key !== key) return; var k = DP_RANK[d.st]; if (d.kind === 'avance') { if (k >= 4) s.o += d.mt; if (k >= 6) s.p += d.mt; return; } if (k === 1) s.r += d.mt; if (k >= 2) s.e += d.mt - (d.lib ? d.lib.amt : 0); if (k >= 3) s.l += d.mt; if (k >= 4) s.o += dpNet(d); if (k >= 6) s.p += dpNet(d); });
+    (DP.docs || []).forEach(function (d) { if (d.key !== key) return; var k = DP_RANK[d.st]; if (d.mis) { var M = d.mis; s.e += M.jus ? M.jus.total : d.mt; if (M.jus) { s.l += M.jus.total; s.o += M.jus.total; } if (M.stage !== 'engagee') s.p += dpNet(d); return; } if (d.kind === 'avance') { if (k >= 4) s.o += d.mt; if (k >= 6) s.p += d.mt; return; } if (k === 1) s.r += d.mt; if (k >= 2) s.e += d.mt - (d.lib ? d.lib.amt : 0); if (k >= 3) s.l += d.mt; if (k >= 4) s.o += dpNet(d); if (k >= 6) s.p += dpNet(d); });
     s.dispo = s.ouv - s.e - s.r; return s;
   }
   /* Avances de démarrage : l'avance est une partie de l'engagement, payée avant service fait puis recoupée sur le décompte */
@@ -20632,8 +20661,8 @@ var EXEC_REC = [
     band.appendChild(badge(ok ? 'Crédits suffisants' : 'Dépassement : soumission bloquée', ok ? 'b-ok' : 'b-ko')); return band;
   }
   /* ----- Engagements ----- */
-  function dpEngTabs() { var tb = document.getElementById('dpeng-tabs'); tb.innerHTML = ''; DP.engTab = DP.engTab || 'visa'; [['visa', 'En attente de visa'], ['suivi', 'Suivi des engagements']].forEach(function (t) { var b = cvEl('button', DP.engTab === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { DP.engTab = t[0]; dpEngRender(); }); tb.appendChild(b); }); }
-  function dpEngRender() { dpEngTabs(); if (DP.engTab === 'suivi') { dpEngSuivi(); return; }
+  function dpEngTabs() { var tb = document.getElementById('dpeng-tabs'); tb.innerHTML = ''; DP.engTab = DP.engTab || 'visa'; [['visa', 'En attente de visa'], ['suivi', 'Suivi des engagements'], ['avances', 'Avances sur mission']].forEach(function (t) { var b = cvEl('button', DP.engTab === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { DP.engTab = t[0]; dpEngRender(); }); tb.appendChild(b); }); }
+  function dpEngRender() { dpEngTabs(); if (DP.engTab === 'suivi') { dpEngSuivi(); return; } if (DP.engTab === 'avances') { dpAvRender(); return; }
     dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'soumis'; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpeng; })[0], t = dpTot();
     dpKpis('dpeng-k', [['Crédit validé (PTBA)', fmt(t.ouv) + ' MGA'], ['Engagé (visé)', fmt(t.e) + ' MGA'], ['En attente de visa', fmt(t.r) + ' MGA'], ['Disponible', fmt(t.dispo) + ' MGA']]);
     dpBar('dpeng-bar', [['Nouvel engagement', true, true, dpEngOpen], ['Viser (Contrôle financier)', false, !!sel && sel.st === 'soumis', function () {
@@ -20679,7 +20708,7 @@ var EXEC_REC = [
   }
   /* ----- Liquidations ----- */
   function dpLiqRender() {
-    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'vise'; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpliq; })[0], t = dpTot();
+    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'vise' && !d.mis; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpliq; })[0], t = dpTot();
     dpKpis('dpliq-k', [['Engagé (visé)', fmt(t.e) + ' MGA'], ['À liquider', fmt(rows.filter(function (d) { return d.st === 'vise'; }).reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA'], ['Liquidé', fmt(t.l) + ' MGA'], ['Reste à liquider', fmt(t.e - t.l) + ' MGA']]);
     dpBar('dpliq-bar', [['Liquider l’avance', false, !!sel && sel.st === 'vise' && !!sel.av && sel.av.st === 'prevue', function () { dpAvLiquider(sel); }], ['Liquider', true, !!sel && sel.st === 'vise', function () { DP.lf = { sf: false, fac: '', vol: '' }; dpLiqPaint(sel); document.getElementById('dp-liq-form').hidden = false; }]]);
     dpTable({ id: 'dpliq', head: ['Engagement', 'Tiers · objet', 'Ligne du PTBA', 'Acte', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun engagement à liquider. Visez d’abord un engagement dans « Engagements ».', redraw: dpLiqRender,
@@ -20874,7 +20903,7 @@ var EXEC_REC = [
     var S = anaSeries(ex), cm = anaCm(ex), today = cadToday(), rows = [], R = { S: S, cm: cm, ex: ex, rows: rows }, m;
     if (kind === 'eng') {
       anaLots(ex).forEach(function (r) { ppmLotItems(r).forEach(function (x) { var d = x.d3 || x.d2 || x.d1; rows.push({ id: x.ref, label: x.ref + ' — ' + x.des, sub: 'Signature prévue le ' + isoToFr(d), plan: x.est, planTo: d && d <= today ? x.est : 0, real: ppmEngDp(x.ref) }); }); });
-      var hors = (DP.docs || []).filter(function (d) { return d.kind !== 'avance' && DP_RANK[d.st] >= 2 && !d.ppm; }).reduce(function (a, d) { return a + d.mt; }, 0);
+      var hors = (DP.docs || []).filter(function (d) { return d.kind !== 'avance' && DP_RANK[d.st] >= 2 && !d.ppm && !d.mis; }).reduce(function (a, d) { return a + d.mt; }, 0);
       if (hors) rows.push({ id: 'hors', label: 'Engagements hors PPM', sub: 'Non rattachés à un marché du PPM', plan: 0, planTo: 0, real: hors });
       R.planM = S.ppm; R.realM = S.eng;
     } else if (kind === 'rea') {
@@ -21091,6 +21120,7 @@ var EXEC_REC = [
     var dp = dec.rows.reduce(function (a, x) { return a + x.plan - x.real; }, 0); if (dp > 0) out.push({ k: 'warn', b: 'Décaissements', go: 'andec', m: 'Les décaissements du projet sont inférieurs de ' + fmt(dp) + ' MGA au plan : vérifier les paiements en attente.' });
     var lp = phy.rows.filter(function (x) { return x.planTo && x.real / x.planTo < 0.85; }); if (lp.length) out.push({ k: 'warn', b: 'Avancement physique', go: 'anphy', m: 'Accélérer ' + (lp.length > 1 ? lp.length + ' travaux' : '1 travail') + ' en retard sur la cible du PTA : ' + lp.slice(0, 2).map(function (x) { return x.label.split(' — ')[0]; }).join(' et ') + '.' });
     var fp = phy.rows.filter(function (x) { return x.plan && x.tf - x.real / x.plan > 0.2; }); if (fp.length) out.push({ k: 'ko', b: 'Dépenses et physique', go: 'anfp', m: 'Vérifier ' + pl(fp.length, 'ligne') + ' dont les dépenses dépassent nettement le réalisé physique.' });
+    var al2 = (DP.docs || []).filter(function (d) { return d.mis && dpAvInfo(d).late; }); if (al2.length) out.push({ k: 'warn', b: 'Avances', go: 'dpeng', tab: 'avances', m: pl(al2.length, 'avance') + ' sur mission non justifiée' + (al2.length > 1 ? 's' : '') + ' depuis plus de 30 jours (' + fmt(al2.reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA).' });
     var rp = REV.items.filter(function (x) { return x.st === 'Soumise' || x.st === 'Validée' || x.st === 'Envoyée au bailleur'; }); if (rp.length) out.push({ k: 'warn', b: 'Révisions', go: 'revpl', m: pl(rp.length, 'révision') + ' en attente d’approbation depuis ' + Math.max.apply(null, rp.map(function (x) { return engDays(x.since, cadToday()); })) + ' jour(s) au plus.' });
     var td = sxEngs().filter(function (i) { return sxStat(i).todo; }).length; if (td) out.push({ k: 'warn', b: 'Engagements', go: 'sxeng', m: td + ' engagement' + (td > 1 ? 's' : '') + ' \u00e0 traiter : fin d\u00e9pass\u00e9e ou sans mouvement.' }); var nc = 0; ['rea', 'eng', 'dec', 'phy'].forEach(function (k) { anaRows(k, ex).rows.forEach(function (x) { if (x.planTo - x.real > 0 && !ANA.com[k + '|' + x.id]) nc++; }); }); if (nc) out.push({ k: 'warn', b: 'Écarts', go: 'anrea', m: pl(nc, 'écart') + ' à commenter et à arbitrer (glissement).' });
     lots_req: { var lots = anaLots(ex); for (var i = 0; i < lots.length; i++) { var P = pdcSim(pdcNeeds(lots[i])), q = P.req.filter(function (z) { return z.m >= cm; })[0]; if (q) { out.push({ k: 'warn', b: 'Trésorerie', go: 'pdec', m: 'Déposer la demande de réapprovisionnement de ' + fmt(q.mt) + ' MGA avant fin ' + PDC_MOIS[q.m] + ' pour éviter un solde négatif.' }); break lots_req; } } }
@@ -21104,7 +21134,7 @@ var EXEC_REC = [
     var d = cvEl('div'); d.style.marginTop = '12px'; d.appendChild(dpDl([['Objectif à ce jour', fmt(pc) + ' MGA'], ['Réalisé', fmt(rl) + ' MGA · ' + anaPc(rl, pc)], ['Écart', anaSg(rl - pc) + ' MGA'], ['Prévu en fin d’exercice', fmt(cp[11]) + ' MGA'], ['À ce rythme, fin d’exercice', fmt(Math.round(rl + rate * (11 - cm))) + ' MGA'], ['Plans de référence', 'PTBA et PTA V' + (ANA.ver || (anaLots(ex)[0] ? bvVers(anaLots(ex)[0]).length : 1)) + ' · PPM et plan de décaissement en vigueur']])); b.appendChild(d);
     var bt = cvEl('button', 'btn small', 'Voir les révisions des plans'); bt.type = 'button'; bt.style.marginTop = '10px'; bt.addEventListener('click', function () { show('revpl'); }); b.appendChild(bt);
     var al = anaAxes(ex); if (!al.length) ax.appendChild(cvEl('div', 'hint', 'Aucun axe d’amélioration : l’exécution suit les plans.'));
-    al.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x.b, x.k === 'ko' ? 'b-ko' : 'b-warn')); var t = cvEl('div', null, x.m); t.style.marginLeft = '12px'; row.appendChild(t); var o = cvEl('button', 'btn small', 'Ouvrir'); o.type = 'button'; o.style.marginLeft = 'auto'; o.addEventListener('click', function () { show(x.go); }); row.appendChild(o); ax.appendChild(row); });
+    al.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x.b, x.k === 'ko' ? 'b-ko' : 'b-warn')); var t = cvEl('div', null, x.m); t.style.marginLeft = '12px'; row.appendChild(t); var o = cvEl('button', 'btn small', 'Ouvrir'); o.type = 'button'; o.style.marginLeft = 'auto'; o.addEventListener('click', function () { if (x.tab) DP.engTab = x.tab; show(x.go); }); row.appendChild(o); ax.appendChild(row); });
   }
   function anaRender() {
     var ex = anaEx(), K = ANA_K[ANA.kind], b = document.getElementById('ana-body'); if (!b) return; b.innerHTML = '';
@@ -21189,7 +21219,7 @@ var EXEC_REC = [
     function add(kind, key, date, ref, tiers, mt, src, unit, x) { var o = { id: sxId(), kind: kind, key: key, date: date, ref: ref, tiers: tiers, mt: mt, src: src || 'SoftAccounting', unit: unit }; if (x) Object.keys(x).forEach(function (k) { o[k] = x[k]; }); SX.items.push(o); }
     DP.docs.forEach(function (d) {
       var q = d.dt || {};
-      if (d.kind !== 'avance' && DP_RANK[d.st] >= 2) add('eng', d.key, q.eng, d.ref, d.tiers, d.id === 'ENG-2026-0009' ? d.mt - 2000000 : d.mt, undefined, undefined, sxDefPer(d));
+      if (d.mis) { sxSeedMis(d, add); return; } if (d.kind !== 'avance' && DP_RANK[d.st] >= 2) add('eng', d.key, q.eng, d.ref, d.tiers, d.id === 'ENG-2026-0009' ? d.mt - 2000000 : d.mt, undefined, undefined, sxDefPer(d));
       if (d.kind !== 'avance' && DP_RANK[d.st] >= 3) add('liq', d.key, q.liq, d.fac, d.tiers, d.mt, undefined, undefined, { eng: d.ref });
       if (DP_RANK[d.st] >= 6 && d.id !== 'ENG-2026-0010') add('pay', d.key, q.pay, d.mandat, d.tiers, dfoAmt(d), undefined, undefined, { eng: d.ref });
       if (d.id === 'ENG-2026-0005') add('pay', d.key, '2026-11-12', 'VIR-0460', d.tiers, d.mt, undefined, undefined, { eng: d.ref });
@@ -21229,7 +21259,7 @@ var EXEC_REC = [
     var sum = function (s) { return items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).reduce(function (a, i) { return a + i.mt; }, 0); };
     var kb = document.getElementById('sx-k'); kb.innerHTML = ''; var cn = function (s) { return String(items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).length); };
     var sd = function (dp) { return items.filter(function (i) { return sxIsDpd(i) === dp; }).reduce(function (a, i) { return a + i.mt; }, 0); };
-    kb.appendChild(SX.kind === 'eng' ? sxEngTiles(items) : SX.kind === 'pay' ? dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Décaissements du projet', fmt(sd(false)) + ' MGA', 'info'], ['Paiements directs du bailleur', fmt(sd(true)) + ' MGA', 'warn'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info']], { cols: 4 }) : SX.kind === 'phy' ? dpTiles([['Mesures', cn(), 'brand'], ['Synchronisées', cn('sync'), 'info'], ['Importées', cn('Import'), 'info'], ['Saisies directement', cn('Saisie directe'), 'info']], { cols: 4 }) : dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
+    kb.appendChild(SX.kind === 'eng' ? sxEngTiles(items) : SX.kind === 'pay' ? dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Décaissements du projet', fmt(sd(false)) + ' MGA', 'info'], ['Paiements directs du bailleur', fmt(sd(true)) + ' MGA', 'warn'], ['Avances à justifier', fmt(items.filter(function (i) { return i.adv && !i.jus; }).reduce(function (a, i) { return a + i.mt; }, 0)) + ' MGA', 'info']], { cols: 4 }) : SX.kind === 'phy' ? dpTiles([['Mesures', cn(), 'brand'], ['Synchronisées', cn('sync'), 'info'], ['Importées', cn('Import'), 'info'], ['Saisies directement', cn('Saisie directe'), 'info']], { cols: 4 }) : dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
     var tb = document.getElementById('sx-b'); tb.innerHTML = '';
     var cols = sxCols(); document.getElementById('sx-th').innerHTML = '<tr>' + cols.map(function (c) { return '<th' + (/MGA\)|Quantit/.test(c) ? ' class="num"' : '') + '>' + escH(c) + '</th>'; }).join('') + '</tr>';
     if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune écriture : récupérez-les de la comptabilité, importez un fichier ou saisissez-les directement.'); c0.colSpan = cols.length; c0.style.textAlign = 'left'; tb.appendChild(t0); }
@@ -21283,7 +21313,7 @@ var EXEC_REC = [
       var ec = cell(tr, i.eng || ''); if (!i.eng) ec.appendChild(badge('Sans engagement', 'b-warn')); else { var en = sxEngOf(i.eng); if (!en) ec.appendChild(badge('Engagement introuvable', 'b-ko')); else if (i.kind === 'liq' && sxRealz(i.eng) > en.mt) { var bx = badge('Dépasse l’engagement', 'b-ko'); bx.style.marginLeft = '6px'; ec.appendChild(bx); } }
       cell(tr, fmt(i.mt), 'num');
     } else cell(tr, fmt(i.mt) + (i.unit ? ' ' + i.unit : ''), 'num');
-    var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); if (SX.kind === 'pay' && sxIsDpd(i)) { var bd2 = badge('Paiement direct', 'b-warn'); bd2.style.marginLeft = '6px'; sc.appendChild(bd2); }
+    var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); if (SX.kind === 'pay' && sxIsDpd(i)) { var bd2 = badge('Paiement direct', 'b-warn'); bd2.style.marginLeft = '6px'; sc.appendChild(bd2); } if (SX.kind === 'pay' && i.adv) { var ba = badge(i.jus ? 'Avance justifiée' : 'Avance à justifier', i.jus ? 'b-ok' : 'b-warn'); ba.style.marginLeft = '6px'; sc.appendChild(ba); } if (SX.kind === 'pay' && i.rev) { var br = badge('Reversement', 'b-info'); br.style.marginLeft = '6px'; sc.appendChild(br); }
     var ac = cell(tr, ''), bc = cvEl('button', 'btn small', 'Consulter'); bc.type = 'button'; bc.addEventListener('click', function () { sxDetOpen(i); }); ac.appendChild(bc);
     return tr;
   }
@@ -21411,7 +21441,7 @@ var EXEC_REC = [
     if ((st.maint ? st.maint.revue : '') !== (r.maint || '')) ch.push(r.maint ? 'Maintenu ouvert jusqu’au ' + isoToFr(r.maint) : 'Maintien levé');
     return ch;
   }
-  function sxLifeApply(st, r) {
+  function sxLifeApply(st, r) { if (st.kind === 'pay') { st.jus = r.jus; return; }
     var p = sxPer(st); if (r.d2 && r.d2 !== p.d2) { st.d2 = r.d2; delete st.ech; }
     if (r.clot) st.clot = { on: r.clot, motif: r.clotMotif || '', by: 'Compte administratif' }; else delete st.clot;
     if (r.maint) st.maint = { revue: r.maint, motif: '' }; else delete st.maint;
@@ -21462,7 +21492,7 @@ var EXEC_REC = [
     });
   }
   function dpEngSuivi() {
-    var docs = (DP.docs || []).filter(function (d) { return d.kind !== 'avance' && DP_RANK[d.st] >= 2; }).map(function (d) { return { d: d, L: dpEngLife(d), r: dpEngReste(d) }; }).sort(function (a, b) { return (b.L.todo - a.L.todo) || (a.d.id < b.d.id ? 1 : -1); }), by = {}; docs.forEach(function (x) { by[x.d.id] = x; });
+    var docs = (DP.docs || []).filter(function (d) { return d.kind !== 'avance' && !d.mis && DP_RANK[d.st] >= 2; }).map(function (d) { return { d: d, L: dpEngLife(d), r: dpEngReste(d) }; }).sort(function (a, b) { return (b.L.todo - a.L.todo) || (a.d.id < b.d.id ? 1 : -1); }), by = {}; docs.forEach(function (x) { by[x.d.id] = x; });
     var rows = docs.map(function (x) { return x.d; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpeng; })[0], S = sel && by[sel.id];
     dpKpis('dpeng-k', [['Engagements suivis', String(docs.length)], ['À traiter', String(docs.filter(function (x) { return x.L.todo; }).length), 'warn'], ['Échus', String(docs.filter(function (x) { return x.L.k === 'echu'; }).length), 'ko'], ['Reste à liquider', fmt(docs.reduce(function (a, x) { return a + x.r; }, 0)) + ' MGA']]);
     var open = !!S && S.L.k !== 'clot', can = open && S.r > 0;
@@ -21903,6 +21933,69 @@ var EXEC_REC = [
     if (!ref) { err.textContent = 'La référence de l’ANO est obligatoire.'; return; } if (!dt) { err.textContent = 'La date de l’ANO est obligatoire.'; return; }
     revApply(rev, { ref: ref, date: dt, doc: document.getElementById('revpl-adoc').value.trim() }); document.getElementById('revpl-ano').hidden = true; revDetPaint(); bkMsg('revpl-msg', 'Révision ' + rev.id + ' approuvée : la version V' + rev.version + ' est désormais la version de référence.', 'ok');
   });
+  /* ----- Avances sur mission et régies : décaissées dès la remise, réalisées seulement après justification ----- */
+  function sxMisItems(d) {
+    var q = d.dt || {}, M = d.mis, out = [], per = sxDefPer(d);
+    out.push({ kind: 'eng', date: q.eng, ref: d.ref, mt: M.jus ? M.jus.total : d.mt, x: { d1: per.d1, d2: per.d2 } });
+    if (M.stage !== 'engagee') out.push({ kind: 'pay', date: q.pay, ref: d.mandat || ('AV-' + d.ref), mt: d.mt, x: { eng: d.ref, adv: true, jus: M.jus ? M.jus.date : '' } });
+    if (M.jus) {
+      out.push({ kind: 'liq', date: M.jus.date, ref: 'JUS-' + d.ref, mt: M.jus.total, x: { eng: d.ref } });
+      if (M.jus.reverse) out.push({ kind: 'pay', date: M.jus.date, ref: 'REV-' + d.ref, mt: -M.jus.reverse, x: { eng: d.ref, rev: true } });
+      if (M.jus.compl) out.push({ kind: 'pay', date: M.jus.date, ref: 'CPL-' + d.ref, mt: M.jus.compl, x: { eng: d.ref } });
+    }
+    return out;
+  }
+  function sxSeedMis(d, add) { sxMisItems(d).forEach(function (i) { add(i.kind, d.key, i.date, i.ref, d.tiers, i.mt, undefined, undefined, i.x); }); }
+  function dpAvInfo(d) {
+    var M = d.mis, t = cadToday(), age = M.stage === 'remise' ? engDays(d.dt.pay, t) : 0;
+    return { age: age, late: M.stage === 'remise' && age > 30, st: M.stage === 'engagee' ? ['À remettre', 'b-info'] : (M.stage === 'justifiee' ? ['Justifiée', 'b-ok'] : (age > 30 ? ['Justification en retard', 'b-ko'] : ['À justifier', 'b-warn'])) };
+  }
+  function dpAvRender() {
+    dpSeed(); var docs = (DP.docs || []).filter(function (d) { return d.mis; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = docs.filter(function (d) { return d.id === DP.sel.dpeng; })[0];
+    var open = docs.filter(function (d) { return d.mis.stage === 'remise'; });
+    dpKpis('dpeng-k', [['Avances remises à justifier', fmt(open.reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA', 'warn'], ['Avances en cours', String(open.length)], ['Justifications en retard', String(open.filter(function (d) { return dpAvInfo(d).late; }).length), 'ko'], ['Avances justifiées', String(docs.filter(function (d) { return d.mis.stage === 'justifiee'; }).length), 'ok']]);
+    var S = sel && dpAvInfo(sel);
+    dpBar('dpeng-bar', [['Nouvelle avance', true, true, dpAvNew], ['Remettre l’avance', false, !!sel && sel.mis.stage === 'engagee', function () {
+      cvAsk({ title: 'Remettre l’avance ' + sel.ref, ok: 'Remettre', required: false, placeholder: 'Référence de la pièce de caisse ou du virement' }, function (ref) { var t = cadToday(); sel.mis.stage = 'remise'; sel.dt.pay = t; sel.st = 'paye'; sel.mode = sel.mis.type === 'regie' ? 'Espèces (régie)' : 'Espèces'; sel.mandat = ref || ('CAI-' + sel.ref); dpMsg('dpeng-msg', 'Avance de ' + fmt(sel.mt) + ' MGA remise à ' + sel.tiers + ' : elle compte comme décaissement, pas comme réalisation, jusqu’à la justification.'); dpEngRender(); });
+    }], ['Justifier', false, !!sel && sel.mis.stage === 'remise', function () { dpAvJusOpen(sel); }]]);
+    dpTable({ id: 'dpeng', head: ['N°', 'Bénéficiaire · objet', 'Ligne du PTBA', 'Type', 'Avance (MGA)', 'Frais réels (MGA)', 'Statut'], num: [4, 5], rows: docs, empty: 'Aucune avance : créez-en une avec « Nouvelle avance ».', redraw: dpEngRender,
+      cells: function (d) { var a = cvEl('div'), I = dpAvInfo(d), st = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); st.appendChild(badge(I.st[0], I.st[1])); if (I.late) st.appendChild(cvEl('div', 'hby', I.age + ' jours depuis la remise')); return [d.ref, a, dpShort(d), d.mis.type === 'regie' ? 'Régie d’avances' : 'Mission', fmt(d.mt), d.mis.jus ? fmt(d.mis.jus.total) : '—', st]; } });
+  }
+  function dpAvNew() {
+    var ls = dpLines(); document.getElementById('av-ligne').innerHTML = ls.map(function (z) { return '<option value="' + escH(z.key) + '">' + escH(z.l.c + ' — ' + (z.l.lib || z.l.l)) + '</option>'; }).join('');
+    ['av-agent', 'av-objet', 'av-mt'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('av-type').value = 'mission'; document.getElementById('av-d1').value = cadToday(); document.getElementById('av-d2').value = cadToday(); document.getElementById('av-err').textContent = ''; avTypeSync(); document.getElementById('av-form').hidden = false;
+  }
+  function avTypeSync() { var m = document.getElementById('av-type').value === 'mission'; document.querySelectorAll('#av-form [data-m]').forEach(function (e) { e.hidden = !m; }); }
+  function dpAvJusOpen(d) {
+    DP.avJ = d.id; document.getElementById('av-jus-title').textContent = 'Justifier l’avance ' + d.ref; ['av-j1', 'av-j2', 'av-j3', 'av-j4', 'av-jp'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('av-jerr').textContent = '';
+    document.getElementById('av-jinfo').innerHTML = ''; document.getElementById('av-jinfo').appendChild(dpDl([['Bénéficiaire', d.tiers], ['Objet', d.objet], ['Avance remise', fmt(d.mt) + ' MGA · ' + isoToFr(d.dt.pay)]])); avJusSync(); document.getElementById('av-jus').hidden = false;
+  }
+  function avJusVals() { return [['Transport', 'av-j1'], ['Hébergement', 'av-j2'], ['Per diem et indemnités', 'av-j3'], ['Autres frais', 'av-j4']].map(function (c) { return [c[0], parseInt0(document.getElementById(c[1]).value) || 0]; }); }
+  function avJusSync() {
+    var d = dpDocById(DP.avJ), box = document.getElementById('av-jres'); if (!d) return; var tot = avJusVals().reduce(function (a, c) { return a + c[1]; }, 0), diff = d.mt - tot; box.innerHTML = '';
+    box.appendChild(dpDl([['Total des frais réels', fmt(tot) + ' MGA'], ['Avance remise', fmt(d.mt) + ' MGA']])); var b = badge(!tot ? 'Saisissez les frais réels' : (diff > 0 ? 'Reversement de ' + fmt(diff) + ' MGA par le bénéficiaire' : (diff < 0 ? 'Complément de ' + fmt(-diff) + ' MGA à payer au bénéficiaire' : 'Avance entièrement utilisée')), !tot ? 'b-neutral' : (diff > 0 ? 'b-info' : (diff < 0 ? 'b-warn' : 'b-ok'))); b.style.marginTop = '8px'; b.style.display = 'inline-block'; box.appendChild(b);
+  }
+  function dpDocById(id) { return (DP.docs || []).filter(function (d) { return d.id === id; })[0]; }
+  document.getElementById('av-type').addEventListener('change', avTypeSync);
+  ['av-j1', 'av-j2', 'av-j3', 'av-j4'].forEach(function (i) { document.getElementById(i).addEventListener('input', function () { setTimeout(avJusSync, 0); }); });
+  document.getElementById('av-cancel').addEventListener('click', function () { document.getElementById('av-form').hidden = true; });
+  document.getElementById('av-jcancel').addEventListener('click', function () { document.getElementById('av-jus').hidden = true; });
+  document.getElementById('av-save').addEventListener('click', function () {
+    var err = document.getElementById('av-err'), tp = document.getElementById('av-type').value, ag = document.getElementById('av-agent').value.trim(), ob = document.getElementById('av-objet').value.trim(), key = document.getElementById('av-ligne').value, mt = parseInt0(document.getElementById('av-mt').value), d1 = document.getElementById('av-d1').value, d2 = document.getElementById('av-d2').value;
+    if (!ag) { err.textContent = 'Indiquez le bénéficiaire de l’avance.'; return; } if (!ob) { err.textContent = 'Indiquez l’objet de l’avance.'; return; } if (!mt || mt <= 0) { err.textContent = 'Le montant doit être positif.'; return; }
+    if (tp === 'mission' && (!d1 || !d2 || d2 < d1)) { err.textContent = 'Indiquez les dates de la mission : la fin doit suivre le début.'; return; }
+    var blocked = (DP.docs || []).filter(function (d) { return d.mis && d.tiers === ag && d.mis.stage === 'remise' && dpAvInfo(d).late; })[0]; if (blocked) { err.textContent = 'Nouvelle avance impossible : ' + ag + ' a une avance non justifiée en retard (' + blocked.ref + ').'; return; }
+    if (dpStat(key).dispo < mt) { err.textContent = 'Crédit insuffisant sur la ligne : disponible ' + fmt(dpStat(key).dispo) + ' MGA.'; return; }
+    var n = (DP.docs || []).filter(function (d) { return d.mis; }).length + 1, id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4);
+    DP.docs.push({ id: id, key: key, tiers: ag, objet: ob, acte: tp === 'regie' ? 'Régie d’avances' : 'Avance sur mission', ref: (tp === 'regie' ? 'RA-2026-' : 'AM-2026-') + ('00' + n).slice(-3), mt: mt, st: 'vise', fac: '', mandat: '', rejet: '', ppm: '', mode: '', dt: { eng: cadToday() }, mis: { type: tp, agent: ag, d1: tp === 'mission' ? d1 : '', d2: tp === 'mission' ? d2 : '', stage: 'engagee', jus: null } });
+    document.getElementById('av-form').hidden = true; DP.sel.dpeng = id; dpMsg('dpeng-msg', 'Avance enregistrée : ' + fmt(mt) + ' MGA engagés sur la ligne. Remettez l’avance pour la décaisser.'); dpEngRender();
+  });
+  document.getElementById('av-jok').addEventListener('click', function () {
+    var d = dpDocById(DP.avJ), err = document.getElementById('av-jerr'), fr = avJusVals(), tot = fr.reduce(function (a, c) { return a + c[1]; }, 0), pieces = document.getElementById('av-jp').value.split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    if (!d) return; if (tot <= 0) { err.textContent = 'Saisissez au moins un frais réel.'; return; } if (!pieces.length) { err.textContent = 'Indiquez les pièces justificatives (nom des fichiers).'; return; }
+    var t = cadToday(); d.mis.jus = { date: t, frais: fr, total: tot, pieces: pieces, reverse: Math.max(0, d.mt - tot), compl: Math.max(0, tot - d.mt) }; d.mis.stage = 'justifiee'; d.net = tot;
+    document.getElementById('av-jus').hidden = true; dpMsg('dpeng-msg', 'Avance ' + d.ref + ' justifiée : réalisation de ' + fmt(tot) + ' MGA' + (d.mis.jus.reverse ? ', reversement de ' + fmt(d.mis.jus.reverse) + ' MGA' : '') + (d.mis.jus.compl ? ', complément de ' + fmt(d.mis.jus.compl) + ' MGA' : '') + '. L’exécution le détectera à la prochaine synchronisation.'); dpEngRender();
+  });
   function sxFormSetup() {
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
     document.getElementById('sxf-d1').value = cadToday(); document.getElementById('sxf-d2').value = cadToday().slice(0, 4) + '-12-31';
@@ -21927,7 +22020,7 @@ var EXEC_REC = [
     sxSeed(); if (src !== 'Compte administratif') return ((SX.store[src] || {})[kind] || []).map(function (r) { return { key: r.key, date: r.date, ref: r.ref, tiers: r.tiers, mt: r.mt, unit: r.unit, eng: r.eng, d1: r.d1, d2: r.d2 }; });
     var out = [];
     (DP.docs || []).forEach(function (d) {
-      var q = d.dt || {}, c = null;
+      var q = d.dt || {}, c = null; if (d.mis) { sxMisItems(d).forEach(function (i) { if (i.kind === kind) out.push(Object.assign({ key: d.key, date: i.date, ref: i.ref, tiers: d.tiers, mt: i.mt }, i.x)); }); return; }
       if (kind === 'eng' && d.kind !== 'avance' && DP_RANK[d.st] >= 2) c = { key: d.key, date: q.eng, ref: d.ref, tiers: d.tiers, mt: d.mt, d1: sxDefPer(d).d1, d2: sxDefPer(d).d2, clot: d.clot ? d.clot.on : '', clotMotif: d.clot ? d.clot.motif : '', lib: d.lib ? d.lib.amt : 0, libMotif: d.lib ? d.lib.motif : '', maint: d.maint ? d.maint.revue : '' };
       if (kind === 'liq' && d.kind !== 'avance' && DP_RANK[d.st] >= 3) c = { key: d.key, date: q.liq, ref: d.fac, tiers: d.tiers, mt: d.mt, eng: d.ref };
       if (kind === 'pay' && DP_RANK[d.st] >= 6) c = { key: d.key, date: q.pay, ref: d.mandat, tiers: d.tiers, mt: dfoAmt(d), eng: d.ref };
@@ -21941,7 +22034,7 @@ var EXEC_REC = [
     var P = SXS, kind = SX.kind, out = [], seen = {};
     sxSrcData(P.src, kind).filter(function (r) { return r.date >= P.d1 && r.date <= P.d2 && (!P.line || r.key === P.line); }).forEach(function (r) {
       var st = SX.items.filter(function (i) { return i.kind === kind && i.ref === r.ref; })[0]; seen[r.ref] = true;
-      var lf = (kind === 'eng' && P.src === 'Compte administratif' && st) ? sxLifeDiff(st, r) : []; if (!st) out.push({ act: 'new', r: r }); else if (lf.length) out.push({ act: 'life', r: r, st: st, ch: lf });
+      var lf = (kind === 'eng' && P.src === 'Compte administratif' && st) ? sxLifeDiff(st, r) : ((kind === 'pay' && P.src === 'Compte administratif' && st && st.adv && (st.jus || '') !== (r.jus || '')) ? ['Avance justifiée le ' + isoToFr(r.jus)] : []); if (!st) out.push({ act: 'new', r: r }); else if (lf.length) out.push({ act: 'life', r: r, st: st, ch: lf });
       else if (st.src !== P.src) out.push({ act: st.mt === r.mt ? 'same' : 'conflict', r: r, st: st });
       else if (st.mt === r.mt && st.date === r.date && (st.tiers || '') === (r.tiers || '')) out.push({ act: 'same', r: r, st: st });
       else out.push({ act: P.mode === 'add' ? 'skip' : 'upd', r: r, st: st });
