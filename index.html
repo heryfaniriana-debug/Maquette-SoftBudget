@@ -1972,6 +1972,11 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="appr">Budgets verrouillés</button>
           <button data-go="avanc" title="Avancement physique des indicateurs" style="display:none">Avancement physique</button>
           <button data-go="dprap" title="Rapprochement de l’exécution saisie et importée" style="display:none">Rapprochement saisie / import</button>
+          <button data-go="sxeng" style="display:none">Engagements</button>
+          <button data-go="sxliq" style="display:none">Réalisations</button>
+          <button data-go="sxpay" style="display:none">Paiements</button>
+          <button data-go="sxenc" style="display:none">Encaissements</button>
+          <button data-go="trpos" title="Encaissements et décaissements" style="display:none">Trésorerie</button>
           <button data-go="engage">Engagements</button>
           <button data-go="real">Réalisations</button>
           <button data-go="decaiss">Paiements comptabilisés</button>
@@ -5361,6 +5366,35 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="panel"><h2>Chaîne de financement <small>dépenses engagées, justifiées, payées et fonds reçus</small></h2><div class="body" id="dfo-chain" style="padding:0"></div></div>
       </section>
 
+      <!-- ===== Projet : suivi de l'exécution (engagements, réalisations, paiements, encaissements) ===== -->
+      <section class="view" id="v-sx">
+        <div class="head"><div><h1>Engagements</h1><p></p></div>
+          <div class="actions"><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-sync">⟳ Récupérer de la compta</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
+        <div class="callout" id="sx-msg" hidden style="margin-bottom:12px"></div>
+        <div id="sx-k"></div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead id="sx-th"></thead><tbody id="sx-b"></tbody></table></div></div>
+        <section class="co-blk"><div class="kb-h">Récupérations, imports et saisies</div><div class="card" id="sx-log"></div></section>
+        <div class="panel" id="sx-form" hidden><h2><span id="sx-form-title">Saisie directe</span></h2><div class="body">
+          <div class="fgrid">
+            <div><label for="sxf-date">Date <em>*</em></label><input id="sxf-date" class="field" type="date"></div>
+            <div id="sxf-lw"><label for="sxf-ligne">Ligne du PTBA <em>*</em></label><select id="sxf-ligne" class="field"></select></div>
+            <div><label for="sxf-ref"><span id="sxf-reflbl">Référence</span> <em>*</em></label><input id="sxf-ref" class="field" type="text"></div>
+            <div><label for="sxf-tiers"><span id="sxf-tglbl">Bénéficiaire</span></label><input id="sxf-tiers" class="field" type="text"></div>
+            <div><label for="sxf-mt">Montant (MGA) <em>*</em></label><input id="sxf-mt" class="field" type="text" inputmode="numeric"></div>
+          </div>
+          <div class="err" id="sxf-err"></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="sxf-cancel">Annuler</button><button class="btn primary" id="sxf-save">Enregistrer</button></div>
+        </div></div>
+      </section>
+
+      <!-- ===== Projet : trésorerie (encaissements et décaissements) ===== -->
+      <section class="view" id="v-trpos">
+        <div class="head"><div><h1>Trésorerie</h1><p>Encaissements et décaissements du projet : fonds reçus du bailleur, paiements et solde, mois par mois.</p></div>
+          <div class="actions"><button class="btn primary" id="trp-open">Voir le détail</button></div></div>
+        <div id="trp-k"></div>
+        <section class="co-blk"><div class="kb-h">Encaissements et décaissements cumulés</div><div class="card" id="trp-chart" style="padding:14px 16px"></div></section>
+        <div class="panel" id="trp-det" hidden><h2><span>Trésorerie : détail</span></h2><div class="body" id="trp-det-body"></div></div>
+      </section>
       <!-- ===== Projet : avance initiale et compte spécial (cadre du projet) ===== -->
       <section class="view" id="v-avini">
         <div class="head"><div><h1>Avance initiale</h1><p>Conditions de l’avance versée par le bailleur sur le compte spécial du projet : montant, plafond et lettre de décaissement</p></div>
@@ -6428,7 +6462,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6499,6 +6533,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     pad: ['Cadre du projet', 'Plan de financement (PAD)'],
     resu: ['Cadre du projet', 'Cadre de résultats'],
     avini: ['Cadre du projet', 'Avance initiale'],
+    sxeng: ['Suivi', 'Engagements'], sxliq: ['Suivi', 'Réalisations'], sxpay: ['Suivi', 'Paiements'], sxenc: ['Suivi', 'Encaissements'], trpos: ['Suivi', 'Trésorerie'],
     avanc: ['Suivi', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
     pdec: ['Plans annuels', 'Plan de décaissement'],
@@ -6518,7 +6553,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
   var NAVGROUPS = {
     'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
-    'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss'],
+    'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss', 'sxeng', 'sxliq', 'sxpay', 'sxenc', 'trpos'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-plan': ['ptba', 'pta', 'ppm', 'pdec'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
@@ -6528,7 +6563,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
   var MENU_OF = { create: 'list', detail: 'bud', saisie: 'bud', valid: 'arb' };
   var LABELLED = ['soon', 'params', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl', 'appr'];
-  var VIEWALIAS = { pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
+  var VIEWALIAS = { sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
   function show(name, label) {
     var vn = VIEWALIAS[name] || name;
     views.forEach(function (v) {
@@ -6563,6 +6598,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'dashboard' && typeof renderDash === 'function') renderDash();
     if (name === 'resu' && typeof resuRender === 'function') resuRender();
     if (name === 'avini' && typeof aviniRender === 'function') aviniRender();
+    if (/^sx(eng|liq|pay|enc)$/.test(name) && typeof sxRender === 'function') { SX.kind = name.slice(2); sxRender(); }
+    if (name === 'trpos' && typeof trpRender === 'function') trpRender();
     if (name === 'avanc' && typeof avancRender === 'function') avancRender();
     if (name === 'synth' && typeof renderSynth === 'function') renderSynth();
     if (name === 'ecarts' && typeof renderEcarts === 'function') renderEcarts();
@@ -14422,11 +14459,11 @@ var EXEC_REC = [
     var adv = function (c, a) { return a; }, simple = function (c, a) { return !a; }, treso = function (c, a, f) { return f.mods.treso; };
     var ca = [['Engagements', rPrj], ['Liquidations', rPrj], ['Ordonnancement', rPrj], ['Paiements', rPrj], ['Tableau de restitution', rPrj], ['Clôture de l’exercice', rPrj], ['Fichiers d’interface', rPrj]];
     return [
-      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways]] },
-      { g: 'Programmation', items: [['Configuration', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['PTBA', rAlways], ['Plan de passation des marchés', rAlways], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
+      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Avance initiale', treso], ['Cadre de résultats', rAlways]] },
+      { g: 'Élaboration', items: [['Configuration', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
+      { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso]] },
       { g: 'Compte administratif', items: ca },
-      { g: 'Trésorerie', items: [['Demandes de fonds (DRF et DPD)', treso], ['Plan de décaissement', treso], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement', treso]] },
-      { g: 'Suivi', items: [['Budgets verrouillés', rAlways], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], [rImp('Engagements', 'Engagements importés'), rSync], [rImp('Réalisations', 'Réalisations importées'), rSync], [rImp('Paiements comptabilisés', 'Paiements importés'), rSync], [rImp('Recettes comptabilisées', 'Recettes importées'), rSync]] },
+      { g: 'Suivi', items: [['Avancement physique', rAlways], [rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Paiements', 'Paiements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
       grp('Analyses'),
       { g: 'Paramètres', items: grp('Paramètres').items.filter(function (it) { return it[0] !== 'Bailleurs' && it[0] !== 'Sources de financement' && it[0] !== 'Taux de change'; }) }
     ];
@@ -14440,7 +14477,7 @@ var EXEC_REC = [
     'g-budgets': ['Élaboration', 'Élaboration : configuration, campagnes, collecte, validation et budgets'],
     'g-plan': ['Plans annuels', 'PTBA, PTA, plan de passation des marchés et plan de décaissement'],
     'g-treso': ['Trésorerie', 'Décaissements, demandes de fonds et comptes bancaires'],
-    'g-suivi': ['Suivi', 'Suivi de l’exécution']
+    'g-suivi': ['Suivi', 'Exécution, trésorerie et rapprochement avec le compte administratif']
   };
   function navHead(g) { return g.querySelector(':scope > .item'); }
   function navLabelNode(h) { for (var i = 0; i < h.childNodes.length; i++) { var n = h.childNodes[i]; if (n.nodeType === 3 && n.nodeValue.trim()) return n; } return null; }
@@ -14481,8 +14518,8 @@ var EXEC_REC = [
     put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
-    put('g-treso', [['dfon'], ['bkacc'], ['bkrel'], ['bkrap']]);
-    put('g-suivi', [['appr'], ['avanc'], ['dprap'], ['engage', circ ? 'Engagements importés' : ''], ['real', circ ? 'Réalisations importées' : ''], ['decaiss', circ ? 'Paiements importés' : ''], ['encaiss', circ ? 'Recettes importées' : '']]);
+    gT.style.display = 'none';
+    put('g-suivi', [['avanc'], ['sxeng'], ['sxliq'], ['sxpay'], ['sxenc'], ['trpos'], ['dfon'], ['dprap'], ['bkacc'], ['bkrel'], ['bkrap']]);
     var avb = document.querySelector('.sub button[data-go="avanc"]'); if (avb) avb.style.display = '';
     Object.keys(PRJ_GROUP_LBL).forEach(function (id) { navSetGroup(document.getElementById(id), PRJ_GROUP_LBL[id][0], PRJ_GROUP_LBL[id][1]); });
   }
@@ -14504,10 +14541,13 @@ var EXEC_REC = [
     if (typeof REG === 'undefined' || !REG) return;
     var code = activeCode(), cfg = REG[code], adv = modes[code] === 'Avancé', circ = cfg.regime !== 'importe';
     applyProjectMenu(code, cfg);
-    regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso);
+    regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso && code !== 'prj');
     regSetVis('.sub button[data-go="pluri"]', cfg.mods.pluri); regSetVis('.sub button[data-go="bkdvr"]', cfg.mods.treso); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso && code !== 'prj'); regSetVis('.sub button[data-go="pdec"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="dfon"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="ppm"]', code === 'prj'); regSetVis('.sub button[data-go="pta"]', code === 'prj'); regSetVis('.sub button[data-go="inv"]', code === 'ent'); regSetVis('.sub button[data-go="pad"]', code === 'prj'); regSetVis('.sub button.epub', cfg.regime === 'public'); regSetVis('.sub button[data-go="revis"]', cfg.regime !== 'public');
     regSetVis('.sub button[data-go="dprap"]', code === 'prj' && cfg.regime === 'projet' && !!cfg.mods.sync);
-    if (code === 'prj') { regSetVis('.sub button[data-go="engage"], .sub button[data-go="real"], .sub button[data-go="decaiss"], .sub button[data-go="encaiss"]', !circ || !!cfg.mods.sync); }
+    regSetVis('.sub button[data-go="sxeng"], .sub button[data-go="sxliq"], .sub button[data-go="sxpay"], .sub button[data-go="sxenc"]', code === 'prj');
+    regSetVis('#g-suivi .sub button[data-go="trpos"], #g-suivi .sub button[data-go="dfon"], #g-suivi .sub button[data-go="bkacc"], #g-suivi .sub button[data-go="bkrel"], #g-suivi .sub button[data-go="bkrap"]', code === 'prj' && !!cfg.mods.treso);
+    regSetVis('.sub button[data-go="appr"], .sub button[data-go="engage"], .sub button[data-go="real"], .sub button[data-go="decaiss"], .sub button[data-go="encaiss"]', code !== 'prj');
+
     if (code === 'prj') regSetVis('.sub button[data-go="cadcred"], .sub button[data-go="revis"]', false); /* projet : la révision se fait dans le PTBA / PTA (versions) */
     regSetVis('.sub button[data-go="cadm"]', !circ);
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
@@ -20040,7 +20080,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ppm-det', 'ppm-guide', 'avini-form', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20691,6 +20731,86 @@ var EXEC_REC = [
     if (!tk2.length) tb.appendChild(cvEl('div', 'hint', 'Aucune tâche en attente.'));
     tk2.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; var d = cvEl('div'); d.appendChild(cvEl('b', null, x.t)); d.appendChild(cvEl('div', 'hby', x.s)); row.appendChild(d); var b = cvEl('button', 'btn small', 'Ouvrir'); b.type = 'button'; b.style.marginLeft = 'auto'; b.addEventListener('click', function () { show(x.go); }); row.appendChild(b); tb.appendChild(row); });
   }
+  /* ----- Suivi de l'exécution : engagements, réalisations, paiements et encaissements, venus de la comptabilité, d'un fichier ou d'une saisie directe, puis rapprochés du compte administratif ----- */
+  var SX = { kind: 'eng', items: null, seq: 0, log: [], extra: null };
+  var SX_K = {
+    eng: { h: 'Engagements', p: 'Engagements récupérés de la comptabilité, importés ou saisis directement, puis rapprochés de ceux du compte administratif.', ref: 'N° d’engagement ou de marché', tg: 'Bénéficiaire' },
+    liq: { h: 'Réalisations', p: 'Réalisations (service fait, factures) récupérées de la comptabilité, importées ou saisies directement.', ref: 'N° de facture', tg: 'Fournisseur' },
+    pay: { h: 'Paiements', p: 'Paiements (décaissements) récupérés de la comptabilité, importés ou saisis directement.', ref: 'N° de paiement ou de mandat', tg: 'Bénéficiaire' },
+    enc: { h: 'Encaissements', p: 'Fonds reçus du bailleur et autres recettes, récupérés de la comptabilité, importés ou saisis directement.', ref: 'Référence de l’encaissement', tg: 'Origine' }
+  };
+  function sxId() { return 'SX-' + ('000' + (++SX.seq)).slice(-4); }
+  function sxLineKey(code) { var z = dpLines().filter(function (x) { return x.l.c === code; })[0]; return z ? z.key : null; }
+  function sxSeed() {
+    if (SX.items) return; dpSeed(); if (!DP.docs) return; SX.items = []; var today = cadToday();
+    function add(kind, key, date, ref, tiers, mt, src) { SX.items.push({ id: sxId(), kind: kind, key: key, date: date, ref: ref, tiers: tiers, mt: mt, src: src || 'Compta' }); }
+    DP.docs.forEach(function (d) {
+      var q = d.dt || {};
+      if (d.kind !== 'avance' && DP_RANK[d.st] >= 2) add('eng', d.key, q.eng, d.ref, d.tiers, d.id === 'ENG-2026-0009' ? d.mt - 2000000 : d.mt);
+      if (d.kind !== 'avance' && DP_RANK[d.st] >= 3) add('liq', d.key, q.liq, d.fac, d.tiers, d.mt);
+      if (DP_RANK[d.st] >= 6 && d.id !== 'ENG-2026-0010') add('pay', d.key, q.pay, d.mandat, d.tiers, dfoAmt(d));
+      if (d.id === 'ENG-2026-0005') add('pay', d.key, '2026-11-12', 'VIR-0460', d.tiers, d.mt);
+    });
+    DFS.versements.forEach(function (v) { add('enc', null, v.date, v.ref, 'Bailleur — ' + v.lib.toLowerCase(), v.mt); });
+    CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') add('enc', null, x.dPaie, x.id, 'Bailleur — reconstitution du compte', x.mtAcc); });
+    var k21 = sxLineKey('2.1');
+    SX.extra = { eng: [{ key: k21, date: today, ref: 'BC-2026-0190', tiers: 'FOURNITEC SARL', mt: 12000000 }], liq: [], pay: [{ key: k21, date: today, ref: 'VIR-0471', tiers: 'Cabinet RAKOTO Conseil', mt: 12000000 }], enc: [] };
+    SX.log = [{ on: '10/11/2026 08:30', src: 'Synchronisation de la comptabilité', n: SX.items.length, by: 'Système' }]; DP.impLog = SX.log;
+  }
+  /* Ce que la comptabilité ou le fichier dit, ligne du PTBA par ligne : base du rapprochement avec le compte administratif */
+  function sxAgg() { sxSeed(); var o = {}; (SX.items || []).forEach(function (i) { if (!i.key || i.kind === 'enc') return; var r = o[i.key] = o[i.key] || { eng: 0, liq: 0, pay: 0 }; r[i.kind] += i.mt; }); return o; }
+  function sxPull(label, src) {
+    sxSeed(); var n = 0; ['eng', 'liq', 'pay', 'enc'].forEach(function (k) { var e = SX.extra[k].shift(); if (e) { SX.items.push({ id: sxId(), kind: k, key: e.key, date: e.date, ref: e.ref, tiers: e.tiers, mt: e.mt, src: src }); n++; } });
+    SX.log.unshift({ on: nowStr(), src: label, n: n, by: ME }); return n;
+  }
+  function sxRender() {
+    sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
+    document.querySelector('#v-sx > .head h1').textContent = K.h; document.querySelector('#v-sx > .head p').textContent = K.p;
+    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = dpRapOn() ? '' : 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : 'un paiement')));
+    var sum = function (s) { return items.filter(function (i) { return !s || i.src === s; }).reduce(function (a, i) { return a + i.mt; }, 0); };
+    var kb = document.getElementById('sx-k'); kb.innerHTML = ''; kb.appendChild(dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Récupéré de la compta', fmt(sum('Compta')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
+    var tb = document.getElementById('sx-b'); tb.innerHTML = '';
+    document.getElementById('sx-th').innerHTML = '<tr><th>Date</th><th>Référence</th><th>' + escH(K.tg) + '</th><th>' + (SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA') + '</th><th class="num">Montant (MGA)</th><th>Source</th></tr>';
+    if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune écriture : récupérez-les de la comptabilité, importez un fichier ou saisissez-les directement.'); c0.colSpan = 6; c0.style.textAlign = 'left'; tb.appendChild(t0); }
+    items.forEach(function (i) { var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'); cell(tr, fmt(i.mt), 'num'); var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Compta' ? 'b-info' : (i.src === 'Import' ? 'b-warn' : 'b-neutral'))); tb.appendChild(tr); });
+    var lg = document.getElementById('sx-log'); lg.innerHTML = ''; SX.log.forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.src)); l.appendChild(cvEl('div', 'hby', pl(n.n, 'écriture') + ' · ' + n.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); lg.appendChild(row); });
+  }
+  function sxMsg(t, bad) { dpMsg('sx-msg', t, bad); }
+  document.getElementById('sx-sync').addEventListener('click', function () { var n = sxPull('Synchronisation de la comptabilité', 'Compta'); sxMsg(n ? 'Synchronisation terminée : ' + pl(n, 'nouvelle écriture') + ' récupérée' + (n > 1 ? 's' : '') + ' de la comptabilité. Le rapprochement avec le compte administratif est à jour.' : 'Synchronisation terminée : aucune nouvelle écriture.'); sxRender(); });
+  document.getElementById('sx-imp').addEventListener('click', function () { cvAsk({ title: 'Importer un fichier Excel', ok: 'Importer', required: true, cLabel: 'Nom du fichier', placeholder: 'Ex. execution_novembre_2026.xlsx' }, function (f) { var n = sxPull('Fichier Excel « ' + f + ' »', 'Import'); sxMsg(n ? 'Fichier importé : ' + pl(n, 'nouvelle écriture') + '.' : 'Fichier importé : aucune nouvelle écriture.'); sxRender(); }); });
+  document.getElementById('sx-rap').addEventListener('click', function () { show('dprap'); });
+  document.getElementById('sx-new').addEventListener('click', function () {
+    var ls = dpLines(), sl = document.getElementById('sxf-ligne'); sl.innerHTML = ls.map(function (z) { return '<option value="' + escH(z.key) + '">' + escH(z.l.c + ' — ' + (z.l.lib || z.l.l)) + '</option>'; }).join('');
+    document.getElementById('sxf-lw').hidden = SX.kind === 'enc'; document.getElementById('sxf-date').value = cadToday(); ['sxf-ref', 'sxf-tiers', 'sxf-mt'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('sxf-err').textContent = '';
+    document.getElementById('sxf-reflbl').textContent = SX_K[SX.kind].ref; document.getElementById('sxf-tglbl').textContent = SX_K[SX.kind].tg; document.getElementById('sx-form-title').textContent = 'Saisie directe : ' + SX_K[SX.kind].h.toLowerCase(); document.getElementById('sx-form').hidden = false;
+  });
+  document.getElementById('sxf-cancel').addEventListener('click', function () { document.getElementById('sx-form').hidden = true; });
+  document.getElementById('sxf-save').addEventListener('click', function () {
+    var err = document.getElementById('sxf-err'), mt = parseInt0(document.getElementById('sxf-mt').value), ref = document.getElementById('sxf-ref').value.trim(), dt = document.getElementById('sxf-date').value;
+    if (!dt) { err.textContent = 'Indiquez la date.'; return; } if (ref.length < 3) { err.textContent = 'Indiquez la référence.'; return; } if (!mt || mt <= 0) { err.textContent = 'Le montant doit être positif.'; return; }
+    SX.items.push({ id: sxId(), kind: SX.kind, key: SX.kind === 'enc' ? null : document.getElementById('sxf-ligne').value, date: dt, ref: ref, tiers: document.getElementById('sxf-tiers').value.trim(), mt: mt, src: 'Saisie directe' });
+    SX.log.unshift({ on: nowStr(), src: 'Saisie directe', n: 1, by: ME }); document.getElementById('sx-form').hidden = true; sxMsg('Écriture enregistrée (saisie directe).'); sxRender();
+  });
+  /* ----- Trésorerie : encaissements et décaissements, pas seulement les décaissements ----- */
+  function trpData() {
+    dpSeed(); var rs = bvList(), ex = rs.length ? cvCamp(rs[0]).ex : '2026', A = pdcActual(ex), dir = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    (DP.docs || []).forEach(function (d) { var p = (d.dt || {}).pay; if (d.mode === DFO_DIRECT && p && p.slice(0, 4) === ex) dir[+p.slice(5, 7) - 1] += dfoAmt(d); });
+    var now = new Date(), nm = String(now.getFullYear()) === ex ? now.getMonth() : 11, bal = [], c = 0; A.pay.forEach(function (p, m) { c += A.rec[m] - p; bal.push(m <= nm ? c : null); });
+    return { ex: ex, enc: A.rec, dec: A.pay, dir: dir, bal: bal, nm: nm };
+  }
+  function trpRender() {
+    var D = trpData(), E = bvSum(D.enc), P = bvSum(D.dec), a = dfoAcc();
+    var kb = document.getElementById('trp-k'); kb.innerHTML = ''; kb.appendChild(dpTiles([['Encaissements ' + D.ex, fmt(E) + ' MGA', 'ok'], ['Décaissements ' + D.ex, fmt(P) + ' MGA', 'warn'], ['Solde de trésorerie', fmt(E - P) + ' MGA', E - P < 0 ? 'ko' : (E - P < a.plaf * DFS.seuil / 100 ? 'warn' : 'brand')]], { cols: 3 }));
+    var cum = function (arr) { var c = 0; return arr.map(function (v, m) { c += v; return m <= D.nm ? c : null; }).map(function (v, m, x) { return v == null ? x[D.nm] : v; }); }, ch = document.getElementById('trp-chart'); ch.innerHTML = '';
+    ch.appendChild(dpLineChart([{ name: 'Encaissements cumulés', color: DPC.ok, data: cum(D.enc) }, { name: 'Décaissements cumulés', color: DPC.warn, data: cum(D.dec) }, { name: 'Solde', color: DPC.brand, data: D.bal.map(function (v, m) { return Math.max(0, v == null ? D.bal[D.nm] : v); }) }], BVMOIS));
+    var body = document.getElementById('trp-det-body'); body.innerHTML = ''; var nz = function (v) { return v ? fmt(v) : '—'; }, up = function (arr) { return arr.map(function (v, m) { return m <= D.nm ? nz(v) : '—'; }); };
+    var net = D.enc.map(function (v, m) { return v - D.dec[m]; });
+    var sec = cvEl('section', 'co-blk'); sec.appendChild(cvEl('div', 'kb-h', 'Flux mensuels (MGA)')); sec.appendChild(dpMini(['MGA'].concat(BVMOIS, ['Total']), [
+      ['Encaissements (fonds du bailleur)'].concat(up(D.enc), [fmt(E)]), ['Décaissements (compte spécial)'].concat(up(D.dec), [fmt(P)]), ['Solde du mois'].concat(up(net), [fmt(E - P)]), ['Solde cumulé'].concat(D.bal.map(function (v) { return v == null ? '—' : nz(v); }), ['']), ['Paiements directs du bailleur (hors compte)'].concat(up(D.dir), [fmt(bvSum(D.dir))])
+    ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], '')); body.appendChild(sec);
+    var s2 = cvEl('section', 'co-blk'); s2.appendChild(cvEl('div', 'kb-h', 'Compte spécial du bailleur')); s2.appendChild(dpDl([['Avance initiale', fmt(DFS.versements[0].mt) + ' MGA'], ['Reconstitutions reçues', fmt(a.recu) + ' MGA'], ['Dépenses payées sur le compte', fmt(a.paid) + ' MGA'], ['Solde du compte spécial', fmt(a.solde) + ' MGA'], ['Demandes de fonds et solde par demande', 'à consulter dans Suivi › Demandes de fonds', true]])); body.appendChild(s2);
+  }
+  document.getElementById('trp-open').addEventListener('click', function () { trpRender(); document.getElementById('trp-det').hidden = false; });
   /* ----- Tableau de restitution : exécution de chaque ligne du PTBA validé (version du crédit au choix) ----- */
   DP.tabVer = 0; DP.ops = {}; DP.vers = []; DP.frozen = null;
   function dpCred(z, ver) { if (!ver) return z.ouv; var v = bvVers(z.r)[ver - 1]; var s = v && v.snap[z.perim + '|' + z.l.c]; return s ? s.dem : 0; }
@@ -20866,12 +20986,7 @@ var EXEC_REC = [
   /* ----- Deux méthodes de suivi de l'exécution : saisie dans le compte administratif et/ou synchronisation (comptabilité, Excel), avec rapprochement ----- */
   DP.imp = null; DP.impLog = []; DP.just = {};
   function dpRapOn() { return !!(REG.prj && REG.prj.regime === 'projet' && REG.prj.mods.sync); }
-  function dpImpSeed() {
-    if (DP.imp) return; var ls = dpLines(); if (!ls.length) return; DP.imp = {};
-    function put(c, e, l, p) { var z = ls.filter(function (x) { return x.l.c === c; })[0]; if (z) DP.imp[z.key] = { eng: e, liq: l, pay: p }; }
-    put('1.1', 400000000, 400000000, 300000000); put('1.2', 90000000, 90000000, 0); put('2.1', 225000000, 0, 0); put('2.2', 20000000, 20000000, 20000000);
-    DP.impLog = [{ on: '10/11/2026 08:30', src: 'Synchronisation de la comptabilité', n: 11, by: 'Système' }];
-  }
+  function dpImpSeed() { sxSeed(); DP.imp = sxAgg(); DP.impLog = SX.log; }
   function dpRapRows() {
     dpSeed(); dpImpSeed();
     return dpLines().map(function (z) { var s = dpStat(z.key), im = (DP.imp || {})[z.key] || { eng: 0, liq: 0, pay: 0 }, ee = im.eng - s.e, ep = im.pay - s.p, el = im.liq - s.l, ok = !ee && !ep && !el, j = DP.just[z.key];
@@ -20879,7 +20994,7 @@ var EXEC_REC = [
   }
   function dpRapRender() {
     var rows = dpRapRows(), sel = rows.filter(function (x) { return x.id === DP.sel.dprap; })[0], conc = rows.filter(function (x) { return x.st === 'ok'; }).length, sg = function (n) { return (n > 0 ? '+ ' : n < 0 ? '− ' : '') + fmt(Math.abs(n)); };
-    var kb = document.getElementById('dprap-k'); kb.innerHTML = ''; kb.appendChild(dpTiles([['Méthodes actives', 'Saisie + import', 'brand'], ['Lignes concordantes', conc + ' / ' + rows.length, conc === rows.length ? 'ok' : 'warn'], ['Écart sur l’engagé', sg(rows.reduce(function (a, x) { return a + x.ee; }, 0)) + ' MGA', 'info'], ['Écart sur le payé', sg(rows.reduce(function (a, x) { return a + x.ep; }, 0)) + ' MGA', 'info']]));
+    var kb = document.getElementById('dprap-k'); kb.innerHTML = ''; kb.appendChild(dpTiles([['Encaissements : compta et fonds reçus', (function () { var c = (SX.items || []).filter(function (i) { return i.kind === 'enc'; }).reduce(function (x, i) { return x + i.mt; }, 0), f = dfoAcc(); f = f.ini + f.recu; return c === f ? 'Concordants' : 'Écart de ' + fmt(Math.abs(c - f)) + ' MGA'; })(), 'brand'], ['Lignes concordantes', conc + ' / ' + rows.length, conc === rows.length ? 'ok' : 'warn'], ['Écart sur l’engagé', sg(rows.reduce(function (a, x) { return a + x.ee; }, 0)) + ' MGA', 'info'], ['Écart sur le payé', sg(rows.reduce(function (a, x) { return a + x.ep; }, 0)) + ' MGA', 'info']]));
     dpBar('dprap-bar', [['Synchroniser la comptabilité', true, true, function () { dpImpRun('Synchronisation de la comptabilité', null); }], ['Importer un fichier Excel', false, true, function () { cvAsk({ title: 'Importer un fichier Excel d’exécution', ok: 'Importer', required: true, cLabel: 'Nom du fichier', placeholder: 'Ex. execution_novembre_2026.xlsx' }, function (f) { dpImpRun('Fichier Excel « ' + f + ' »', f); }); }],
       ['Justifier l’écart', false, !!sel && sel.st === 'ko', function () { cvAsk({ title: 'Justifier l’écart — ligne ' + sel.z.l.c, ok: 'Enregistrer', required: true, cLabel: 'Explication', placeholder: 'Ex. paiement fait en banque, saisie à régulariser' }, function (why) { DP.just[sel.id] = { why: why, on: nowStr() }; dpMsg('dprap-msg', 'Écart de la ligne ' + sel.z.l.c + ' justifié.'); dpRapRender(); }); }],
       ['Exporter l’écart', false, true, function () { sbDl('rapprochement-execution-' + sbStamp() + '.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', sbXlsx([{ name: 'Rapprochement', rows: [['Rapprochement saisie / import'], [], ['Ligne', 'Engagé saisi', 'Engagé import', 'Écart engagé', 'Payé saisi', 'Payé import', 'Écart payé', 'Statut']].concat(rows.map(function (x) { return [x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l), x.s.e, x.im.eng, x.ee, x.s.p, x.im.pay, x.ep, x.st === 'ok' ? 'Concordant' : (x.st === 'just' ? 'Justifié' : 'Écart')]; })), head: 1, boldRows: [0, 2] }])); dpMsg('dprap-msg', 'Export Excel généré.'); }]]);
@@ -20887,11 +21002,11 @@ var EXEC_REC = [
       cells: function (x) { var b = x.st === 'ok' ? badge('Concordant', 'b-ok') : (x.st === 'just' ? badge('Justifié', 'b-info') : badge('Écart à traiter', 'b-ko')); return [x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l), fmt(x.s.e), fmt(x.im.eng), x.ee ? sg(x.ee) : '—', fmt(x.s.p), fmt(x.im.pay), x.ep ? sg(x.ep) : '—', b]; } });
     var db = document.getElementById('dprap-detail'); db.innerHTML = '';
     if (sel) { db.appendChild(cvEl('div', 'kb-h', 'Ligne ' + sel.z.l.c + ' — ' + (sel.z.l.lib || sel.z.l.l))); var p = [['Engagé : saisie / import', fmt(sel.s.e) + ' / ' + fmt(sel.im.eng) + ' MGA'], ['Liquidé : saisie / import', fmt(sel.s.l) + ' / ' + fmt(sel.im.liq) + ' MGA'], ['Payé : saisie / import', fmt(sel.s.p) + ' / ' + fmt(sel.im.pay) + ' MGA']]; if (sel.j) p.push(['Justification', sel.j.why + ' — ' + sel.j.on, true]); db.appendChild(dpDl(p)); }
-    var hb = document.getElementById('dprap-log'); hb.innerHTML = ''; DP.impLog.forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.src)); l.appendChild(cvEl('div', 'hby', pl(n.n, 'écriture') + ' lues · ' + n.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); hb.appendChild(row); });
+    var hb = document.getElementById('dprap-log'); hb.innerHTML = ''; DP.impLog.forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.src)); l.appendChild(cvEl('div', 'hby', pl(n.n, 'écriture') + (n.n > 1 ? ' lues' : ' lue') + ' · ' + n.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); hb.appendChild(row); });
   }
   function dpImpRun(src, file) {
-    dpImpSeed(); DP.impLog.unshift({ on: nowStr(), src: src, n: 11 + DP.impLog.length, by: ME });
-    var bad = dpRapRows().filter(function (x) { return x.st === 'ko'; }).length; dpMsg('dprap-msg', src + ' : ' + (bad ? pl(bad, 'ligne') + ' en écart à traiter.' : 'toutes les lignes concordent.'), !!bad); dpRapRender();
+    var n = sxPull(file ? 'Fichier Excel « ' + file + ' »' : src, file ? 'Import' : 'Compta'); dpImpSeed();
+    var bad = dpRapRows().filter(function (x) { return x.st === 'ko'; }).length; dpMsg('dprap-msg', src + ' : ' + pl(n, 'nouvelle écriture') + '. ' + (bad ? pl(bad, 'ligne') + ' en écart à traiter.' : 'Toutes les lignes concordent.'), !!bad); dpRapRender();
   }
   DP_RENDER.dprap = dpRapRender;
   /* Menu en tiroir sous 1 024 px (charte §7.3) */
