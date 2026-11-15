@@ -5505,7 +5505,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div class="full"><label for="ar-nom">Nom de la règle</label><input id="ar-nom" class="field" type="text"></div>
           </div>
           <div class="err" id="ar-err"></div>
-          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="ar-cancel">Annuler</button><button class="btn primary" id="ar-save">Enregistrer la règle</button></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="ar-cancel">Annuler</button><button class="btn primary" id="arule-save">Enregistrer la règle</button></div>
         </div></div>
       </section>
 
@@ -12394,20 +12394,24 @@ function fmAxes() {
       cvAsk({ title: 'Clôturer le PTBA', ok: 'Clôturer', required: false, placeholder: 'Commentaire de clôture' }, function (com) {
         pt.st = 'Clôturé'; pt.hist.unshift({ t: 'PTBA clôturé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA clôturé : il est verrouillé.'); });
     }
-    var items = [];
+    var act = [], exp = [{ l: 'Exporter en Excel', on: true, fn: function () { bvExportXlsx(r); } }, { l: 'Exporter en PDF', on: true, fn: function () { bvExportPdf(r); } }];
     if (directMode()) {
       var dsel = bvSel ? dirFind(bvSel.c) : null;
-      items.push({ h: 'Lignes du plan' }, { l: 'Importer depuis Excel (CSV)', on: !locked, fn: function () { dirImport(r); } }, { l: dsel ? 'Modifier la ligne ' + dsel.c : 'Modifier la ligne (cliquez d’abord sur une ligne)', on: !!dsel && !locked, fn: function () { dirLineOpen(r, dsel); } }, { l: dsel ? 'Supprimer la ligne ' + dsel.c : 'Supprimer la ligne (cliquez d’abord sur une ligne)', on: !!dsel && !locked, danger: true, fn: function () { dirLineDel(r, dsel); } });
+      act.push({ h: 'Lignes du plan' }, { l: 'Importer depuis Excel (CSV)', on: !locked, fn: function () { dirImport(r); } }, { l: dsel ? 'Modifier la ligne ' + dsel.c : 'Modifier la ligne (cliquez d’abord sur une ligne)', on: !!dsel && !locked, fn: function () { dirLineOpen(r, dsel); } }, { l: dsel ? 'Supprimer la ligne ' + dsel.c : 'Supprimer la ligne (cliquez d’abord sur une ligne)', on: !!dsel && !locked, danger: true, fn: function () { dirLineDel(r, dsel); } });
     }
-    items.push({ h: 'Exporter' }, { l: 'Exporter en Excel', on: true, fn: function () { bvExportXlsx(r); } }, { l: 'Exporter en PDF', on: true, fn: function () { bvExportPdf(r); } });
     if (!isPta) {
-      items.push({ h: 'Plans et bailleur' }, { l: 'Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), on: !locked && bvPlans(r).length > 0, fn: function () { bvLinkOpen(r); } },
+      act.push({ h: 'Plans et bailleur' }, { l: 'Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), on: !locked && bvPlans(r).length > 0, fn: function () { bvLinkOpen(r); } },
         { l: pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', on: canSend, fn: send }, { l: 'Notifier le retour du bailleur', on: canRet, fn: ret }, { l: 'Clôturer le PTBA', on: canClose, fn: close });
     }
+    bar.appendChild(tbMenu('Exporter', exp));
+    if (act.length) bar.appendChild(tbMenu('Actions', act));
     if (directMode()) { var add = cvEl('button', 'btn primary', '+ Ajouter une ligne'); add.type = 'button'; add.disabled = locked; add.addEventListener('click', function () { dirLineOpen(r, null); }); bar.appendChild(add); }
-    else if (!isPta && canSend) { var sd = cvEl('button', 'btn primary', 'Envoyer au bailleur'); sd.type = 'button'; sd.addEventListener('click', send); bar.appendChild(sd); }
-    bar.appendChild(tbMenu('Actions', items));    root.appendChild(bar);
+    else if (!isPta && canSend) { var sd = cvEl('button', 'btn primary', 'Envoyer au bailleur'); sd.type = 'button'; sd.addEventListener('click', send); bar.appendChild(sd); }    document.querySelectorAll('#v-ptba > .sb-fp-head .bv-bar').forEach(function (x) { x.remove(); });
+    root.appendChild(bar); bvBarMove();
   }
+  /* La barre d'actions se range en haut à droite, dans l'en-tête de la page (à côté de l'exercice) */
+  function bvBarMove() { var h = document.querySelector('#v-ptba > .sb-fp-head'), bar = document.querySelector('#bv-view-body .bv-bar'); if (!h || !bar) return; var ac = h.querySelector('.actions'), back = ac.querySelector('.sb-fp-back'); ac.style.cssText = 'display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end'; bar.style.margin = '0'; ac.insertBefore(bar, back || null); }
+  window.sbBarMove = bvBarMove;
   function bvRender(root, r) {
     var d = bvData(r), pa = d.pa, axes = pa && pa.axes ? pa.axes : [], labs = pa && VTS[pa.vt] ? VTS[pa.vt] : null;
     var tot = d.lines.reduce(function (s, x) { return s + (x.l.dem || 0); }, 0), vd = r.hist.filter(function (h) { return /^Validée/.test(h.t); })[0];
@@ -21171,7 +21175,7 @@ var EXEC_REC = [
     var sub = sm ? sm.textContent.replace(/^[\s·]+/, '').trim() : ''; if (sub) h.querySelector('.sb-fp-sub').textContent = sub; else h.querySelector('.sb-fp-sub').remove();
     h.querySelector('.sb-fp-back').addEventListener('click', function () { fpBack(el); });
     if ((el.id === 'bv-view' || el.id === 'ppm-det' || el.id === 'pdc-det') && typeof window.sbExSel === 'function' && document.querySelector('.pcard[data-profile="prj"] input:checked')) { var ac0 = h.querySelector('.actions'), bk0 = h.querySelector('.sb-fp-back'); ac0.insertBefore(window.sbExSel(), bk0); if (window.sbOneLot()) bk0.remove(); }
-    view.insertBefore(h, top); rec.head = h;
+    view.insertBefore(h, top); rec.head = h; if (el.id === 'bv-view' && typeof window.sbBarMove === 'function') window.sbBarMove();
     if (h2 && !h2.querySelector('button')) { h2.classList.add('sb-fp-noh2'); rec.noh2 = h2; }
     fpOpenEls.push(el); modalStack.push(el);
     if (view.classList.contains('on')) fpCrumbApply(rec);
@@ -22063,7 +22067,7 @@ var EXEC_REC = [
     var nw = document.getElementById('ana-new'), pn = document.getElementById('ana-rule'); if (!nw || !pn) return;
     nw.addEventListener('click', function () { document.getElementById('ar-nom').value = ''; document.getElementById('ar-seuil').value = '15'; document.getElementById('ar-err').textContent = ''; pn.hidden = false; });
     document.getElementById('ar-cancel').addEventListener('click', function () { pn.hidden = true; });
-    document.getElementById('ar-save').addEventListener('click', function () {
+    document.getElementById('arule-save').addEventListener('click', function () {
       var re = document.getElementById('ar-real').value, pa = document.getElementById('ar-plan').value, se = parseInt(document.getElementById('ar-seuil').value.replace(/\s/g, ''), 10), sn = document.getElementById('ar-sens').value, nm = document.getElementById('ar-nom').value.trim(), er = document.getElementById('ar-err');
       if ((re === 'phy') !== (pa === 'pta')) { er.textContent = 'Le PTA se compare à l’avancement physique, et inversement.'; return; }
       if (isNaN(se) || se < 0 || se > 100) { er.textContent = 'L’écart toléré doit être un pourcentage entre 0 et 100.'; return; }
