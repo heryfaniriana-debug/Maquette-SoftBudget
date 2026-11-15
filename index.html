@@ -15420,9 +15420,9 @@ var EXEC_REC = [
     (DP.docs || []).forEach(function (d) {
       var k = DP_RANK[d.st], dd = d.dt || {};
       if (type === 'ecr') {
-        if (k >= 2 && dt(dd.eng) && (mode === 'all' || !sent(d, 'eng'))) rows.push({ obj: d, j: 'ENG', date: dd.eng, pc: d.id, d: cpt(d), c: '9001 · Engagements à régulariser', lib: 'Engagement ' + d.id + ' — ' + d.tiers, mt: d.mt, kind: 'eng' });
-        if (k >= 3 && dt(dd.liq) && (mode === 'all' || !sent(d, 'liq'))) rows.push({ obj: d, j: 'ACH', date: dd.liq, pc: d.fac || d.id, d: cpt(d), c: '401 · Fournisseurs', lib: 'Prise en charge ' + (d.fac || d.id) + ' — ' + d.tiers, mt: d.mt, kind: 'liq' });
-        if (k >= 6 && dt(dd.pay) && (mode === 'all' || !sent(d, 'pay'))) rows.push({ obj: d, j: 'BQ', date: dd.pay, pc: d.mandat, d: '401 · Fournisseurs', c: '5121 · Banque', lib: 'Paiement ' + d.mandat + ' — ' + d.tiers + ' (' + (d.mode || 'virement') + ')', mt: d.mt, kind: 'pay' });
+        if (d.kind !== 'avance' && k >= 2 && dt(dd.eng) && (mode === 'all' || !sent(d, 'eng'))) rows.push({ obj: d, j: 'ENG', date: dd.eng, pc: d.id, d: cpt(d), c: '9001 · Engagements à régulariser', lib: 'Engagement ' + d.id + ' — ' + d.tiers, mt: d.mt, kind: 'eng' });
+        if (k >= 3 && dt(dd.liq) && (mode === 'all' || !sent(d, 'liq'))) { if (d.kind === 'avance') rows.push({ obj: d, j: 'ACH', date: dd.liq, pc: d.id, d: '4091 · Avances et acomptes versés', c: '401 · Fournisseurs', lib: 'Avance de démarrage ' + d.id + ' — ' + d.tiers, mt: d.mt, kind: 'liq' }); else { rows.push({ obj: d, j: 'ACH', date: dd.liq, pc: d.fac || d.id, d: cpt(d), c: '401 · Fournisseurs', lib: 'Prise en charge ' + (d.fac || d.id) + ' — ' + d.tiers, mt: d.mt, kind: 'liq' }); if (d.av && d.av.recoupe) rows.push({ obj: d, j: 'ACH', date: dd.liq, pc: d.fac || d.id, d: '401 · Fournisseurs', c: '4091 · Avances et acomptes versés', lib: 'Recoupement de l’avance — ' + d.tiers, mt: d.av.recoupe, kind: 'liq', cont: true }); } }
+        if (k >= 6 && dt(dd.pay) && (mode === 'all' || !sent(d, 'pay'))) rows.push({ obj: d, j: 'BQ', date: dd.pay, pc: d.mandat, d: '401 · Fournisseurs', c: '5121 · Banque', lib: 'Paiement ' + d.mandat + ' — ' + d.tiers + ' (' + (d.mode || 'virement') + ')', mt: dpNet(d), kind: 'pay' });
       } else if (k >= 2 && (d.acte === 'Marché' || d.acte === 'Contrat') && dt(dd.eng) && (mode === 'all' || !sent(d, 'mkt'))) rows.push({ obj: d, j: 'MKT', date: dd.eng, pc: d.ref, d: d.ppm || '—', c: '—', lib: d.tiers + ' — ' + d.objet, mt: d.mt, kind: 'mkt', dev: 'MGA' });
     });
     return rows;
@@ -20261,7 +20261,7 @@ var EXEC_REC = [
       d(1, '1.1', 'BTP Andriana', 'Construction de 6 salles de classe (lot 1)', 'Marché', 'M-2026-021', 300000000, 'paye', { fac: 'FAC-0457', mandat: 'MD-2026-0001', ppm: 'PPM-2026-60', mode: 'Virement bancaire' }),
       d(2, '1.1', 'BTP Andriana', 'Construction de 3 salles de classe (lot 2)', 'Marché', 'M-2026-034', 100000000, 'ordonnance', { fac: 'FAC-0912', mandat: 'MD-2026-0002', ppm: 'PPM-2026-61' }),
       d(3, '1.2', 'Centre de formation Vatsy', 'Formation de 150 enseignants aux nouvelles méthodes', 'Contrat', 'CT-2026-007', 90000000, 'liquide', { fac: 'FAC-2231' }),
-      d(4, '2.1', 'Entreprise Sud Bâtiment', 'Construction de 3 centres de santé', 'Marché', 'M-2026-051', 180000000, 'vise'),
+      d(4, '2.1', 'Entreprise Sud Bâtiment', 'Construction de 3 centres de santé', 'Marché', 'M-2026-051', 180000000, 'vise', { av: { pct: 20, amt: 36000000, garantie: 'GRA-2026-014', st: 'prevue' } }),
       d(5, '2.2', 'Hôtel Les Flamboyants', 'Séminaire de formation des agents de santé', 'Bon de commande', 'BC-2026-0121', 20000000, 'liquide', { fac: 'FAC-0460', rejet: DP_MOTIFS[0] }),
       d(6, '2.1', 'MEDIFROID SARL', 'Réfrigérateurs solaires pour les centres de santé', 'Bon de commande', 'BC-2026-0157', 45000000, 'soumis')
     ].filter(function (x) { return x.key; });
@@ -20270,9 +20270,14 @@ var EXEC_REC = [
   }
   function dpStat(key) {
     var ln = dpLine(key), s = { ouv: ln ? ln.ouv : 0, e: 0, r: 0, l: 0, o: 0, p: 0 };
-    (DP.docs || []).forEach(function (d) { if (d.key !== key) return; var k = DP_RANK[d.st]; if (k === 1) s.r += d.mt; if (k >= 2) s.e += d.mt; if (k >= 3) s.l += d.mt; if (k >= 4) s.o += d.mt; if (k >= 6) s.p += d.mt; });
+    (DP.docs || []).forEach(function (d) { if (d.key !== key) return; var k = DP_RANK[d.st]; if (d.kind === 'avance') { if (k >= 4) s.o += d.mt; if (k >= 6) s.p += d.mt; return; } if (k === 1) s.r += d.mt; if (k >= 2) s.e += d.mt; if (k >= 3) s.l += d.mt; if (k >= 4) s.o += dpNet(d); if (k >= 6) s.p += dpNet(d); });
     s.dispo = s.ouv - s.e - s.r; return s;
   }
+  /* Avances de démarrage : l'avance est une partie de l'engagement, payée avant service fait puis recoupée sur le décompte */
+  function dpNet(d) { return d.net != null ? d.net : d.mt; }
+  function dpRecoup(d) { return d.av && d.av.st === 'versee' ? d.av.amt : 0; }
+  function dpHasAv(f) { return (f.acte === 'Marché' || f.acte === 'Contrat') && (parseInt0(f.avpct) || 0) > 0; }
+  function dpAvStats(key) { var v = 0, r = 0, p = 0; (DP.docs || []).forEach(function (d) { if (d.key !== key) return; if (d.kind === 'avance') { v += d.mt; if (DP_RANK[d.st] >= 6) p += d.mt; } else if (d.av && d.av.recoupe && DP_RANK[d.st] >= 3) r += d.av.recoupe; }); return { versee: v, payee: p, recoupee: r, reste: v - r }; }
   function dpTot(f) { var t = { ouv: 0, e: 0, r: 0, l: 0, o: 0, p: 0, dispo: 0 }; dpLines().forEach(function (z) { var s = dpStat(z.key); Object.keys(t).forEach(function (k) { t[k] += s[k]; }); }); return t; }
   function dpShort(d) { var z = dpLine(d.key); return z ? z.l.c + ' — ' + (z.l.lib || z.l.l) : '—'; }
   function dpMsg(id, text, bad) { var m = document.getElementById(id); if (!m) return; m.hidden = !text; m.textContent = text || ''; m.style.background = bad ? 'var(--ko-bg)' : 'var(--ok-bg)'; m.style.color = bad ? 'var(--ko)' : 'var(--ok)'; }
@@ -20321,13 +20326,13 @@ var EXEC_REC = [
   function dpEngOpen() {
     if (DP.ops && DP.ops.stop) { dpMsg('dpeng-msg', 'Les engagements sont arrêtés pour l’exercice (clôture en cours).', true); return; }
     var ls = dpLines(); if (!ls.length) { dpMsg('dpeng-msg', 'Aucun budget validé : validez d’abord une campagne pour engager des dépenses.', true); return; }
-    DP.f = { key: ls[0].key, tiers: DP_TIERS[0], objet: '', montant: '', acte: 'Bon de commande', ref: '', ppm: '' }; dpEngPaint(); document.getElementById('dp-eng-form').hidden = false;
+    DP.f = { key: ls[0].key, tiers: DP_TIERS[0], objet: '', montant: '', acte: 'Bon de commande', ref: '', ppm: '', avpct: '', gar: '' }; dpEngPaint(); document.getElementById('dp-eng-form').hidden = false;
   }
   function dpEngPaint() {
     var body = document.getElementById('dp-eng-body'), f = DP.f; body.innerHTML = '';
-    var bar = cvEl('div', 'row-toolbar'), mt = parseInt0(f.montant) || 0, s = dpStat(f.key), ok = s.dispo - mt >= 0, sv = cvEl('button', 'btn primary', 'Enregistrer et soumettre au visa'); sv.type = 'button'; sv.disabled = !(ok && mt > 0 && f.objet.trim());
+    var bar = cvEl('div', 'row-toolbar'), mt = parseInt0(f.montant) || 0, s = dpStat(f.key), ok = s.dispo - mt >= 0, sv = cvEl('button', 'btn primary', 'Enregistrer et soumettre au visa'); sv.type = 'button'; sv.disabled = !(ok && mt > 0 && f.objet.trim() && !(dpHasAv(f) && !f.gar.trim()));
     sv.addEventListener('click', function () {
-      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', dt: { eng: cadToday() } });
+      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', dt: { eng: cadToday() }, av: dpHasAv(f) ? { pct: parseInt0(f.avpct), amt: Math.round(mt * parseInt0(f.avpct) / 100), garantie: f.gar.trim(), st: 'prevue' } : null });
       document.getElementById('dp-eng-form').hidden = true; dpMsg('dpeng-msg', id + ' enregistré : crédit réservé sur la ligne ' + dpShort({ key: f.key }) + ', dossier transmis au Contrôle financier.'); DP.sel.dpeng = id; dpEngRender();
     });
     bar.appendChild(sv); body.appendChild(bar);
@@ -20340,34 +20345,46 @@ var EXEC_REC = [
     var pp = cvEl('select', 'field'); var o0 = cvEl('option', null, '— Aucun (saisie libre) —'); o0.value = ''; pp.appendChild(o0);
     CPP.items.filter(function (x) { return x.act === f.key.split('|').filter(function (_, i) { return i !== 1; }).join('|') && ['Attribué', 'Signé', 'En exécution'].indexOf(x.st) >= 0; }).forEach(function (x) { var o = cvEl('option', null, x.ref + ' — ' + x.des + ' (' + fmt(x.est) + ' MGA)'); o.value = x.ref; pp.appendChild(o); }); pp.value = f.ppm;
     pp.addEventListener('change', function () { f.ppm = pp.value; var it = CPP.items.filter(function (x) { return x.ref === pp.value; })[0]; if (it) { f.objet = it.des; f.montant = String(it.est); f.acte = 'Marché'; f.ref = it.ref; } dpEngPaint(); }); fld('Marché du PPM lié à cette activité (facultatif : reprend l’objet et le montant)', pp, true);
-    var sa = cvEl('select', 'field'); ['Bon de commande', 'Marché', 'Contrat', 'Convention'].forEach(function (x) { sa.appendChild(cvEl('option', null, x)); }); sa.value = f.acte; sa.addEventListener('change', function () { f.acte = sa.value; }); fld('Type d’acte', sa);
+    var sa = cvEl('select', 'field'); ['Bon de commande', 'Marché', 'Contrat', 'Convention'].forEach(function (x) { sa.appendChild(cvEl('option', null, x)); }); sa.value = f.acte; sa.addEventListener('change', function () { f.acte = sa.value; dpEngPaint(); }); fld('Type d’acte', sa);
     var ri = cvEl('input', 'field'); ri.type = 'text'; ri.placeholder = 'BC-2026-…'; ri.value = f.ref; ri.addEventListener('input', function () { f.ref = ri.value; }); fld('Référence de l’acte', ri);
     var st = cvEl('select', 'field'); DP_TIERS.forEach(function (x) { st.appendChild(cvEl('option', null, x)); }); st.value = f.tiers; st.addEventListener('change', function () { f.tiers = st.value; }); fld('Tiers', st);
     var mi = cvEl('input', 'field'); mi.type = 'text'; mi.setAttribute('inputmode', 'numeric'); mi.placeholder = '0'; mi.value = f.montant ? fmt(parseInt0(f.montant) || 0) : ''; mi.addEventListener('input', function () { f.montant = mi.value; });
     mi.addEventListener('change', function () { f.montant = String(parseInt0(mi.value) || ''); dpEngPaint(); }); fld('Montant TTC (MGA)', mi);
-    var oi = cvEl('textarea', 'field'); oi.placeholder = 'Objet de la dépense'; oi.value = f.objet; oi.addEventListener('input', function () { f.objet = oi.value; sv.disabled = !(ok && mt > 0 && f.objet.trim()); }); fld('Objet', oi, true);
+    if (f.acte === 'Marché' || f.acte === 'Contrat') {
+      var ap = cvEl('input', 'field'); ap.type = 'text'; ap.setAttribute('inputmode', 'numeric'); ap.placeholder = '0 (pas d’avance)'; ap.value = f.avpct; ap.addEventListener('input', function () { f.avpct = ap.value; }); ap.addEventListener('change', function () { f.avpct = String(Math.min(100, parseInt0(ap.value) || '')); dpEngPaint(); });
+      fld('Avance de démarrage (% du montant, facultatif)' + (dpHasAv(f) ? ' — soit ' + fmt(Math.round(mt * parseInt0(f.avpct) / 100)) + ' MGA' : ''), ap);
+      var gi = cvEl('input', 'field'); gi.type = 'text'; gi.placeholder = 'Ex. GRA-2026-014'; gi.disabled = !dpHasAv(f); gi.value = f.gar; gi.addEventListener('input', function () { f.gar = gi.value; sv.disabled = !(ok && mt > 0 && f.objet.trim() && !(dpHasAv(f) && !f.gar.trim())); }); fld('Garantie de restitution d’avance (référence)' + (dpHasAv(f) ? ' *' : ''), gi);
+    }
+    var oi = cvEl('textarea', 'field'); oi.placeholder = 'Objet de la dépense'; oi.value = f.objet; oi.addEventListener('input', function () { f.objet = oi.value; sv.disabled = !(ok && mt > 0 && f.objet.trim() && !(dpHasAv(f) && !f.gar.trim())); }); fld('Objet', oi, true);
     g2.style.marginTop = '8px'; body.appendChild(g2);
   }
   /* ----- Liquidations ----- */
   function dpLiqRender() {
     dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'vise'; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpliq; })[0], t = dpTot();
     dpKpis('dpliq-k', [['Engagé (visé)', fmt(t.e) + ' MGA'], ['À liquider', fmt(rows.filter(function (d) { return d.st === 'vise'; }).reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA'], ['Liquidé', fmt(t.l) + ' MGA'], ['Reste à liquider', fmt(t.e - t.l) + ' MGA']]);
-    dpBar('dpliq-bar', [['Liquider', true, !!sel && sel.st === 'vise', function () { DP.lf = { sf: false, fac: '' }; dpLiqPaint(sel); document.getElementById('dp-liq-form').hidden = false; }]]);
+    dpBar('dpliq-bar', [['Liquider l’avance', false, !!sel && sel.st === 'vise' && !!sel.av && sel.av.st === 'prevue', function () { dpAvLiquider(sel); }], ['Liquider', true, !!sel && sel.st === 'vise', function () { DP.lf = { sf: false, fac: '' }; dpLiqPaint(sel); document.getElementById('dp-liq-form').hidden = false; }]]);
     dpTable({ id: 'dpliq', head: ['Engagement', 'Tiers · objet', 'Ligne du PTBA', 'Acte', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun engagement à liquider. Visez d’abord un engagement dans « Engagements ».', redraw: dpLiqRender,
       cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, dpShort(d), d.acte + ' ' + d.ref, fmt(d.mt), dpStatBadge(d)]; } });
   }
+  function dpAvLiquider(d) {
+    cvAsk({ title: 'Liquider l’avance de démarrage — ' + d.id, ok: 'Liquider l’avance', required: false, placeholder: 'Observation (garantie ' + d.av.garantie + ' vérifiée)' }, function () {
+      var a = { id: 'AV-' + d.id, kind: 'avance', parent: d.id, key: d.key, tiers: d.tiers, objet: 'Avance de démarrage de ' + d.av.pct + ' % — ' + d.objet, acte: d.acte, ref: d.ref, mt: d.av.amt, st: 'liquide', fac: 'Garantie ' + d.av.garantie, garantie: d.av.garantie, mandat: '', rejet: '', ppm: d.ppm, mode: '', dt: { eng: (d.dt || {}).eng, liq: cadToday() } };
+      DP.docs.push(a); d.av.st = 'versee'; dpMsg('dpliq-msg', 'Avance de ' + fmt(a.mt) + ' MGA liquidée sur la garantie ' + d.av.garantie + ' : elle passe en ordonnancement. Elle sera recoupée sur le décompte.'); dpLiqRender(); });
+  }
   function dpLiqPaint(d) {
     var body = document.getElementById('dp-liq-body'), z = dpLine(d.key), lf = DP.lf; body.innerHTML = '';
-    var bar = cvEl('div', 'row-toolbar'), sv = cvEl('button', 'btn primary', 'Valider la liquidation'); sv.type = 'button'; sv.disabled = !(lf.sf && lf.fac.trim());
-    sv.addEventListener('click', function () { d.st = 'liquide'; d.fac = lf.fac.trim(); d.rejet = ''; (d.dt = d.dt || {}).liq = cadToday(); document.getElementById('dp-liq-form').hidden = true; dpMsg('dpliq-msg', d.id + ' liquidé : le net à payer est arrêté, il passe en ordonnancement.'); dpLiqRender(); });
+    var rc = dpRecoup(d), bar = cvEl('div', 'row-toolbar'), sv = cvEl('button', 'btn primary', 'Valider la liquidation'); sv.type = 'button'; sv.disabled = !(lf.sf && lf.fac.trim());
+    sv.addEventListener('click', function () { d.st = 'liquide'; d.fac = lf.fac.trim(); d.rejet = ''; (d.dt = d.dt || {}).liq = cadToday(); d.net = d.mt - rc; if (d.av) { if (rc) d.av.recoupe = rc; else d.av.st = 'annulee'; } document.getElementById('dp-liq-form').hidden = true; dpMsg('dpliq-msg', d.id + ' liquidé : le net à payer est arrêté, il passe en ordonnancement.'); dpLiqRender(); });
     bar.appendChild(sv); body.appendChild(bar);
     var h = cvEl('div', 'kb-h', d.id + ' · ' + d.tiers); body.appendChild(h);
     body.appendChild(dpTiles([['Imputation', dpShort(d)], ['Acte', d.acte + ' ' + d.ref], ['Montant engagé', fmt(d.mt) + ' MGA'], ['Objet', d.objet]]));
     if (z) body.appendChild(dpWork(z));
+    if (rc) { var sa2 = cvEl('section', 'co-blk'); sa2.appendChild(cvEl('div', 'kb-h', 'Recoupement de l’avance de démarrage')); sa2.appendChild(dpTiles([['Montant du décompte', fmt(d.mt) + ' MGA', 'brand'], ['Avance à recouper', '− ' + fmt(rc) + ' MGA', 'warn'], ['Net à liquider', fmt(d.mt - rc) + ' MGA', 'ok']], { cols: 3 })); body.appendChild(sa2); }
+    else if (d.av && d.av.st === 'prevue') { var wn = cvEl('div', 'callout', 'L’avance prévue (' + fmt(d.av.amt) + ' MGA) n’a pas été liquidée : liquider ce décompte l’annule et le net à liquider reste le montant complet. Pour la verser, utilisez « Liquider l’avance » avant.'); wn.style.marginBottom = '14px'; body.appendChild(wn); }
     var sec = cvEl('section', 'co-blk'); sec.appendChild(cvEl('div', 'kb-h', 'Service fait et facture'));
     var g = cvEl('div', 'fgrid');
     var a = cvEl('div'); a.appendChild(cvEl('label', null, 'Facture n°')); var fi = cvEl('input', 'field'); fi.type = 'text'; fi.placeholder = 'FAC-…'; fi.value = lf.fac; fi.addEventListener('input', function () { lf.fac = fi.value; sv.disabled = !(lf.sf && lf.fac.trim()); }); a.appendChild(fi); g.appendChild(a);
-    var b = cvEl('div'); b.appendChild(cvEl('label', null, 'Net à liquider (MGA)')); var ni = cvEl('input', 'field'); ni.type = 'text'; ni.readOnly = true; ni.value = fmt(d.mt); b.appendChild(ni); g.appendChild(b); sec.appendChild(g);
+    var b = cvEl('div'); b.appendChild(cvEl('label', null, 'Net à liquider (MGA)')); var ni = cvEl('input', 'field'); ni.type = 'text'; ni.readOnly = true; ni.value = fmt(d.mt - rc); b.appendChild(ni); g.appendChild(b); sec.appendChild(g);
     var lb = cvEl('label', 'chk'); lb.style.marginTop = '12px'; var ck = cvEl('input'); ck.type = 'checkbox'; ck.checked = lf.sf; ck.addEventListener('change', function () { lf.sf = ck.checked; sv.disabled = !(lf.sf && lf.fac.trim()); }); lb.appendChild(ck); lb.appendChild(document.createTextNode(' Je certifie le service fait (PV de réception joint)')); sec.appendChild(lb);
     body.appendChild(sec);
   }
@@ -20375,13 +20392,13 @@ var EXEC_REC = [
   function dpOrdRows() { return (DP.docs || []).filter(function (d) { return d.st === 'liquide'; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }); }
   function dpOrdSel() { return dpOrdRows().filter(function (d) { return DP.ordSel[d.id]; }); }
   function dpOrdRender() {
-    dpSeed(); var rows = dpOrdRows(), sel = dpOrdSel(), t = dpTot(), tot = sel.reduce(function (a, d) { return a + d.mt; }, 0);
-    dpKpis('dpord-k', [['Liquidé', fmt(t.l) + ' MGA'], ['À ordonnancer', fmt(rows.reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA'], ['Mandaté', fmt(t.o) + ' MGA'], ['Sélection', sel.length + ' liquidation(s) · ' + fmt(tot) + ' MGA']]);
+    dpSeed(); var rows = dpOrdRows(), sel = dpOrdSel(), t = dpTot(), tot = sel.reduce(function (a, d) { return a + dpNet(d); }, 0);
+    dpKpis('dpord-k', [['Liquidé', fmt(t.l) + ' MGA'], ['À ordonnancer', fmt(rows.reduce(function (a, d) { return a + dpNet(d); }, 0)) + ' MGA'], ['Mandaté', fmt(t.o) + ' MGA'], ['Sélection', sel.length + ' liquidation(s) · ' + fmt(tot) + ' MGA']]);
     dpBar('dpord-bar', [['Émettre les mandats', true, sel.length > 0, function () {
       sel.forEach(function (d) { d.mandat = 'MD-2026-' + ('000' + (DP.seqM++)).slice(-4); d.st = 'ordonnance'; d.rejet = ''; (d.dt = d.dt || {}).ord = cadToday(); }); var n = sel.length; DP.ordSel = {}; dpMsg('dpord-msg', n + ' mandat(s) émis et transmis au comptable avec le bordereau.'); dpOrdRender(); }],
       ['Imprimer les mandats', false, sel.length > 0, function () { dpPrintPaint(); document.getElementById('dp-print').hidden = false; }]]);
     dpTable({ id: 'dpord', multi: true, head: ['Engagement', 'Tiers', 'Ligne du PTBA', 'Facture', 'Net à payer (MGA)', 'Remarque'], num: [4], rows: rows, empty: 'Aucune liquidation en attente. Validez une liquidation dans « Liquidations ».', redraw: dpOrdRender,
-      cells: function (d) { var r = d.rejet ? badge('Rejeté : ' + d.rejet, 'b-ko') : '—'; return [d.id, d.tiers, dpShort(d), d.fac, fmt(d.mt), r]; } });
+      cells: function (d) { var r = d.rejet ? badge('Rejeté : ' + d.rejet, 'b-ko') : (d.kind === 'avance' ? badge('Avance de démarrage', 'b-info') : (d.av && d.av.recoupe ? badge('Avance recoupée : ' + fmt(d.av.recoupe), 'b-warn') : '—')); return [d.id, d.tiers, dpShort(d), d.fac, fmt(dpNet(d)), r]; } });
   }
   var DP_MODELS = { std: 'MANDAT DE PAIEMENT', prj: 'MANDAT · PROJET', reg: 'MANDAT DE RÉGIE' };
   /* ----- Modèle de mandat : mise en page réelle (en-tête officiel, imputation, bénéficiaire, montants, signatures) ----- */
@@ -20407,9 +20424,9 @@ var EXEC_REC = [
       + '<div style="text-align:right;' + hs + '">Exercice <b>2026</b><br>Budget : <b>' + E(z ? z.r.camp : '—') + '</b><br>' + E(copyLbl) + '</div></div>';    h += '<div style="text-align:center;margin:14px 0 4px"><div style="display:inline-block;border:2px solid #111;padding:6px 26px;font-size:17px;font-weight:700;letter-spacing:.04em">' + E(title) + '</div></div>';
     h += '<div style="text-align:center;font-size:13px;margin-bottom:12px">N° <b>' + E(no) + '</b> · Engagement n° <b>' + E(d.id) + '</b></div>';
     if (O.imp) h += '<div style="font-size:11px;font-weight:700;margin:8px 0 3px">IMPUTATION BUDGÉTAIRE</div><table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0;margin-bottom:10px"><tr><th style="' + th + '">Composante</th><th style="' + th + '">Ligne du PTBA</th><th style="' + th + '">Compte</th><th style="' + th + '">Source de financement</th></tr><tr><td style="' + td + '">' + E(z ? z.perim : '—') + '</td><td style="' + td + '">' + E(dpShort(d)) + '</td><td style="' + td + '">' + E(nat) + '</td><td style="' + td + '">' + E(fin) + (DP.model === 'prj' ? '<br><span style="font-size:11px">Bailleur : ' + E(info.bailleur) + '</span>' : '') + '</td></tr></table>';
-    h += '<div style="font-size:11px;font-weight:700;margin:8px 0 3px">BÉNÉFICIAIRE ET OBJET DE LA DÉPENSE</div><table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0;margin-bottom:10px">' + row('Bénéficiaire', '<b>' + E(d.tiers) + '</b>') + row('Objet', E(d.objet)) + row('Acte', E(d.acte + ' n° ' + d.ref)) + row('Facture', E(d.fac || '—') + ' · service fait certifié le ' + E(isoToFr(dd.liq || cadToday()))) + row('Engagement visé', 'le ' + E(isoToFr(dd.eng || cadToday())) + ' par le Contrôle financier') + '</table>';
-    h += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0;margin-bottom:8px"><tr><th style="' + th + '">Montant engagé (MGA)</th><th style="' + th + '">Retenues (MGA)</th><th style="' + th + ';text-align:right">NET À PAYER (MGA)</th></tr><tr><td style="' + td + ';text-align:right">' + E(fmt(d.mt)) + '</td><td style="' + td + ';text-align:right">0</td><td style="' + td + ';text-align:right;font-size:15px"><b>' + E(fmt(d.mt)) + '</b></td></tr></table>';
-    if (O.lettres) h += '<div style="font-size:12.5px;margin:6px 0 10px">Arrêté le présent mandat à la somme de : <b><i>' + E(cadWords(d.mt, 'ariary')) + '</i></b>.</div>';
+    h += '<div style="font-size:11px;font-weight:700;margin:8px 0 3px">BÉNÉFICIAIRE ET OBJET DE LA DÉPENSE</div><table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0;margin-bottom:10px">' + row('Bénéficiaire', '<b>' + E(d.tiers) + '</b>') + row('Objet', E(d.objet)) + row('Acte', E(d.acte + ' n° ' + d.ref)) + row(d.kind === 'avance' ? 'Garantie' : 'Facture', d.kind === 'avance' ? E(d.garantie || '—') + ' · avance de démarrage, sans service fait (recoupée sur le décompte)' : E(d.fac || '—') + ' · service fait certifié le ' + E(isoToFr(dd.liq || cadToday()))) + row('Engagement visé', 'le ' + E(isoToFr(dd.eng || cadToday())) + ' par le Contrôle financier') + '</table>';
+    h += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0;margin-bottom:8px"><tr><th style="' + th + '">Montant engagé (MGA)</th><th style="' + th + '">' + (d.av && d.av.recoupe ? 'Avance recoupée (MGA)' : 'Retenues (MGA)') + '</th><th style="' + th + ';text-align:right">NET À PAYER (MGA)</th></tr><tr><td style="' + td + ';text-align:right">' + E(fmt(d.mt)) + '</td><td style="' + td + ';text-align:right">' + E(fmt(d.mt - dpNet(d))) + '</td><td style="' + td + ';text-align:right;font-size:15px"><b>' + E(fmt(dpNet(d))) + '</b></td></tr></table>';
+    if (O.lettres) h += '<div style="font-size:12.5px;margin:6px 0 10px">Arrêté le présent mandat à la somme de : <b><i>' + E(cadWords(dpNet(d), 'ariary')) + '</i></b>.</div>';
     if (O.bank) h += '<div style="font-size:12.5px;margin-bottom:10px"><b>Mode de règlement :</b> ' + E(d.mode || 'Virement bancaire') + ' sur le compte domicilié du bénéficiaire.</div>';
     if (O.pj) h += '<div style="font-size:11px;font-weight:700;margin:6px 0 3px">PIÈCES JUSTIFICATIVES JOINTES</div><ol style="margin:0 0 10px 18px;padding:0;font-size:12px;line-height:1.5"><li>' + E(d.acte + ' ' + d.ref) + '</li><li>Facture ' + E(d.fac || '—') + '</li><li>Procès-verbal de réception (service fait)</li><li>Visa du Contrôle financier sur l’engagement ' + E(d.id) + '</li></ol>';
     if (O.sign) {
@@ -20442,22 +20459,22 @@ var EXEC_REC = [
   /* ----- Paiements ----- */
   function dpPayRender() {
     dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'ordonnance'; }), sel = rows.filter(function (d) { return d.id === DP.sel.dppay; })[0];
-    document.getElementById('dppay-k').innerHTML = ''; document.getElementById('dppay-k').appendChild(dpTiles([['Mandats à traiter', String(rows.length), 'brand'], ['Montant à payer', fmt(rows.reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA', 'info']], { cols: 2 }));
+    document.getElementById('dppay-k').innerHTML = ''; document.getElementById('dppay-k').appendChild(dpTiles([['Mandats à traiter', String(rows.length), 'brand'], ['Montant à payer', fmt(rows.reduce(function (a, d) { return a + dpNet(d); }, 0)) + ' MGA', 'info']], { cols: 2 }));
     dpBar('dppay-bar', [['Ouvrir le mandat', true, !!sel, function () { dpPayOpen(sel); }]]);
     dpTable({ id: 'dppay', head: ['Mandat', 'Bénéficiaire · objet', 'Ligne du PTBA', 'Facture', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun mandat en attente. Émettez un mandat dans « Ordonnancement ».', redraw: dpPayRender,
-      cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.mandat, a, dpShort(d), d.fac, fmt(d.mt), dpStatBadge(d)]; } });
+      cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.mandat, a, dpShort(d), d.fac, fmt(dpNet(d)), dpStatBadge(d)]; } });
   }
   /* Détail complet d'un mandat : le comptable y trouve tout ce qu'il faut pour contrôler, puis payer ou rejeter */
-  function dpPayChecks(d) { var z = dpLine(d.key), s = dpStat(d.key); return [['Qualité de l’ordonnateur (délégation en vigueur)', true], ['Disponibilité des crédits sur la ligne', s.dispo >= 0], ['Exacte imputation budgétaire (plans de la configuration renseignés)', !!z && bvLinkMissing(z.r) === 0], ['Validité de la créance : service fait certifié', !!d.fac && !!(d.dt && d.dt.liq)], ['Pièces justificatives', !!d.fac]]; }
+  function dpPayChecks(d) { var z = dpLine(d.key), s = dpStat(d.key); return [['Qualité de l’ordonnateur (délégation en vigueur)', true], ['Disponibilité des crédits sur la ligne', s.dispo >= 0], ['Exacte imputation budgétaire (plans de la configuration renseignés)', !!z && bvLinkMissing(z.r) === 0], [d.kind === 'avance' ? 'Garantie de restitution d’avance fournie (' + (d.garantie || '—') + ')' : 'Validité de la créance : service fait certifié', d.kind === 'avance' ? !!d.garantie : (!!d.fac && !!(d.dt && d.dt.liq))], ['Pièces justificatives', !!d.fac]]; }
   function dpPayOpen(d) {
     var body = document.getElementById('dp-pay-body'), z = dpLine(d.key), s = dpStat(d.key), dd = d.dt || {}, ch = dpPayChecks(d), ko = ch.filter(function (c) { return !c[1]; }).length; body.innerHTML = '';
     document.getElementById('dp-pay-title').textContent = 'Mandat ' + d.mandat;
     var bar = cvEl('div', 'row-toolbar'), pay = cvEl('button', 'btn primary', 'Prendre en charge et payer'), rej = cvEl('button', 'btn', 'Rejeter le mandat'); pay.type = rej.type = 'button'; pay.disabled = ko > 0; if (ko) pay.title = ko + ' contrôle(s) en anomalie : rejetez le mandat ou corrigez le dossier.';
-    pay.addEventListener('click', function () { cvAsk({ title: 'Prendre en charge et payer ' + d.mandat, ok: 'Payer', required: false, optLabel: 'Mode de paiement *', options: DP_MODES, placeholder: 'Observation du comptable' }, function (c, mode) { d.st = 'paye'; d.mode = mode; (d.dt = d.dt || {}).pay = cadToday(); DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', d.mandat + ' pris en charge : ' + fmt(d.mt) + ' MGA payés (' + mode.toLowerCase() + ').'); dpPayRender(); }); });
+    pay.addEventListener('click', function () { cvAsk({ title: 'Prendre en charge et payer ' + d.mandat, ok: 'Payer', required: false, optLabel: 'Mode de paiement *', options: DP_MODES, placeholder: 'Observation du comptable' }, function (c, mode) { d.st = 'paye'; d.mode = mode; (d.dt = d.dt || {}).pay = cadToday(); DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', d.mandat + ' pris en charge : ' + fmt(dpNet(d)) + ' MGA payés (' + mode.toLowerCase() + ').'); dpPayRender(); }); });
     rej.addEventListener('click', function () { cvAsk({ title: 'Rejeter ' + d.mandat, ok: 'Rejeter', required: false, optLabel: 'Motif du rejet *', options: DP_MOTIFS, placeholder: 'Précisions pour l’ordonnateur' }, function (c, motif) { d.st = 'liquide'; d.mandat = ''; d.rejet = motif; DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', 'Mandat rejeté (' + motif.toLowerCase() + ') : retour à l’ordonnateur.', true); dpPayRender(); }); });
     bar.appendChild(pay); bar.appendChild(rej); body.appendChild(bar);
     function sec(title, node) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); return x; }
-    sec('Mandat', dpTiles([['Mandat', d.mandat, 'brand'], ['Bénéficiaire', d.tiers, 'n'], ['Net à payer', fmt(d.mt) + ' MGA', 'warn'], ['Statut', DP_ST[d.st][0], 'info']], { small: true }));
+    sec('Mandat', dpTiles([['Mandat', d.mandat, 'brand'], ['Bénéficiaire', d.tiers, 'n'], ['Net à payer', fmt(dpNet(d)) + ' MGA', 'warn'], ['Statut', DP_ST[d.st][0], 'info']], { small: true }));
     sec('Dépense', dpTiles([['Engagement', d.id], ['Acte', d.acte + ' ' + d.ref], ['Facture', d.fac || '—'], ['Marché du PPM', d.ppm || '—']], { small: true }));
     var obj = cvEl('div', 'hint', 'Objet : ' + d.objet); obj.style.margin = '-4px 0 14px'; body.lastChild.appendChild(obj);
     var nat = z && z.l.nat && PUB_NAT[z.l.nat] ? PUB_NAT[z.l.nat] + ' · ' + (NATL[z.l.nat] || '').replace(/^\d+ — /, '') : 'Non rattaché';
@@ -20465,7 +20482,7 @@ var EXEC_REC = [
     if (z) body.appendChild(dpWork(z));
     sec('Situation du crédit de la ligne', dpTiles([['Crédit validé', fmt(s.ouv) + ' MGA', 'brand'], ['Engagé (visé)', fmt(s.e) + ' MGA'], ['Payé à ce jour', fmt(s.p) + ' MGA'], ['Disponible', fmt(s.dispo) + ' MGA', s.dispo >= 0 ? 'ok' : 'ko']], { small: true }));
     var cl = cvEl('div'); ch.forEach(function (c) { var row = cvEl('div', 'list-row'); row.appendChild(cvEl('div', null, c[0])); row.appendChild(badge(c[1] ? 'Conforme' : 'Anomalie', c[1] ? 'b-ok' : 'b-ko')); cl.appendChild(row); }); sec('Contrôles du comptable', cl);
-    var pj = cvEl('div'); pj.appendChild(pjList([d.acte.replace(/ /g, '_') + '_' + d.ref + '.pdf', 'Facture_' + (d.fac || 'sans_numero') + '.pdf', 'PV_de_reception_' + d.id + '.pdf', 'Visa_CF_' + d.id + '.pdf'])); sec('Pièces justificatives', pj);
+    var pj = cvEl('div'); pj.appendChild(pjList(d.kind === 'avance' ? [d.acte.replace(/ /g, '_') + '_' + d.ref + '.pdf', 'Garantie_restitution_avance_' + (d.garantie || '') + '.pdf', 'Visa_CF_' + (d.parent || d.id) + '.pdf'] : [d.acte.replace(/ /g, '_') + '_' + d.ref + '.pdf', 'Facture_' + (d.fac || 'sans_numero') + '.pdf', 'PV_de_reception_' + d.id + '.pdf', 'Visa_CF_' + d.id + '.pdf'].concat(d.av && d.av.recoupe ? ['Releve_avance_recoupee_' + d.av.garantie + '.pdf'] : []))); sec('Pièces justificatives', pj);
     var hl = cvEl('div'); [['Engagement saisi', dd.eng, d.tiers], ['Visa du Contrôle financier', dd.eng, 'Engagement ' + d.id], ['Service fait et liquidation', dd.liq, 'Facture ' + (d.fac || '—')], ['Mandat émis', dd.ord, d.mandat]].forEach(function (x) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, x[0])); l.appendChild(cvEl('div', 'hby', x[2])); row.appendChild(l); row.appendChild(cvEl('span', 'when', x[1] ? isoToFr(x[1]) : '—')); hl.appendChild(row); }); sec('Parcours du dossier', hl);
     document.getElementById('dp-pay-form').hidden = false;
   }
@@ -20518,16 +20535,17 @@ var EXEC_REC = [
     if (T === 'syn') {
       body.appendChild(dpTiles([['Crédit validé', fmt(cr) + ' MGA', 'brand'], ['Engagé (visé)', fmt(s.e) + ' MGA', 'info'], ['Liquidé', fmt(s.l) + ' MGA', 'n'], ['Mandaté', fmt(s.o) + ' MGA', 'n'], ['Payé', fmt(s.p) + ' MGA', 'ok'], ['Disponible', fmt(cr - s.e - s.r) + ' MGA', cr - s.e - s.r >= 0 ? 'ok' : 'ko']], { cols: 3 }));
       body.appendChild(dpWork(z));
+      var av = dpAvStats(z.key); if (av.versee || docs.some(function (d) { return d.av; })) { var sv2 = cvEl('section', 'co-blk'); sv2.appendChild(cvEl('div', 'kb-h', 'Avances de démarrage')); sv2.appendChild(dpTiles([['Avance versée', fmt(av.versee) + ' MGA', 'info'], ['Avance recoupée', fmt(av.recoupee) + ' MGA', 'ok'], ['Reste à recouper', fmt(av.reste) + ' MGA', av.reste ? 'warn' : 'n']], { cols: 3 })); body.appendChild(sv2); }
       var nat = z.l.nat && PUB_NAT[z.l.nat] ? PUB_NAT[z.l.nat] + ' · ' + (NATL[z.l.nat] || '').replace(/^\d+ — /, '') : 'Non rattaché';
       var sc = cvEl('section', 'co-blk'); sc.appendChild(cvEl('div', 'kb-h', 'Imputation budgétaire')); sc.appendChild(dpTiles([['Composante', z.perim], ['Compte', nat], ['Source de financement', (z.l.axv && z.l.axv.Financier) || '—'], ['Taux de paiement', dpPct(s.p, cr)]], { small: true })); body.appendChild(sc);
     } else if (T === 'eng') {
-      body.appendChild(dpMini(['N°', 'Tiers · objet', 'Acte', 'Date', 'Montant (MGA)', 'Statut'], docs.map(function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, d.acte + ' ' + d.ref, dt((d.dt || {}).eng), fmt(d.mt), dpStatBadge(d)]; }), [4], 'Aucun engagement sur cette ligne.'));
+      body.appendChild(dpMini(['N°', 'Tiers · objet', 'Acte', 'Date', 'Montant (MGA)', 'Statut'], docs.filter(function (d) { return d.kind !== 'avance'; }).map(function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, d.acte + ' ' + d.ref, dt((d.dt || {}).eng), fmt(d.mt), dpStatBadge(d)]; }), [4], 'Aucun engagement sur cette ligne.'));
     } else if (T === 'liq') {
       body.appendChild(dpMini(['Engagement', 'Tiers', 'Facture', 'Date de liquidation', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 3; }).map(function (d) { return [d.id, d.tiers, d.fac || '—', dt((d.dt || {}).liq), fmt(d.mt)]; }), [4], 'Aucune liquidation sur cette ligne.'));
     } else if (T === 'ord') {
-      body.appendChild(dpMini(['Mandat', 'Bénéficiaire', 'Engagement', 'Date d’émission', 'Montant (MGA)', 'Statut'], docs.filter(function (d) { return DP_RANK[d.st] >= 4; }).map(function (d) { return [d.mandat, d.tiers, d.id, dt((d.dt || {}).ord), fmt(d.mt), dpStatBadge(d)]; }), [4], 'Aucun mandat sur cette ligne.'));
+      body.appendChild(dpMini(['Mandat', 'Bénéficiaire', 'Engagement', 'Date d’émission', 'Montant (MGA)', 'Statut'], docs.filter(function (d) { return DP_RANK[d.st] >= 4; }).map(function (d) { return [d.mandat, d.tiers, d.id, dt((d.dt || {}).ord), fmt(dpNet(d)), dpStatBadge(d)]; }), [4], 'Aucun mandat sur cette ligne.'));
     } else if (T === 'pay') {
-      body.appendChild(dpMini(['Mandat', 'Bénéficiaire', 'Mode de paiement', 'Date de paiement', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 6; }).map(function (d) { return [d.mandat, d.tiers, d.mode || '—', dt((d.dt || {}).pay), fmt(d.mt)]; }), [4], 'Aucun paiement sur cette ligne.'));
+      body.appendChild(dpMini(['Mandat', 'Bénéficiaire', 'Mode de paiement', 'Date de paiement', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 6; }).map(function (d) { return [d.mandat, d.tiers, d.mode || '—', dt((d.dt || {}).pay), fmt(dpNet(d))]; }), [4], 'Aucun paiement sur cette ligne.'));
     } else {
       var ex = z.r.ex || '2026', prev = bvSpread(cr, z.l, ex), E = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], Li = E.slice(), P = E.slice();
       docs.forEach(function (d) { var q = d.dt || {}; function put(a, iso, v) { if (iso && iso.slice(0, 4) === ex) a[+iso.slice(5, 7) - 1] += v; } if (DP_RANK[d.st] >= 2) put(E, q.eng, d.mt); if (DP_RANK[d.st] >= 3) put(Li, q.liq, d.mt); if (DP_RANK[d.st] >= 6) put(P, q.pay, d.mt); });
@@ -20546,7 +20564,7 @@ var EXEC_REC = [
   function dpClotRender() {
     dpSeed(); var O = DP.ops, docs = DP.docs || [], fr = DP.frozen, t = dpTot();
     var soumis = docs.filter(function (d) { return d.st === 'soumis'; }), chez = docs.filter(function (d) { return d.st === 'ordonnance'; }), nonSolde = t.e - t.p;
-    var blockOk = !!(O.stop && O.rep && !soumis.length), res = chez.length + (nonSolde > 0 && O.rep === 'reporte' ? 0 : 0);
+    var blockOk = !!(O.stop && O.rep && !soumis.length), res = chez.length + docs.filter(function (d) { return d.av && d.av.st === 'versee' && !d.av.recoupe; }).length;
     function chip(k, tx) { return badge(tx, { ok: 'b-ok', warn: 'b-warn', ko: 'b-ko', neutral: 'b-neutral' }[k]); }
     var box = document.getElementById('dpclot-ops'); box.innerHTML = '';
     function op(title, sub, chips) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.style.flex = '1'; l.appendChild(cvEl('b', null, title)); l.appendChild(cvEl('div', 'hby', sub)); row.appendChild(l); chips.forEach(function (c) { c.style.marginLeft = '6px'; row.appendChild(c); }); box.appendChild(row); }
@@ -20554,6 +20572,7 @@ var EXEC_REC = [
     op('2 · Engagements en attente de visa', soumis.length ? pl(soumis.length, 'engagement') + ' à viser ou à rejeter : ' + soumis.map(function (d) { return d.id; }).join(', ') + '.' : 'Aucun engagement en attente de visa.', [chip(soumis.length ? 'ko' : 'ok', soumis.length ? 'À traiter' : 'Conforme'), chip('neutral', 'Bloquant')]);
     op('3 · Engagements non soldés', fmt(nonSolde) + ' MGA engagés et non encore payés à reporter ou à annuler.' + (O.rep ? ' Décision : ' + (O.rep === 'annule' ? 'annulation' : 'report sur l’exercice suivant') + '.' : ''), [chip(O.rep ? 'ok' : 'warn', O.rep ? 'Fait' : 'À faire'), chip('neutral', 'Bloquant')]);
     op('4 · Mandats chez le comptable', chez.length ? pl(chez.length, 'mandat') + ' non payé(s) : ' + chez.map(function (d) { return d.mandat; }).join(', ') + '.' : 'Tous les mandats sont payés ou rejetés.', [chip(chez.length ? 'warn' : 'ok', chez.length ? 'Réserve' : 'Conforme')]);
+    var avs = docs.filter(function (d) { return d.av && d.av.st === 'versee' && !d.av.recoupe; }); op('4bis · Avances non recoupées', avs.length ? pl(avs.length, 'avance') + ' versée(s) non encore recoupée(s) : ' + avs.map(function (d) { return d.id + ' (' + fmt(d.av.amt) + ' MGA)'; }).join(', ') + '.' : 'Toutes les avances versées sont recoupées.', [chip(avs.length ? 'warn' : 'ok', avs.length ? 'Réserve' : 'Conforme')]);
     op('5 · Validation par le Responsable administratif et financier', O.raf ? 'Validé le ' + O.raf + ' : « VU ET VÉRIFIÉ ».' : (blockOk ? 'Les opérations bloquantes sont faites : le RAF peut valider.' : 'Disponible quand les opérations bloquantes 1 à 3 sont faites.'), [chip(O.raf ? 'ok' : 'neutral', O.raf ? 'Validé' : 'En attente')]);
     op('6 · Adoption par le Directeur de projet et verrouillage', fr ? 'Version ' + fr.v + ' figée le ' + fr.on + ' : exercice verrouillé.' : 'Fige la version avec ' + pl(res, 'réserve') + ' et verrouille les écritures de l’exercice.', [chip(fr ? 'ok' : 'neutral', fr ? 'Figé' : 'Projet')]);
     var vb = document.getElementById('dpclot-ver'); vb.innerHTML = '';
