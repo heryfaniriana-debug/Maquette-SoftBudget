@@ -11996,7 +11996,7 @@ function fmAxes() {
     var isPta = bvView() === 'pta';
     [['Exporter en Excel', '', true, function () { bvExportXlsx(r); }],
      ['Exporter en PDF', '', true, function () { bvExportPdf(r); }],
-     ['Proposer une révision', 'primary', !!bvSelLine(r), function () { revFromLine(r); }],
+     ['Proposer une révision', 'primary', true, function () { revFromLine(r); }],
      ['Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), '', pt.st !== 'Clôturé' && bvPlans(r).length > 0, function () { bvLinkOpen(r); }],
      [pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', 'primary', canSend, function () {
         if (bvLinkMissing(r)) { cvSay('bv-msg', 'Envoi impossible : ' + pl(bvLinkMissing(r), 'ligne') + ' à rattacher aux plans de la configuration (' + bvPlans(r).map(function (p) { return p.n; }).join(', ') + ').'); var m0 = document.getElementById('bv-msg'); m0.style.background = 'var(--ko-bg)'; m0.style.color = 'var(--ko)'; return; }
@@ -12068,7 +12068,8 @@ function fmAxes() {
       var stc = cell(tr, ''); stc.appendChild(badge(bvPt(r).st, PTST[bvPt(r).st] || 'b-neutral'));
       var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button';
       b.addEventListener('click', function () { bvOpen(r); });
-      act.appendChild(b); body.appendChild(tr);
+      var brv = cvEl('button', 'btn small', 'Proposer une révision'); brv.type = 'button'; brv.style.marginLeft = '6px'; brv.addEventListener('click', function () { revFromLine(r); });
+      act.appendChild(b); act.appendChild(brv); body.appendChild(tr);
     });
   }
   document.getElementById('bv-view-close').addEventListener('click', function () { document.getElementById('bv-view').hidden = true; });
@@ -21871,8 +21872,8 @@ var EXEC_REC = [
     });
   }
   function revFromLine(r) {
-    var sel = bvSelLine(r); if (!sel) return; var key = r.camp + '|' + sel.x.perim + '|' + sel.x.l.c;
-    cvAsk({ title: 'Proposer une révision de la ligne ' + sel.x.l.c, ok: 'Créer le brouillon', required: true, cLabel: 'Motif de la révision', placeholder: 'Pourquoi réviser cette ligne ?' }, function (m) { var rev = revNew(m, r); show('revpl'); revDetOpen(rev); revChgOpen(rev, null); var t = document.getElementById('revpl-ct'); t.value = 'L'; revChgFill(key); });
+    var sel = bvSelLine(r), key = sel ? r.camp + '|' + sel.x.perim + '|' + sel.x.l.c : null;
+    cvAsk({ title: sel ? 'Proposer une révision de la ligne ' + sel.x.l.c : 'Proposer une révision du plan', ok: 'Créer le brouillon', required: true, cLabel: 'Motif de la révision', placeholder: 'Pourquoi réviser cette ligne ?' }, function (m) { var rev = revNew(m, r); show('revpl'); revDetOpen(rev); if (key) { revChgOpen(rev, null); var t = document.getElementById('revpl-ct'); t.value = 'L'; revChgFill(key); } });
   }
   document.getElementById('revpl-new').addEventListener('click', function () {
     var lot = anaLots(anaEx())[0]; if (!lot) { bkMsg('revpl-msg', 'Aucun PTBA validé à réviser.', 'ko'); return; }
