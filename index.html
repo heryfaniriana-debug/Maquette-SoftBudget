@@ -1929,6 +1929,14 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         </div>
       </div>
 
+      <div class="group" id="g-plan" style="display:none">
+        <button class="item" data-toggle="g-plan" id="nav-plan" title="Planification">
+          <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Planification
+          <svg class="ico chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="sub"></div>
+      </div>
       <div class="group" id="g-cadm">
         <button class="item" data-toggle="g-cadm" id="nav-cadm" title="Compte administratif">
           <svg class="ico" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
@@ -5344,32 +5352,16 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       <!-- ===== Projet : plan de décaissement prévisionnel ===== -->
       <section class="view" id="v-pdec">
-        <div class="head"><div><h1>Plan de décaissement</h1><p>Besoins de décaissement par période, dérivés de la programmation du PTBA, comparés aux décaissements réalisés. Distinct du PTBA : il suit les besoins de trésorerie du projet.</p></div></div>
+        <div class="head"><div><h1>Plan de décaissement</h1><p>Décaissements prévus à partir du PTBA et du PPM, en partant de l’avance initiale : le plan indique quand déposer chaque demande de réapprovisionnement.</p></div>
+          <div class="actions"><button class="btn" id="pdc-go">Voir les demandes de fonds</button></div></div>
         <div class="callout" id="pdc-msg" hidden style="margin-bottom:12px"></div>
-        <div class="rpbud" style="margin-bottom:12px"><div class="rpbud-title">Affichage</div><div class="rpbud-grid">
-          <div class="rpbud-fld"><label for="pdc-per">Période</label><select class="field" id="pdc-per"><option value="mois">Par mois</option><option value="trim">Par trimestre</option><option value="sem">Par semestre</option></select></div>
-          <div class="rpbud-fld"><label for="pdc-grp">Regroupement</label><select class="field" id="pdc-grp"><option value="src">Par source de financement</option><option value="comp">Par composante</option><option value="cat">Par catégorie de dépenses</option></select></div>
-          <div class="rpbud-fld"><label for="pdc-ar">Arrêté des décaissements au</label><input class="field" type="date" id="pdc-ar"><div class="rpbud-hint" style="margin-top:4px">Les paiements importés sont connus jusqu’au 30/09/2026.</div></div>
-        </div><div class="err" id="pdc-err"></div></div>
-        <div class="kpis" id="pdc-k"></div>
-        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:900px"><thead><tr id="pdc-h"></tr></thead><tbody id="pdc-b"></tbody><tfoot><tr id="pdc-f"></tr></tfoot></table></div><div class="pager"><span id="pdc-n"></span><span>Montants en millions de MGA · cellule : prévu, puis réalisé</span></div></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px">
-          <div class="panel"><h2>Besoins, demandes au bailleur et fonds reçus</h2><div class="body" style="padding:0"><table style="min-width:0"><thead><tr><th>Source</th><th class="num">Besoin de l’exercice</th><th class="num">Demandé</th><th class="num">Reçu</th></tr></thead><tbody id="pdc-fin"></tbody></table></div></div>
-          <div class="panel"><h2>Réviser le plan <small id="pdc-ver"></small></h2><div class="body">
-            <div class="fgrid">
-              <div class="full"><label for="pdc-l">Ligne <em>*</em></label><select id="pdc-l" class="field"></select></div>
-              <div><label for="pdc-a">Décaler depuis <em>*</em></label><select id="pdc-a" class="field"></select></div>
-              <div><label for="pdc-b2">Vers <em>*</em></label><select id="pdc-b2" class="field"></select></div>
-              <div class="full"><label for="pdc-m">Montant décalé (MGA) <em>*</em></label><input id="pdc-m" class="field" type="text" inputmode="numeric"></div>
-              <div class="full"><label for="pdc-mo">Motif <em>*</em></label><input id="pdc-mo" class="field" type="text" placeholder="Ex. retard de la procédure d’attribution"></div>
-            </div>
-            <div class="err" id="pdc-rerr"></div>
-            <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn primary" id="pdc-rok">Créer une nouvelle version</button></div>
-            <div id="pdc-hist" style="margin-top:8px"></div>
-          </div></div>
-        </div>
+        <div id="pdc-k"></div>
+        <section class="co-blk"><div class="kb-h">Hypothèses</div><div id="pdc-hyp"></div></section>
+        <section class="co-blk"><div class="kb-h">Demandes de réapprovisionnement à déposer</div><div class="card" id="pdc-req"></div></section>
+        <section class="co-blk"><div class="kb-h">Évolution du solde du compte spécial</div><div class="card" id="pdc-chart" style="padding:14px 16px"></div></section>
+        <section class="co-blk"><div class="kb-h">Détail mensuel</div><div id="pdc-tab"></div></section>
+        <section class="co-blk"><div class="kb-h">Origine des décaissements prévus</div><div id="pdc-orig"></div></section>
       </section>
-
       <!-- ===== Projet : demandes de fonds (DRF et DPD) ===== -->
       <section class="view" id="v-dfon">
         <div class="head"><div><h1>Demandes de fonds</h1><p>Demandes de retrait de fonds (DRF) et de paiement direct (DPD) adressées au bailleur : préparation, soumission, réponse et fonds reçus</p></div>
@@ -6536,7 +6528,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     avini: ['Cadre du projet', 'Avance initiale'],
     avanc: ['Suivi', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
-    pdec: ['Trésorerie', 'Plan de décaissement'],
+    pdec: ['Planification', 'Plan de décaissement'],
     dfon: ['Trésorerie', 'Demandes de fonds'],
     pubrect: ['Élaboration', 'Budget rectificatif'],
     pubdot: ['Élaboration', 'Répartition des crédits'],
@@ -6555,11 +6547,12 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
-    'nav-treso': ['bkacc', 'bkdec', 'pdec', 'dfon', 'bkrel', 'bkrap'],
+    'nav-plan': ['ptba', 'pta', 'ppm', 'pdec'],
+    'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
     'nav-rapports': ['synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
   };
-  var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
+  var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
   var MENU_OF = { create: 'list', detail: 'bud', saisie: 'bud', valid: 'arb' };
   var LABELLED = ['soon', 'params', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl', 'appr'];
   var VIEWALIAS = { pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
@@ -14469,7 +14462,8 @@ var EXEC_REC = [
   }
   var NAV_ORIG = null;
   var PRJ_GROUP_LBL = {
-    'g-budgets': ['Programmation', 'Programmation : configuration, campagnes, collecte, PTBA et marchés'],
+    'g-budgets': ['Programmation', 'Programmation : configuration, campagnes, collecte et budgets'],
+    'g-plan': ['Planification', 'PTBA, PTA, plan de passation des marchés et plan de décaissement'],
     'g-treso': ['Trésorerie', 'Décaissements, demandes de fonds et comptes bancaires'],
     'g-suivi': ['Suivi', 'Suivi de l’exécution']
   };
@@ -14500,6 +14494,7 @@ var EXEC_REC = [
     var gS = document.getElementById('g-suivi'), gT = document.getElementById('g-treso');
     nav.insertBefore(gS, gT);
     document.getElementById('g-pcadre').style.display = code === 'prj' ? '' : 'none';
+    document.getElementById('g-plan').style.display = code === 'prj' ? '' : 'none';
     if (code !== 'prj') return;
     nav.insertBefore(gT, gS);
     var circ = cfg.regime !== 'importe', revCA = cfg.regime === 'projet' && cfg.mods.cadm;
@@ -14508,14 +14503,15 @@ var EXEC_REC = [
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
     put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['avini', 'Avance initiale', 'Avance initiale et compte spécial du projet'], ['resu']]);
-    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud'], ['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)']]);
+    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
+    put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
-    put('g-treso', [['dfon'], ['pdec'], ['bkacc'], ['bkrel'], ['bkrap']]);
+    put('g-treso', [['dfon'], ['bkacc'], ['bkrel'], ['bkrap']]);
     put('g-suivi', [['appr'], ['avanc'], ['dprap'], ['engage', circ ? 'Engagements importés' : ''], ['real', circ ? 'Réalisations importées' : ''], ['decaiss', circ ? 'Paiements importés' : ''], ['encaiss', circ ? 'Recettes importées' : '']]);
     var avb = document.querySelector('.sub button[data-go="avanc"]'); if (avb) avb.style.display = '';
     Object.keys(PRJ_GROUP_LBL).forEach(function (id) { navSetGroup(document.getElementById(id), PRJ_GROUP_LBL[id][0], PRJ_GROUP_LBL[id][1]); });
   }
-  var PRJ_CRUMB_G = { 'g-pcadre': 1, 'g-budgets': 1, 'g-cadm': 1, 'g-treso': 1, 'g-suivi': 1 };
+  var PRJ_CRUMB_G = { 'g-pcadre': 1, 'g-plan': 1, 'g-budgets': 1, 'g-cadm': 1, 'g-treso': 1, 'g-suivi': 1 };
   function prjBtn(name) { return document.querySelector('.sub button[data-go="' + (MENU_OF[name] || name) + '"]'); }
   function prjGroupOf(name) {
     if (typeof activeCode !== 'function' || activeCode() !== 'prj') return null;
@@ -16130,48 +16126,68 @@ var EXEC_REC = [
   function pdcPeriods(per) { if (per === 'mois') return MOIS.slice(1).map(function (n, i) { return { l: n, ms: [i + 1] }; }); if (per === 'sem') return [{ l: 'S1', ms: [1, 2, 3, 4, 5, 6] }, { l: 'S2', ms: [7, 8, 9, 10, 11, 12] }]; return [{ l: 'T1', ms: [1, 2, 3] }, { l: 'T2', ms: [4, 5, 6] }, { l: 'T3', ms: [7, 8, 9] }, { l: 'T4', ms: [10, 11, 12] }]; }
   function pdcKey(grp) { return grp === 'comp' ? function (l) { return 'Composante ' + l.comp.slice(1) + ' — ' + CAD.comps[l.comp]; } : (grp === 'cat' ? function (l) { return l.cat; } : function (l) { return l.srcLib + ' (' + l.src + ')'; }); }
   function pdcSums(keyFn, upto) { var L = cadLines(2), P = pdcPlan(), R = pdcReal(), o = {}; L.forEach(function (l) { var k = keyFn(l); o[k] = o[k] || { p: 0, r: 0 }; for (var m = 1; m <= 12; m++) { if (m <= upto) { o[k].p += P[l.code][m]; o[k].r += R[l.code][m]; } } }); return o; }
-  function pdcRender() {
-    var P = CPD.par, ar = document.getElementById('pdc-ar'); if (!ar.value) ar.value = P.arret; document.getElementById('pdc-per').value = P.per; document.getElementById('pdc-grp').value = P.grp;
-    var up = parseInt(P.arret.slice(5, 7), 10), L = cadLines(2), plan = pdcPlan(), real = pdcReal(), per = pdcPeriods(P.per), key = pdcKey(P.grp), keys = uniq(L.map(key)), T = { p: 0, r: 0, pc: 0, rc: 0 };
-    document.getElementById('pdc-h').innerHTML = '<th>' + (P.grp === 'src' ? 'Source de financement' : (P.grp === 'comp' ? 'Composante' : 'Catégorie')) + '</th>' + per.map(function (p) { return '<th class="num">' + p.l + '</th>'; }).join('') + '<th class="num">Total exercice</th><th class="num">Écart à l’arrêté</th>';
-    var cell = function (p, r, ms) { var show = ms.some(function (m) { return m <= up; }); return '<td class="num"><b>' + fmMio(p) + '</b><div style="font-size:12px;color:#5B606D">' + (show ? fmMio(r) : '—') + '</div></td>'; };
-    var body = keys.map(function (k) {
-      var g = L.filter(function (l) { return key(l) === k; }), tp = 0, tr = 0, pc = 0, rc = 0;
-      var cells = per.map(function (pp) { var p = 0, r = 0; g.forEach(function (l) { pp.ms.forEach(function (m) { p += plan[l.code][m]; if (m <= up) r += real[l.code][m]; }); }); return cell(p, r, pp.ms); }).join('');
-      g.forEach(function (l) { for (var m = 1; m <= 12; m++) { tp += plan[l.code][m]; if (m <= up) { pc += plan[l.code][m]; rc += real[l.code][m]; } } });
-      T.p += tp; T.pc += pc; T.rc += rc;
-      return '<tr><td class="name">' + escH(k) + '</td>' + cells + '<td class="num"><b>' + fmMio(tp) + '</b></td><td class="num' + (rc - pc < 0 ? ' neg' : '') + '">' + (rc - pc >= 0 ? '+' : '−') + fmMio(Math.abs(rc - pc)) + '</td></tr>';
-    }).join('');
-    document.getElementById('pdc-b').innerHTML = body;
-    document.getElementById('pdc-f').innerHTML = '<td>Total</td>' + per.map(function (pp) { var p = 0, r = 0; L.forEach(function (l) { pp.ms.forEach(function (m) { p += plan[l.code][m]; if (m <= up) r += real[l.code][m]; }); }); return cell(p, r, pp.ms); }).join('') + '<td class="num"><b>' + fmMio(T.p) + '</b></td><td class="num">' + (T.rc - T.pc >= 0 ? '+' : '−') + fmMio(Math.abs(T.rc - T.pc)) + '</td>';
-    cadKpi('pdc-k', [['Plan de l’exercice', fmt(T.p) + ' MGA', 'version ' + CPD.ver], ['Prévu à l’arrêté', fmt(T.pc) + ' MGA', 'jusqu’en ' + MOIS[up].toLowerCase()], ['Décaissé à l’arrêté', fmt(T.rc) + ' MGA', pctf(rt0(T.rc, T.pc)) + ' du prévu'], ['Écart de décaissement', (T.rc - T.pc >= 0 ? '+ ' : '− ') + fmt(Math.abs(T.rc - T.pc)) + ' MGA', 'réalisé − prévu']]);
-    document.getElementById('pdc-n').textContent = 'Écart de décaissement = décaissements réalisés − décaissements prévus · réalisé : paiements importés répartis selon la programmation (simulation) et règlements du circuit';
-    // besoins, demandes, fonds reçus
-    var fin = CAD.src.map(function (s) { var lines = L.filter(function (l) { return l.src === s.code; }), need = lines.reduce(function (a, l) { return a + plan[l.code].reduce(function (x, y) { return x + y; }, 0); }, 0), dm = CDF.items.filter(function (d) { return d.src === s.code && d.st !== 'Préparée'; }), rc = CDF.items.filter(function (d) { return d.src === s.code && d.st === 'Payée'; }); return '<tr><td class="name">' + escH(s.lib) + '</td><td class="num">' + fmt(need) + '</td><td class="num">' + fmt(sumK(dm, 'mt')) + '</td><td class="num">' + fmt(sumK(rc, 'mtAcc')) + '</td></tr>'; }).join('');
-    document.getElementById('pdc-fin').innerHTML = fin;
-    // révision
-    document.getElementById('pdc-ver').textContent = '· version ' + CPD.ver;
-    var ls = document.getElementById('pdc-l'); if (!ls.options.length) { ls.innerHTML = L.map(function (l) { return '<option value="' + l.code + '">' + escH(l.code + ' — ' + l.lib) + '</option>'; }).join(''); var mo = MOIS.slice(1).map(function (n, i) { return '<option value="' + (i + 1) + '">' + n + '</option>'; }).join(''); document.getElementById('pdc-a').innerHTML = mo; document.getElementById('pdc-b2').innerHTML = mo; document.getElementById('pdc-b2').value = '12'; }
-    document.getElementById('pdc-rok').disabled = !cadCan('pdc_edit') || cadFrozen(); document.getElementById('pdc-rok').title = cadCan('pdc_edit') ? '' : 'Réservé : ' + cadRolesTxt('pdc_edit');
-    document.getElementById('pdc-hist').innerHTML = CPD.hist.map(function (h) { return '<div class="list-row"><div><b>Version ' + h.v + '</b><div class="hby">' + escH(h.t) + '</div></div><span class="when">' + h.on + ' · ' + escH(h.by) + '</span></div>'; }).join('');
+  /* ----- Plan de décaissement : besoins du compte spécial dérivés du PTBA et du PPM, à partir de l'avance initiale ----- */
+  var PDC = { delai: 1 }, PDC_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  function pdcNeeds() {
+    dpSeed(); var z12 = function () { return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; }, out = z12(), ppmM = z12(), rows = [], ex = '2026';
+    dpLines().forEach(function (z) {
+      if (!dfoDocSrc({ key: z.key })) return; ex = z.r.ex || ex;
+      var act = z.key.split('|').filter(function (_, i) { return i !== 1; }).join('|'), pp = (CPP.items || []).filter(function (x) { return x.act === act; }), ppT = 0, o = z12();
+      pp.forEach(function (x) { var d = x.d3 || x.d2 || x.d1; if (d && d.slice(0, 4) === ex) { o[+d.slice(5, 7) - 1] += x.est; ppT += x.est; } });
+      var rest = Math.max(0, z.ouv - ppT), sp = bvSpread(rest, z.l, ex);
+      for (var m = 0; m < 12; m++) { out[m] += o[m] + sp[m]; ppmM[m] += o[m]; }
+      rows.push({ z: z, ppm: ppT, ptba: rest });
+    });
+    return { out: out, ppmM: ppmM, rows: rows, ex: ex };
   }
-  ['pdc-per', 'pdc-grp'].forEach(function (i) { document.getElementById(i).addEventListener('change', function () { CPD.par.per = document.getElementById('pdc-per').value; CPD.par.grp = document.getElementById('pdc-grp').value; pdcRender(); }); });
-  document.getElementById('pdc-ar').addEventListener('change', function () {
-    var v = this.value, err = document.getElementById('pdc-err');
-    if (!v || v.slice(0, 4) !== CAD.ex) { err.textContent = 'L’arrêté doit être dans l’exercice ' + CAD.ex + '.'; return; } if (v > isoOf(new Date())) { err.textContent = 'L’arrêté ne peut pas dépasser aujourd’hui.'; return; }
-    err.textContent = (v > CAD.cover ? 'Paiements importés connus jusqu’au ' + isoToFr(CAD.cover) + ' : seuls les règlements du circuit complètent la période.' : ''); CPD.par.arret = v; pdcRender();
-  });
-  document.getElementById('pdc-rok').addEventListener('click', function () {
-    var err = document.getElementById('pdc-rerr'), l = document.getElementById('pdc-l').value, a = +document.getElementById('pdc-a').value, b = +document.getElementById('pdc-b2').value, m = parseInt0(document.getElementById('pdc-m').value), mo = document.getElementById('pdc-mo').value.trim();
-    if (!cadPerm('pdc_edit', 'pdc-msg')) return; if (cadFrozen()) { err.textContent = 'Exercice verrouillé : le plan ne peut plus être révisé.'; return; }
-    if (a === b) { err.textContent = 'Les deux mois doivent être différents.'; return; }
-    if (isNaN(m) || m <= 0) { err.textContent = 'Le montant décalé doit être positif.'; return; }
-    var plan = pdcPlan(); if (m > plan[l][a]) { err.textContent = 'Le montant dépasse la prévision de ' + MOIS[a].toLowerCase() + ' (' + fmt(plan[l][a]) + ' MGA).'; return; }
-    if (mo.length < 5) { err.textContent = 'Le motif est obligatoire.'; return; }
-    err.textContent = ''; CPD.ver++; CPD.adj.push({ ligne: l, de: a, vers: b, mt: m, motif: mo, v: CPD.ver });
-    CPD.hist.unshift({ v: CPD.ver, on: nowStr(), by: cadRoleName(), t: l + ' : ' + fmt(m) + ' MGA décalés de ' + MOIS[a].toLowerCase() + ' vers ' + MOIS[b].toLowerCase() + ' — ' + mo }); cadAudit('Plan de décaissement', 'Version ' + CPD.ver + ' : ' + l + ' ' + fmt(m) + ' MGA');
-    document.getElementById('pdc-m').value = ''; document.getElementById('pdc-mo').value = ''; bkMsg('pdc-msg', 'Version ' + CPD.ver + ' du plan créée : la précédente reste consultable dans l’historique.', 'ok'); pdcRender();
-  });
+  /* Simulation mois par mois : l'avance initiale arrive, les dépenses la consomment, et une demande de réapprovisionnement est déposée dès que le solde, après le délai du bailleur, passerait sous le seuil */
+  function pdcSim(N) {
+    var v0 = DFS.versements[0], seuil = DFS.plaf * DFS.seuil / 100, dl = PDC.delai, s = v0.date.slice(0, 4) === N.ex ? +v0.date.slice(5, 7) - 1 : 0, inflow = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], bal = [], req = [], unj = 0, b = 0;
+    for (var m = 0; m < 12; m++) {
+      if (m === s) inflow[m] += v0.mt;
+      b += inflow[m] - N.out[m]; if (m >= s) unj += N.out[m]; bal[m] = b;
+      var next = 0, arr = 0; for (var k = 1; k <= dl; k++) if (m + k < 12) { next += N.out[m + k]; arr += inflow[m + k]; }
+      if (m >= s && unj > 0 && b + arr - next < seuil) { req.push({ m: m, mt: unj, arr: m + dl }); if (m + dl < 12) inflow[m + dl] += unj; unj = 0; }
+    }
+    return { inflow: inflow, bal: bal, req: req, s: s, seuil: seuil };
+  }
+  function pdcActual(ex) {
+    var pay = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], rec = pay.slice(); function put(a, iso, v) { if (iso && iso.slice(0, 4) === ex) a[+iso.slice(5, 7) - 1] += v; }
+    (DP.docs || []).forEach(function (d) { if (dfoDocSrc(d) && DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT) put(pay, (d.dt || {}).pay, dfoAmt(d)); });
+    DFS.versements.forEach(function (v) { put(rec, v.date, v.mt); }); CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') put(rec, x.dPaie, x.mtAcc); });
+    return { pay: pay, rec: rec };
+  }
+  function pdcRender() {
+    var N = pdcNeeds(), S = pdcSim(N), A = pdcActual(N.ex), v0 = DFS.versements[0], now = new Date(), nm = String(now.getFullYear()) === N.ex ? now.getMonth() : 11, tot = bvSum(N.out), lowI = S.s, i;
+    for (i = S.s; i < 12; i++) if (S.bal[i] < S.bal[lowI]) lowI = i;
+    var low = S.bal[lowI], neg = []; for (i = S.s; i < 12; i++) if (S.bal[i] < 0) neg.push(PDC_MOIS[i]);
+    dpKpis('pdc-k', [['Décaissements prévus', fmt(tot) + ' MGA', 'brand'], ['Avance initiale', fmt(v0.mt) + ' MGA', 'info'], ['Demandes à déposer', String(S.req.length), 'warn'], ['Solde prévu le plus bas (' + BVMOIS[lowI].replace('.', '') + ')', fmt(low) + ' MGA', low < 0 ? 'ko' : (low < S.seuil ? 'warn' : 'ok')]]);
+    dpMsg('pdc-msg', neg.length ? 'Le solde du compte spécial serait négatif en ' + neg.join(', ') + ' : avancez une demande, augmentez l’avance ou relevez le plafond.' : '', true);
+    var hy = document.getElementById('pdc-hyp'); hy.innerHTML = '';
+    var row = cvEl('div'); row.style.cssText = 'display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px'; var f = cvEl('div'); f.appendChild(cvEl('label', null, 'Délai de traitement du bailleur')); var sl = cvEl('select', 'field'); [1, 2, 3].forEach(function (n) { var o = cvEl('option', null, n + ' mois'); o.value = String(n); sl.appendChild(o); }); sl.value = String(PDC.delai); sl.style.minWidth = '160px'; sl.addEventListener('change', function () { PDC.delai = +sl.value; pdcRender(); }); f.appendChild(sl); row.appendChild(f);
+    var ht = cvEl('div', 'hint', 'Avance initiale de ' + fmt(v0.mt) + ' MGA le ' + isoToFr(v0.date) + ' · plafond ' + fmt(DFS.plaf) + ' MGA · seuil d’alerte ' + fmt(Math.round(S.seuil)) + ' MGA (modifiables dans Cadre du projet › Avance initiale). Les décaissements viennent du PTBA (reste à programmer) et du PPM (paiement à la fin de chaque marché).'); ht.style.flex = '1 1 320px'; row.appendChild(ht); hy.appendChild(row);
+    var rq = document.getElementById('pdc-req'); rq.innerHTML = '';
+    if (!S.req.length) rq.appendChild(cvEl('div', 'hint', 'Aucune demande nécessaire : l’avance couvre les décaissements prévus.'));
+    S.req.forEach(function (r, j) {
+      var rw = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'Demande ' + (j + 1) + ' : à déposer en ' + PDC_MOIS[r.m] + ', avant la fin du mois'));
+      l.appendChild(cvEl('div', 'hby', 'Montant ' + fmt(r.mt) + ' MGA (dépenses payées depuis la dernière demande) · fonds attendus ' + (r.arr < 12 ? 'en ' + PDC_MOIS[r.arr] : 'après la fin de l’exercice'))); rw.appendChild(l);
+      var bd = r.m < nm ? badge('Échéance passée', 'b-neutral') : (r.m === nm ? badge('À déposer ce mois-ci', 'b-warn') : badge('À prévoir', 'b-info')); bd.style.marginLeft = 'auto'; rw.appendChild(bd); rq.appendChild(rw);
+    });
+    var ch = document.getElementById('pdc-chart'); ch.innerHTML = '';
+    var cum = 0, rb = A.pay.map(function (p, m) { cum += A.rec[m] - p; return cum; }), cl = function (a) { return a.map(function (v) { return Math.max(0, v); }); };
+    ch.appendChild(dpLineChart([{ name: 'Solde prévu', color: DPC.brand, data: cl(S.bal) }, { name: 'Seuil d’alerte', color: DPC.warn, dash: true, data: S.bal.map(function () { return S.seuil; }) }, { name: 'Solde réel', color: DPC.ok, data: cl(rb.map(function (v, m) { return m <= nm ? v : rb[nm]; })) }], BVMOIS));
+    var tb = document.getElementById('pdc-tab'); tb.innerHTML = ''; var nz = function (v) { return v ? fmt(v) : '—'; }, past = function (a) { return a.map(function (v, m) { return m <= nm ? nz(v) : '—'; }); };
+    var reqM = {}; S.req.forEach(function (r) { reqM[r.m] = r; });
+    tb.appendChild(dpMini(['MGA'].concat(BVMOIS, ['Total']), [
+      ['Décaissements prévus (PTBA et PPM)'].concat(N.out.map(nz), [fmt(tot)]), ['dont marchés du PPM'].concat(N.ppmM.map(nz), [fmt(bvSum(N.ppmM))]),
+      ['Fonds prévus (avance et réapprovisionnements)'].concat(S.inflow.map(nz), [fmt(bvSum(S.inflow))]), ['Solde prévu en fin de mois'].concat(S.bal.map(function (v) { return v ? fmt(v) : '—'; }), ['']),
+      ['Demande à déposer'].concat(S.bal.map(function (v, m) { return reqM[m] ? badge(fmt(reqM[m].mt), 'b-warn') : '—'; }), ['']),
+      ['Décaissements réalisés'].concat(past(A.pay), [fmt(bvSum(A.pay))]), ['Fonds reçus réels'].concat(past(A.rec), [fmt(bvSum(A.rec))])
+    ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
+    var og = document.getElementById('pdc-orig'); og.innerHTML = '';
+    og.appendChild(dpMini(['Ligne du PTBA', 'Source de financement', 'Marchés du PPM', 'Reste à programmer (PTBA)', 'Total prévu'], N.rows.map(function (r) { return [r.z.l.c + ' — ' + (r.z.l.lib || r.z.l.l), (r.z.l.axv && r.z.l.axv.Financier) || '—', fmt(r.ppm), fmt(r.ptba), fmt(r.ppm + r.ptba)]; }), [2, 3, 4], 'Aucune ligne financée par le bailleur.'));
+  }
+  document.getElementById('pdc-go').addEventListener('click', function () { show('dfon'); });
 
   /* ----- Demandes de fonds (DRF et DPD) : rattachées aux dépenses du compte administratif, avec l'avance initiale et le compte spécial du projet ----- */
   var DFO_ST = { 'Préparée': 'b-neutral', 'Soumise': 'b-warn', 'Acceptée': 'b-info', 'Rejetée': 'b-ko', 'Payée': 'b-ok' };
