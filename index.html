@@ -20297,8 +20297,9 @@ var EXEC_REC = [
   }
   function dpBar(id, items) { var bar = document.getElementById(id); bar.innerHTML = ''; items.forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); }); }
   /* Tuiles de lecture : libellé, valeur en gras avec unité discrète, couleur selon le sens (charte : marine, info, ok, alerte, erreur) */
+  function dpDl(pairs) { var g = cvEl('div', 'dp-dl'); pairs.forEach(function (p) { var d = cvEl('div', p[2] ? 'full' : ''); d.appendChild(cvEl('span', 'k', p[0])); d.appendChild(cvEl('span', 'v', p[1])); g.appendChild(d); }); return g; }
   function dpTiles(arr, opt) {
-    opt = opt || {}; var g = cvEl('div', 'dp-tiles' + (opt.small ? ' small' : '')); g.style.setProperty('--c', String(opt.cols || arr.length)); g.style.marginBottom = '14px';
+    opt = opt || {}; var g = cvEl('div', 'dp-tiles' + (opt.small ? ' small' : '')); g.style.setProperty('--c', String(opt.cols || arr.length)); if (arr.length % 2) g.className += ' odd'; g.style.marginBottom = '14px';
     arr.forEach(function (a) { var t = cvEl('div', 'dp-tile ' + (a[2] || 'n')), v = cvEl('div', 'v'), s = String(a[1]), m = s.match(/^(.*?)(\s(?:MGA))$/); t.appendChild(cvEl('div', 'l', a[0])); if (m) { v.appendChild(document.createTextNode(m[1])); v.appendChild(cvEl('span', 'u', 'MGA')); } else v.textContent = s; t.appendChild(v); g.appendChild(t); });
     return g;
   }
@@ -20474,14 +20475,12 @@ var EXEC_REC = [
     rej.addEventListener('click', function () { cvAsk({ title: 'Rejeter ' + d.mandat, ok: 'Rejeter', required: false, optLabel: 'Motif du rejet *', options: DP_MOTIFS, placeholder: 'Précisions pour l’ordonnateur' }, function (c, motif) { d.st = 'liquide'; d.mandat = ''; d.rejet = motif; DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', 'Mandat rejeté (' + motif.toLowerCase() + ') : retour à l’ordonnateur.', true); dpPayRender(); }); });
     bar.appendChild(pay); bar.appendChild(rej); body.appendChild(bar);
     function sec(title, node) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); return x; }
-    sec('Mandat', dpTiles([['Mandat', d.mandat, 'brand'], ['Bénéficiaire', d.tiers, 'n'], ['Net à payer', fmt(dpNet(d)) + ' MGA', 'warn'], ['Statut', DP_ST[d.st][0], 'info']], { small: true }));
-    sec('Dépense', dpTiles([['Engagement', d.id], ['Acte', d.acte + ' ' + d.ref], ['Facture', d.fac || '—'], ['Marché du PPM', d.ppm || '—']], { small: true }));
-    var obj = cvEl('div', 'hint', 'Objet : ' + d.objet); obj.style.margin = '-4px 0 14px'; body.lastChild.appendChild(obj);
+    sec('Mandat', dpTiles([['Net à payer', fmt(dpNet(d)) + ' MGA', 'warn'], ['Bénéficiaire', d.tiers, 'brand'], ['Statut', DP_ST[d.st][0], 'info']], { cols: 3 }));
     var nat = z && z.l.nat && PUB_NAT[z.l.nat] ? PUB_NAT[z.l.nat] + ' · ' + (NATL[z.l.nat] || '').replace(/^\d+ — /, '') : 'Non rattaché';
-    sec('Imputation budgétaire', dpTiles([['Composante', z ? z.perim : '—'], ['Ligne du PTBA', dpShort(d)], ['Compte', nat], ['Source de financement', (z && z.l.axv && z.l.axv.Financier) || '—']], { small: true }));
-    if (z) body.appendChild(dpWork(z));
-    sec('Situation du crédit de la ligne', dpTiles([['Crédit validé', fmt(s.ouv) + ' MGA', 'brand'], ['Engagé (visé)', fmt(s.e) + ' MGA'], ['Payé à ce jour', fmt(s.p) + ' MGA'], ['Disponible', fmt(s.dispo) + ' MGA', s.dispo >= 0 ? 'ok' : 'ko']], { small: true }));
-    var cl = cvEl('div'); ch.forEach(function (c) { var row = cvEl('div', 'list-row'); row.appendChild(cvEl('div', null, c[0])); row.appendChild(badge(c[1] ? 'Conforme' : 'Anomalie', c[1] ? 'b-ok' : 'b-ko')); cl.appendChild(row); }); sec('Contrôles du comptable', cl);
+    sec('Dépense', dpDl([['Engagement', d.id], ['Acte', d.acte + ' ' + d.ref], ['Facture', d.fac || '—'], ['Marché du PPM', d.ppm || '—'], ['Objet', d.objet, true]]));
+    var w = z && z.l.wk, pr = z ? (bvData(z.r).c.perims.filter(function (p) { return p.p === z.perim; })[0] || {}) : {}, inds = ((w && w.inds) || []).map(function (k) { var i = (pr.inds || []).filter(function (q) { return q.id === k.id; })[0]; return i ? i.lib + ' (' + fmt(k.contrib) + ' ' + i.unit + ')' : null; }).filter(Boolean);
+    sec('Imputation et programmation', dpDl([['Composante', z ? z.perim : '—'], ['Ligne du PTBA', dpShort(d)], ['Compte', nat], ['Source de financement', (z && z.l.axv && z.l.axv.Financier) || '—'], ['Travail prévu', w ? w.task : '—'], ['Période', w ? isoToFr(w.d1) + ' → ' + isoToFr(w.d2) : '—'], ['Indicateurs servis', inds.length ? inds.join(' · ') : '—', true]]));
+    sec('Crédit de la ligne', dpDl([['Crédit validé', fmt(s.ouv) + ' MGA'], ['Engagé (visé)', fmt(s.e) + ' MGA'], ['Payé à ce jour', fmt(s.p) + ' MGA'], ['Disponible', fmt(s.dispo) + ' MGA']]));    var cl = cvEl('div'); ch.forEach(function (c) { var row = cvEl('div', 'list-row'); row.appendChild(cvEl('div', null, c[0])); row.appendChild(badge(c[1] ? 'Conforme' : 'Anomalie', c[1] ? 'b-ok' : 'b-ko')); cl.appendChild(row); }); sec('Contrôles du comptable', cl);
     var pj = cvEl('div'); pj.appendChild(pjList(d.kind === 'avance' ? [d.acte.replace(/ /g, '_') + '_' + d.ref + '.pdf', 'Garantie_restitution_avance_' + (d.garantie || '') + '.pdf', 'Visa_CF_' + (d.parent || d.id) + '.pdf'] : [d.acte.replace(/ /g, '_') + '_' + d.ref + '.pdf', 'Facture_' + (d.fac || 'sans_numero') + '.pdf', 'PV_de_reception_' + d.id + '.pdf', 'Visa_CF_' + d.id + '.pdf'].concat(d.av && d.av.recoupe ? ['Releve_avance_recoupee_' + d.av.garantie + '.pdf'] : []))); sec('Pièces justificatives', pj);
     var hl = cvEl('div'); [['Engagement saisi', dd.eng, d.tiers], ['Visa du Contrôle financier', dd.eng, 'Engagement ' + d.id], ['Service fait et liquidation', dd.liq, 'Facture ' + (d.fac || '—')], ['Mandat émis', dd.ord, d.mandat]].forEach(function (x) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, x[0])); l.appendChild(cvEl('div', 'hby', x[2])); row.appendChild(l); row.appendChild(cvEl('span', 'when', x[1] ? isoToFr(x[1]) : '—')); hl.appendChild(row); }); sec('Parcours du dossier', hl);
     document.getElementById('dp-pay-form').hidden = false;
@@ -21161,8 +21160,14 @@ function pcRenderEnv(){
 
 </script>
 <style>
-  .dp-tiles { display: grid; grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); gap: 12px; }
-  @media (max-width: 1200px) { .dp-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .dp-dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; border: 1px solid var(--border); border-radius: 10px; padding: 2px 16px; background: #fff; }
+  .dp-dl > div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--border); min-width: 0; }
+  .dp-dl > div.full { grid-column: 1 / -1; }
+  .dp-dl > div:last-child, .dp-dl > div:nth-last-child(2):not(.full):nth-child(odd) { border-bottom: 0; }
+  .dp-dl .k { color: var(--muted); font-size: 13px; flex: 0 0 auto; }
+  .dp-dl .v { font-weight: 600; text-align: right; overflow-wrap: anywhere; min-width: 0; }
+  @media (max-width: 1100px) { .dp-dl { grid-template-columns: 1fr; } .dp-dl > div:nth-last-child(2):not(.full) { border-bottom: 1px solid var(--border); } }  .dp-tiles { display: grid; grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 1200px) { .dp-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dp-tiles.odd { grid-template-columns: minmax(0, 1fr); } }
   .dp-tile { border: 1px solid var(--border); border-left: 4px solid var(--navy-200, #CAD9FB); border-radius: 10px; background: #fff; padding: 12px 14px; min-width: 0; }
   .dp-tile .l { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .02em; margin-bottom: 6px; }
   .dp-tile .v { font-size: 19px; font-weight: 700; color: var(--navy-900, #18244F); font-variant-numeric: tabular-nums; line-height: 1.25; overflow-wrap: anywhere; }
