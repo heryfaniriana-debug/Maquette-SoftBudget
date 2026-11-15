@@ -1930,9 +1930,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       </div>
 
       <div class="group" id="g-plan" style="display:none">
-        <button class="item" data-toggle="g-plan" id="nav-plan" title="Planification">
+        <button class="item" data-toggle="g-plan" id="nav-plan" title="Plans annuels">
           <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          Planification
+          Plans annuels
           <svg class="ico chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="sub"></div>
@@ -6501,7 +6501,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     avini: ['Cadre du projet', 'Avance initiale'],
     avanc: ['Suivi', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
-    pdec: ['Planification', 'Plan de décaissement'],
+    pdec: ['Plans annuels', 'Plan de décaissement'],
     dfon: ['Trésorerie', 'Demandes de fonds'],
     pubrect: ['Élaboration', 'Budget rectificatif'],
     pubdot: ['Élaboration', 'Répartition des crédits'],
@@ -14405,7 +14405,7 @@ var EXEC_REC = [
   function rPubl(c, a, f) { return f.regime === 'public' && f.mods.cadm; }
   var MENU_DEF = [
     { g: 'Élaboration', items: [['Paramétrage', rAlways], ['Campagnes', function (c, a) { return a; }], ['Collecte', function (c, a) { return a; }], ['Validation', function (c, a) { return a; }], ['Budgets (saisie directe)', function (c, a) { return !a; }], ['Budget initial du projet (PAD)', function (c) { return c === 'prj'; }], ['Budget d’investissement', function (c) { return c === 'ent'; }], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', function (c, a, f) { return f.regime !== 'public'; }]] },
-    { g: 'Planification', items: [['PTBA', function (c) { return c === 'prj'; }], ['Plan de passation des marchés', function (c) { return c === 'prj'; }], ['Plan de décaissement', function (c, a, f) { return f.mods.treso && c === 'prj'; }]] },
+    { g: 'Plans annuels', items: [['PTBA', function (c) { return c === 'prj'; }], ['Plan de passation des marchés', function (c) { return c === 'prj'; }], ['Plan de décaissement', function (c, a, f) { return f.mods.treso && c === 'prj'; }]] },
     { g: 'Compte administratif', items: [['Crédits ouverts (projet)', rPrj], ['Engagements (projet : RAF puis Directeur)', rPrj], ['Liquidations (projet)', rPrj], ['Règlements (projet)', rPrj], ['Tableau de restitution (projet)', rPrj], ['Clôture (projet)', rPrj], ['Fichiers d’interface (projet)', rPrj], ['Crédits ouverts (par programme)', rPubl], ['Engagements (visa du Contrôle financier)', rPubl], ['Liquidations (public)', rPubl], ['Ordonnancement et mandats', rPubl], ['Paiements (agent comptable)', rPubl], ['Recettes (titres et recouvrement)', rPubl], ['Tableau de restitution (par programme)', rPubl], ['Clôture (public)', rPubl]] },
     { g: 'Exécution', items: [['Budgets verrouillés', rAlways], ['Engagements', rAlways], ['Réalisations', rAlways], ['Paiements comptabilisés', rAlways], ['Recettes comptabilisées', rAlways]] },
     { g: 'Trésorerie', items: [['Comptes bancaires', function (c, a, f) { return f.mods.treso; }], ['Plan de trésorerie', function (c, a, f) { return f.mods.treso && c !== 'prj'; }], ['Demandes de fonds (DRF et DPD)', function (c, a, f) { return f.mods.treso && c === 'prj'; }], ['Relevés bancaires', function (c, a, f) { return f.mods.treso; }], ['Rapprochement', function (c, a, f) { return f.mods.treso; }]] },
@@ -14438,7 +14438,7 @@ var EXEC_REC = [
   var NAV_ORIG = null;
   var PRJ_GROUP_LBL = {
     'g-budgets': ['Élaboration', 'Élaboration : configuration, campagnes, collecte, validation et budgets'],
-    'g-plan': ['Planification', 'PTBA, PTA, plan de passation des marchés et plan de décaissement'],
+    'g-plan': ['Plans annuels', 'PTBA, PTA, plan de passation des marchés et plan de décaissement'],
     'g-treso': ['Trésorerie', 'Décaissements, demandes de fonds et comptes bancaires'],
     'g-suivi': ['Suivi', 'Suivi de l’exécution']
   };
