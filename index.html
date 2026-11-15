@@ -5061,6 +5061,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       <section class="view" id="v-dpeng">
         <div class="head"><div><h1>Engagements</h1><p>Réservation de crédit sur une ligne du PTBA validé, engagement juridique et visa du Contrôle financier.</p></div></div>
         <div class="callout" id="dpeng-msg" hidden style="margin-bottom:12px"></div>
+                <div class="seg dp-tabs" id="dpeng-tabs" style="margin-bottom:12px"></div>
         <div class="row-toolbar" id="dpeng-bar" style="margin-bottom:12px"></div>
         <div id="dpeng-k"></div>
         <div class="card"><div class="scroll"><table style="min-width:900px"><thead id="dpeng-h"></thead><tbody id="dpeng-b"></tbody></table></div></div>
@@ -5399,12 +5400,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       <!-- ===== Projet : suivi de l'exécution (engagements, réalisations, paiements, encaissements) ===== -->
       <section class="view" id="v-sx">
         <div class="head"><div><h1>Engagements</h1><p></p></div>
-          <div class="actions"><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-suivi-b">Suivi sur une période</button><button class="btn" id="sx-sync">⟳ Synchroniser</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
+          <div class="actions"><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-trait-b">À traiter</button><button class="btn" id="sx-suivi-b">Suivi sur une période</button><button class="btn" id="sx-sync">⟳ Synchroniser</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
         <div class="callout" id="sx-msg" hidden style="margin-bottom:12px"></div>
         <div id="sx-k"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead id="sx-th"></thead><tbody id="sx-b"></tbody></table></div></div>
         <section class="co-blk"><div class="kb-h">Récupérations, imports et saisies</div><div class="card" id="sx-log"></div></section>
                 <div class="panel" id="sx-det" hidden><h2><span id="sx-det-title">Détail</span></h2><div class="body" id="sx-det-body"></div></div>
+                <div class="panel" id="sx-trait" hidden><h2><span>Engagements à traiter</span></h2><div class="body" id="sx-trait-body"></div></div>
         <div class="panel" id="sx-suivi" hidden><h2><span>Suivi des engagements sur une période</span></h2><div class="body" id="sx-suivi-body"></div></div>
         <div class="panel" id="sx-ech" hidden><h2><span id="sx-ech-title">Échéancier</span></h2><div class="body" id="sx-ech-body"></div></div>
 <div class="panel" id="sx-sy" hidden><h2><span id="sx-sy-title">Synchroniser</span></h2><div class="body" id="sx-sy-body"></div></div>
@@ -20143,7 +20145,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20487,7 +20489,7 @@ var EXEC_REC = [
   });
 
   /* ===== Chaîne de la dépense du projet (menu Compte administratif) : engagements, liquidations, ordonnancement, paiements — chaque dépense est rattachée à une ligne du PTBA validé ===== */
-  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 13, seqM: 10, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
+  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 14, seqM: 10, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
   var DP_ST = { soumis: ['En attente de visa CF', 'b-warn'], vise: ['Visé · à liquider', 'b-info'], liquide: ['Liquidé · à ordonnancer', 'b-info'], ordonnance: ['Mandaté · chez le comptable', 'b-warn'], paye: ['Payé', 'b-ok'] };
   var DP_RANK = { soumis: 1, vise: 2, liquide: 3, ordonnance: 4, paye: 6 };
   var DP_TIERS = ['BTP Andriana', 'Entreprise Sud Bâtiment', 'Centre de formation Vatsy', 'Hôtel Les Flamboyants', 'MEDIFROID SARL', 'FOURNITEC SARL', 'Cabinet RAKOTO Conseil', 'Imprimerie nationale'];
@@ -20512,14 +20514,15 @@ var EXEC_REC = [
       d(9, '2.1', 'FOURNITEC SARL', 'Mobilier médical des centres de santé (lot 1)', 'Bon de commande', 'BC-2026-0171', 40000000, 'paye', { fac: 'FAC-0547', mandat: 'MD-2026-0005', mode: 'Virement bancaire', dt: { eng: '2026-07-15', liq: '2026-08-25', ord: '2026-09-03', pay: '2026-09-10' } }),
       d(10, '2.1', 'Centre de formation Vatsy', 'Formation à l’entretien des équipements', 'Contrat', 'CT-2026-015', 20000000, 'paye', { fac: 'FAC-0561', mandat: 'MD-2026-0006', mode: 'Mobile money', dt: { eng: '2026-08-10', liq: '2026-09-15', ord: '2026-09-22', pay: '2026-09-30' } }),
       d(11, '2.1', 'FOURNITEC SARL', 'Équipements de laboratoire des centres de santé (lot 2)', 'Bon de commande', 'BC-2026-0180', 30000000, 'ordonnance', { pm: 'dpd', pmNote: 'Passé en paiement direct après le PPM : fournisseur étranger', fac: 'FAC-0574', mandat: 'MD-2026-0009', dt: { eng: '2026-09-01', liq: '2026-10-12', ord: '2026-10-22' } }),
-      d(12, '2.1', 'Cabinet RAKOTO Conseil', 'Supervision des travaux des centres de santé', 'Contrat', 'CT-2026-016', 12000000, 'paye', { fac: 'FAC-0589', mandat: 'MD-2026-0007', mode: 'Virement bancaire', dt: { eng: '2026-09-20', liq: '2026-10-20', ord: '2026-10-28', pay: '2026-11-05' } })
+      d(12, '2.1', 'Cabinet RAKOTO Conseil', 'Supervision des travaux des centres de santé', 'Contrat', 'CT-2026-016', 12000000, 'paye', { fac: 'FAC-0589', mandat: 'MD-2026-0007', mode: 'Virement bancaire', dt: { eng: '2026-09-20', liq: '2026-10-20', ord: '2026-10-28', pay: '2026-11-05' } }),
+       d(13, '1.2', 'Imprimerie nationale', 'Impression des supports de formation', 'Bon de commande', 'BC-2026-0125', 6000000, 'vise', { fin: '2026-06-30', dt: { eng: '2026-02-10' } })
     ].filter(function (x) { return x.key; });
     function dd(m, j) { return '2026-' + ('0' + m).slice(-2) + '-' + ('0' + j).slice(-2); }
     DP.docs.forEach(function (x, i) { var k = i + 1; if (x.dt) return; x.dt = { eng: dd(k + 1, 10) }; if (DP_RANK[x.st] >= 3) x.dt.liq = dd(k + 3, 15); if (DP_RANK[x.st] >= 4) x.dt.ord = dd(k + 3, 25); if (DP_RANK[x.st] >= 6) x.dt.pay = dd(k + 4, 5); });
   }
   function dpStat(key) {
     var ln = dpLine(key), s = { ouv: ln ? ln.ouv : 0, e: 0, r: 0, l: 0, o: 0, p: 0 };
-    (DP.docs || []).forEach(function (d) { if (d.key !== key) return; var k = DP_RANK[d.st]; if (d.kind === 'avance') { if (k >= 4) s.o += d.mt; if (k >= 6) s.p += d.mt; return; } if (k === 1) s.r += d.mt; if (k >= 2) s.e += d.mt; if (k >= 3) s.l += d.mt; if (k >= 4) s.o += dpNet(d); if (k >= 6) s.p += dpNet(d); });
+    (DP.docs || []).forEach(function (d) { if (d.key !== key) return; var k = DP_RANK[d.st]; if (d.kind === 'avance') { if (k >= 4) s.o += d.mt; if (k >= 6) s.p += d.mt; return; } if (k === 1) s.r += d.mt; if (k >= 2) s.e += d.mt - (d.lib ? d.lib.amt : 0); if (k >= 3) s.l += d.mt; if (k >= 4) s.o += dpNet(d); if (k >= 6) s.p += dpNet(d); });
     s.dispo = s.ouv - s.e - s.r; return s;
   }
   /* Avances de démarrage : l'avance est une partie de l'engagement, payée avant service fait puis recoupée sur le décompte */
@@ -20567,7 +20570,8 @@ var EXEC_REC = [
     band.appendChild(badge(ok ? 'Crédits suffisants' : 'Dépassement : soumission bloquée', ok ? 'b-ok' : 'b-ko')); return band;
   }
   /* ----- Engagements ----- */
-  function dpEngRender() {
+  function dpEngTabs() { var tb = document.getElementById('dpeng-tabs'); tb.innerHTML = ''; DP.engTab = DP.engTab || 'visa'; [['visa', 'En attente de visa'], ['suivi', 'Suivi des engagements']].forEach(function (t) { var b = cvEl('button', DP.engTab === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { DP.engTab = t[0]; dpEngRender(); }); tb.appendChild(b); }); }
+  function dpEngRender() { dpEngTabs(); if (DP.engTab === 'suivi') { dpEngSuivi(); return; }
     dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'soumis'; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpeng; })[0], t = dpTot();
     dpKpis('dpeng-k', [['Crédit validé (PTBA)', fmt(t.ouv) + ' MGA'], ['Engagé (visé)', fmt(t.e) + ' MGA'], ['En attente de visa', fmt(t.r) + ' MGA'], ['Disponible', fmt(t.dispo) + ' MGA']]);
     dpBar('dpeng-bar', [['Nouvel engagement', true, true, dpEngOpen], ['Viser (Contrôle financier)', false, !!sel && sel.st === 'soumis', function () {
@@ -21025,7 +21029,7 @@ var EXEC_REC = [
     var dp = dec.rows.reduce(function (a, x) { return a + x.plan - x.real; }, 0); if (dp > 0) out.push({ k: 'warn', b: 'Décaissements', go: 'andec', m: 'Les décaissements du projet sont inférieurs de ' + fmt(dp) + ' MGA au plan : vérifier les paiements en attente.' });
     var lp = phy.rows.filter(function (x) { return x.planTo && x.real / x.planTo < 0.85; }); if (lp.length) out.push({ k: 'warn', b: 'Avancement physique', go: 'anphy', m: 'Accélérer ' + (lp.length > 1 ? lp.length + ' travaux' : '1 travail') + ' en retard sur la cible du PTA : ' + lp.slice(0, 2).map(function (x) { return x.label.split(' — ')[0]; }).join(' et ') + '.' });
     var fp = phy.rows.filter(function (x) { return x.plan && x.tf - x.real / x.plan > 0.2; }); if (fp.length) out.push({ k: 'ko', b: 'Dépenses et physique', go: 'anfp', m: 'Vérifier ' + pl(fp.length, 'ligne') + ' dont les dépenses dépassent nettement le réalisé physique.' });
-    var nc = 0; ['rea', 'eng', 'dec', 'phy'].forEach(function (k) { anaRows(k, ex).rows.forEach(function (x) { if (x.planTo - x.real > 0 && !ANA.com[k + '|' + x.id]) nc++; }); }); if (nc) out.push({ k: 'warn', b: 'Écarts', go: 'anrea', m: pl(nc, 'écart') + ' à commenter et à arbitrer (glissement).' });
+    var td = sxEngs().filter(function (i) { return sxStat(i).todo; }).length; if (td) out.push({ k: 'warn', b: 'Engagements', go: 'sxeng', m: td + ' engagement' + (td > 1 ? 's' : '') + ' \u00e0 traiter : fin d\u00e9pass\u00e9e ou sans mouvement.' }); var nc = 0; ['rea', 'eng', 'dec', 'phy'].forEach(function (k) { anaRows(k, ex).rows.forEach(function (x) { if (x.planTo - x.real > 0 && !ANA.com[k + '|' + x.id]) nc++; }); }); if (nc) out.push({ k: 'warn', b: 'Écarts', go: 'anrea', m: pl(nc, 'écart') + ' à commenter et à arbitrer (glissement).' });
     lots_req: { var lots = anaLots(ex); for (var i = 0; i < lots.length; i++) { var P = pdcSim(pdcNeeds(lots[i])), q = P.req.filter(function (z) { return z.m >= cm; })[0]; if (q) { out.push({ k: 'warn', b: 'Trésorerie', go: 'pdec', m: 'Déposer la demande de réapprovisionnement de ' + fmt(q.mt) + ' MGA avant fin ' + PDC_MOIS[q.m] + ' pour éviter un solde négatif.' }); break lots_req; } } }
     return out;
   }
@@ -21158,7 +21162,7 @@ var EXEC_REC = [
   }  function sxRender() {
     sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
     document.querySelector('#v-sx > .head h1').textContent = K.h; document.querySelector('#v-sx > .head p').textContent = K.p;
-    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-suivi-b').style.display = (SX.kind === 'eng' || SX.kind === 'liq') ? '' : 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
+    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-suivi-b').style.display = (SX.kind === 'eng' || SX.kind === 'liq') ? '' : 'none'; var tb0 = document.getElementById('sx-trait-b'); tb0.style.display = SX.kind === 'eng' ? '' : 'none'; if (SX.kind === 'eng') tb0.textContent = '\u00c0 traiter (' + sxEngs().filter(function (i) { return sxStat(i).todo; }).length + ')'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
     var sum = function (s) { return items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).reduce(function (a, i) { return a + i.mt; }, 0); };
     var kb = document.getElementById('sx-k'); kb.innerHTML = ''; var cn = function (s) { return String(items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).length); };
     var sd = function (dp) { return items.filter(function (i) { return sxIsDpd(i) === dp; }).reduce(function (a, i) { return a + i.mt; }, 0); };
@@ -21178,8 +21182,8 @@ var EXEC_REC = [
   /* Période par défaut d'un engagement venu du compte administratif : un marché ou un contrat encore ouvert court sur plus d'un exercice */
   function sxDefPer(d) {
     var q = d.dt || {}, e = q.eng || '', y = e.slice(0, 4);
-    if ((d.acte === 'Marché' || d.acte === 'Contrat') && DP_RANK[d.st] < 3) { var t = sxD(e); t.setMonth(t.getMonth() + 14); return { d1: e, d2: isoOf(t) }; }
-    return { d1: e, d2: y + '-12-31' };
+    if ((d.acte === 'Marché' || d.acte === 'Contrat') && DP_RANK[d.st] < 3) { var t = sxD(e); t.setMonth(t.getMonth() + 14); return { d1: e, d2: d.fin || isoOf(t) }; }
+    return { d1: e, d2: d.fin || y + '-12-31' };
   }
   /* Échéancier : part de l'engagement qui revient à chaque exercice (saisi, sinon réparti au prorata de la période) */
   function sxEch(i) {
@@ -21200,7 +21204,7 @@ var EXEC_REC = [
   }
   function sxCols() {
     var K = SX_K[SX.kind];
-    if (SX.kind === 'eng') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Période', 'Montant (MGA)', 'Réalisé (MGA)', 'Reste à réaliser (MGA)', 'Source', ''];
+    if (SX.kind === 'eng') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Période', 'Montant (MGA)', 'Réalisé (MGA)', 'Reste à réaliser (MGA)', 'Statut', 'Source', ''];
     if (SX.kind === 'liq' || SX.kind === 'pay') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Engagement', 'Montant (MGA)', 'Source', ''];
     return ['Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)', 'Source', ''];
   }
@@ -21208,7 +21212,7 @@ var EXEC_REC = [
     var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur');
     if (SX.kind === 'eng') {
       var p = sxPer(i), ys = Object.keys(sxEch(i)), pc = cell(tr, isoToFr(p.d1) + ' → ' + isoToFr(p.d2)); if (ys.length > 1) { var bd = badge(ys.length + ' exercices', 'b-info'); bd.style.marginLeft = '6px'; pc.appendChild(bd); }
-      cell(tr, fmt(i.mt), 'num'); var rz = sxRealz(i.ref); cell(tr, fmt(rz), 'num'); var rc = cell(tr, '', 'num'); if (rz > i.mt) rc.appendChild(badge('Dépassé de ' + fmt(rz - i.mt), 'b-ko')); else rc.textContent = fmt(sxReste(i));
+      cell(tr, fmt(i.mt), 'num'); var rz = sxRealz(i.ref); cell(tr, fmt(rz), 'num'); var rc = cell(tr, '', 'num'); if (rz > i.mt) rc.appendChild(badge('Dépassé de ' + fmt(rz - i.mt), 'b-ko')); else rc.textContent = fmt(sxReste(i)); var ss = sxStat(i), sc0 = cell(tr, ''); sc0.appendChild(badge(ss.lbl, ss.cls));
     } else if (SX.kind === 'liq' || SX.kind === 'pay') {
       var ec = cell(tr, i.eng || ''); if (!i.eng) ec.appendChild(badge('Sans engagement', 'b-warn')); else { var en = sxEngOf(i.eng); if (!en) ec.appendChild(badge('Engagement introuvable', 'b-ko')); else if (i.kind === 'liq' && sxRealz(i.eng) > en.mt) { var bx = badge('Dépasse l’engagement', 'b-ko'); bx.style.marginLeft = '6px'; ec.appendChild(bx); } }
       cell(tr, fmt(i.mt), 'num');
@@ -21276,7 +21280,7 @@ var EXEC_REC = [
     var doc = (DP.docs || []).filter(function (d) { return i.kind === 'eng' ? d.ref === i.ref : (i.kind === 'liq' ? d.fac === i.ref : (i.kind === 'pay' ? d.mandat === i.ref : false)); })[0];
     document.getElementById('sx-det-title').textContent = K.h.replace(/s$/, '') + ' ' + (i.ref || '');
     var pr = [['Référence', i.ref || '—'], ['Date', isoToFr(i.date)], [K.tg, i.tiers || '—'], [i.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'], [i.kind === 'phy' ? 'Quantité réalisée' : 'Montant', fmt(i.mt) + (i.unit ? ' ' + i.unit : ' MGA')], ['Source', i.src]];
-    if (i.kind === 'eng') { var p = sxPer(i); pr.push(['Période', isoToFr(p.d1) + ' → ' + isoToFr(p.d2)]); }
+    if (i.kind === 'eng') { var ss = sxStat(i); pr.push(['Statut', ss.lbl + (ss.why ? ' \u2014 ' + ss.why : '')]); if (i.clot) pr.push(['Cl\u00f4ture', isoToFr(i.clot.on) + (i.clot.motif ? ' \u00b7 ' + i.clot.motif : '')]); var p = sxPer(i); pr.push(['Période', isoToFr(p.d1) + ' → ' + isoToFr(p.d2)]); }
     if (i.kind === 'pay') pr.push(['Type de paiement', sxIsDpd(i) ? 'Paiement direct du bailleur' : 'Décaissement du projet']);
     if (doc) pr.push(['Dossier du compte administratif', doc.id + ' · ' + (DP_ST[doc.st] ? DP_ST[doc.st][0] : doc.st)]);
     anaBlock(body, 'Informations', dpDl(pr));
@@ -21298,6 +21302,103 @@ var EXEC_REC = [
     if (i.kind === 'eng') { var be = cvEl('button', 'btn primary', 'Modifier l’échéancier'); be.type = 'button'; be.addEventListener('click', function () { sxEchOpen(i); }); ft.appendChild(be); }
     body.appendChild(ft); document.getElementById('sx-det').hidden = false;
   }
+  /* ----- Fin des engagements : statut, engagements à traiter, clôture, prolongation, libération du reliquat et maintien ----- */
+  var ENG_IDLE = 180;
+  var ENG_ACT = {
+    clot: ['Clôturer', 'Clôturer l’engagement', 'Motif de la clôture', 'Le reste éventuel est libéré. Pourquoi clôturer ?'],
+    prol: ['Prolonger', 'Prolonger l’engagement', 'Motif de la prolongation', 'Avenant ou nouvelle échéance'],
+    lib: ['Libérer le reliquat', 'Libérer le reliquat de l’engagement', 'Motif', 'Pourquoi le reliquat n’est-il plus à réaliser ?'],
+    maint: ['Maintenir ouvert', 'Maintenir ouvert l’engagement', 'Motif du maintien', 'Litige, livraison attendue…'],
+    reop: ['Réouvrir', 'Réouvrir l’engagement', 'Motif de la réouverture', 'Pourquoi réouvrir ?']
+  };
+  function engDays(a, b) { return Math.round((sxD(b) - sxD(a)) / 86400000); }
+  function engAddMonths(iso, opt) { var n = parseInt(opt, 10) || 0, t = sxD(iso); t.setMonth(t.getMonth() + n); return isoOf(t); }
+  /* Règle unique, appliquée au compte administratif comme à l'exécution */
+  function engLife(o) {
+    var t = cadToday(), held = o.maint && o.maint >= t;
+    if (o.clot) return { k: 'clot', lbl: 'Clôturé', cls: 'b-neutral', todo: false, why: '' };
+    if (!o.reste) return { k: 'solde', lbl: 'Soldé', cls: 'b-ok', todo: false, why: '' };
+    var late = o.fin && o.fin < t, idle = o.last && engDays(o.last, t) > ENG_IDLE;
+    if ((late || idle) && held) return { k: 'held', lbl: 'Maintenu jusqu’au ' + isoToFr(o.maint), cls: 'b-neutral', todo: false, why: '' };
+    if (late) return { k: 'echu', lbl: 'Échu', cls: 'b-ko', todo: true, why: 'Fin dépassée depuis le ' + isoToFr(o.fin) + ', ' + fmt(o.reste) + ' MGA restent à réaliser' };
+    if (idle) return { k: 'idle', lbl: 'Sans mouvement', cls: 'b-warn', todo: true, why: 'Aucun mouvement depuis ' + engDays(o.last, t) + ' jours' };
+    return { k: 'ouvert', lbl: 'Ouvert', cls: 'b-info', todo: false, why: '' };
+  }
+  function engAsk(act, ref, cb) {
+    var A = ENG_ACT[act], o = { title: A[1] + ' ' + ref, ok: A[0], required: true, cLabel: A[2], placeholder: A[3] };
+    if (act === 'prol') { o.options = ['3 mois', '6 mois', '12 mois']; o.optLabel = 'Prolonger de'; } if (act === 'maint') { o.options = ['1 mois', '3 mois', '6 mois']; o.optLabel = 'Réexaminer dans'; }
+    cvAsk(o, cb);
+  }
+  function engBtn(txt, fn) { var b = cvEl('button', 'btn small', txt); b.type = 'button'; b.addEventListener('click', fn); return b; }
+  /* Côté exécution */
+  function sxStat(i) { var rl = (SX.items || []).filter(function (x) { return x.kind === 'liq' && x.eng === i.ref; }).map(function (x) { return x.date; }).sort().pop(); return engLife({ reste: sxReste(i), fin: sxPer(i).d2, clot: !!i.clot, last: rl || i.date, maint: i.maint ? i.maint.revue : '' }); }
+  function sxLifeDiff(st, r) {
+    var ch = [], p = sxPer(st), sf = (SX.free || []).filter(function (f) { return f.eng === st.ref && f.sync; }).reduce(function (a, f) { return a + f.amt; }, 0);
+    if (r.d2 && r.d2 !== p.d2) ch.push((r.d2 > p.d2 ? 'Fin prolongée : ' : 'Fin avancée : ') + isoToFr(p.d2) + ' → ' + isoToFr(r.d2));
+    if ((st.clot ? st.clot.on : '') !== (r.clot || '')) ch.push(r.clot ? 'Clôturé le ' + isoToFr(r.clot) : 'Réouvert');
+    if (sf !== (r.lib || 0)) ch.push('Reliquat libéré : ' + fmt(sf) + ' → ' + fmt(r.lib || 0) + ' MGA');
+    if ((st.maint ? st.maint.revue : '') !== (r.maint || '')) ch.push(r.maint ? 'Maintenu ouvert jusqu’au ' + isoToFr(r.maint) : 'Maintien levé');
+    return ch;
+  }
+  function sxLifeApply(st, r) {
+    var p = sxPer(st); if (r.d2 && r.d2 !== p.d2) { st.d2 = r.d2; delete st.ech; }
+    if (r.clot) st.clot = { on: r.clot, motif: r.clotMotif || '', by: 'Compte administratif' }; else delete st.clot;
+    if (r.maint) st.maint = { revue: r.maint, motif: '' }; else delete st.maint;
+    SX.free = (SX.free || []).filter(function (f) { return !(f.eng === st.ref && f.sync); });
+    if (r.lib > 0) SX.free.push({ eng: st.ref, amt: r.lib, date: r.clot || cadToday(), motif: r.libMotif || '', by: 'Compte administratif', on: nowStr(), sync: true });
+  }
+  /* Engagements qui ne sont pas dans le compte administratif : les actions se font ici */
+  function sxEngLocal(i, act) {
+    engAsk(act, i.ref, function (m, opt) {
+      var t = cadToday(), r = sxReste(i); SX.free = SX.free || [];
+      if (act === 'clot') { if (r > 0) SX.free.push({ eng: i.ref, amt: r, date: t, motif: m, by: ME, on: nowStr() }); i.clot = { on: t, motif: m, by: ME }; }
+      else if (act === 'prol') { var f = sxPer(i).d2; i.d2 = engAddMonths(f > t ? f : t, opt); delete i.ech; delete i.maint; }
+      else if (act === 'lib') { if (r > 0) SX.free.push({ eng: i.ref, amt: r, date: t, motif: m, by: ME, on: nowStr() }); }
+      else if (act === 'maint') i.maint = { revue: engAddMonths(t, opt), motif: m };
+      else if (act === 'reop') delete i.clot;
+      sxTraitPaint(); sxRender(); sxMsg(i.ref + ' : ' + ENG_ACT[act][0].toLowerCase() + ' enregistré.');
+    });
+  }
+  function sxTraitPaint() {
+    var body = document.getElementById('sx-trait-body'); body.innerHTML = '';
+    var rows = sxEngs().map(function (i) { return { i: i, S: sxStat(i), doc: (DP.docs || []).filter(function (d) { return d.ref === i.ref; })[0] }; }).filter(function (x) { return x.S.todo; });
+    var card = cvEl('div', 'card'), sc = cvEl('div', 'scroll'), tb = cvEl('table'), th = cvEl('thead'), tbd = cvEl('tbody'); tb.style.minWidth = '860px';
+    th.innerHTML = '<tr><th>Engagement</th><th>Fin prévue</th><th class="num">Reste à réaliser (MGA)</th><th>Situation</th><th>Origine</th><th></th></tr>'; tb.appendChild(th);
+    if (!rows.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucun engagement à traiter.'); c0.colSpan = 6; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
+    rows.forEach(function (x) {
+      var tr = cvEl('tr'), n = cvEl('div'), c1 = cell(tr, '', 'name'); n.appendChild(cvEl('b', null, x.i.ref)); n.appendChild(cvEl('div', 'hby', x.i.tiers || '—')); c1.appendChild(n);
+      cell(tr, isoToFr(sxPer(x.i).d2)); cell(tr, fmt(sxReste(x.i)), 'num'); var s = cell(tr, ''); s.appendChild(badge(x.S.lbl, x.S.cls)); s.appendChild(cvEl('div', 'hby', x.S.why)); cell(tr, x.doc ? 'Compte administratif' : x.i.src);
+      var a = cell(tr, '');
+      if (x.doc) a.appendChild(engBtn('Ouvrir dans le compte administratif', function () { DP.engTab = 'suivi'; DP.sel.dpeng = x.doc.id; document.getElementById('sx-trait').hidden = true; show('dpeng'); }));
+      else ['clot', 'prol', 'lib', 'maint'].forEach(function (act) { a.appendChild(engBtn(ENG_ACT[act][0], function () { sxEngLocal(x.i, act); })); });
+      tbd.appendChild(tr);
+    });
+    tb.appendChild(tbd); sc.appendChild(tb); card.appendChild(sc); body.appendChild(card);
+  }
+  document.getElementById('sx-trait-b').addEventListener('click', function () { sxTraitPaint(); document.getElementById('sx-trait').hidden = false; });
+  /* Côté compte administratif : même règle, sur les engagements visés */
+  function dpEngReste(d) { return Math.max(0, d.mt - (DP_RANK[d.st] >= 3 ? d.mt : 0) - (d.lib ? d.lib.amt : 0)); }
+  function dpEngLife(d) { var q = d.dt || {}; return engLife({ reste: dpEngReste(d), fin: sxDefPer(d).d2, clot: !!d.clot, last: q.pay || q.ord || q.liq || q.eng, maint: d.maint ? d.maint.revue : '' }); }
+  function dpEngAct(d, act) {
+    engAsk(act, d.ref, function (m, opt) {
+      var t = cadToday(), r = dpEngReste(d);
+      if (act === 'clot') { if (r > 0) d.lib = { amt: (d.lib ? d.lib.amt : 0) + r, motif: m, on: t }; d.clot = { on: t, motif: m, by: ME }; }
+      else if (act === 'prol') { var f = sxDefPer(d).d2; d.fin = engAddMonths(f > t ? f : t, opt); delete d.maint; }
+      else if (act === 'lib') { if (r > 0) d.lib = { amt: (d.lib ? d.lib.amt : 0) + r, motif: m, on: t }; }
+      else if (act === 'maint') d.maint = { revue: engAddMonths(t, opt), motif: m };
+      else if (act === 'reop') delete d.clot;
+      dpMsg('dpeng-msg', d.id + ' : ' + ENG_ACT[act][0].toLowerCase() + ' enregistré. L’exécution le détectera à la prochaine synchronisation depuis le compte administratif.'); dpEngRender();
+    });
+  }
+  function dpEngSuivi() {
+    var docs = (DP.docs || []).filter(function (d) { return d.kind !== 'avance' && DP_RANK[d.st] >= 2; }).map(function (d) { return { d: d, L: dpEngLife(d), r: dpEngReste(d) }; }).sort(function (a, b) { return (b.L.todo - a.L.todo) || (a.d.id < b.d.id ? 1 : -1); }), by = {}; docs.forEach(function (x) { by[x.d.id] = x; });
+    var rows = docs.map(function (x) { return x.d; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpeng; })[0], S = sel && by[sel.id];
+    dpKpis('dpeng-k', [['Engagements suivis', String(docs.length)], ['À traiter', String(docs.filter(function (x) { return x.L.todo; }).length), 'warn'], ['Échus', String(docs.filter(function (x) { return x.L.k === 'echu'; }).length), 'ko'], ['Reste à liquider', fmt(docs.reduce(function (a, x) { return a + x.r; }, 0)) + ' MGA']]);
+    var open = !!S && S.L.k !== 'clot', can = open && S.r > 0;
+    dpBar('dpeng-bar', [['Clôturer', false, open, function () { dpEngAct(sel, 'clot'); }], ['Prolonger', false, can, function () { dpEngAct(sel, 'prol'); }], ['Libérer le reliquat', false, can, function () { dpEngAct(sel, 'lib'); }], ['Maintenir ouvert', false, can, function () { dpEngAct(sel, 'maint'); }], ['Réouvrir', false, !!S && S.L.k === 'clot', function () { dpEngAct(sel, 'reop'); }]]);
+    dpTable({ id: 'dpeng', head: ['N°', 'Tiers · objet', 'Ligne du PTBA', 'Acte', 'Montant (MGA)', 'Fin prévue', 'Reste (MGA)', 'Statut'], num: [4, 6], rows: rows, empty: 'Aucun engagement visé.', redraw: dpEngRender,
+      cells: function (d) { var x = by[d.id], a = cvEl('div'), st = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); st.appendChild(badge(x.L.lbl, x.L.cls)); if (x.L.why) st.appendChild(cvEl('div', 'hby', x.L.why)); return [d.id, a, dpShort(d), d.acte + ' ' + d.ref, fmt(d.mt), isoToFr(sxDefPer(d).d2), fmt(x.r), st]; } });
+  }
   function sxFormSetup() {
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
     document.getElementById('sxf-d1').value = cadToday(); document.getElementById('sxf-d2').value = cadToday().slice(0, 4) + '-12-31';
@@ -21315,7 +21416,7 @@ var EXEC_REC = [
   /* Synchronisation : on précise d'abord la source, la période, la ligne et le mode (ajouter, mettre à jour, remplacer), puis on contrôle la liste des changements avant de confirmer */
   var SXS = { stage: 1, src: '', d1: '', d2: '', line: '', mode: 'add', plan: [] };
   var SX_MODES = [['add', 'Ajouter les nouvelles', 'Seules les écritures absentes du suivi sont ajoutées. Rien d’existant n’est modifié.'], ['upd', 'Ajouter et mettre à jour', 'Les nouvelles sont ajoutées et les écritures déjà synchronisées sont corrigées si la source a changé.'], ['rep', 'Remplacer (écraser)', 'Les écritures déjà synchronisées depuis cette source, sur la période, sont supprimées puis remplacées par celles de la source.']];
-  var SX_ACT = { 'new': ['Nouvelle', 'b-ok'], 'upd': ['Mise à jour', 'b-info'], 'same': ['Inchangée', 'b-neutral'], 'skip': ['Ignorée (mode « Ajouter »)', 'b-neutral'], 'conflict': ['Conflit : écriture saisie ou importée', 'b-warn'], 'del': ['Supprimée', 'b-ko'] };
+  var SX_ACT = { 'life': ['Statut mis \u00e0 jour', 'b-info'], 'new': ['Nouvelle', 'b-ok'], 'upd': ['Mise à jour', 'b-info'], 'same': ['Inchangée', 'b-neutral'], 'skip': ['Ignorée (mode « Ajouter »)', 'b-neutral'], 'conflict': ['Conflit : écriture saisie ou importée', 'b-warn'], 'del': ['Supprimée', 'b-ko'] };
   function sxSources() { return SX.kind === 'eng' ? ['SoftAccounting', 'Soft e-Procurement', 'Compte administratif'] : (SX.kind === 'phy' ? ['SoftSE', 'Compte administratif'] : ['SoftAccounting', 'Compte administratif']); }
   /* Ce que contient chaque source, indépendamment de ce qui est déjà dans le suivi */
   function sxSrcData(src, kind) {
@@ -21323,7 +21424,7 @@ var EXEC_REC = [
     var out = [];
     (DP.docs || []).forEach(function (d) {
       var q = d.dt || {}, c = null;
-      if (kind === 'eng' && d.kind !== 'avance' && DP_RANK[d.st] >= 2) c = { key: d.key, date: q.eng, ref: d.ref, tiers: d.tiers, mt: d.mt, d1: sxDefPer(d).d1, d2: sxDefPer(d).d2 };
+      if (kind === 'eng' && d.kind !== 'avance' && DP_RANK[d.st] >= 2) c = { key: d.key, date: q.eng, ref: d.ref, tiers: d.tiers, mt: d.mt, d1: sxDefPer(d).d1, d2: sxDefPer(d).d2, clot: d.clot ? d.clot.on : '', clotMotif: d.clot ? d.clot.motif : '', lib: d.lib ? d.lib.amt : 0, libMotif: d.lib ? d.lib.motif : '', maint: d.maint ? d.maint.revue : '' };
       if (kind === 'liq' && d.kind !== 'avance' && DP_RANK[d.st] >= 3) c = { key: d.key, date: q.liq, ref: d.fac, tiers: d.tiers, mt: d.mt, eng: d.ref };
       if (kind === 'pay' && DP_RANK[d.st] >= 6) c = { key: d.key, date: q.pay, ref: d.mandat, tiers: d.tiers, mt: dfoAmt(d), eng: d.ref };
       if (kind === 'phy' && d.volReal) c = { key: d.key, date: q.liq, ref: 'AP-' + d.id, tiers: d.objet, mt: d.volReal, unit: d.volUnit };
@@ -21336,7 +21437,7 @@ var EXEC_REC = [
     var P = SXS, kind = SX.kind, out = [], seen = {};
     sxSrcData(P.src, kind).filter(function (r) { return r.date >= P.d1 && r.date <= P.d2 && (!P.line || r.key === P.line); }).forEach(function (r) {
       var st = SX.items.filter(function (i) { return i.kind === kind && i.ref === r.ref; })[0]; seen[r.ref] = true;
-      if (!st) out.push({ act: 'new', r: r });
+      var lf = (kind === 'eng' && P.src === 'Compte administratif' && st) ? sxLifeDiff(st, r) : []; if (!st) out.push({ act: 'new', r: r }); else if (lf.length) out.push({ act: 'life', r: r, st: st, ch: lf });
       else if (st.src !== P.src) out.push({ act: st.mt === r.mt ? 'same' : 'conflict', r: r, st: st });
       else if (st.mt === r.mt && st.date === r.date && (st.tiers || '') === (r.tiers || '')) out.push({ act: 'same', r: r, st: st });
       else out.push({ act: P.mode === 'add' ? 'skip' : 'upd', r: r, st: st });
@@ -21365,22 +21466,22 @@ var EXEC_REC = [
       bc.addEventListener('click', function () { document.getElementById('sx-sy').hidden = true; });
       bo.addEventListener('click', function () { P.src = sl.value; if (!P.d1 || !P.d2 || P.d1 > P.d2) { var e = cvEl('div', 'err', 'La période est invalide : la date de début doit précéder la date de fin.'); if (!body.querySelector('.err')) ft.parentNode.insertBefore(e, ft); return; } P.plan = sxPlan(); P.stage = 2; sxSyPaint(); });
     } else {
-      var c = function (a) { return P.plan.filter(function (x) { return x.act === a; }); }, sm = function (a) { return a.reduce(function (s, x) { return s + x.r.mt; }, 0); }, applied = c('new').length + c('upd').length + c('del').length;
+      var c = function (a) { return P.plan.filter(function (x) { return x.act === a; }); }, sm = function (a) { return a.reduce(function (s, x) { return s + x.r.mt; }, 0); }, applied = c('new').length + c('upd').length + c('life').length + c('del').length;
       var ctx = cvEl('div', 'hint', 'Source : ' + P.src + ' · du ' + isoToFr(P.d1) + ' au ' + isoToFr(P.d2) + ' · ' + (P.line ? dpShort({ key: P.line }) : 'toutes les lignes') + ' · mode « ' + SX_MODES.filter(function (m) { return m[0] === P.mode; })[0][1] + ' »'); ctx.style.marginBottom = '12px'; body.appendChild(ctx);
-      body.appendChild(dpTiles([['Nouvelles', String(c('new').length), 'ok'], ['Mises à jour', String(c('upd').length), 'info'], ['Inchangées', String(c('same').length + c('skip').length + c('conflict').length), 'n'], ['Supprimées', String(c('del').length), c('del').length ? 'ko' : 'n']], { cols: 4 }));
-      var rows = P.plan.slice().sort(function (a, b) { var o = { 'new': 0, upd: 1, del: 2, conflict: 3, skip: 4, same: 5 }; return o[a.act] - o[b.act] || (a.r.date < b.r.date ? 1 : -1); }).map(function (x) {
+      body.appendChild(dpTiles([['Nouvelles', String(c('new').length), 'ok'], ['Mises à jour', String(c('upd').length + c('life').length), 'info'], ['Inchangées', String(c('same').length + c('skip').length + c('conflict').length), 'n'], ['Supprimées', String(c('del').length), c('del').length ? 'ko' : 'n']], { cols: 4 }));
+      var rows = P.plan.slice().sort(function (a, b) { var o = { 'new': 0, upd: 1, life: 1, del: 2, conflict: 3, skip: 4, same: 5 }; return o[a.act] - o[b.act] || (a.r.date < b.r.date ? 1 : -1); }).map(function (x) {
         var A = SX_ACT[x.act], u = x.r.unit ? ' ' + x.r.unit : '', mt = x.act === 'upd' ? fmt(x.st.mt) + ' → ' + fmt(x.r.mt) + u : fmt(x.r.mt) + u;
-        return [badge(A[0], A[1]), isoToFr(x.r.date), x.r.ref, x.r.tiers || '—', x.r.key ? dpShort({ key: x.r.key }) : 'Compte spécial du bailleur'].concat(sxEngCol() ? [x.r.eng || 'Sans engagement'] : [], [mt]);
+        return [badge(A[0], A[1]), isoToFr(x.r.date), x.r.ref, x.r.tiers || '—', x.r.key ? dpShort({ key: x.r.key }) : 'Compte spécial du bailleur'].concat(sxEngCol() ? [x.r.eng || 'Sans engagement'] : [], SX.kind === 'eng' ? [x.ch ? x.ch.join(' ; ') : ''] : [], [mt]);
       });
-      body.appendChild(dpMini(['Changement', 'Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA'].concat(sxEngCol() ? ['Engagement'] : [], [SX.kind === 'phy' ? 'Quantité' : 'Montant (MGA)']), rows, [sxEngCol() ? 6 : 5], 'Aucune écriture de cette source sur la période choisie.'));
+      body.appendChild(dpMini(['Changement', 'Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA'].concat(sxEngCol() ? ['Engagement'] : [], SX.kind === 'eng' ? ['Modification'] : [], [SX.kind === 'phy' ? 'Quantité' : 'Montant (MGA)']), rows, [(sxEngCol() || SX.kind === 'eng') ? 6 : 5], 'Aucune écriture de cette source sur la période choisie.'));
       var ft2 = cvEl('div', 'form-foot'); ft2.style.cssText = 'margin-top:12px;padding-top:12px'; var bb = cvEl('button', 'btn', 'Modifier les paramètres'), bk = cvEl('button', 'btn primary', applied ? 'Confirmer la synchronisation (' + applied + ' changement' + (applied > 1 ? 's' : '') + ')' : 'Rien à synchroniser'); bb.type = bk.type = 'button'; bk.disabled = !applied; ft2.appendChild(bb); ft2.appendChild(bk); body.appendChild(ft2);
       bb.addEventListener('click', function () { P.stage = 1; sxSyPaint(); });
       bk.addEventListener('click', function () {
         var n = { 'new': 0, upd: 0, del: 0 }, done = {};
         P.plan.forEach(function (x) {
-          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, unit: x.r.unit, eng: x.r.eng, d1: x.r.d1, d2: x.r.d2, src: P.src }); n['new']++; done[x.r.ref] = true; }
+          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, unit: x.r.unit, eng: x.r.eng, d1: x.r.d1, d2: x.r.d2, src: P.src }); n['new']++; done[x.r.ref] = true; if (x.r.clot || x.r.lib || x.r.maint) sxLifeApply(SX.items[SX.items.length - 1], x.r); }
           if (x.act === 'upd') { if (x.st.mt !== x.r.mt) delete x.st.ech; x.st.eng = x.r.eng; x.st.d1 = x.r.d1; x.st.d2 = x.r.d2; x.st.mt = x.r.mt; x.st.unit = x.r.unit; x.st.date = x.r.date; x.st.tiers = x.r.tiers; x.st.key = x.r.key; x.st.src = P.src; n.upd++; done[x.r.ref] = true; }
-          if (x.act === 'del') { SX.items.splice(SX.items.indexOf(x.st), 1); n.del++; }
+          if (x.act === 'life') { sxLifeApply(x.st, x.r); n.upd++; } if (x.act === 'del') { SX.items.splice(SX.items.indexOf(x.st), 1); n.del++; }
         });
         [SX.extra, SX.pool['SoftSE']].forEach(function (pl0) { if (pl0[SX.kind]) pl0[SX.kind] = pl0[SX.kind].filter(function (e) { return !done[e.ref]; }); }); if (SX.kind === 'phy') sxPhyApply();
         SX.log.unshift({ on: nowStr(), src: 'Synchronisation : ' + P.src + ' (' + n['new'] + ' nouvelle(s), ' + n.upd + ' mise(s) à jour, ' + n.del + ' supprimée(s))', n: n['new'] + n.upd + n.del, by: ME });
