@@ -20306,11 +20306,11 @@ var EXEC_REC = [
   }
   /* ----- Engagements ----- */
   function dpEngRender() {
-    dpSeed(); var rows = (DP.docs || []).slice().sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpeng; })[0], t = dpTot();
+    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'soumis'; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpeng; })[0], t = dpTot();
     dpKpis('dpeng-k', [['Crédit validé (PTBA)', fmt(t.ouv) + ' MGA'], ['Engagé (visé)', fmt(t.e) + ' MGA'], ['En attente de visa', fmt(t.r) + ' MGA'], ['Disponible', fmt(t.dispo) + ' MGA']]);
     dpBar('dpeng-bar', [['Nouvel engagement', true, true, dpEngOpen], ['Viser (Contrôle financier)', false, !!sel && sel.st === 'soumis', function () {
       cvAsk({ title: 'Viser ' + sel.id, ok: 'Viser', required: false, placeholder: 'Observation du Contrôle financier' }, function () { sel.st = 'vise'; dpMsg('dpeng-msg', sel.id + ' visé par le Contrôle financier : il passe en liquidation.'); dpEngRender(); }); }]]);
-    dpTable({ id: 'dpeng', head: ['N°', 'Tiers · objet', 'Ligne du PTBA', 'Acte', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun engagement. Aucun budget validé n’est disponible.', redraw: dpEngRender,
+    dpTable({ id: 'dpeng', head: ['N°', 'Tiers · objet', 'Ligne du PTBA', 'Acte', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun engagement en attente de visa. Les engagements visés passent dans « Liquidations ».', redraw: dpEngRender,
       cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, dpShort(d), d.acte + ' ' + d.ref, fmt(d.mt), dpStatBadge(d)]; } });
   }
   function dpEngOpen() {
@@ -20345,11 +20345,11 @@ var EXEC_REC = [
   }
   /* ----- Liquidations ----- */
   function dpLiqRender() {
-    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return DP_RANK[d.st] >= 2; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpliq; })[0], t = dpTot();
+    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'vise'; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpliq; })[0], t = dpTot();
     dpKpis('dpliq-k', [['Engagé (visé)', fmt(t.e) + ' MGA'], ['À liquider', fmt(rows.filter(function (d) { return d.st === 'vise'; }).reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA'], ['Liquidé', fmt(t.l) + ' MGA'], ['Reste à liquider', fmt(t.e - t.l) + ' MGA']]);
     dpBar('dpliq-bar', [['Liquider', true, !!sel && sel.st === 'vise', function () { DP.lf = { sf: false, fac: '' }; dpLiqPaint(sel); document.getElementById('dp-liq-form').hidden = false; }]]);
-    dpTable({ id: 'dpliq', head: ['Engagement', 'Tiers · objet', 'Ligne du PTBA', 'Facture', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun engagement visé. Visez un engagement dans « Engagements ».', redraw: dpLiqRender,
-      cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, dpShort(d), d.fac || '—', fmt(d.mt), dpStatBadge(d)]; } });
+    dpTable({ id: 'dpliq', head: ['Engagement', 'Tiers · objet', 'Ligne du PTBA', 'Acte', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun engagement à liquider. Visez d’abord un engagement dans « Engagements ».', redraw: dpLiqRender,
+      cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, dpShort(d), d.acte + ' ' + d.ref, fmt(d.mt), dpStatBadge(d)]; } });
   }
   function dpLiqPaint(d) {
     var body = document.getElementById('dp-liq-body'), z = dpLine(d.key), lf = DP.lf; body.innerHTML = '';
