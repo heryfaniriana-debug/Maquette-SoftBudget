@@ -14403,7 +14403,7 @@ var EXEC_REC = [
   function rPrj(c, a, f) { return f.regime === 'projet' && f.mods.cadm; }
   function rPubl(c, a, f) { return f.regime === 'public' && f.mods.cadm; }
   var MENU_DEF = [
-    { g: 'Élaboration du budget', items: [['Paramétrage', rAlways], ['Campagnes', function (c, a) { return a; }], ['Collecte', function (c, a) { return a; }], ['Validation', function (c, a) { return a; }], ['Budgets (saisie directe)', function (c, a) { return !a; }], ['Budget initial du projet (PAD)', function (c) { return c === 'prj'; }], ['Budget d’investissement', function (c) { return c === 'ent'; }], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', function (c, a, f) { return f.regime !== 'public'; }]] },
+    { g: 'Élaboration', items: [['Paramétrage', rAlways], ['Campagnes', function (c, a) { return a; }], ['Collecte', function (c, a) { return a; }], ['Validation', function (c, a) { return a; }], ['Budgets (saisie directe)', function (c, a) { return !a; }], ['Budget initial du projet (PAD)', function (c) { return c === 'prj'; }], ['Budget d’investissement', function (c) { return c === 'ent'; }], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', function (c, a, f) { return f.regime !== 'public'; }]] },
     { g: 'Planification', items: [['PTBA', function (c) { return c === 'prj'; }], ['Plan de passation des marchés', function (c) { return c === 'prj'; }], ['Plan de décaissement', function (c, a, f) { return f.mods.treso && c === 'prj'; }]] },
     { g: 'Compte administratif', items: [['Crédits ouverts (projet)', rPrj], ['Engagements (projet : RAF puis Directeur)', rPrj], ['Liquidations (projet)', rPrj], ['Règlements (projet)', rPrj], ['Tableau de restitution (projet)', rPrj], ['Clôture (projet)', rPrj], ['Fichiers d’interface (projet)', rPrj], ['Crédits ouverts (par programme)', rPubl], ['Engagements (visa du Contrôle financier)', rPubl], ['Liquidations (public)', rPubl], ['Ordonnancement et mandats', rPubl], ['Paiements (agent comptable)', rPubl], ['Recettes (titres et recouvrement)', rPubl], ['Tableau de restitution (par programme)', rPubl], ['Clôture (public)', rPubl]] },
     { g: 'Exécution', items: [['Budgets verrouillés', rAlways], ['Engagements', rAlways], ['Réalisations', rAlways], ['Paiements comptabilisés', rAlways], ['Recettes comptabilisées', rAlways]] },
@@ -14436,7 +14436,7 @@ var EXEC_REC = [
   }
   var NAV_ORIG = null;
   var PRJ_GROUP_LBL = {
-    'g-budgets': ['Élaboration du budget', 'Élaboration du budget : configuration, campagnes, collecte, validation et budgets'],
+    'g-budgets': ['Élaboration', 'Élaboration : configuration, campagnes, collecte, validation et budgets'],
     'g-plan': ['Planification', 'PTBA, PTA, plan de passation des marchés et plan de décaissement'],
     'g-treso': ['Trésorerie', 'Décaissements, demandes de fonds et comptes bancaires'],
     'g-suivi': ['Suivi', 'Suivi de l’exécution']
