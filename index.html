@@ -11996,7 +11996,6 @@ function fmAxes() {
     var isPta = bvView() === 'pta';
     [['Exporter en Excel', '', true, function () { bvExportXlsx(r); }],
      ['Exporter en PDF', '', true, function () { bvExportPdf(r); }],
-     ['Proposer une révision', 'primary', true, function () { revFromLine(r); }],
      ['Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), '', pt.st !== 'Clôturé' && bvPlans(r).length > 0, function () { bvLinkOpen(r); }],
      [pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', 'primary', canSend, function () {
         if (bvLinkMissing(r)) { cvSay('bv-msg', 'Envoi impossible : ' + pl(bvLinkMissing(r), 'ligne') + ' à rattacher aux plans de la configuration (' + bvPlans(r).map(function (p) { return p.n; }).join(', ') + ').'); var m0 = document.getElementById('bv-msg'); m0.style.background = 'var(--ko-bg)'; m0.style.color = 'var(--ko)'; return; }
@@ -12012,7 +12011,7 @@ function fmAxes() {
      ['Clôturer', 'primary', canClose, function () {
         cvAsk({ title: 'Clôturer le PTBA', ok: 'Clôturer', required: false, placeholder: 'Commentaire de clôture' }, function (com) {
           pt.st = 'Clôturé'; pt.hist.unshift({ t: 'PTBA clôturé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA clôturé : il est verrouillé.'); });
-      }]].filter(function (a, i) { return !isPta || i < 2 || a[0] === 'Proposer une révision'; }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
+      }]].filter(function (a, i) { return !isPta || i < 2; }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
     root.appendChild(bar);
   }
   function bvRender(root, r) {
@@ -12046,7 +12045,6 @@ function fmAxes() {
       tbd.appendChild(tr);
     });
     tb.appendChild(tbd); sc.appendChild(tb); bl.appendChild(sc); root.appendChild(bl);
-    var sh = cvEl('div', 'hint', bvSel ? 'Ligne sélectionnée : utilisez « Proposer une révision » en haut.' : 'Cliquez sur une ligne pour proposer une révision : elle suit son circuit dans Plans annuels › Révisions.'); sh.style.margin = '-6px 0 14px'; root.appendChild(sh);
     var cmp = bvCompareBlock(r); if (cmp) root.appendChild(cmp); root.appendChild(bvVersBlock(r));
     var hs =cvEl('section', 'co-blk'); hs.appendChild(cvEl('div', 'kb-h', 'Suivi du PTBA'));
     var ph = bvPt(r).hist; if (!ph.length) hs.appendChild(cvEl('div', 'hint', 'Aucune action enregistrée : le PTBA est prêt à être envoyé au bailleur.'));
@@ -12068,8 +12066,7 @@ function fmAxes() {
       var stc = cell(tr, ''); stc.appendChild(badge(bvPt(r).st, PTST[bvPt(r).st] || 'b-neutral'));
       var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button';
       b.addEventListener('click', function () { bvOpen(r); });
-      var brv = cvEl('button', 'btn small', 'Proposer une révision'); brv.type = 'button'; brv.style.marginLeft = '6px'; brv.addEventListener('click', function () { revFromLine(r); });
-      act.appendChild(b); act.appendChild(brv); body.appendChild(tr);
+      act.appendChild(b); body.appendChild(tr);
     });
   }
   document.getElementById('bv-view-close').addEventListener('click', function () { document.getElementById('bv-view').hidden = true; });
