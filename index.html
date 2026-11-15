@@ -20379,30 +20379,61 @@ var EXEC_REC = [
       cells: function (d) { var r = d.rejet ? badge('Rejeté : ' + d.rejet, 'b-ko') : '—'; return [d.id, d.tiers, dpShort(d), d.fac, fmt(d.mt), r]; } });
   }
   var DP_MODELS = { std: 'MANDAT DE PAIEMENT', prj: 'MANDAT · PROJET', reg: 'MANDAT DE RÉGIE' };
+  /* ----- Modèle de mandat : mise en page réelle (en-tête officiel, imputation, bénéficiaire, montants, signatures) ----- */
+  DP.fmt = 'A4 portrait'; DP.copies = 3;
+  var DP_COPY = ['Exemplaire de l’ordonnateur', 'Exemplaire du comptable', 'Exemplaire pour archives'];
+  function dpQr(seed, size) {
+    var h = 2166136261, i, n = 21, cells = ''; for (i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    function fin(x, y) { return '<rect x="' + x + '" y="' + y + '" width="7" height="7" fill="#000"/><rect x="' + (x + 1) + '" y="' + (y + 1) + '" width="5" height="5" fill="#fff"/><rect x="' + (x + 2) + '" y="' + (y + 2) + '" width="3" height="3" fill="#000"/>'; }
+    var r = h; for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) { if ((x < 8 && y < 8) || (x > 12 && y < 8) || (x < 8 && y > 12)) continue; r = (Math.imul(r, 1103515245) + 12345) >>> 0; if ((r >>> 16) & 1) cells += '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="#000"/>'; }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="' + size + '" height="' + size + '" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/>' + fin(0, 0) + fin(14, 0) + fin(0, 14) + cells + '</svg>';
+  }
+  function dpMandatHtml(d, no, copyLbl) {
+    var E = sbXml, z = dpLine(d.key), O = DP.opt, dd = d.dt || {}, today = isoToFr(cadToday()), fin = (z && z.l.axv && z.l.axv.Financier) || '—', info = z ? bvInfo(z.r) : { name: 'Projet', bailleur: '—' };
+    var nat = z && z.l.nat && PUB_NAT[z.l.nat] ? PUB_NAT[z.l.nat] + ' · ' + (NATL[z.l.nat] || '').replace(/^\d+ — /, '') : 'Non rattaché';
+    var title = { std: 'MANDAT DE PAIEMENT', prj: 'MANDAT DE PAIEMENT — PROJET', reg: 'MANDAT DE RÉGIE D’AVANCES' }[DP.model];
+    var th = 'border:1px solid #222;padding:5px 8px;background:#EEF0F4;font-size:11px;text-align:left;font-weight:600;white-space:normal', td = 'border:1px solid #222;padding:6px 8px;font-size:12.5px;vertical-align:top;text-align:left;white-space:normal;overflow-wrap:anywhere';
+    function row(l, v) { return '<tr><th style="' + th + ';width:30%">' + E(l) + '</th><td style="' + td + '">' + v + '</td></tr>'; }
+    var h = '<div style="font-family:Georgia,\'Times New Roman\',serif;color:#111;background:#fff;padding:26px 30px;width:760px;margin:0 auto;border:1px solid #999;box-sizing:border-box">';
+    h += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0"><tr><td style="width:34%;vertical-align:top;font-size:11.5px;line-height:1.4">' + (O.logo ? '<div style="width:54px;height:54px;border:1px solid #555;display:flex;align-items:center;justify-content:center;font-size:10px;margin-bottom:6px">LOGO</div>' : '') + '<b>' + E(info.name.toUpperCase()) + '</b><br>Direction du projet<br>Responsable administratif et financier</td>'
+      + '<td style="text-align:center;font-size:11.5px;line-height:1.5"><b>RÉPUBLIQUE DE MADAGASCAR</b><br><i>Fitiavana – Tanindrazana – Fandrosoana</i><div style="margin:4px auto;width:60px;border-top:1px solid #111"></div></td>'
+      + '<td style="width:30%;text-align:right;vertical-align:top;font-size:11.5px;line-height:1.5">Exercice <b>2026</b><br>Budget : <b>' + E(z ? z.r.camp : '—') + '</b><br>' + E(copyLbl) + '</td></tr></table>';
+    h += '<div style="text-align:center;margin:14px 0 4px"><div style="display:inline-block;border:2px solid #111;padding:6px 26px;font-size:17px;font-weight:700;letter-spacing:.04em">' + E(title) + '</div></div>';
+    h += '<div style="text-align:center;font-size:13px;margin-bottom:12px">N° <b>' + E(no) + '</b> · Engagement n° <b>' + E(d.id) + '</b></div>';
+    if (O.imp) h += '<div style="font-size:11px;font-weight:700;margin:8px 0 3px">IMPUTATION BUDGÉTAIRE</div><table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0;margin-bottom:10px"><tr><th style="' + th + '">Composante</th><th style="' + th + '">Ligne du PTBA</th><th style="' + th + '">Compte</th><th style="' + th + '">Source de financement</th></tr><tr><td style="' + td + '">' + E(z ? z.perim : '—') + '</td><td style="' + td + '">' + E(dpShort(d)) + '</td><td style="' + td + '">' + E(nat) + '</td><td style="' + td + '">' + E(fin) + (DP.model === 'prj' ? '<br><span style="font-size:11px">Bailleur : ' + E(info.bailleur) + '</span>' : '') + '</td></tr></table>';
+    h += '<div style="font-size:11px;font-weight:700;margin:8px 0 3px">BÉNÉFICIAIRE ET OBJET DE LA DÉPENSE</div><table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0;margin-bottom:10px">' + row('Bénéficiaire', '<b>' + E(d.tiers) + '</b>') + row('Objet', E(d.objet)) + row('Acte', E(d.acte + ' n° ' + d.ref)) + row('Facture', E(d.fac || '—') + ' · service fait certifié le ' + E(isoToFr(dd.liq || cadToday()))) + row('Engagement visé', 'le ' + E(isoToFr(dd.eng || cadToday())) + ' par le Contrôle financier') + '</table>';
+    h += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:0;margin-bottom:8px"><tr><th style="' + th + '">Montant engagé (MGA)</th><th style="' + th + '">Retenues (MGA)</th><th style="' + th + ';text-align:right">NET À PAYER (MGA)</th></tr><tr><td style="' + td + ';text-align:right">' + E(fmt(d.mt)) + '</td><td style="' + td + ';text-align:right">0</td><td style="' + td + ';text-align:right;font-size:15px"><b>' + E(fmt(d.mt)) + '</b></td></tr></table>';
+    if (O.lettres) h += '<div style="font-size:12.5px;margin:6px 0 10px">Arrêté le présent mandat à la somme de : <b><i>' + E(cadWords(d.mt, 'ariary')) + '</i></b>.</div>';
+    if (O.bank) h += '<div style="font-size:12.5px;margin-bottom:10px"><b>Mode de règlement :</b> ' + E(d.mode || 'Virement bancaire') + ' sur le compte domicilié du bénéficiaire.</div>';
+    if (O.pj) h += '<div style="font-size:11px;font-weight:700;margin:6px 0 3px">PIÈCES JUSTIFICATIVES JOINTES</div><ol style="margin:0 0 10px 18px;padding:0;font-size:12px;line-height:1.5"><li>' + E(d.acte + ' ' + d.ref) + '</li><li>Facture ' + E(d.fac || '—') + '</li><li>Procès-verbal de réception (service fait)</li><li>Visa du Contrôle financier sur l’engagement ' + E(d.id) + '</li></ol>';
+    if (O.sign) {
+      var box = function (t, sub) { return '<td style="border:1px solid #222;height:92px;width:33%;vertical-align:top;padding:6px 8px;font-size:11.5px"><b>' + E(t) + '</b><div style="color:#555;margin-top:2px">' + E(sub) + '</div></td>'; };
+      h += '<div style="font-size:12px;margin:10px 0 4px">Fait à Antananarivo, le ' + E(today) + '</div><table style="width:100%;border-collapse:separate;border-spacing:6px 0;margin:0 -6px"><tr>' + box('L’ordonnateur', 'Directeur de projet (nom, signature et cachet)') + box('Visa du Contrôle financier', 'Visé le ' + isoToFr(dd.eng || cadToday())) + box(DP.model === 'reg' ? 'Le régisseur' : 'Le comptable', 'Prise en charge le ………… ') + '</tr></table>';
+    }
+    if (O.qr) h += '<div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:10.5px;color:#444">' + dpQr(no + d.id + d.mt, 64) + '<span>Code de vérification du mandat<br>' + E(no) + ' · ' + E(d.id) + '</span></div>';
+    return h + '</div>';
+  }
   function dpPrintPaint() {
     var body = document.getElementById('dp-print-body'), sel = dpOrdSel(); body.innerHTML = '';
+    function nums() { return sel.map(function (d, i) { return 'MD-2026-' + ('000' + (DP.seqM + i)).slice(-4); }); }
     var bar = cvEl('div', 'row-toolbar'), pb = cvEl('button', 'btn primary', 'Imprimer les mandats sélectionnés'); pb.type = 'button';
     pb.addEventListener('click', function () {
-      var E = sbXml; sbPrint('Mandats', sel.map(function (d, i) { var mt = fmt(d.mt); return '<h1>' + E(DP_MODELS[DP.model]) + '</h1><div class="meta">N° ' + E('MD-2026-' + ('000' + (DP.seqM + i)).slice(-4)) + ' · Exercice 2026</div><p>Bénéficiaire : <b>' + E(d.tiers) + '</b></p>' + (DP.opt.imp ? '<p>Imputation : ' + E(dpShort(d)) + '</p>' : '') + '<p>Objet : ' + E(d.objet) + '</p><p><b>Net à payer : ' + E(mt) + ' MGA</b></p>' + (DP.opt.pj ? '<p>Pièces : ' + E([d.ref, d.fac, 'PV de réception'].join(', ')) + '</p>' : '') + (DP.opt.sign ? '<p>L’ordonnateur ………… &nbsp;&nbsp; Le comptable …………</p>' : ''); }).join('<hr>')); });
+      var ns = nums(), pages = []; sel.forEach(function (d, i) { for (var c = 0; c < DP.copies; c++) pages.push('<div style="page-break-after:always;margin-bottom:24px">' + dpMandatHtml(d, ns[i], DP_COPY[c % 3]) + '</div>'); });
+      sbPrint('Mandats de paiement', pages.join('')); });
     bar.appendChild(pb); body.appendChild(bar);
-    var g = cvEl('div', 'fgrid');
+    var g = cvEl('div', 'fgrid'); g.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
     function fld(label, el) { var d = cvEl('div'); d.appendChild(cvEl('label', null, label)); d.appendChild(el); g.appendChild(d); }
     var m = cvEl('select', 'field'); [['std', 'Mandat de paiement standard'], ['prj', 'Mandat de projet'], ['reg', 'Mandat de régie d’avances']].forEach(function (o) { var op = cvEl('option', null, o[1]); op.value = o[0]; m.appendChild(op); }); m.value = DP.model; m.addEventListener('change', function () { DP.model = m.value; dpPrintPaint(); }); fld('Modèle de mandat', m);
-    var fm = cvEl('select', 'field'); ['A4 portrait', 'A5 paysage'].forEach(function (x) { fm.appendChild(cvEl('option', null, x)); }); fld('Format', fm);
-    var ex = cvEl('select', 'field'); ['3 (ordonnateur, comptable, archives)', '2', '1'].forEach(function (x) { ex.appendChild(cvEl('option', null, x)); }); fld('Exemplaires', ex);
+    var fm = cvEl('select', 'field'); ['A4 portrait', 'A5 paysage'].forEach(function (x) { fm.appendChild(cvEl('option', null, x)); }); fm.value = DP.fmt; fm.addEventListener('change', function () { DP.fmt = fm.value; }); fld('Format', fm);
+    var ex = cvEl('select', 'field'); [['3', '3 (ordonnateur, comptable, archives)'], ['2', '2'], ['1', '1']].forEach(function (o) { var op = cvEl('option', null, o[1]); op.value = o[0]; ex.appendChild(op); }); ex.value = String(DP.copies); ex.addEventListener('change', function () { DP.copies = +ex.value; }); fld('Exemplaires', ex);
     var fs = cvEl('div'); fs.appendChild(cvEl('label', null, 'Éléments à imprimer')); var wrap = cvEl('div'); wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px 16px;padding-top:6px';
     [['logo', 'Logo et en-tête'], ['imp', 'Imputation budgétaire'], ['bank', 'Mode et domiciliation'], ['lettres', 'Montant en lettres'], ['pj', 'Liste des pièces jointes'], ['sign', 'Blocs de signature'], ['qr', 'QR code de vérification']].forEach(function (o) {
       var l = cvEl('label', 'chk'), c = cvEl('input'); c.type = 'checkbox'; c.checked = !!DP.opt[o[0]]; c.addEventListener('change', function () { DP.opt[o[0]] = c.checked; dpPrintPaint(); }); l.appendChild(c); l.appendChild(document.createTextNode(' ' + o[1])); wrap.appendChild(l); }); fs.appendChild(wrap); fs.className = 'full'; g.appendChild(fs);
     body.appendChild(g);
-    var d0 = sel[0], pv = cvEl('section', 'co-blk'); pv.style.marginTop = '14px'; pv.appendChild(cvEl('div', 'kb-h', 'Aperçu du mandat'));
-    if (!d0) pv.appendChild(cvEl('div', 'hint', 'Cochez une liquidation pour voir l’aperçu.')); else {
-      var card = cvEl('div', 'card'); card.style.padding = '18px'; card.appendChild(cvEl('b', null, (DP.opt.logo ? '[LOGO] ' : '') + DP_MODELS[DP.model] + ' — N° MD-2026-' + ('000' + DP.seqM).slice(-4)));
-      [['Bénéficiaire : ' + d0.tiers, true], [DP.opt.imp ? 'Imputation : ' + dpShort(d0) : null, true], ['Objet : ' + d0.objet, true], [DP.opt.bank ? 'Paiement : virement sur compte domicilié' : null, true], ['Net à payer : ' + fmt(d0.mt) + ' MGA', true], [DP.opt.lettres ? 'Arrêté à la somme de ' + dpWords(d0.mt) : null, true], [DP.opt.pj ? 'Pièces : ' + [d0.ref, d0.fac, 'PV de réception'].join(', ') : null, true], [DP.opt.sign ? 'L’ordonnateur · Le comptable' : null, true], [DP.opt.qr ? '[QR de vérification]' : null, true]].forEach(function (x) { if (x[0]) { var p = cvEl('div', null, x[0]); p.style.marginTop = '6px'; card.appendChild(p); } });
-      pv.appendChild(card);
-    }
+    var pv = cvEl('section', 'co-blk'); pv.style.marginTop = '14px'; pv.appendChild(cvEl('div', 'kb-h', 'Aperçu du mandat' + (sel.length > 1 ? ' (1 sur ' + sel.length + ')' : '')));
+    if (!sel.length) pv.appendChild(cvEl('div', 'hint', 'Cochez une liquidation pour voir l’aperçu.')); else { var sheet = cvEl('div'); sheet.style.cssText = 'background:#E9EBF0;padding:16px;border-radius:8px;overflow:auto'; sheet.innerHTML = dpMandatHtml(sel[0], nums()[0], DP_COPY[0]); pv.appendChild(sheet); setTimeout(function () { var w = sheet.clientWidth - 32, pg = sheet.firstChild; if (pg && w > 0 && w < 790) pg.style.zoom = String(Math.max(0.4, w / 790)); }, 0); }
     body.appendChild(pv);
   }
-  function dpWords(n) { return fmt(n) + ' ariary'; }
   /* ----- Paiements ----- */
   function dpPayRender() {
     dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'ordonnance'; }), done = (DP.docs || []).filter(function (d) { return d.st === 'paye'; }), sel = rows.filter(function (d) { return d.id === DP.sel.dppay; })[0], t = dpTot();
