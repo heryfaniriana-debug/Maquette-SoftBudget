@@ -1994,7 +1994,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="sub">
           <button data-go="bkacc">Comptes bancaires</button>
           <button data-go="bkdec" title="Plan de trésorerie prévisionnel">Plan de trésorerie</button>
-                    <button data-go="rep" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
+                              <button data-go="revpl" title="Révisions des plans : circuit et approbation du bailleur" style="display:none">Révisions</button><button data-go="rep" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
           <button data-go="pdec" title="Plan de décaissement du projet">Plan de décaissement</button>
           <button data-go="dfon" title="Demandes de fonds DRF et DPD">Demandes de fonds</button>
           <button data-go="bkrel" title="Relevés bancaires">Relevés bancaires</button>
@@ -2017,7 +2017,6 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button class="anp" data-go="anfp" title="Dépenses comparées à l’avancement physique" style="display:none">Finances et physique</button>
           <button class="anp" data-go="anplu" title="Suivi pluriannuel" style="display:none">Pluriannuel</button>
           <button class="anp" data-go="anale" title="Règles et alertes" style="display:none">Alertes</button>
-          <button class="anp" data-go="anver" title="Versions des plans" style="display:none">Versions des plans</button><button data-go="synth" title="Synthèse du contrôleur de gestion">Synthèse</button>
           <button data-go="ecarts" title="Écarts à expliquer et commentés">Écarts commentés</button>
           <button data-go="dispo">Disponibilités</button>
           <button data-go="alertes" title="Dépassements et alertes">Alertes</button>
@@ -5398,6 +5397,38 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         </div></div>
       </section>
 
+      <!-- ===== Projet : révisions des plans ===== -->
+      <section class="view" id="v-revpl">
+        <div class="head"><div><h1>Révisions des plans</h1><p>Modifier le PTBA, le PTA et le PPM en cours d’exercice : brouillon, validation, puis approbation du bailleur.</p></div>
+          <div class="actions"><button class="btn primary" id="revpl-new">+ Nouvelle révision</button></div></div>
+        <div class="callout" id="revpl-msg" hidden style="margin-bottom:12px"></div>
+        <div id="revpl-k"></div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:900px"><thead id="revpl-th"></thead><tbody id="revpl-b"></tbody></table></div></div>
+        <section class="co-blk"><div class="kb-h">Versions en vigueur</div><div id="revpl-vers"></div></section>
+        <div class="panel" id="revpl-det" hidden><h2><span id="revpl-det-title">Révision</span></h2><div class="body" id="revpl-det-body"></div></div>
+        <div class="panel" id="revpl-chg" hidden><h2><span id="revpl-chg-title">Modification</span></h2><div class="body">
+          <div class="fgrid">
+            <div><label for="revpl-ct">Élément à modifier</label><select id="revpl-ct" class="field"><option value="L">Ligne du PTBA</option><option value="P">Marché du PPM</option></select></div>
+            <div><label for="revpl-ce">Choix <em>*</em></label><select id="revpl-ce" class="field"></select></div>
+            <div><label for="revpl-cv">Valeur actuelle</label><input id="revpl-cv" class="field" type="text" readonly></div>
+            <div><label for="revpl-cn">Nouveau montant (MGA) <em>*</em></label><input id="revpl-cn" class="field" type="text" inputmode="decimal"></div>
+            <div id="revpl-cqw"><label for="revpl-cq" id="revpl-cql">Nouvelle cible</label><input id="revpl-cq" class="field" type="text" inputmode="decimal"></div>
+            <div id="revpl-cdw"><label for="revpl-cd">Nouvelle date de signature</label><input id="revpl-cd" class="field" type="date"></div>
+          </div>
+          <div class="err" id="revpl-cerr"></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="revpl-ccancel">Annuler</button><button class="btn primary" id="revpl-csave">Enregistrer la modification</button></div>
+        </div></div>
+        <div class="panel" id="revpl-ano" hidden><h2><span>Approbation du bailleur (ANO)</span></h2><div class="body">
+          <div class="fgrid">
+            <div><label for="revpl-aref">Référence de l’ANO <em>*</em></label><input id="revpl-aref" class="field" type="text"></div>
+            <div><label for="revpl-adate">Date de l’ANO <em>*</em></label><input id="revpl-adate" class="field" type="date"></div>
+            <div class="full"><label for="revpl-adoc">Document joint</label><input id="revpl-adoc" class="field" type="text" placeholder="Nom du fichier (ex. ANO_PTBA_2026_rev1.pdf)"></div>
+          </div>
+          <div class="err" id="revpl-aerr"></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="revpl-acancel">Annuler</button><button class="btn primary" id="revpl-aok">Approuver la révision</button></div>
+        </div></div>
+      </section>
+
       <!-- ===== Projet : report et clôture de l'exercice ===== -->
       <section class="view" id="v-rep">
         <div class="head"><div><h1>Report et clôture</h1><p></p></div>
@@ -6512,7 +6543,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6587,6 +6618,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     anfin: ['Analyses', 'Financement et exécution'], aneng: ['Analyses', 'Engagements et PPM'], anrea: ['Analyses', 'Réalisations et PTBA'], andec: ['Analyses', 'Décaissements et plan de décaissement'], anphy: ['Analyses', 'Avancement physique et PTA'], anfp: ['Analyses', 'Réalisations et avancement physique'], anplu: ['Analyses', 'Suivi pluriannuel'], anale: ['Analyses', 'Alertes'], anver: ['Analyses', 'Versions des plans'],
     avanc: ['Exécution', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
+    revpl: ['Plans annuels', 'R\u00e9visions des plans'],
     rep: ['Plans annuels', 'Report et cl\u00f4ture de l\u2019exercice'],
     pdec: ['Plans annuels', 'Plan de décaissement'],
     dfon: ['Trésorerie', 'Demandes de fonds'],
@@ -6607,7 +6639,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss', 'sxeng', 'sxliq', 'sxpay', 'sxenc', 'sxphy', 'trpos'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
-    'nav-plan': ['ptba', 'pta', 'ppm', 'pdec', 'rep'],
+    'nav-plan': ['ptba', 'pta', 'ppm', 'pdec', 'revpl', 'rep'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
     'nav-rapports': ['anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
@@ -6653,6 +6685,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'avini' && typeof aviniRender === 'function') aviniRender();
     if (/^sx(eng|liq|pay|enc|phy)$/.test(name) && typeof sxRender === 'function') { SX.kind = name.slice(2); sxRender(); }
     if (/^an(fin|eng|rea|dec|phy|fp|plu|ale|ver)$/.test(name) && typeof anaRender === 'function') { ANA.kind = name.slice(2); anaRender(); }
+    if (name === 'revpl' && typeof revRender === 'function') revRender();
     if (name === 'rep' && typeof repRender === 'function') repRender();
     if (name === 'trpos' && typeof trpRender === 'function') trpRender();
     if (name === 'avanc' && typeof avancRender === 'function') avancRender();
@@ -11951,7 +11984,7 @@ function fmAxes() {
     var isPta = bvView() === 'pta';
     [['Exporter en Excel', '', true, function () { bvExportXlsx(r); }],
      ['Exporter en PDF', '', true, function () { bvExportPdf(r); }],
-     ['Réviser la ligne', 'primary', !!bvSelLine(r), function () { bvRevise(r); }],
+     ['Proposer une révision', 'primary', !!bvSelLine(r), function () { revFromLine(r); }],
      ['Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), '', pt.st !== 'Clôturé' && bvPlans(r).length > 0, function () { bvLinkOpen(r); }],
      [pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', 'primary', canSend, function () {
         if (bvLinkMissing(r)) { cvSay('bv-msg', 'Envoi impossible : ' + pl(bvLinkMissing(r), 'ligne') + ' à rattacher aux plans de la configuration (' + bvPlans(r).map(function (p) { return p.n; }).join(', ') + ').'); var m0 = document.getElementById('bv-msg'); m0.style.background = 'var(--ko-bg)'; m0.style.color = 'var(--ko)'; return; }
@@ -11967,7 +12000,7 @@ function fmAxes() {
      ['Clôturer', 'primary', canClose, function () {
         cvAsk({ title: 'Clôturer le PTBA', ok: 'Clôturer', required: false, placeholder: 'Commentaire de clôture' }, function (com) {
           pt.st = 'Clôturé'; pt.hist.unshift({ t: 'PTBA clôturé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA clôturé : il est verrouillé.'); });
-      }]].filter(function (a, i) { return !isPta || i < 2 || a[0] === 'Réviser la ligne'; }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
+      }]].filter(function (a, i) { return !isPta || i < 2 || a[0] === 'Proposer une révision'; }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
     root.appendChild(bar);
   }
   function bvRender(root, r) {
@@ -12001,7 +12034,7 @@ function fmAxes() {
       tbd.appendChild(tr);
     });
     tb.appendChild(tbd); sc.appendChild(tb); bl.appendChild(sc); root.appendChild(bl);
-    var sh = cvEl('div', 'hint', bvSel ? 'Ligne sélectionnée : utilisez « Réviser la ligne » en haut.' : 'Cliquez sur une ligne pour la réviser : la révision ajoute une version, le budget initial V1 est conservé.'); sh.style.margin = '-6px 0 14px'; root.appendChild(sh);
+    var sh = cvEl('div', 'hint', bvSel ? 'Ligne sélectionnée : utilisez « Proposer une révision » en haut.' : 'Cliquez sur une ligne pour proposer une révision : elle suit son circuit dans Plans annuels › Révisions.'); sh.style.margin = '-6px 0 14px'; root.appendChild(sh);
     var cmp = bvCompareBlock(r); if (cmp) root.appendChild(cmp); root.appendChild(bvVersBlock(r));
     var hs =cvEl('section', 'co-blk'); hs.appendChild(cvEl('div', 'kb-h', 'Suivi du PTBA'));
     var ph = bvPt(r).hist; if (!ph.length) hs.appendChild(cvEl('div', 'hint', 'Aucune action enregistrée : le PTBA est prêt à être envoyé au bailleur.'));
@@ -14521,10 +14554,10 @@ var EXEC_REC = [
     return [
       { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Cadre budgétaire', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
       { g: 'Élaboration', items: [['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
-      { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso], ['Report et clôture', rAlways]] },
+      { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso], ['Révisions', rAlways], ['Report et clôture', rAlways]] },
       { g: 'Compte administratif', items: ca },
       { g: 'Exécution', items: [[rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Avancement physique', rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
-      { g: 'Analyses', items: [['Vue d’ensemble', rAlways], ['Engagements et PPM', rAlways], ['Réalisations et PTBA', rAlways], ['Décaissements et plan', treso], ['Physique et PTA', rAlways], ['Finances et physique', rAlways], ['Pluriannuel', rAlways], ['Alertes', rAlways], ['Versions des plans', rAlways]] },
+      { g: 'Analyses', items: [['Vue d’ensemble', rAlways], ['Engagements et PPM', rAlways], ['Réalisations et PTBA', rAlways], ['Décaissements et plan', treso], ['Physique et PTA', rAlways], ['Finances et physique', rAlways], ['Pluriannuel', rAlways], ['Alertes', rAlways]] },
       { g: 'Paramètres', items: grp('Paramètres').items.filter(function (it) { return it[0] !== 'Bailleurs' && it[0] !== 'Sources de financement' && it[0] !== 'Taux de change'; }) }
     ];
   })();
@@ -14578,6 +14611,7 @@ var EXEC_REC = [
     put('g-budgets', [['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
+    put('g-plan', [['revpl', 'R\u00e9visions', 'R\u00e9visions des plans : circuit et approbation du bailleur']]);
     put('g-plan', [['rep', 'Report et cl\u00f4ture', 'Report et cl\u00f4ture de l\u2019exercice']]);
     gT.style.display = 'none';
     put('g-suivi', [['sxeng'], ['sxliq'], ['sxpay'], ['sxenc'], ['sxphy'], ['avanc'], ['trpos'], ['dfon'], ['dprap'], ['bkacc'], ['bkrel'], ['bkrap']]);
@@ -14615,7 +14649,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
   }
   var CAD_SOON = {
@@ -20163,7 +20197,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -21047,6 +21081,7 @@ var EXEC_REC = [
     var dp = dec.rows.reduce(function (a, x) { return a + x.plan - x.real; }, 0); if (dp > 0) out.push({ k: 'warn', b: 'Décaissements', go: 'andec', m: 'Les décaissements du projet sont inférieurs de ' + fmt(dp) + ' MGA au plan : vérifier les paiements en attente.' });
     var lp = phy.rows.filter(function (x) { return x.planTo && x.real / x.planTo < 0.85; }); if (lp.length) out.push({ k: 'warn', b: 'Avancement physique', go: 'anphy', m: 'Accélérer ' + (lp.length > 1 ? lp.length + ' travaux' : '1 travail') + ' en retard sur la cible du PTA : ' + lp.slice(0, 2).map(function (x) { return x.label.split(' — ')[0]; }).join(' et ') + '.' });
     var fp = phy.rows.filter(function (x) { return x.plan && x.tf - x.real / x.plan > 0.2; }); if (fp.length) out.push({ k: 'ko', b: 'Dépenses et physique', go: 'anfp', m: 'Vérifier ' + pl(fp.length, 'ligne') + ' dont les dépenses dépassent nettement le réalisé physique.' });
+    var rp = REV.items.filter(function (x) { return x.st === 'Soumise' || x.st === 'Validée'; }); if (rp.length) out.push({ k: 'warn', b: 'Révisions', go: 'revpl', m: pl(rp.length, 'révision') + ' en attente d’approbation depuis ' + Math.max.apply(null, rp.map(function (x) { return engDays(x.since, cadToday()); })) + ' jour(s) au plus.' });
     var td = sxEngs().filter(function (i) { return sxStat(i).todo; }).length; if (td) out.push({ k: 'warn', b: 'Engagements', go: 'sxeng', m: td + ' engagement' + (td > 1 ? 's' : '') + ' \u00e0 traiter : fin d\u00e9pass\u00e9e ou sans mouvement.' }); var nc = 0; ['rea', 'eng', 'dec', 'phy'].forEach(function (k) { anaRows(k, ex).rows.forEach(function (x) { if (x.planTo - x.real > 0 && !ANA.com[k + '|' + x.id]) nc++; }); }); if (nc) out.push({ k: 'warn', b: 'Écarts', go: 'anrea', m: pl(nc, 'écart') + ' à commenter et à arbitrer (glissement).' });
     lots_req: { var lots = anaLots(ex); for (var i = 0; i < lots.length; i++) { var P = pdcSim(pdcNeeds(lots[i])), q = P.req.filter(function (z) { return z.m >= cm; })[0]; if (q) { out.push({ k: 'warn', b: 'Trésorerie', go: 'pdec', m: 'Déposer la demande de réapprovisionnement de ' + fmt(q.mt) + ' MGA avant fin ' + PDC_MOIS[q.m] + ' pour éviter un solde négatif.' }); break lots_req; } } }
     return out;
@@ -21057,7 +21092,7 @@ var EXEC_REC = [
     document.getElementById('db-curve-n').textContent = 'exercice ' + ex + ' · situation au ' + isoToFr(cadToday());
     b.appendChild(anaChart([{ name: 'Prévu (PTBA de référence)', color: DPC.brand, dash: true, data: cp }, { name: 'Réalisé', color: DPC.ok, data: cl.map(function (v, i) { return i <= cm ? v : null; }) }, { name: 'À ce rythme jusqu’à la fin', color: DPC.ko, dash: true, data: cl.map(function (v, i) { return i >= cm ? rl + rate * (i - cm) : null; }) }], cm, [{ i: cm, v: pc, c: DPC.brand, t: 'Objectif à ce jour' }, { i: cm, v: rl, c: DPC.ok, t: 'Vous êtes ici' }]));
     var d = cvEl('div'); d.style.marginTop = '12px'; d.appendChild(dpDl([['Objectif à ce jour', fmt(pc) + ' MGA'], ['Réalisé', fmt(rl) + ' MGA · ' + anaPc(rl, pc)], ['Écart', anaSg(rl - pc) + ' MGA'], ['Prévu en fin d’exercice', fmt(cp[11]) + ' MGA'], ['À ce rythme, fin d’exercice', fmt(Math.round(rl + rate * (11 - cm))) + ' MGA'], ['Plans de référence', 'PTBA et PTA V' + (ANA.ver || (anaLots(ex)[0] ? bvVers(anaLots(ex)[0]).length : 1)) + ' · PPM et plan de décaissement en vigueur']])); b.appendChild(d);
-    var bt = cvEl('button', 'btn small', 'Choisir les plans de référence'); bt.type = 'button'; bt.style.marginTop = '10px'; bt.addEventListener('click', function () { show('anver'); }); b.appendChild(bt);
+    var bt = cvEl('button', 'btn small', 'Voir les révisions des plans'); bt.type = 'button'; bt.style.marginTop = '10px'; bt.addEventListener('click', function () { show('revpl'); }); b.appendChild(bt);
     var al = anaAxes(ex); if (!al.length) ax.appendChild(cvEl('div', 'hint', 'Aucun axe d’amélioration : l’exécution suit les plans.'));
     al.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x.b, x.k === 'ko' ? 'b-ko' : 'b-warn')); var t = cvEl('div', null, x.m); t.style.marginLeft = '12px'; row.appendChild(t); var o = cvEl('button', 'btn small', 'Ouvrir'); o.type = 'button'; o.style.marginLeft = 'auto'; o.addEventListener('click', function () { show(x.go); }); row.appendChild(o); ax.appendChild(row); });
   }
@@ -21532,6 +21567,132 @@ var EXEC_REC = [
     c.reprise = { from: String(+ex - 1), lines: nl, ppm: np, tot: tot }; c.hist.unshift({ t: txt.trim(), by: ME, on: nowStr() }); return txt;
   }
   document.getElementById('cm-ex').addEventListener('change', cmRepRefresh); document.getElementById('cm-new').addEventListener('click', function () { setTimeout(cmRepRefresh, 0); });
+  /* ----- Révisions des plans : brouillon, soumission, validation, approbation du bailleur (ANO), puis nouvelle version de référence ----- */
+  var REV = { seq: 0, items: [] }, REVC = { rev: null, ch: null }, REVD = null;
+  var REV_CLS = { 'Brouillon': 'b-neutral', 'Soumise': 'b-warn', 'Validée': 'b-info', 'Approuvée': 'b-ok', 'Rejetée': 'b-ko' };
+  function revLot(rev) { return bvList().filter(function (r) { return r.camp === rev.lot; })[0]; }
+  function revGet(id) { return REV.items.filter(function (x) { return x.id === id; })[0]; }
+  function revStamp(rev, txt) { rev.since = cadToday(); rev.hist.unshift({ t: txt, by: ME, on: nowStr() }); }
+  function revNew(motif, r) {
+    REV.seq++; var ex = cvCamp(r).ex, rev = { id: 'REV-' + ex + '-' + ('0' + REV.seq).slice(-2), ex: ex, lot: r.camp, st: 'Brouillon', motif: motif, changes: [], hist: [], by: ME, on: nowStr(), since: cadToday() };
+    rev.hist.unshift({ t: 'Brouillon créé — ' + motif, by: ME, on: nowStr() }); REV.items.unshift(rev); return rev;
+  }
+  function revCurOf(r, k, key) {
+    if (k === 'L') { var z = dpLines().filter(function (q) { return q.key === key && q.r === r; })[0]; return z ? { cur: z.l.dem || 0, q: z.l.wk && z.l.wk.vol ? z.l.wk.vol : null, unit: z.l.wk ? z.l.wk.unit : '', label: z.l.c + ' — ' + (z.l.lib || z.l.l), z: z } : null; }
+    var x = CPP.items.filter(function (q) { return q.ref === key; })[0]; return x ? { cur: x.est, q: null, unit: '', label: x.ref + ' — ' + x.des, x: x } : null;
+  }
+  function revImpact(rev) {
+    var r = revLot(rev), out = [], block = 0, t0 = 0, t1 = 0, env = 0, yi = CPAD.years.indexOf(+rev.ex), CL = rev.changes.filter(function (c) { return c.k === 'L'; }), CP = rev.changes.filter(function (c) { return c.k === 'P'; });
+    dpLines().filter(function (z) { return z.r === r; }).forEach(function (z) {
+      var c = CL.filter(function (x) { return x.key === z.key; })[0], v0 = z.l.dem || 0, v1 = c ? c.to : v0; t0 += v0; t1 += v1; if (!c) return;
+      var s = dpStat(z.key), eng = s.e + s.r, act = r.camp + '|' + z.l.c, pp = ppmActTotal(act) + CP.filter(function (x) { var it = CPP.items.filter(function (q) { return q.ref === x.key; })[0]; return it && it.act === act; }).reduce(function (a, x) { return a + x.to - x.from; }, 0);
+      if (v1 < eng) { out.push(['ko', 'Engagé', c.label + ' : le nouveau montant (' + fmt(v1) + ' MGA) est inférieur à l’engagé (' + fmt(eng) + ' MGA). La révision ne peut pas être soumise.']); block++; } else out.push(['ok', 'Engagé', c.label + ' : conforme à l’engagé (' + fmt(eng) + ' MGA).']);
+      if (pp > v1) out.push(['warn', 'PPM', c.label + ' : les marchés du PPM (' + fmt(pp) + ' MGA) dépassent la ligne révisée.']);
+      if (c.qTo != null && c.qTo !== c.qFrom) out.push(['info', 'PTA', c.label + ' : cible ' + fmt(c.qFrom) + ' → ' + fmt(c.qTo) + ' ' + c.unit + '.']);
+      out.push(['info', 'Plan de décaissement', c.label + ' : ' + anaSg(v1 - v0) + ' MGA sur les besoins de l’exercice.']);
+    });
+    CP.forEach(function (c) { out.push(['info', 'PPM', c.label + ' : estimatif ' + fmt(c.from) + ' → ' + fmt(c.to) + ' MGA' + (c.dTo ? ', signature le ' + isoToFr(c.dTo) : '') + '.']); });
+    if (yi >= 0) env = CPAD.comps.reduce(function (a, cp) { return a + (padComp(cp.code)[yi] || 0); }, 0);
+    if (CL.length) out.push(env && t1 > env && t1 > t0 ? ['warn', 'Financement', 'Total révisé ' + fmt(t1) + ' MGA : supérieur au financement prévu (' + fmt(env) + ' MGA).'] : ['ok', 'Financement', 'Total révisé ' + fmt(t1) + ' MGA (' + anaSg(t1 - t0) + ' MGA) : la révision n’augmente pas le budget au-delà du financement.']);
+    return { out: out, block: block, t0: t0, t1: t1 };
+  }
+  function revRender() {
+    var ex = anaEx(), lot = anaLots(ex)[0], items = REV.items, n = function (s) { return items.filter(function (x) { return s.indexOf(x.st) >= 0; }).length; };
+    var k = document.getElementById('revpl-k'); k.innerHTML = ''; k.appendChild(dpTiles([['Brouillons', String(n(['Brouillon'])), 'brand'], ['En attente d’approbation', String(n(['Soumise', 'Validée'])), 'warn'], ['Approuvées', String(n(['Approuvée'])), 'ok'], ['Rejetées', String(n(['Rejetée'])), 'ko']], { cols: 4 }));
+    document.getElementById('revpl-th').innerHTML = '<tr><th>N°</th><th>Exercice</th><th>Motif</th><th class="num">Modifications</th><th class="num">Écart sur le PTBA (MGA)</th><th>Statut</th><th>Depuis</th><th></th></tr>';
+    var tb = document.getElementById('revpl-b'); tb.innerHTML = '';
+    if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune révision : cliquez sur « Nouvelle révision » pour modifier le PTBA, le PTA ou le PPM.'); c0.colSpan = 8; c0.style.textAlign = 'left'; tb.appendChild(t0); }
+    items.forEach(function (rev) {
+      var tr = cvEl('tr'), ecart = rev.changes.filter(function (c) { return c.k === 'L'; }).reduce(function (a, c) { return a + c.to - c.from; }, 0), age = engDays(rev.since, cadToday());
+      cell(tr, rev.id, 'name'); cell(tr, rev.ex); cell(tr, rev.motif); cell(tr, String(rev.changes.length), 'num'); cell(tr, anaSg(ecart), 'num'); var st = cell(tr, ''); st.appendChild(badge(rev.st, REV_CLS[rev.st])); cell(tr, age ? 'il y a ' + pl(age, 'jour') : 'aujourd’hui');
+      var ac = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button'; b.addEventListener('click', function () { revDetOpen(rev); }); ac.appendChild(b); tb.appendChild(tr);
+    });
+    var vb = document.getElementById('revpl-vers'); vb.innerHTML = '';
+    var rows = []; anaLots(ex).forEach(function (r) { var vs = bvVers(r), sum = function (v) { return Object.keys(v.snap).reduce(function (a, q) { return a + (v.snap[q].dem || 0); }, 0); }; vs.forEach(function (v, i) { var bd = cvEl('div'); if (i === vs.length - 1) bd.appendChild(badge('Référence', 'b-ok')); rows.push(['V' + v.v + ' — ' + cvCamp(r).ex, v.on, v.by, (v.why || '') + (v.what ? ' — ' + v.what : ''), fmt(sum(v)), i ? anaSg(sum(v) - sum(vs[i - 1])) : '—', bd]); }); });
+    vb.appendChild(dpMini(['Version', 'Date', 'Auteur', 'Motif et modification', 'PTBA (MGA)', 'Écart avec la précédente', ''], rows, [4, 5], 'Aucune version.'));
+  }
+  function revDetOpen(rev) { REVD = rev.id; revDetPaint(); document.getElementById('revpl-det').hidden = false; }
+  function revDetPaint() {
+    var rev = revGet(REVD), body = document.getElementById('revpl-det-body'); if (!rev) return; body.innerHTML = ''; document.getElementById('revpl-det-title').textContent = 'Révision ' + rev.id;
+    var r = revLot(rev), draft = rev.st === 'Brouillon', stb = cvEl('div'); stb.style.marginBottom = '12px'; stb.appendChild(badge(rev.st, REV_CLS[rev.st])); body.appendChild(stb);
+    anaBlock(body, 'Informations', dpDl([['Exercice', rev.ex], ['Créée par', rev.by + ' · ' + rev.on], ['Motif', rev.motif, true], ['ANO du bailleur', rev.ano ? rev.ano.ref + ' du ' + isoToFr(rev.ano.date) + (rev.ano.doc ? ' · ' + rev.ano.doc : '') : '—']]));
+    if (draft) { var ab = cvEl('div'); ab.style.marginBottom = '10px'; var ba = cvEl('button', 'btn', '+ Ajouter une modification'); ba.type = 'button'; ba.addEventListener('click', function () { revChgOpen(rev, null); }); ab.appendChild(ba); body.appendChild(ab); }
+    var rows = rev.changes.map(function (c) {
+      var n = cvEl('div'); n.appendChild(cvEl('b', null, c.label)); n.appendChild(cvEl('div', 'hby', c.k === 'L' ? 'Ligne du PTBA' : 'Marché du PPM'));
+      var a = cvEl('div'); if (draft) { var bm = cvEl('button', 'btn small', 'Modifier'), br = cvEl('button', 'btn small', 'Retirer'); bm.type = br.type = 'button'; bm.addEventListener('click', function () { revChgOpen(rev, c); }); br.addEventListener('click', function () { rev.changes = rev.changes.filter(function (x) { return x !== c; }); revDetPaint(); }); a.appendChild(bm); a.appendChild(br); }
+      return [n, fmt(c.from), fmt(c.to), anaSg(c.to - c.from), c.k === 'L' && c.qTo != null && c.qTo !== c.qFrom ? fmt(c.qFrom) + ' → ' + fmt(c.qTo) + ' ' + c.unit : (c.k === 'P' && c.dTo ? 'Signature le ' + isoToFr(c.dTo) : '—'), a];
+    });
+    anaBlock(body, 'Modifications', dpMini(['Élément', 'Actuel (MGA)', 'Révisé (MGA)', 'Écart (MGA)', 'Cible ou date', ''], rows, [1, 2, 3], 'Aucune modification : ajoutez-en au moins une.'));
+    var I = null;
+    if (rev.st !== 'Approuvée' && rev.st !== 'Rejetée') {
+      I = revImpact(rev); var card = cvEl('div', 'card'); card.style.padding = '4px 16px';
+      if (!I.out.length) card.appendChild(cvEl('div', 'list-row', 'Aucun impact à afficher.'));
+      I.out.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x[1], { ok: 'b-ok', warn: 'b-warn', ko: 'b-ko', info: 'b-info' }[x[0]])); var t = cvEl('div', null, x[2]); t.style.marginLeft = '12px'; row.appendChild(t); card.appendChild(row); });
+      anaBlock(body, 'Aperçu d’impact', card);
+    }
+    anaBlock(body, 'Historique', dpMini(['Date', 'Événement', 'Par'], rev.hist.map(function (h) { return [h.on, h.t, h.by]; }), [], ''));
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px';
+    function btn(txt, cls, fn, dis) { var b = cvEl('button', 'btn' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; b.disabled = !!dis; b.addEventListener('click', fn); ft.appendChild(b); return b; }
+    btn('Fermer', '', function () { document.getElementById('revpl-det').hidden = true; revRender(); });
+    if (draft) { btn('Supprimer le brouillon', '', function () { REV.items = REV.items.filter(function (x) { return x !== rev; }); document.getElementById('revpl-det').hidden = true; revRender(); }); btn('Soumettre', 'primary', function () { rev.st = 'Soumise'; revStamp(rev, 'Soumise à la validation'); revDetPaint(); }, !rev.changes.length || (I && I.block)); }
+    if (rev.st === 'Soumise') { btn('Rejeter', '', function () { revReject(rev); }); btn('Valider', 'primary', function () { cvAsk({ title: 'Valider ' + rev.id, ok: 'Valider', required: false, placeholder: 'Observation de la direction' }, function (m) { rev.st = 'Validée'; revStamp(rev, 'Validée par la direction' + (m ? ' — ' + m : '')); revDetPaint(); }); }); }
+    if (rev.st === 'Validée') { btn('Rejeter', '', function () { revReject(rev); }); btn('Enregistrer l’approbation du bailleur', 'primary', function () { document.getElementById('revpl-aref').value = ''; document.getElementById('revpl-adoc').value = ''; document.getElementById('revpl-adate').value = cadToday(); document.getElementById('revpl-aerr').textContent = ''; document.getElementById('revpl-ano').hidden = false; }); }
+    body.appendChild(ft);
+  }
+  function revReject(rev) { cvAsk({ title: 'Rejeter ' + rev.id, ok: 'Rejeter', required: true, cLabel: 'Motif du rejet', placeholder: 'Pourquoi la révision est-elle rejetée ?' }, function (m) { rev.st = 'Rejetée'; revStamp(rev, 'Rejetée — ' + m); revDetPaint(); }); }
+  /* Formulaire d'une modification */
+  function revChgOpen(rev, ch) {
+    REVC = { rev: rev, ch: ch }; var t = document.getElementById('revpl-ct'); t.value = ch ? ch.k : 'L'; t.disabled = !!ch; document.getElementById('revpl-chg-title').textContent = ch ? 'Modifier ' + ch.label : 'Ajouter une modification'; document.getElementById('revpl-cerr').textContent = '';
+    revChgFill(ch ? ch.key : null); document.getElementById('revpl-chg').hidden = false;
+  }
+  function revChgFill(sel) {
+    var r = revLot(REVC.rev), k = document.getElementById('revpl-ct').value, e = document.getElementById('revpl-ce'); e.innerHTML = '';
+    var opts = k === 'L' ? dpLines().filter(function (z) { return z.r === r; }).map(function (z) { return [z.key, z.l.c + ' — ' + (z.l.lib || z.l.l)]; }) : ppmLotItems(r).map(function (x) { return [x.ref, x.ref + ' — ' + x.des]; });
+    opts.forEach(function (o) { var op = cvEl('option', null, o[1]); op.value = o[0]; e.appendChild(op); }); if (sel) e.value = sel; e.disabled = !!REVC.ch; revChgSync();
+  }
+  function revChgSync() {
+    var r = revLot(REVC.rev), k = document.getElementById('revpl-ct').value, key = document.getElementById('revpl-ce').value, o = revCurOf(r, k, key), ch = REVC.ch; if (!o) return;
+    document.getElementById('revpl-cv').value = fmt(o.cur) + ' MGA' + (o.q != null ? ' · cible ' + fmt(o.q) + ' ' + o.unit : '');
+    document.getElementById('revpl-cn').value = fmt(ch ? ch.to : o.cur);
+    document.getElementById('revpl-cqw').hidden = !(k === 'L' && o.q != null); document.getElementById('revpl-cql').textContent = 'Nouvelle cible (' + o.unit + ')'; document.getElementById('revpl-cq').value = o.q != null ? fmt(ch && ch.qTo != null ? ch.qTo : o.q) : '';
+    document.getElementById('revpl-cdw').hidden = k !== 'P'; document.getElementById('revpl-cd').value = ch && ch.dTo ? ch.dTo : '';
+  }
+  function revApply(rev, ano) {
+    var r = revLot(rev), vs = bvVers(r), what = [];
+    rev.changes.forEach(function (c) {
+      var o = revCurOf(r, c.k, c.key); if (!o) return;
+      if (c.k === 'L') { var l = o.z.l; what.push('Ligne ' + l.c + ' : ' + fmt(l.dem || 0) + ' → ' + fmt(c.to) + ' MGA'); l.dem = c.to; if (l.q) l.p = Math.round(c.to / l.q); if (c.qTo != null && l.wk) { l.wk.vol = c.qTo; if (l.wk.inds && l.wk.inds.length === 1) l.wk.inds[0].contrib = c.qTo; } }
+      else { var x = o.x; what.push('Marché ' + x.ref + ' : ' + fmt(x.est) + ' → ' + fmt(c.to) + ' MGA'); x.est = c.to; if (c.dTo) { x.d3 = c.dTo; } }
+    });
+    var v = vs.length + 1; vs.push({ v: v, on: nowStr(), by: ME, why: rev.motif, what: what.join(' ; '), snap: bvSnap(r), rev: rev.id }); bvPt(r).hist.unshift({ t: 'Révision approuvée — version V' + v + ' (' + rev.id + ')', by: ME, on: nowStr() });
+    rev.ano = ano; rev.st = 'Approuvée'; rev.version = v; ANA.ver = 0; revStamp(rev, 'Approuvée par le bailleur (ANO ' + ano.ref + ') — version V' + v + ' en vigueur');
+  }
+  function revFromLine(r) {
+    var sel = bvSelLine(r); if (!sel) return; var key = r.camp + '|' + sel.x.perim + '|' + sel.x.l.c;
+    cvAsk({ title: 'Proposer une révision de la ligne ' + sel.x.l.c, ok: 'Créer le brouillon', required: true, cLabel: 'Motif de la révision', placeholder: 'Pourquoi réviser cette ligne ?' }, function (m) { var rev = revNew(m, r); show('revpl'); revDetOpen(rev); revChgOpen(rev, null); var t = document.getElementById('revpl-ct'); t.value = 'L'; revChgFill(key); });
+  }
+  document.getElementById('revpl-new').addEventListener('click', function () {
+    var lot = anaLots(anaEx())[0]; if (!lot) { bkMsg('revpl-msg', 'Aucun PTBA validé à réviser.', 'ko'); return; }
+    cvAsk({ title: 'Nouvelle révision', ok: 'Créer le brouillon', required: true, cLabel: 'Motif de la révision', placeholder: 'Pourquoi réviser le plan ?' }, function (m) { revDetOpen(revNew(m, lot)); revRender(); });
+  });
+  document.getElementById('revpl-ct').addEventListener('change', function () { revChgFill(null); });
+  document.getElementById('revpl-ce').addEventListener('change', revChgSync);
+  document.getElementById('revpl-ccancel').addEventListener('click', function () { document.getElementById('revpl-chg').hidden = true; });
+  document.getElementById('revpl-csave').addEventListener('click', function () {
+    var err = document.getElementById('revpl-cerr'), rev = REVC.rev, r = revLot(rev), k = document.getElementById('revpl-ct').value, key = document.getElementById('revpl-ce').value, o = revCurOf(r, k, key), to = parseInt0(document.getElementById('revpl-cn').value);
+    if (!o) { err.textContent = 'Choisissez l’élément à modifier.'; return; } if (to == null || to < 0) { err.textContent = 'Indiquez un nouveau montant valide.'; return; }
+    var qTo = null; if (k === 'L' && o.q != null) { qTo = parseInt0(document.getElementById('revpl-cq').value); if (qTo == null || qTo < 0) { err.textContent = 'Indiquez une cible valide.'; return; } }
+    var dTo = k === 'P' ? document.getElementById('revpl-cd').value : '';
+    var c = { k: k, key: key, label: o.label, from: o.cur, to: to, qFrom: o.q, qTo: qTo, unit: o.unit, dTo: dTo };
+    if (to === o.cur && (qTo == null || qTo === o.q) && !dTo) { err.textContent = 'Aucun changement : modifiez le montant, la cible ou la date.'; return; }
+    rev.changes = rev.changes.filter(function (x) { return !(x.k === k && x.key === key); }); rev.changes.push(c); document.getElementById('revpl-chg').hidden = true; revDetPaint();
+  });
+  document.getElementById('revpl-acancel').addEventListener('click', function () { document.getElementById('revpl-ano').hidden = true; });
+  document.getElementById('revpl-aok').addEventListener('click', function () {
+    var ref = document.getElementById('revpl-aref').value.trim(), dt = document.getElementById('revpl-adate').value, err = document.getElementById('revpl-aerr'), rev = revGet(REVD);
+    if (!ref) { err.textContent = 'La référence de l’ANO est obligatoire.'; return; } if (!dt) { err.textContent = 'La date de l’ANO est obligatoire.'; return; }
+    revApply(rev, { ref: ref, date: dt, doc: document.getElementById('revpl-adoc').value.trim() }); document.getElementById('revpl-ano').hidden = true; revDetPaint(); bkMsg('revpl-msg', 'Révision ' + rev.id + ' approuvée : la version V' + rev.version + ' est désormais la version de référence.', 'ok');
+  });
   function sxFormSetup() {
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
     document.getElementById('sxf-d1').value = cadToday(); document.getElementById('sxf-d2').value = cadToday().slice(0, 4) + '-12-31';
