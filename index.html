@@ -21162,7 +21162,7 @@ var EXEC_REC = [
   }  function sxRender() {
     sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
     document.querySelector('#v-sx > .head h1').textContent = K.h; document.querySelector('#v-sx > .head p').textContent = K.p;
-    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-suivi-b').style.display = (SX.kind === 'eng' || SX.kind === 'liq') ? '' : 'none'; var tb0 = document.getElementById('sx-trait-b'); tb0.style.display = SX.kind === 'eng' ? '' : 'none'; if (SX.kind === 'eng') tb0.textContent = '\u00c0 traiter (' + sxEngs().filter(function (i) { return sxStat(i).todo; }).length + ')'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
+    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-suivi-b').style.display = SX.kind === 'liq' ? '' : 'none'; document.getElementById('sx-trait-b').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
     var sum = function (s) { return items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).reduce(function (a, i) { return a + i.mt; }, 0); };
     var kb = document.getElementById('sx-k'); kb.innerHTML = ''; var cn = function (s) { return String(items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).length); };
     var sd = function (dp) { return items.filter(function (i) { return sxIsDpd(i) === dp; }).reduce(function (a, i) { return a + i.mt; }, 0); };
@@ -21200,7 +21200,10 @@ var EXEC_REC = [
   function sxReste(i) { return Math.max(0, i.mt - sxRealz(i.ref) - sxFreed(i.ref)); }
   function sxEngTiles(items) {
     var ex = anaEx(), t = items.reduce(function (a, i) { return a + i.mt; }, 0), pe = items.reduce(function (a, i) { return a + sxPart(i, ex); }, 0), rz = items.reduce(function (a, i) { return a + sxRealz(i.ref); }, 0), rs = items.reduce(function (a, i) { return a + sxReste(i); }, 0);
-    return dpTiles([['Total engagé', fmt(t) + ' MGA', 'brand'], ['Part de l’exercice ' + ex, fmt(pe) + ' MGA', 'info'], ['Réalisé sur ces engagements', fmt(rz) + ' MGA', 'ok'], ['Reste à réaliser', fmt(rs) + ' MGA', 'warn']], { cols: 4 });
+    var nt = items.filter(function (i) { return sxStat(i).todo; }).length;
+    var g = dpTiles([['Total engagé', fmt(t) + ' MGA', 'brand'], ['Part de l’exercice ' + ex, fmt(pe) + ' MGA', 'info'], ['Réalisé sur ces engagements', fmt(rz) + ' MGA', 'ok'], ['Reste à réaliser', fmt(rs) + ' MGA', 'warn'], ['Engagements à traiter', String(nt), nt ? 'ko' : 'ok']], { cols: 5 }), last = g.lastChild;
+    last.style.cursor = 'pointer'; last.title = 'Voir les engagements à traiter'; last.addEventListener('click', function () { sxTraitPaint(); document.getElementById('sx-trait').hidden = false; });
+    return g;
   }
   function sxCols() {
     var K = SX_K[SX.kind];
@@ -21219,7 +21222,6 @@ var EXEC_REC = [
     } else cell(tr, fmt(i.mt) + (i.unit ? ' ' + i.unit : ''), 'num');
     var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); if (SX.kind === 'pay' && sxIsDpd(i)) { var bd2 = badge('Paiement direct', 'b-warn'); bd2.style.marginLeft = '6px'; sc.appendChild(bd2); }
     var ac = cell(tr, ''), bc = cvEl('button', 'btn small', 'Consulter'); bc.type = 'button'; bc.addEventListener('click', function () { sxDetOpen(i); }); ac.appendChild(bc);
-    if (SX.kind === 'eng') { var b = cvEl('button', 'btn small', 'Échéancier'); b.type = 'button'; b.style.marginLeft = '6px'; b.addEventListener('click', function () { sxEchOpen(i); }); ac.appendChild(b); }
     return tr;
   }
   /* Échéancier d'un engagement : période et part de chaque exercice */
@@ -21259,7 +21261,7 @@ var EXEC_REC = [
     if (!P.d1 || !P.d2 || P.d1 > P.d2) { var e = cvEl('div', 'err', 'La période est invalide : la date de début doit précéder la date de fin.'); e.style.marginTop = '10px'; body.appendChild(e); return; }
     var rows = [], T = { op: 0, nv: 0, rz: 0, lb: 0, fin: 0 };
     sxEngs().forEach(function (i) {
-      var op = i.date < P.d1 ? Math.max(0, i.mt - sxRealzB(i.ref, P.d1) - sxFreedB(i.ref, P.d1)) : 0, nv = i.date >= P.d1 && i.date <= P.d2 ? i.mt : 0, rz = sxRealz(i.ref, P.d1, P.d2), lb = sxFreed(i.ref, P.d1, P.d2), fin = Math.max(0, op + nv - rz - lb);
+      if (P.only && i.ref !== P.only) return; var op = i.date < P.d1 ? Math.max(0, i.mt - sxRealzB(i.ref, P.d1) - sxFreedB(i.ref, P.d1)) : 0, nv = i.date >= P.d1 && i.date <= P.d2 ? i.mt : 0, rz = sxRealz(i.ref, P.d1, P.d2), lb = sxFreed(i.ref, P.d1, P.d2), fin = Math.max(0, op + nv - rz - lb);
       if (!op && !nv && !rz && !lb) return; T.op += op; T.nv += nv; T.rz += rz; T.lb += lb; T.fin += fin; rows.push({ i: i, op: op, nv: nv, rz: rz, lb: lb, fin: fin });
     });
     var tl = dpTiles([['Engagé au début', fmt(T.op) + ' MGA', 'brand'], ['Nouveaux engagements', fmt(T.nv) + ' MGA', 'info'], ['Réalisé sur la période', fmt(T.rz) + ' MGA', 'ok'], ['Libéré', fmt(T.lb) + ' MGA', 'n'], ['Reste à réaliser', fmt(T.fin) + ' MGA', 'warn']], { cols: 5 }); tl.style.marginTop = '14px'; body.appendChild(tl);
@@ -21299,7 +21301,13 @@ var EXEC_REC = [
       else { var w = cvEl('div', 'callout', i.eng ? 'L’engagement ' + i.eng + ' est introuvable.' : 'Cette écriture n’est rattachée à aucun engagement.'); w.style.margin = '0 0 14px'; body.appendChild(w); }
     }
     var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px'; var bf = cvEl('button', 'btn', 'Fermer'); bf.type = 'button'; bf.addEventListener('click', function () { document.getElementById('sx-det').hidden = true; }); ft.appendChild(bf);
-    if (i.kind === 'eng') { var be = cvEl('button', 'btn primary', 'Modifier l’échéancier'); be.type = 'button'; be.addEventListener('click', function () { sxEchOpen(i); }); ft.appendChild(be); }
+    if (i.kind === 'eng') {
+      var be = cvEl('button', 'btn', 'Échéancier'); be.type = 'button'; be.addEventListener('click', function () { sxEchOpen(i); }); ft.appendChild(be);
+      var bs = cvEl('button', 'btn', 'Suivi sur une période'); bs.type = 'button'; bs.addEventListener('click', function () { var t = cadToday(); SXV = { d1: t.slice(0, 4) + '-01-01', d2: t, only: i.ref }; sxSuiviPaint(); document.getElementById('sx-suivi').hidden = false; }); ft.appendChild(bs);
+      var cdoc = (DP.docs || []).filter(function (d) { return d.ref === i.ref; })[0], cs = sxStat(i);
+      if (cdoc) { var bc = cvEl('button', 'btn', 'Traiter dans le compte administratif'); bc.type = 'button'; bc.addEventListener('click', function () { DP.engTab = 'suivi'; DP.sel.dpeng = cdoc.id; document.getElementById('sx-det').hidden = true; show('dpeng'); }); ft.appendChild(bc); }
+      else (cs.k === 'clot' ? ['reop'] : ['clot', 'prol', 'lib', 'maint']).forEach(function (act) { var ba = cvEl('button', 'btn', ENG_ACT[act][0]); ba.type = 'button'; ba.disabled = act !== 'reop' && act !== 'clot' && !sxReste(i); ba.addEventListener('click', function () { sxEngLocal(i, act); }); ft.appendChild(ba); });
+    }
     body.appendChild(ft); document.getElementById('sx-det').hidden = false;
   }
   /* ----- Fin des engagements : statut, engagements à traiter, clôture, prolongation, libération du reliquat et maintien ----- */
@@ -21356,7 +21364,7 @@ var EXEC_REC = [
       else if (act === 'lib') { if (r > 0) SX.free.push({ eng: i.ref, amt: r, date: t, motif: m, by: ME, on: nowStr() }); }
       else if (act === 'maint') i.maint = { revue: engAddMonths(t, opt), motif: m };
       else if (act === 'reop') delete i.clot;
-      sxTraitPaint(); sxRender(); sxMsg(i.ref + ' : ' + ENG_ACT[act][0].toLowerCase() + ' enregistré.');
+      sxTraitPaint(); sxRender(); if (!document.getElementById('sx-det').hidden) sxDetOpen(i); sxMsg(i.ref + ' : ' + ENG_ACT[act][0].toLowerCase() + ' enregistré.');
     });
   }
   function sxTraitPaint() {
@@ -21409,7 +21417,7 @@ var EXEC_REC = [
     var rows = sxEngs().filter(function (i) { return sxPart(i, ex) || sxReste(i); }).map(function (i) { var pe = sxPart(i, ex), later = Object.keys(sxEch(i)).filter(function (y) { return y > ex; }).reduce(function (a, y) { return a + sxEch(i)[y]; }, 0); return [i.ref + ' — ' + (i.tiers || ''), fmt(i.mt), fmt(pe), fmt(later), fmt(sxRealz(i.ref)), fmt(sxReste(i))]; });
     anaBlock(b, 'Engagements à cheval sur plusieurs exercices', dpMini(['Engagement', 'Montant total', 'Part de ' + ex, 'Exercices suivants', 'Réalisé', 'Reste à réaliser'], rows, [1, 2, 3, 4, 5], 'Aucun engagement.'));
   }
-  document.getElementById('sx-suivi-b').addEventListener('click', function () { var t = cadToday(); SXV = { d1: t.slice(0, 4) + '-01-01', d2: t }; sxSuiviPaint(); document.getElementById('sx-suivi').hidden = false; });
+  document.getElementById('sx-suivi-b').addEventListener('click', function () { var t = cadToday(); SXV = { d1: t.slice(0, 4) + '-01-01', d2: t, only: '' }; sxSuiviPaint(); document.getElementById('sx-suivi').hidden = false; });
 
   function sxIsDpd(i) { return !!i.dpd || (DP.docs || []).some(function (d) { return d.mandat && d.mandat === i.ref && (dpPm(d) === 'dpd' || d.mode === DFO_DIRECT); }); }
   function sxMsg(t, bad) { dpMsg('sx-msg', t, bad); }
