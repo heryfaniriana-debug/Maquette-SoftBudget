@@ -5369,11 +5369,12 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       <!-- ===== Projet : suivi de l'exécution (engagements, réalisations, paiements, encaissements) ===== -->
       <section class="view" id="v-sx">
         <div class="head"><div><h1>Engagements</h1><p></p></div>
-          <div class="actions"><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-sync">⟳ Récupérer de la compta</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
+          <div class="actions"><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-sync">⟳ Synchroniser</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
         <div class="callout" id="sx-msg" hidden style="margin-bottom:12px"></div>
         <div id="sx-k"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead id="sx-th"></thead><tbody id="sx-b"></tbody></table></div></div>
         <section class="co-blk"><div class="kb-h">Récupérations, imports et saisies</div><div class="card" id="sx-log"></div></section>
+        <div class="panel" id="sx-sy" hidden><h2><span id="sx-sy-title">Synchroniser</span></h2><div class="body" id="sx-sy-body"></div></div>
         <div class="panel" id="sx-form" hidden><h2><span id="sx-form-title">Saisie directe</span></h2><div class="body">
           <div class="fgrid">
             <div><label for="sxf-date">Date <em>*</em></label><input id="sxf-date" class="field" type="date"></div>
@@ -20080,7 +20081,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20743,7 +20744,7 @@ var EXEC_REC = [
   function sxLineKey(code) { var z = dpLines().filter(function (x) { return x.l.c === code; })[0]; return z ? z.key : null; }
   function sxSeed() {
     if (SX.items) return; dpSeed(); if (!DP.docs) return; SX.items = []; var today = cadToday();
-    function add(kind, key, date, ref, tiers, mt, src) { SX.items.push({ id: sxId(), kind: kind, key: key, date: date, ref: ref, tiers: tiers, mt: mt, src: src || 'Compta' }); }
+    function add(kind, key, date, ref, tiers, mt, src) { SX.items.push({ id: sxId(), kind: kind, key: key, date: date, ref: ref, tiers: tiers, mt: mt, src: src || 'SoftAccounting' }); }
     DP.docs.forEach(function (d) {
       var q = d.dt || {};
       if (d.kind !== 'avance' && DP_RANK[d.st] >= 2) add('eng', d.key, q.eng, d.ref, d.tiers, d.id === 'ENG-2026-0009' ? d.mt - 2000000 : d.mt);
@@ -20754,7 +20755,7 @@ var EXEC_REC = [
     DFS.versements.forEach(function (v) { add('enc', null, v.date, v.ref, 'Bailleur — ' + v.lib.toLowerCase(), v.mt); });
     CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') add('enc', null, x.dPaie, x.id, 'Bailleur — reconstitution du compte', x.mtAcc); });
     var k21 = sxLineKey('2.1');
-    SX.extra = { eng: [{ key: k21, date: today, ref: 'BC-2026-0190', tiers: 'FOURNITEC SARL', mt: 12000000 }], liq: [], pay: [{ key: k21, date: today, ref: 'VIR-0471', tiers: 'Cabinet RAKOTO Conseil', mt: 12000000 }], enc: [] };
+    SX.pool = { 'SoftAccounting': { eng: [{ key: k21, date: today, ref: 'BC-2026-0190', tiers: 'FOURNITEC SARL', mt: 12000000 }], liq: [], pay: [{ key: k21, date: today, ref: 'VIR-0471', tiers: 'Cabinet RAKOTO Conseil', mt: 12000000 }], enc: [] }, 'Soft e-Procurement': { eng: [{ key: k21, date: '2026-11-10', ref: 'M-2026-070', tiers: 'ELECTRO-MED Madagascar', mt: 18000000 }, { key: sxLineKey('1.1'), date: '2026-11-12', ref: 'M-2026-071', tiers: 'BTP Andriana', mt: 8000000 }], liq: [], pay: [], enc: [] } }; SX.extra = SX.pool['SoftAccounting'];
     SX.log = [{ on: '10/11/2026 08:30', src: 'Synchronisation de la comptabilité', n: SX.items.length, by: 'Système' }]; DP.impLog = SX.log;
   }
   /* Ce que la comptabilité ou le fichier dit, ligne du PTBA par ligne : base du rapprochement avec le compte administratif */
@@ -20767,16 +20768,54 @@ var EXEC_REC = [
     sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
     document.querySelector('#v-sx > .head h1').textContent = K.h; document.querySelector('#v-sx > .head p').textContent = K.p;
     document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : 'un décaissement')));
-    var sum = function (s) { return items.filter(function (i) { return !s || i.src === s; }).reduce(function (a, i) { return a + i.mt; }, 0); };
-    var kb = document.getElementById('sx-k'); kb.innerHTML = ''; kb.appendChild(dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Récupéré de la compta', fmt(sum('Compta')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
+    var sum = function (s) { return items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).reduce(function (a, i) { return a + i.mt; }, 0); };
+    var kb = document.getElementById('sx-k'); kb.innerHTML = ''; kb.appendChild(dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
     var tb = document.getElementById('sx-b'); tb.innerHTML = '';
     document.getElementById('sx-th').innerHTML = '<tr><th>Date</th><th>Référence</th><th>' + escH(K.tg) + '</th><th>' + (SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA') + '</th><th class="num">Montant (MGA)</th><th>Source</th></tr>';
     if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune écriture : récupérez-les de la comptabilité, importez un fichier ou saisissez-les directement.'); c0.colSpan = 6; c0.style.textAlign = 'left'; tb.appendChild(t0); }
-    items.forEach(function (i) { var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'); cell(tr, fmt(i.mt), 'num'); var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Compta' ? 'b-info' : (i.src === 'Import' ? 'b-warn' : 'b-neutral'))); tb.appendChild(tr); });
+    items.forEach(function (i) { var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'); cell(tr, fmt(i.mt), 'num'); var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); tb.appendChild(tr); });
     var lg = document.getElementById('sx-log'); lg.innerHTML = ''; SX.log.forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.src)); l.appendChild(cvEl('div', 'hby', pl(n.n, 'écriture') + ' · ' + n.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); lg.appendChild(row); });
   }
   function sxMsg(t, bad) { dpMsg('sx-msg', t, bad); }
-  document.getElementById('sx-sync').addEventListener('click', function () { var n = sxPull('Synchronisation de la comptabilité', 'Compta'); sxMsg(n ? 'Synchronisation terminée : ' + pl(n, 'nouvelle écriture') + ' récupérée' + (n > 1 ? 's' : '') + ' de la comptabilité. Le rapprochement avec le compte administratif est à jour.' : 'Synchronisation terminée : aucune nouvelle écriture.'); sxRender(); });
+  /* Synchronisation en deux temps : choix de la source, puis liste des écritures à confirmer */
+  var SXS = { stage: 1, src: '', cand: [] };
+  function sxSources() { return SX.kind === 'eng' ? ['SoftAccounting', 'Soft e-Procurement', 'Compte administratif'] : ['SoftAccounting', 'Compte administratif']; }
+  function sxCands(src, kind) {
+    sxSeed(); if (src !== 'Compte administratif') return ((SX.pool[src] || {})[kind] || []).slice();
+    var have = {}, out = []; SX.items.forEach(function (i) { if (i.kind === kind) have[i.ref] = true; });
+    (DP.docs || []).forEach(function (d) {
+      var q = d.dt || {}, c = null;
+      if (kind === 'eng' && d.kind !== 'avance' && DP_RANK[d.st] >= 2) c = { key: d.key, date: q.eng, ref: d.ref, tiers: d.tiers, mt: d.mt };
+      if (kind === 'liq' && d.kind !== 'avance' && DP_RANK[d.st] >= 3) c = { key: d.key, date: q.liq, ref: d.fac, tiers: d.tiers, mt: d.mt };
+      if (kind === 'pay' && DP_RANK[d.st] >= 6) c = { key: d.key, date: q.pay, ref: d.mandat, tiers: d.tiers, mt: dfoAmt(d) };
+      if (c && c.ref && !have[c.ref]) out.push(c);
+    });
+    if (kind === 'enc') { DFS.versements.forEach(function (v) { if (!have[v.ref]) out.push({ key: null, date: v.date, ref: v.ref, tiers: 'Bailleur — ' + v.lib.toLowerCase(), mt: v.mt }); }); CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée' && !have[x.id]) out.push({ key: null, date: x.dPaie, ref: x.id, tiers: 'Bailleur — reconstitution du compte', mt: x.mtAcc }); }); }
+    return out;
+  }
+  function sxSyPaint() {
+    var body = document.getElementById('sx-sy-body'); body.innerHTML = ''; var K = SX_K[SX.kind]; document.getElementById('sx-sy-title').textContent = 'Synchroniser : ' + K.h.toLowerCase();
+    if (SXS.stage === 1) {
+      var hint = cvEl('div', 'hint', 'Choisissez la source. Les écritures à récupérer vous sont d’abord présentées : rien n’est ajouté avant votre confirmation.'); hint.style.marginBottom = '12px'; body.appendChild(hint);
+      var d = cvEl('div'); d.style.maxWidth = '420px'; d.appendChild(cvEl('label', null, 'Source de la synchronisation')); var sl = cvEl('select', 'field'); sxSources().forEach(function (x) { var o = cvEl('option', null, x); o.value = x; sl.appendChild(o); }); sl.value = SXS.src || sxSources()[0]; d.appendChild(sl);
+      var inf = cvEl('div', 'hint', ''); d.appendChild(inf); var tx = { 'SoftAccounting': 'Écritures comptables du projet.', 'Soft e-Procurement': 'Marchés et commandes passés dans la plateforme de passation.', 'Compte administratif': 'Dossiers saisis dans le compte administratif du projet.' }; function upd() { inf.textContent = tx[sl.value]; } sl.addEventListener('change', upd); upd(); body.appendChild(d);
+      var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:12px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Voir les écritures à récupérer'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); body.appendChild(ft);
+      bc.addEventListener('click', function () { document.getElementById('sx-sy').hidden = true; });
+      bo.addEventListener('click', function () { SXS.src = sl.value; SXS.cand = sxCands(SXS.src, SX.kind); SXS.stage = 2; sxSyPaint(); });
+    } else {
+      var tot = SXS.cand.reduce(function (a, c) { return a + c.mt; }, 0), hd = cvEl('div', 'hint', 'Source : ' + SXS.src + ' · ' + (SXS.cand.length ? pl(SXS.cand.length, 'écriture') + ' à récupérer, ' + fmt(tot) + ' MGA.' : 'aucune nouvelle écriture à récupérer.')); hd.style.marginBottom = '12px'; body.appendChild(hd);
+      body.appendChild(dpMini(['Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', 'Montant (MGA)'], SXS.cand.map(function (c) { return [isoToFr(c.date), c.ref, c.tiers || '—', c.key ? dpShort({ key: c.key }) : 'Compte spécial du bailleur', fmt(c.mt)]; }), [4], 'Aucune nouvelle écriture : tout ce que cette source contient est déjà enregistré.'));
+      var ft2 = cvEl('div', 'form-foot'); ft2.style.cssText = 'margin-top:12px;padding-top:12px'; var bb = cvEl('button', 'btn', 'Changer de source'), bk = cvEl('button', 'btn primary', 'Confirmer la synchronisation' + (SXS.cand.length ? ' (' + SXS.cand.length + ')' : '')); bb.type = bk.type = 'button'; bk.disabled = !SXS.cand.length; ft2.appendChild(bb); ft2.appendChild(bk); body.appendChild(ft2);
+      bb.addEventListener('click', function () { SXS.stage = 1; sxSyPaint(); });
+      bk.addEventListener('click', function () {
+        var n = 0, pool = SX.pool[SXS.src];
+        SXS.cand.forEach(function (c) { SX.items.push({ id: sxId(), kind: SX.kind, key: c.key, date: c.date, ref: c.ref, tiers: c.tiers, mt: c.mt, src: SXS.src }); n++; });
+        if (pool) pool[SX.kind] = [];
+        SX.log.unshift({ on: nowStr(), src: 'Synchronisation : ' + SXS.src, n: n, by: ME }); document.getElementById('sx-sy').hidden = true; sxMsg('Synchronisation depuis ' + SXS.src + ' terminée : ' + pl(n, 'écriture') + ' récupérée' + (n > 1 ? 's' : '') + '.'); sxRender();
+      });
+    }
+  }
+  document.getElementById('sx-sync').addEventListener('click', function () { sxSeed(); SXS = { stage: 1, src: '', cand: [] }; sxSyPaint(); document.getElementById('sx-sy').hidden = false; });
   document.getElementById('sx-imp').addEventListener('click', function () { cvAsk({ title: 'Importer un fichier Excel', ok: 'Importer', required: true, cLabel: 'Nom du fichier', placeholder: 'Ex. execution_novembre_2026.xlsx' }, function (f) { var n = sxPull('Fichier Excel « ' + f + ' »', 'Import'); sxMsg(n ? 'Fichier importé : ' + pl(n, 'nouvelle écriture') + '.' : 'Fichier importé : aucune nouvelle écriture.'); sxRender(); }); });
   document.getElementById('sx-rap').addEventListener('click', function () { show('dprap'); });
   document.getElementById('sx-new').addEventListener('click', function () {
@@ -21005,7 +21044,7 @@ var EXEC_REC = [
     var hb = document.getElementById('dprap-log'); hb.innerHTML = ''; DP.impLog.forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.src)); l.appendChild(cvEl('div', 'hby', pl(n.n, 'écriture') + (n.n > 1 ? ' lues' : ' lue') + ' · ' + n.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); hb.appendChild(row); });
   }
   function dpImpRun(src, file) {
-    var n = sxPull(file ? 'Fichier Excel « ' + file + ' »' : src, file ? 'Import' : 'Compta'); dpImpSeed();
+    var n = sxPull(file ? 'Fichier Excel « ' + file + ' »' : src, file ? 'Import' : 'SoftAccounting'); dpImpSeed();
     var bad = dpRapRows().filter(function (x) { return x.st === 'ko'; }).length; dpMsg('dprap-msg', src + ' : ' + pl(n, 'nouvelle écriture') + '. ' + (bad ? pl(bad, 'ligne') + ' en écart à traiter.' : 'Toutes les lignes concordent.'), !!bad); dpRapRender();
   }
   DP_RENDER.dprap = dpRapRender;
