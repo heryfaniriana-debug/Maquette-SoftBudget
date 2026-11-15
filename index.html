@@ -16182,16 +16182,7 @@ var EXEC_REC = [
     var body = document.getElementById('pdc-det-body'); body.innerHTML = '';
     function block(title, node) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); }
     if (neg.length) { var al = cvEl('div', 'callout', 'Le solde du compte spécial serait négatif en ' + neg.join(', ') + ' : avancez une demande, augmentez l’avance ou relevez le plafond.'); al.style.cssText = 'margin-bottom:12px;background:var(--ko-bg);color:var(--ko)'; body.appendChild(al); }
-    body.appendChild(dpTiles([['Avance initiale', fmt(v0.mt) + ' MGA', 'info'], ['Décaissements prévus', fmt(tot) + ' MGA', 'brand'], ['Demandes à déposer', String(S.req.length), 'warn']], { cols: 3 }));
-    var rq = cvEl('div', 'card');
-    if (!S.req.length) rq.appendChild(cvEl('div', 'hint', 'Aucune demande nécessaire : l’avance couvre les décaissements prévus.'));
-    S.req.forEach(function (q, j) {
-      var rw = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'Demande ' + (j + 1) + ' : à déposer en ' + PDC_MOIS[q.m]));
-      l.appendChild(cvEl('div', 'hby', 'Fonds attendus ' + (q.arr < 12 ? 'en ' + PDC_MOIS[q.arr] : 'après la fin de l’exercice'))); rw.appendChild(l);
-      var bd = badge(fmt(q.mt) + ' MGA', 'b-warn'); bd.style.marginLeft = 'auto'; rw.appendChild(bd); rq.appendChild(rw);
-    });
-    block('Demandes de réapprovisionnement à déposer', rq);
-    block('Hypothèses', dpDl([['Avance initiale', fmt(v0.mt) + ' MGA · ' + isoToFr(v0.date)], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte', fmt(Math.round(S.seuil)) + ' MGA'], ['Délai de traitement du bailleur', DFS.delai + ' mois'], ['Origine des décaissements', 'PTBA (reste à programmer) et PPM (montant du marché décaissé à sa signature prévue) ; paramètres à modifier dans Cadre du projet › Avance initiale', true]]));
+    block('Hypothèses', dpDl([['Avance initiale', fmt(v0.mt) + ' MGA · ' + isoToFr(v0.date)], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte', fmt(Math.round(S.seuil)) + ' MGA'], ['Délai de traitement du bailleur', DFS.delai + ' mois']]));
     var cl = function (a) { return a.map(function (v) { return Math.max(0, v); }); };
     var chart = cvEl('div', 'card'); chart.style.padding = '14px 16px'; chart.appendChild(dpLineChart([{ name: 'Solde prévu', color: DPC.brand, data: cl(S.bal) }, { name: 'Seuil d’alerte', color: DPC.warn, dash: true, data: S.bal.map(function () { return S.seuil; }) }], BVMOIS)); block('Évolution du solde du compte spécial', chart);
     var nz = function (v) { return v ? fmt(v) : '—'; }, reqM = {}; S.req.forEach(function (q) { reqM[q.m] = q; });
@@ -16200,7 +16191,6 @@ var EXEC_REC = [
       ['Fonds prévus (avance et réapprovisionnements)'].concat(S.inflow.map(nz), [fmt(bvSum(S.inflow))]), ['Solde prévu en fin de mois'].concat(S.bal.map(nz), ['']),
       ['Demande à déposer'].concat(S.bal.map(function (v, m) { return reqM[m] ? badge(fmt(reqM[m].mt), 'b-warn') : '—'; }), [''])
     ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
-    block('Origine des décaissements prévus', dpMini(['Ligne du PTBA', 'Source de financement', 'Marchés du PPM', 'Reste à programmer (PTBA)', 'Total prévu'], N.rows.map(function (x) { return [x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l), (x.z.l.axv && x.z.l.axv.Financier) || '—', fmt(x.ppm), fmt(x.ptba), fmt(x.ppm + x.ptba)]; }), [2, 3, 4], 'Aucune ligne financée par le bailleur.'));
     document.getElementById('pdc-det').hidden = false;
   }
 
