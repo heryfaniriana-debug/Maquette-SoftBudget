@@ -5300,7 +5300,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="card" style="margin-bottom:14px"><div style="padding:14px 16px;display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div style="min-width:0;flex:1 1 360px"><div class="kb-h" style="margin:0 0 6px;font-weight:600">Objectif général du projet</div><div id="resu-goal" style="font-size:14px"></div></div><button class="btn" id="resu-goal-btn">Modifier l’objectif général</button></div></div>
         <div class="kb-h" style="margin:0 0 8px;font-weight:600">Indicateurs du projet</div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1000px">
-          <thead><tr><th>Code</th><th>Indicateur</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de fin de projet</th><th>Actions</th></tr></thead><tbody id="resu-b"></tbody></table></div><div class="pager"><span id="resu-n"></span><span>Valeur de départ et cible de fin de projet. Les cibles de l’exercice et les réalisations se gèrent dans Suivi › Avancement physique</span></div></div>
+          <thead><tr><th>Code</th><th>Indicateur</th><th>Unité</th><th class="num">Valeur de départ</th><th class="num">Cible de fin de projet</th><th>Actions</th></tr></thead><tbody id="resu-b"></tbody></table></div><div class="pager"><span id="resu-n"></span><span>Valeur de départ et cible de fin de projet. Les cibles de l’exercice et les réalisations se gèrent dans Exécution › Avancement physique</span></div></div>
         <div class="panel" id="resu-form" hidden>
           <h2><span id="resu-form-title">Nouvel indicateur</span><button class="btn small" id="resu-close">Fermer</button></h2>
           <div class="body">
@@ -6521,7 +6521,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     dppay: ['Compte administratif', 'Paiements'],
     dptab: ['Compte administratif', 'Tableau de restitution'],
     dpclot: ['Compte administratif', 'Clôture de l’exercice'],
-    dprap: ['Suivi', 'Rapprochement saisie / import'],
+    dprap: ['Exécution', 'Rapprochement saisie / import'],
     cadint: ['Compte administratif', 'Fichiers d’interface'],
     pubcred: ['Compte administratif', 'Crédits ouverts'],
     pubeng: ['Compte administratif', 'Engagements'],
@@ -6534,8 +6534,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     pad: ['Cadre du projet', 'Plan de financement (PAD)'],
     resu: ['Cadre du projet', 'Cadre de résultats'],
     avini: ['Cadre du projet', 'Avance initiale'],
-    sxeng: ['Suivi', 'Engagements'], sxliq: ['Suivi', 'Réalisations'], sxpay: ['Suivi', 'Décaissements'], sxenc: ['Suivi', 'Encaissements'], trpos: ['Suivi', 'Trésorerie'],
-    avanc: ['Suivi', 'Avancement physique'],
+    sxeng: ['Exécution', 'Engagements'], sxliq: ['Exécution', 'Réalisations'], sxpay: ['Exécution', 'Décaissements'], sxenc: ['Exécution', 'Encaissements'], trpos: ['Exécution', 'Trésorerie'],
+    avanc: ['Exécution', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
     pdec: ['Plans annuels', 'Plan de décaissement'],
     dfon: ['Trésorerie', 'Demandes de fonds'],
@@ -10833,7 +10833,7 @@ function fmAxes() {
   function wkAsk(p, l) {
     var w = l.wk || {}, bd = cvEl('div', 'cv-modal-bd'), box = cvEl('div', 'cv-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.style.maxHeight = '90vh'; box.style.overflow = 'auto';
     box.appendChild(cvEl('h3', null, 'Plan de travail — ' + l.c + ' ' + (l.lib || l.l)));
-    box.appendChild(cvEl('div', 'hint', 'Prévisions de l’exercice : aucun réalisé à ce stade, l’avancement se saisit plus tard dans Suivi › Avancement physique.'));
+    box.appendChild(cvEl('div', 'hint', 'Prévisions de l’exercice : aucun réalisé à ce stade, l’avancement se saisit plus tard dans Exécution › Avancement physique.'));
     function fld(label, el, parent) { var d = cvEl('div'); d.appendChild(cvEl('label', null, label)); d.appendChild(el); (parent || box).appendChild(d); return el; }
     var task = fld('Travail à réaliser *', cvEl('input', 'field')); task.type = 'text'; task.value = w.task || ''; task.placeholder = 'Ex. Réaliser les études de faisabilité des 17 centres';
     var g1 = cvEl('div'); g1.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px'; box.appendChild(g1);
@@ -14464,7 +14464,7 @@ var EXEC_REC = [
       { g: 'Élaboration', items: [['Configuration', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso]] },
       { g: 'Compte administratif', items: ca },
-      { g: 'Suivi', items: [['Avancement physique', rAlways], [rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
+      { g: 'Exécution', items: [['Avancement physique', rAlways], [rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
       grp('Analyses'),
       { g: 'Paramètres', items: grp('Paramètres').items.filter(function (it) { return it[0] !== 'Bailleurs' && it[0] !== 'Sources de financement' && it[0] !== 'Taux de change'; }) }
     ];
@@ -14478,7 +14478,7 @@ var EXEC_REC = [
     'g-budgets': ['Élaboration', 'Élaboration : configuration, campagnes, collecte, validation et budgets'],
     'g-plan': ['Plans annuels', 'PTBA, PTA, plan de passation des marchés et plan de décaissement'],
     'g-treso': ['Trésorerie', 'Décaissements, demandes de fonds et comptes bancaires'],
-    'g-suivi': ['Suivi', 'Exécution, trésorerie et rapprochement avec le compte administratif']
+    'g-suivi': ['Exécution', 'Renseigner l’exécution : engagements, réalisations, décaissements et encaissements']
   };
   function navHead(g) { return g.querySelector(':scope > .item'); }
   function navLabelNode(h) { for (var i = 0; i < h.childNodes.length; i++) { var n = h.childNodes[i]; if (n.nodeType === 3 && n.nodeValue.trim()) return n; } return null; }
@@ -15996,7 +15996,7 @@ var EXEC_REC = [
     });
     bd.appendChild(box); document.body.appendChild(bd); ins[0].focus();
   }
-  /* Suivi › Avancement physique : cibles de l'exercice et réalisations, par période */
+  /* Exécution › Avancement physique : cibles de l'exercice et réalisations, par période */
   function avMsg(t, kind) { var e = document.getElementById('av-msg'); e.hidden = !t; e.textContent = t || ''; var m = { ok: ['var(--ok-bg)', 'var(--ok)'], ko: ['var(--ko-bg)', 'var(--ko)'] }[kind || 'ok']; e.style.background = m[0]; e.style.color = m[1]; }
   function lineAvance(l) {
     var w = l.wk; if (!w) return;
@@ -20583,7 +20583,7 @@ var EXEC_REC = [
       var v2 = cvEl('div'); v2.appendChild(cvEl('label', null, 'Cumul réalisé après ce service fait')); var vo = cvEl('input', 'field'); vo.type = 'text'; vo.readOnly = true;
       function upd() { var n = parseFloat(String(vi.value).replace(/\s/g, '').replace(',', '.')); vo.value = fmt(cur + (isNaN(n) ? 0 : Math.max(0, n))) + ' / ' + fmt(w0.vol) + ' ' + w0.unit; }
       vi.addEventListener('input', function () { lf.vol = vi.value; upd(); }); upd(); v1.appendChild(vi); v2.appendChild(vo); g3.appendChild(v1); g3.appendChild(v2); sec.appendChild(g3);
-      var hn = cvEl('div', 'hint', 'Ce volume alimente automatiquement Suivi › Avancement physique (trimestre en cours) et le tableau de restitution.'); hn.style.marginTop = '6px'; sec.appendChild(hn);
+      var hn = cvEl('div', 'hint', 'Ce volume alimente automatiquement Exécution › Avancement physique (trimestre en cours) et le tableau de restitution.'); hn.style.marginTop = '6px'; sec.appendChild(hn);
     }
     var lb = cvEl('label', 'chk'); lb.style.marginTop = '12px'; var ck = cvEl('input'); ck.type = 'checkbox'; ck.checked = lf.sf; ck.addEventListener('change', function () { lf.sf = ck.checked; sv.disabled = !(lf.sf && lf.fac.trim()); }); lb.appendChild(ck); lb.appendChild(document.createTextNode(' Je certifie le service fait (PV de réception joint)')); sec.appendChild(lb);
     body.appendChild(sec);
@@ -20814,21 +20814,22 @@ var EXEC_REC = [
   function sxSyPaint() {
     var body = document.getElementById('sx-sy-body'), K = SX_K[SX.kind], P = SXS; body.innerHTML = ''; document.getElementById('sx-sy-title').textContent = 'Synchroniser : ' + K.h.toLowerCase();
     if (P.stage === 1) {
-      function sec(num, title, node, hint) { var x = cvEl('section', 'co-blk'); x.style.marginBottom = '18px'; var h = cvEl('div', 'kb-h'); h.style.cssText = 'display:flex;align-items:center;gap:10px'; var n = cvEl('span', null, num); n.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#2E427B;color:#fff;font-size:12.5px;font-weight:600'; h.appendChild(n); h.appendChild(document.createTextNode(title)); x.appendChild(h); x.appendChild(node); if (hint) { var t = cvEl('div', 'hint', hint); t.style.marginTop = '8px'; x.appendChild(t); } body.appendChild(x); return x; }
+      var card = cvEl('div', 'card'); card.style.cssText = 'padding:18px 20px;margin-bottom:14px'; body.appendChild(card);
+      function sec(num, title, node, hint) { var x = cvEl('div'); x.style.marginBottom = '18px'; if (title) x.appendChild(cvEl('label', null, title)); x.appendChild(node); if (hint) { var t = cvEl('div', 'hint', hint); t.style.marginTop = '8px'; x.appendChild(t); } card.appendChild(x); return x; }
       function lab(text, el, hint) { var d = cvEl('div'); d.appendChild(cvEl('label', null, text)); d.appendChild(el); if (hint != null) { var h = cvEl('div', 'hint', hint); d.appendChild(h); } return d; }
       var tx = { 'SoftAccounting': 'Écritures comptables du projet.', 'Soft e-Procurement': 'Marchés et commandes de la plateforme de passation.', 'Compte administratif': 'Dossiers saisis dans le compte administratif du projet.' };
       var sl = cvEl('select', 'field'); sxSources().forEach(function (x) { var o = cvEl('option', null, x); o.value = x; sl.appendChild(o); }); sl.value = P.src || sxSources()[0];
       var ln = cvEl('select', 'field'); var o0 = cvEl('option', null, 'Toutes les lignes'); o0.value = ''; ln.appendChild(o0); dpLines().forEach(function (z) { var o = cvEl('option', null, z.l.c + ' — ' + (z.l.lib || z.l.l)); o.value = z.key; ln.appendChild(o); }); ln.value = P.line; ln.disabled = SX.kind === 'enc'; ln.addEventListener('change', function () { P.line = ln.value; });
       var g = cvEl('div', 'fgrid'), ds = lab('Source', sl, tx[sl.value]), dl = lab('Ligne du PTBA', ln, SX.kind === 'enc' ? 'Les encaissements ne sont pas rattachés à une ligne.' : 'Limitez la synchronisation à une seule ligne si besoin.'); g.appendChild(ds); g.appendChild(dl);
       sl.addEventListener('change', function () { P.src = sl.value; ds.querySelector('.hint').textContent = tx[sl.value]; });
-      sec('1', 'Quelles données récupérer ?', g);
+      sec('', '', g);
       var pr = cvEl('div'); pr.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap'; var i1 = cvEl('input', 'field'), i2 = cvEl('input', 'field'); i1.type = i2.type = 'date'; i1.style.cssText = i2.style.cssText = 'width:190px;flex:0 0 190px'; i1.value = P.d1; i2.value = P.d2; i1.addEventListener('change', function () { P.d1 = i1.value; }); i2.addEventListener('change', function () { P.d2 = i2.value; });
       pr.appendChild(cvEl('span', null, 'Du')); pr.appendChild(i1); pr.appendChild(cvEl('span', null, 'au')); pr.appendChild(i2);
       [['Cette année', function () { var t = cadToday(); return [t.slice(0, 4) + '-01-01', t]; }], ['Ce mois', function () { var t = cadToday(); return [t.slice(0, 8) + '01', t]; }]].forEach(function (q) { var b = cvEl('button', 'btn small', q[0]); b.type = 'button'; b.style.marginLeft = '6px'; b.addEventListener('click', function () { var r = q[1](); P.d1 = i1.value = r[0]; P.d2 = i2.value = r[1]; }); pr.appendChild(b); });
-      sec('2', 'Sur quelle période ?', pr, 'Seules les écritures datées dans cette période sont concernées : vous pouvez par exemple ne remettre à jour que le dernier mois.');
+      sec('', 'Période à synchroniser', pr, 'Seules les écritures datées dans cette période sont concernées : vous pouvez par exemple ne remettre à jour que le dernier mois.');
       var wrap = cvEl('div'), sg = cvEl('div', 'seg dp-tabs'), mh = cvEl('div', 'hint', ''); sg.style.marginBottom = '8px'; function mk() { sg.innerHTML = ''; SX_MODES.forEach(function (m) { var b = cvEl('button', P.mode === m[0] ? 'on' : '', m[1]); b.type = 'button'; b.addEventListener('click', function () { P.mode = m[0]; mk(); }); sg.appendChild(b); }); mh.textContent = SX_MODES.filter(function (m) { return m[0] === P.mode; })[0][2]; } mk(); wrap.appendChild(sg); wrap.appendChild(mh);
-      sec('3', 'Comment les intégrer ?', wrap);
-      var nt = cvEl('div', 'callout', 'Les écritures saisies directement ou importées ne sont jamais écrasées : en cas de même référence, elles sont signalées comme conflit.'); nt.style.margin = '0'; body.appendChild(nt);
+      sec('', 'Mode d’intégration', wrap);
+      var nt = cvEl('div', 'callout', 'Les écritures saisies directement ou importées ne sont jamais écrasées : en cas de même référence, elles sont signalées comme conflit.'); nt.style.margin = '0'; card.appendChild(nt);
       var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Voir les changements →'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); body.appendChild(ft);
       bc.addEventListener('click', function () { document.getElementById('sx-sy').hidden = true; });
       bo.addEventListener('click', function () { P.src = sl.value; if (!P.d1 || !P.d2 || P.d1 > P.d2) { var e = cvEl('div', 'err', 'La période est invalide : la date de début doit précéder la date de fin.'); if (!body.querySelector('.err')) ft.parentNode.insertBefore(e, ft); return; } P.plan = sxPlan(); P.stage = 2; sxSyPaint(); });
@@ -20888,7 +20889,7 @@ var EXEC_REC = [
     var sec = cvEl('section', 'co-blk'); sec.appendChild(cvEl('div', 'kb-h', 'Flux mensuels (MGA)')); sec.appendChild(dpMini(['MGA'].concat(BVMOIS, ['Total']), [
       ['Encaissements (fonds du bailleur)'].concat(up(D.enc), [fmt(E)]), ['Décaissements (compte spécial)'].concat(up(D.dec), [fmt(P)]), ['Solde du mois'].concat(up(net), [fmt(E - P)]), ['Solde cumulé'].concat(D.bal.map(function (v) { return v == null ? '—' : nz(v); }), ['']), ['Paiements directs du bailleur (hors compte)'].concat(up(D.dir), [fmt(bvSum(D.dir))])
     ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], '')); body.appendChild(sec);
-    var s2 = cvEl('section', 'co-blk'); s2.appendChild(cvEl('div', 'kb-h', 'Compte spécial du bailleur')); s2.appendChild(dpDl([['Avance initiale', fmt(DFS.versements[0].mt) + ' MGA'], ['Reconstitutions reçues', fmt(a.recu) + ' MGA'], ['Dépenses payées sur le compte', fmt(a.paid) + ' MGA'], ['Solde du compte spécial', fmt(a.solde) + ' MGA'], ['Demandes de fonds et solde par demande', 'à consulter dans Suivi › Demandes de fonds', true]])); body.appendChild(s2);
+    var s2 = cvEl('section', 'co-blk'); s2.appendChild(cvEl('div', 'kb-h', 'Compte spécial du bailleur')); s2.appendChild(dpDl([['Avance initiale', fmt(DFS.versements[0].mt) + ' MGA'], ['Reconstitutions reçues', fmt(a.recu) + ' MGA'], ['Dépenses payées sur le compte', fmt(a.paid) + ' MGA'], ['Solde du compte spécial', fmt(a.solde) + ' MGA'], ['Demandes de fonds et solde par demande', 'à consulter dans Exécution › Demandes de fonds', true]])); body.appendChild(s2);
   }
   document.getElementById('trp-open').addEventListener('click', function () { trpRender(); document.getElementById('trp-det').hidden = false; });
   /* ----- Tableau de restitution : exécution de chaque ligne du PTBA validé (version du crédit au choix) ----- */
