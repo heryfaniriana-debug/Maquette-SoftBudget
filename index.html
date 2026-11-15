@@ -14702,7 +14702,7 @@ var EXEC_REC = [
     ex: '2026', cover: '2026-09-30',
     comps: { C1: 'Mobilisation des ressources', C2: 'Gouvernance et contrôle interne', C3: 'Fonctionnement et gestion' },
     src: [{ code: '01', lib: 'Prêt FAD', type: 'Prêt', dev: 'UC' }, { code: '02', lib: 'Don FAD', type: 'Don', dev: 'UC' }, { code: '03', lib: 'Contrepartie RPI', type: 'Contrepartie nationale', dev: 'MGA' }, { code: '04', lib: 'TVA', type: 'Taxe (ligne pour ordre)', dev: 'MGA' }, { code: '05', lib: 'DTI', type: 'Taxe (ligne pour ordre)', dev: 'MGA' }],
-    rates: [{ dev: 'UC', date: '2026-01-02', val: 6100 }, { dev: 'UC', date: '2026-07-01', val: 6250 }, { dev: 'EUR', date: '2026-01-02', val: 4980 }, { dev: 'EUR', date: '2026-07-01', val: 5060 }],
+    rates: [{ dev: 'USD', date: '2026-01-02', val: 4500 }, { dev: 'USD', date: '2026-02-12', val: 4560 }, { dev: 'USD', date: '2026-06-01', val: 4580 }, { dev: 'USD', date: '2026-07-28', val: 4620 }, { dev: 'USD', date: '2026-11-01', val: 4650 }, { dev: 'EUR', date: '2026-10-01', val: 5120 }, { dev: 'UC', date: '2026-01-02', val: 6100 }, { dev: 'UC', date: '2026-07-01', val: 6250 }, { dev: 'EUR', date: '2026-01-02', val: 4980 }, { dev: 'EUR', date: '2026-07-01', val: 5060 }],
     lines: [
       { code: 'C1.1', lib: 'Saisie de matériel informatique (DGI)', comp: 'C1', src: '01', cat: 'A1 — Équipements', ini: 150000000, eng: 160000000, liq: 160000000, pay: 160000000, m1: 1, m2: 6 },
       { code: 'C1.2', lib: 'Formation des cadres des douanes', comp: 'C1', src: '02', cat: 'B2 — Formations', ini: 100000000, eng: 40000000, liq: 20000000, pay: 20000000, m1: 1, m2: 12 },
@@ -20577,7 +20577,7 @@ var EXEC_REC = [
   });
 
   /* ===== Chaîne de la dépense du projet (menu Compte administratif) : engagements, liquidations, ordonnancement, paiements — chaque dépense est rattachée à une ligne du PTBA validé ===== */
-  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 17, seqM: 10, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
+  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 19, seqM: 10, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
   var DP_ST = { soumis: ['En attente de visa CF', 'b-warn'], vise: ['Visé · à liquider', 'b-info'], liquide: ['Liquidé · à ordonnancer', 'b-info'], ordonnance: ['Mandaté · chez le comptable', 'b-warn'], paye: ['Payé', 'b-ok'] };
   var DP_RANK = { soumis: 1, vise: 2, liquide: 3, ordonnance: 4, paye: 6 };
   var DP_TIERS = ['BTP Andriana', 'Entreprise Sud Bâtiment', 'Centre de formation Vatsy', 'Hôtel Les Flamboyants', 'MEDIFROID SARL', 'FOURNITEC SARL', 'Cabinet RAKOTO Conseil', 'Imprimerie nationale'];
@@ -20606,14 +20606,16 @@ var EXEC_REC = [
        d(13, '1.2', 'Imprimerie nationale', 'Impression des supports de formation', 'Bon de commande', 'BC-2026-0125', 6000000, 'vise', { fin: '2026-06-30', dt: { eng: '2026-02-10' } }),
        d(14, '2.1', 'RAKOTONDRAVAO Jean', 'Mission de supervision des centres de santé à Toliara', 'Avance sur mission', 'AM-2026-001', 4500000, 'paye', { mandat: 'CAI-2026-0031', mode: 'Espèces', dt: { eng: '2026-11-05', pay: '2026-11-10' }, mis: { type: 'mission', agent: 'RAKOTONDRAVAO Jean', d1: '2026-11-12', d2: '2026-11-16', stage: 'remise', jus: null } }),
        d(15, '2.2', 'RASOLOFO Miora', 'Mission de formation des agents de santé à Fianarantsoa', 'Avance sur mission', 'AM-2026-002', 3000000, 'paye', { mandat: 'CAI-2026-0027', mode: 'Espèces', dt: { eng: '2026-09-25', pay: '2026-09-28' }, mis: { type: 'mission', agent: 'RASOLOFO Miora', d1: '2026-10-01', d2: '2026-10-05', stage: 'remise', jus: null } }),
-       d(16, '1.2', 'RANDRIA Hery', 'Mission de suivi des formations à Antsirabe', 'Avance sur mission', 'AM-2026-003', 4500000, 'paye', { mandat: 'CAI-2026-0019', mode: 'Espèces', net: 4100000, dt: { eng: '2026-08-20', pay: '2026-08-24' }, mis: { type: 'mission', agent: 'RANDRIA Hery', d1: '2026-08-26', d2: '2026-08-30', stage: 'justifiee', jus: { date: '2026-09-03', frais: [['Transport', 1800000], ['Hébergement', 1400000], ['Per diem et indemnités', 900000], ['Autres frais', 0]], total: 4100000, pieces: ['Billets_Antsirabe.pdf', 'Factures_hotel.pdf'], reverse: 400000, compl: 0 } } })
+       d(16, '1.2', 'RANDRIA Hery', 'Mission de suivi des formations à Antsirabe', 'Avance sur mission', 'AM-2026-003', 4500000, 'paye', { mandat: 'CAI-2026-0019', mode: 'Espèces', net: 4100000, dt: { eng: '2026-08-20', pay: '2026-08-24' }, mis: { type: 'mission', agent: 'RANDRIA Hery', d1: '2026-08-26', d2: '2026-08-30', stage: 'justifiee', jus: { date: '2026-09-03', frais: [['Transport', 1800000], ['Hébergement', 1400000], ['Per diem et indemnités', 900000], ['Autres frais', 0]], total: 4100000, pieces: ['Billets_Antsirabe.pdf', 'Factures_hotel.pdf'], reverse: 400000, compl: 0 } } }),
+       d(17, '2.2', 'MEDITEC GmbH', 'Matériel pédagogique importé pour la formation des agents', 'Marché', 'M-2026-080', 20240000, 'paye', { fac: 'FAC-EU-014', mandat: 'MD-2026-0010', mode: 'Virement bancaire', net: 20480000, dt: { eng: '2026-07-05', liq: '2026-09-10', ord: '2026-10-10', pay: '2026-10-20' }, fx: { dev: 'EUR', mtd: 4000, tx: 5060, txLiq: 5060, liqMt: 20240000, txPay: 5120 } }),
+       d(18, '2.2', 'ELECTROMED SA', 'Équipement de démonstration (livraison attendue)', 'Contrat', 'CT-2026-021', 15180000, 'vise', { dt: { eng: '2026-10-02' }, fx: { dev: 'EUR', mtd: 3000, tx: 5060 } })
     ].filter(function (x) { return x.key; });
     function dd(m, j) { return '2026-' + ('0' + m).slice(-2) + '-' + ('0' + j).slice(-2); }
     DP.docs.forEach(function (x, i) { var k = i + 1; if (x.dt) return; x.dt = { eng: dd(k + 1, 10) }; if (DP_RANK[x.st] >= 3) x.dt.liq = dd(k + 3, 15); if (DP_RANK[x.st] >= 4) x.dt.ord = dd(k + 3, 25); if (DP_RANK[x.st] >= 6) x.dt.pay = dd(k + 4, 5); });
   }
   function dpStat(key) {
     var ln = dpLine(key), s = { ouv: ln ? ln.ouv : 0, e: 0, r: 0, l: 0, o: 0, p: 0 };
-    (DP.docs || []).forEach(function (d) { if (d.key !== key) return; var k = DP_RANK[d.st]; if (d.mis) { var M = d.mis; s.e += M.jus ? M.jus.total : d.mt; if (M.jus) { s.l += M.jus.total; s.o += M.jus.total; } if (M.stage !== 'engagee') s.p += dpNet(d); return; } if (d.kind === 'avance') { if (k >= 4) s.o += d.mt; if (k >= 6) s.p += d.mt; return; } if (k === 1) s.r += d.mt; if (k >= 2) s.e += d.mt - (d.lib ? d.lib.amt : 0); if (k >= 3) s.l += d.mt; if (k >= 4) s.o += dpNet(d); if (k >= 6) s.p += dpNet(d); });
+    (DP.docs || []).forEach(function (d) { if (d.key !== key) return; var k = DP_RANK[d.st]; if (d.mis) { var M = d.mis; s.e += M.jus ? M.jus.total : d.mt; if (M.jus) { s.l += M.jus.total; s.o += M.jus.total; } if (M.stage !== 'engagee') s.p += dpNet(d); return; } if (d.kind === 'avance') { if (k >= 4) s.o += d.mt; if (k >= 6) s.p += d.mt; return; } if (k === 1) s.r += d.mt; if (k >= 2) s.e += d.mt - (d.lib ? d.lib.amt : 0); if (k >= 3) s.l += (d.fx && d.fx.liqMt != null ? d.fx.liqMt : d.mt); if (k >= 4) s.o += dpNet(d); if (k >= 6) s.p += dpNet(d); });
     s.dispo = s.ouv - s.e - s.r; return s;
   }
   /* Avances de démarrage : l'avance est une partie de l'engagement, payée avant service fait puis recoupée sur le décompte */
@@ -20679,7 +20681,7 @@ var EXEC_REC = [
     var body = document.getElementById('dp-eng-body'), f = DP.f; body.innerHTML = '';
     var bar = cvEl('div', 'row-toolbar'), mt = parseInt0(f.montant) || 0, s = dpStat(f.key), ok = s.dispo - mt >= 0, sv = cvEl('button', 'btn primary', 'Enregistrer et soumettre au visa'); sv.type = 'button'; sv.disabled = !(ok && mt > 0 && f.objet.trim() && !(dpHasAv(f) && !f.gar.trim()));
     sv.addEventListener('click', function () {
-      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', pm: dfoDocSrc({ key: f.key }) ? (f.pm || 'projet') : 'projet', pmNote: f.pmT && f.pm !== dpPmPropose(f, mt) ? 'Mode de paiement modifié à l’engagement' : '', dt: { eng: cadToday() }, av: dpHasAv(f) ? { pct: parseInt0(f.avpct), amt: Math.round(mt * parseInt0(f.avpct) / 100), garantie: f.gar.trim(), st: 'prevue' } : null });
+      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', pm: dfoDocSrc({ key: f.key }) ? (f.pm || 'projet') : 'projet', pmNote: f.pmT && f.pm !== dpPmPropose(f, mt) ? 'Mode de paiement modifié à l’engagement' : '', dt: { eng: cadToday() }, av: dpHasAv(f) ? { pct: parseInt0(f.avpct), amt: Math.round(mt * parseInt0(f.avpct) / 100), garantie: f.gar.trim(), st: 'prevue' } : null, fx: f.dev && f.dev !== 'MGA' ? { dev: f.dev, mtd: parseInt0(f.mtd), tx: srcRate(f.dev, cadToday()) } : undefined });
       document.getElementById('dp-eng-form').hidden = true; dpMsg('dpeng-msg', id + ' enregistré : crédit réservé sur la ligne ' + dpShort({ key: f.key }) + ', dossier transmis au Contrôle financier.'); DP.sel.dpeng = id; dpEngRender();
     });
     bar.appendChild(sv); body.appendChild(bar);
@@ -20696,8 +20698,15 @@ var EXEC_REC = [
     var sa = cvEl('select', 'field'); ['Bon de commande', 'Marché', 'Contrat', 'Convention'].forEach(function (x) { sa.appendChild(cvEl('option', null, x)); }); sa.value = f.acte; sa.addEventListener('change', function () { f.acte = sa.value; dpEngPaint(); }); fld('Type d’acte', sa);
     var ri = cvEl('input', 'field'); ri.type = 'text'; ri.placeholder = 'BC-2026-…'; ri.value = f.ref; ri.addEventListener('input', function () { f.ref = ri.value; }); fld('Référence de l’acte', ri);
     var st = cvEl('select', 'field'); DP_TIERS.forEach(function (x) { st.appendChild(cvEl('option', null, x)); }); st.value = f.tiers; st.addEventListener('change', function () { f.tiers = st.value; }); fld('Tiers', st);
-    var mi = cvEl('input', 'field'); mi.type = 'text'; mi.setAttribute('inputmode', 'numeric'); mi.placeholder = '0'; mi.value = f.montant ? fmt(parseInt0(f.montant) || 0) : ''; mi.addEventListener('input', function () { f.montant = mi.value; });
-    mi.addEventListener('change', function () { f.montant = String(parseInt0(mi.value) || ''); dpEngPaint(); }); fld('Montant TTC (MGA)', mi);
+    var dv = cvEl('select', 'field'); ['MGA'].concat(fxDevs()).forEach(function (x) { dv.appendChild(cvEl('option', null, x)); }); dv.value = f.dev || 'MGA'; dv.addEventListener('change', function () { f.dev = dv.value; f.mtd = ''; f.montant = ''; dpEngPaint(); }); fld('Devise de l’engagement', dv);
+    var fxr = f.dev && f.dev !== 'MGA' ? srcRate(f.dev, cadToday()) : null, mi = cvEl('input', 'field'); mi.type = 'text'; mi.setAttribute('inputmode', 'decimal'); mi.placeholder = '0';
+    if (fxr) {
+      mi.value = f.mtd ? fmt(parseInt0(f.mtd) || 0) : ''; mi.addEventListener('input', function () { f.mtd = mi.value; }); mi.addEventListener('change', function () { f.mtd = String(parseInt0(mi.value) || ''); f.montant = String(Math.round((parseInt0(f.mtd) || 0) * fxr)); dpEngPaint(); }); fld('Montant TTC (' + f.dev + ')', mi);
+      var eq = cvEl('input', 'field'); eq.type = 'text'; eq.readOnly = true; eq.value = fmt(mt) + ' MGA'; fld('Équivalent en MGA (taux du jour : ' + fmt(fxr) + ')', eq);
+    } else {
+      mi.value = f.montant ? fmt(parseInt0(f.montant) || 0) : ''; mi.addEventListener('input', function () { f.montant = mi.value; });
+      mi.addEventListener('change', function () { f.montant = String(parseInt0(mi.value) || ''); dpEngPaint(); }); fld('Montant TTC (MGA)', mi);
+    }
     if (f.acte === 'Marché' || f.acte === 'Contrat') {
       var ap = cvEl('input', 'field'); ap.type = 'text'; ap.setAttribute('inputmode', 'numeric'); ap.placeholder = '0 (pas d’avance)'; ap.value = f.avpct; ap.addEventListener('input', function () { f.avpct = ap.value; }); ap.addEventListener('change', function () { f.avpct = String(Math.min(100, parseInt0(ap.value) || '')); dpEngPaint(); });
       fld('Avance de démarrage (% du montant, facultatif)' + (dpHasAv(f) ? ' — soit ' + fmt(Math.round(mt * parseInt0(f.avpct) / 100)) + ' MGA' : ''), ap);
@@ -20726,7 +20735,7 @@ var EXEC_REC = [
   function dpLiqPaint(d) {
     var body = document.getElementById('dp-liq-body'), z = dpLine(d.key), lf = DP.lf; body.innerHTML = '';
     var rc = dpRecoup(d), bar = cvEl('div', 'row-toolbar'), sv = cvEl('button', 'btn primary', 'Valider la liquidation'); sv.type = 'button'; sv.disabled = !(lf.sf && lf.fac.trim());
-    sv.addEventListener('click', function () { d.st = 'liquide'; d.fac = lf.fac.trim(); d.rejet = ''; (d.dt = d.dt || {}).liq = cadToday(); dpApplyReal(d, z, lf.vol); d.net = d.mt - rc; if (d.av) { if (rc) d.av.recoupe = rc; else d.av.st = 'annulee'; } document.getElementById('dp-liq-form').hidden = true; dpMsg('dpliq-msg', d.id + ' liquidé : le net à payer est arrêté, il passe en ordonnancement.'); dpLiqRender(); });
+    sv.addEventListener('click', function () { d.st = 'liquide'; d.fac = lf.fac.trim(); d.rejet = ''; (d.dt = d.dt || {}).liq = cadToday(); dpApplyReal(d, z, lf.vol); d.net = d.mt - rc; if (d.fx) { d.fx.txLiq = srcRate(d.fx.dev, cadToday()) || d.fx.tx; d.fx.liqMt = Math.round(d.fx.mtd * d.fx.txLiq); d.net = d.fx.liqMt - rc; } if (d.av) { if (rc) d.av.recoupe = rc; else d.av.st = 'annulee'; } document.getElementById('dp-liq-form').hidden = true; dpMsg('dpliq-msg', d.id + ' liquidé : le net à payer est arrêté, il passe en ordonnancement.'); dpLiqRender(); });
     bar.appendChild(sv); body.appendChild(bar);
     var h = cvEl('div', 'kb-h', d.id + ' · ' + d.tiers); body.appendChild(h);
     body.appendChild(dpTiles([['Imputation', dpShort(d)], ['Acte', d.acte + ' ' + d.ref], ['Montant engagé', fmt(d.mt) + ' MGA'], ['Objet', d.objet]]));
@@ -20830,7 +20839,7 @@ var EXEC_REC = [
     var body = document.getElementById('dp-pay-body'), z = dpLine(d.key), s = dpStat(d.key), dd = d.dt || {}, ch = dpPayChecks(d), ko = ch.filter(function (c) { return !c[1]; }).length; body.innerHTML = '';
     document.getElementById('dp-pay-title').textContent = 'Mandat ' + d.mandat;
     var bar = cvEl('div', 'row-toolbar'), pay = cvEl('button', 'btn primary', 'Prendre en charge et payer'), rej = cvEl('button', 'btn', 'Rejeter le mandat'); pay.type = rej.type = 'button'; pay.disabled = ko > 0; if (ko) pay.title = ko + ' contrôle(s) en anomalie : rejetez le mandat ou corrigez le dossier.';
-    pay.addEventListener('click', function () { cvAsk({ title: 'Prendre en charge et payer ' + d.mandat, ok: 'Payer', required: false, optLabel: 'Mode de paiement *', options: DP_MODES, placeholder: 'Observation du comptable' }, function (c, mode) { d.st = 'paye'; d.mode = mode; (d.dt = d.dt || {}).pay = cadToday(); DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', d.mandat + ' pris en charge : ' + fmt(dpNet(d)) + ' MGA payés (' + mode.toLowerCase() + ').'); dpPayRender(); }); });
+    pay.addEventListener('click', function () { cvAsk({ title: 'Prendre en charge et payer ' + d.mandat, ok: 'Payer', required: false, optLabel: 'Mode de paiement *', options: DP_MODES, placeholder: 'Observation du comptable' }, function (c, mode) { d.st = 'paye'; d.mode = mode; if (d.fx) { d.fx.txPay = srcRate(d.fx.dev, cadToday()) || d.fx.txLiq || d.fx.tx; d.net = Math.round(d.fx.mtd * d.fx.txPay); } (d.dt = d.dt || {}).pay = cadToday(); DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', d.mandat + ' pris en charge : ' + fmt(dpNet(d)) + ' MGA payés (' + mode.toLowerCase() + ').'); dpPayRender(); }); });
     rej.addEventListener('click', function () { cvAsk({ title: 'Rejeter ' + d.mandat, ok: 'Rejeter', required: false, optLabel: 'Motif du rejet *', options: DP_MOTIFS, placeholder: 'Précisions pour l’ordonnateur' }, function (c, motif) { d.st = 'liquide'; d.mandat = ''; d.rejet = motif; DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', 'Mandat rejeté (' + motif.toLowerCase() + ') : retour à l’ordonnateur.', true); dpPayRender(); }); });
     bar.appendChild(pay); bar.appendChild(rej); body.appendChild(bar);
     function sec(title, node) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); return x; }
@@ -21044,7 +21053,7 @@ var EXEC_REC = [
       if (kind === 'dec') return [x.label, fmt(x.plan), fmt(x.real), anaSg(x.real - x.plan), fmt(x.plan2), fmt(x.real2), anaSg(x.real2 - x.plan2)].concat(anaSit(kind, x, sb));
       return [anaLabel(x), fmt(x.plan) + (u ? ' ' + u : ''), fmt(x.planTo) + (u ? ' ' + u : ''), fmt(x.real) + (u ? ' ' + u : ''), anaSg(x.ecart, u), anaPc(x.real, x.planTo)].concat(anaSit(kind, x, sb));
     });
-    anaBlock(b, kind === 'fin' ? 'Du financement prévu aux encaissements' : 'Écarts à date', dpMini(head, trs, num, 'Aucune donnée pour cet exercice.'));
+    anaBlock(b, kind === 'fin' ? 'Du financement prévu aux encaissements' : 'Écarts à date', dpMini(head, trs, num, 'Aucune donnée pour cet exercice.')); if (kind === 'fin') anaFxBlock(b, ex);
     /* Décisions de glissement */
     if (kind === 'eng') anaEngReport(b, ex); var ds = ANA.dec.filter(function (d) { return d.kind === kind; });
     if (ds.length) anaBlock(b, 'Décisions de glissement', dpMini(['Écart', 'Montant', 'Décision', 'Motif', 'Prise le', ''], ds.map(function (d) { var bt = cvEl('button', 'btn small', 'Annuler la décision'); bt.type = 'button'; bt.addEventListener('click', function () { ANA.dec = ANA.dec.filter(function (q) { return q !== d; }); anaRender(); }); return [d.label, fmt(d.amt) + ' ' + d.unit, badge(d.opt, 'b-info'), d.motif, d.by + ' · ' + d.on, bt]; }), [1], ''));
@@ -21219,20 +21228,20 @@ var EXEC_REC = [
     function add(kind, key, date, ref, tiers, mt, src, unit, x) { var o = { id: sxId(), kind: kind, key: key, date: date, ref: ref, tiers: tiers, mt: mt, src: src || 'SoftAccounting', unit: unit }; if (x) Object.keys(x).forEach(function (k) { o[k] = x[k]; }); SX.items.push(o); }
     DP.docs.forEach(function (d) {
       var q = d.dt || {};
-      if (d.mis) { sxSeedMis(d, add); return; } if (d.kind !== 'avance' && DP_RANK[d.st] >= 2) add('eng', d.key, q.eng, d.ref, d.tiers, d.id === 'ENG-2026-0009' ? d.mt - 2000000 : d.mt, undefined, undefined, sxDefPer(d));
-      if (d.kind !== 'avance' && DP_RANK[d.st] >= 3) add('liq', d.key, q.liq, d.fac, d.tiers, d.mt, undefined, undefined, { eng: d.ref });
-      if (DP_RANK[d.st] >= 6 && d.id !== 'ENG-2026-0010') add('pay', d.key, q.pay, d.mandat, d.tiers, dfoAmt(d), undefined, undefined, { eng: d.ref });
+      if (d.mis) { sxSeedMis(d, add); return; } if (d.kind !== 'avance' && DP_RANK[d.st] >= 2) add('eng', d.key, q.eng, d.ref, d.tiers, d.id === 'ENG-2026-0009' ? d.mt - 2000000 : d.mt, undefined, undefined, Object.assign({}, sxDefPer(d), sxFx(d, 'eng')));
+      if (d.kind !== 'avance' && DP_RANK[d.st] >= 3) add('liq', d.key, q.liq, d.fac, d.tiers, (d.fx && d.fx.liqMt != null ? d.fx.liqMt : d.mt), undefined, undefined, Object.assign({ eng: d.ref }, sxFx(d, 'liq')));
+      if (DP_RANK[d.st] >= 6 && d.id !== 'ENG-2026-0010') add('pay', d.key, q.pay, d.mandat, d.tiers, dfoAmt(d), undefined, undefined, Object.assign({ eng: d.ref }, sxFx(d, 'pay')));
       if (d.id === 'ENG-2026-0005') add('pay', d.key, '2026-11-12', 'VIR-0460', d.tiers, d.mt, undefined, undefined, { eng: d.ref });
     });
-    DFS.versements.forEach(function (v) { add('enc', null, v.date, v.ref, 'Bailleur — ' + v.lib.toLowerCase(), v.mt); });
-    CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') add('enc', null, x.dPaie, x.id, 'Bailleur — reconstitution du compte', x.mtAcc); });
+    DFS.versements.forEach(function (v) { add('enc', null, v.date, v.ref, 'Bailleur — ' + v.lib.toLowerCase(), v.mt, undefined, undefined, sxFxEnc(v.mt, v.date)); });
+    CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') add('enc', null, x.dPaie, x.id, 'Bailleur — reconstitution du compte', x.mtAcc, undefined, undefined, sxFxEnc(x.mtAcc, x.dPaie)); });
     var QE = ['-03-31', '-06-30', '-09-30', '-12-31'];
     dpLines().forEach(function (z) { var w = z.l.wk; if (!w || !w.real) return; var ex = z.r.ex || '2026', prev = 0; w.real.forEach(function (v, q) { if (v == null) return; if (v > prev) add('phy', z.key, ex + QE[q], 'AP-' + z.l.c + '-T' + (q + 1), w.task, v - prev, 'SoftSE', w.unit); prev = v; }); });
     var k21 = sxLineKey('2.1'), w21 = (dpLine(k21) || { l: {} }).l.wk || {};
     SX.pool = { 'SoftAccounting': { eng: [{ key: k21, date: today, ref: 'BC-2026-0190', tiers: 'FOURNITEC SARL', mt: 12000000 }], liq: [{ key: k21, date: today, ref: 'FAC-0990', tiers: 'Entreprise Sud B\u00e2timent', mt: 54000000, eng: 'M-2026-051' }], pay: [{ eng: 'CT-2026-016', key: k21, date: today, ref: 'VIR-0471', tiers: 'Cabinet RAKOTO Conseil', mt: 12000000 }], enc: [] }, 'SoftSE': { phy: [{ key: k21, date: today, ref: 'AP-2.1-T4', tiers: w21.task, mt: 1, unit: w21.unit }] }, 'Soft e-Procurement': { eng: [{ key: k21, date: '2026-11-10', ref: 'M-2026-070', tiers: 'ELECTRO-MED Madagascar', mt: 18000000 }, { key: sxLineKey('1.1'), date: '2026-11-12', ref: 'M-2026-071', tiers: 'BTP Andriana', mt: 8000000 }], liq: [], pay: [], enc: [] } }; SX.extra = SX.pool['SoftAccounting'];
     SX.store = { 'SoftAccounting': {}, 'Soft e-Procurement': {}, 'SoftSE': {} };
     SX.store['SoftSE'].phy = SX.items.filter(function (i) { return i.kind === 'phy'; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt, unit: i.unit }; }).concat(SX.pool['SoftSE'].phy); SX.store['SoftSE'].phy.forEach(function (r) { if (r.ref === 'AP-2.2-T3') r.mt = 12; });
-    ['eng', 'liq', 'pay', 'enc'].forEach(function (k) { SX.store['SoftAccounting'][k] = SX.items.filter(function (i) { return i.kind === k; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt, eng: i.eng, d1: i.d1, d2: i.d2 }; }).concat(SX.pool['SoftAccounting'][k]); SX.store['Soft e-Procurement'][k] = SX.pool['Soft e-Procurement'][k].slice(); });
+    ['eng', 'liq', 'pay', 'enc'].forEach(function (k) { SX.store['SoftAccounting'][k] = SX.items.filter(function (i) { return i.kind === k; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt, eng: i.eng, d1: i.d1, d2: i.d2, fx: i.fx }; }).concat(SX.pool['SoftAccounting'][k]); SX.store['Soft e-Procurement'][k] = SX.pool['Soft e-Procurement'][k].slice(); });
     SX.store['SoftAccounting'].eng.forEach(function (r) { if (r.ref === 'BC-2026-0171') r.mt = 40000000; });
     var e51 = SX.items.filter(function (i) { return i.kind === 'eng' && i.ref === 'M-2026-051'; })[0]; if (e51) e51.ech = { '2026': Math.round(e51.mt * 2 / 3), '2027': e51.mt - Math.round(e51.mt * 2 / 3) };
     SX.log = [{ on: '10/11/2026 08:30', src: 'Synchronisation de la comptabilité', n: SX.items.length, by: 'Système' }]; DP.impLog = SX.log;
@@ -21241,7 +21250,7 @@ var EXEC_REC = [
   function sxAgg() { sxSeed(); var o = {}; (SX.items || []).forEach(function (i) { if (!i.key || ['eng', 'liq', 'pay'].indexOf(i.kind) < 0) return; var r = o[i.key] = o[i.key] || { eng: 0, liq: 0, pay: 0 }; r[i.kind] += i.mt; }); return o; }
   function sxPull(label, src, kind) {
     sxSeed(); var n = 0, kinds = kind ? [kind] : ['eng', 'liq', 'pay', 'enc'], pool = kind === 'phy' ? SX.pool['SoftSE'] : SX.extra;
-    kinds.forEach(function (k) { var e = (pool[k] || []).shift(); if (e) { SX.items.push({ id: sxId(), kind: k, key: e.key, date: e.date, ref: e.ref, tiers: e.tiers, mt: e.mt, unit: e.unit, eng: e.eng, d1: e.d1, d2: e.d2, src: src }); n++; } });
+    kinds.forEach(function (k) { var e = (pool[k] || []).shift(); if (e) { SX.items.push({ id: sxId(), kind: k, key: e.key, date: e.date, ref: e.ref, tiers: e.tiers, mt: e.mt, unit: e.unit, eng: e.eng, d1: e.d1, d2: e.d2, fx: e.fx, src: src }); n++; } });
     SX.log.unshift({ on: nowStr(), src: label, n: n, by: ME }); if (kind === 'phy') sxPhyApply(); return n;
   }
   /* Les quantités mesurées alimentent l'avancement physique cumulé de chaque ligne (par trimestre) */
@@ -21314,7 +21323,7 @@ var EXEC_REC = [
       cell(tr, fmt(i.mt), 'num');
     } else cell(tr, fmt(i.mt) + (i.unit ? ' ' + i.unit : ''), 'num');
     var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); if (SX.kind === 'pay' && sxIsDpd(i)) { var bd2 = badge('Paiement direct', 'b-warn'); bd2.style.marginLeft = '6px'; sc.appendChild(bd2); } if (SX.kind === 'pay' && i.adv) { var ba = badge(i.jus ? 'Avance justifiée' : 'Avance à justifier', i.jus ? 'b-ok' : 'b-warn'); ba.style.marginLeft = '6px'; sc.appendChild(ba); } if (SX.kind === 'pay' && i.rev) { var br = badge('Reversement', 'b-info'); br.style.marginLeft = '6px'; sc.appendChild(br); }
-    var ac = cell(tr, ''), bc = cvEl('button', 'btn small', 'Consulter'); bc.type = 'button'; bc.addEventListener('click', function () { sxDetOpen(i); }); ac.appendChild(bc);
+    if (i.fx) { var fxc = tr.querySelector('td.num'); if (fxc) fxc.appendChild(cvEl('div', 'hby', fmt(i.fx.mtd) + ' ' + i.fx.dev + ' × ' + fmt(i.fx.tx))); } var ac = cell(tr, ''), bc = cvEl('button', 'btn small', 'Consulter'); bc.type = 'button'; bc.addEventListener('click', function () { sxDetOpen(i); }); ac.appendChild(bc);
     return tr;
   }
   /* Échéancier d'un engagement : période et part de chaque exercice */
@@ -21570,7 +21579,7 @@ var EXEC_REC = [
     var ex = anaEx(), nx = repNext(ex), E = repEffects(ex), body = document.getElementById('rep-prev-body'), yi = CPAD.years.indexOf(+nx), env = yi >= 0 ? CPAD.comps.reduce(function (a, cp) { return a + (padComp(cp.code)[yi] || 0); }, 0) : 0; body.innerHTML = '';
     body.appendChild(dpTiles([['Lignes reportées', E.lines.length + ' · ' + fmt(E.totL) + ' MGA', 'ok'], ['Marchés reportés', E.ppm.length + ' · ' + fmt(E.totP) + ' MGA', 'info'], ['Engagements ajustés', E.engs.length + ' · ' + fmt(E.engs.reduce(function (a, c) { return a + c.move; }, 0)) + ' MGA', 'brand'], ['Abandonné', fmt(E.aband) + ' MGA', 'n']], { cols: 4 }));
     var ratio = env ? E.totL / env : 0, fin = cvEl('div'); fin.appendChild(dpDl([['Financement prévu en ' + nx, fmt(env) + ' MGA'], ['Reports sur le PTBA ' + nx, fmt(E.totL) + ' MGA'], ['Part du financement', env ? pctf(ratio) : '—']])); if (ratio > 1) { var al = badge('Les reports dépassent le financement prévu en ' + nx, 'b-ko'); al.style.marginTop = '8px'; al.style.display = 'inline-block'; fin.appendChild(al); }
-    anaBlock(body, 'Cohérence avec le plan de financement', fin);
+    anaBlock(body, 'Cohérence avec le plan de financement', fin); repFxBlock(body, ex);
     anaBlock(body, 'Lignes du PTBA reportées sur ' + nx, dpMini(['Ligne', 'Montant reporté (MGA)', 'Décision', 'Cible physique reportée'], E.lines.map(function (x) { var q = x.r.reste ? Math.round(x.r.qty * x.d.amt / x.r.reste) : 0; return [x.r.label, fmt(x.d.amt), x.d.opt, q ? fmt(q) + ' ' + x.r.unit : '—']; }), [1], 'Aucune ligne reportée.'));
     anaBlock(body, 'Marchés du PPM reportés sur ' + nx, dpMini(['Marché', 'Estimatif reporté (MGA)', 'Décision', 'Nouvelle signature prévue'], E.ppm.map(function (x) { return [x.r.label, fmt(x.d.amt), x.d.opt, isoToFr(repShift(x.r.x.d3 || x.r.x.d2 || x.r.x.d1))]; }), [1], 'Aucun marché reporté.'));
     anaBlock(body, 'Engagements : parts reportées sur l’échéancier ' + nx, dpMini(['Engagement', 'Part ' + ex + ' non réalisée (MGA)', 'Nouvel échéancier'], E.engs.map(function (c) { var e = sxEch(c.i); return [c.i.ref + ' — ' + (c.i.tiers || ''), fmt(c.move), ex + ' : ' + fmt((e[ex] || 0) - c.move) + ' · ' + nx + ' : ' + fmt((e[nx] || 0) + c.move)]; }), [1], 'Aucun ajustement.'));
@@ -21996,6 +22005,30 @@ var EXEC_REC = [
     var t = cadToday(); d.mis.jus = { date: t, frais: fr, total: tot, pieces: pieces, reverse: Math.max(0, d.mt - tot), compl: Math.max(0, tot - d.mt) }; d.mis.stage = 'justifiee'; d.net = tot;
     document.getElementById('av-jus').hidden = true; dpMsg('dpeng-msg', 'Avance ' + d.ref + ' justifiée : réalisation de ' + fmt(tot) + ' MGA' + (d.mis.jus.reverse ? ', reversement de ' + fmt(d.mis.jus.reverse) + ' MGA' : '') + (d.mis.jus.compl ? ', complément de ' + fmt(d.mis.jus.compl) + ' MGA' : '') + '. L’exécution le détectera à la prochaine synchronisation.'); dpEngRender();
   });
+  /* ----- Devises : engagements et encaissements dans la devise du bailleur ou du fournisseur, écarts de change ----- */
+  function fxDevs() { var o = {}; CAD.rates.forEach(function (r) { o[r.dev] = 1; }); return Object.keys(o).sort(); }
+  function fxBud(dev, ex) { return srcRate(dev, ex + '-01-02') || srcRate(dev, ex + '-12-31'); }
+  function sxFx(d, step) { if (!d.fx) return {}; var F = d.fx, tx = step === 'pay' ? (F.txPay || F.txLiq || F.tx) : (step === 'liq' ? (F.txLiq || F.tx) : F.tx); return { fx: { dev: F.dev, mtd: F.mtd, tx: tx } }; }
+  function sxFxEnc(mt, date) { var tx = srcRate('USD', date); return tx ? { fx: { dev: 'USD', mtd: Math.round(mt / tx * 100) / 100, tx: tx } } : {}; }
+  /* Écarts de change de l'exercice : encaissements au taux budgétaire, engagements payés à un autre taux, et écart latent des engagements ouverts */
+  function anaFxRows(ex) {
+    sxSeed(); var today = cadToday(), rows = [], enc = (SX.items || []).filter(function (i) { return i.kind === 'enc' && i.fx && i.date.slice(0, 4) === ex; });
+    if (enc.length) { var md = enc.reduce(function (a, i) { return a + i.fx.mtd; }, 0), mm = enc.reduce(function (a, i) { return a + i.mt; }, 0), bud = fxBud('USD', ex), gap = mm - md * bud; rows.push(['Encaissements en ' + enc[0].fx.dev + ' (' + pl(enc.length, 'versement') + ')', fmt(md) + ' ' + enc[0].fx.dev, fmt(bud) + ' (budgétaire)', fmt(mm / md), gap, gap >= 0 ? ['Gain', 'b-ok'] : ['Perte', 'b-ko']]); }
+    var paid = (DP.docs || []).filter(function (d) { return d.fx && d.fx.txPay && d.dt && d.dt.pay && d.dt.pay.slice(0, 4) === ex; });
+    paid.forEach(function (d) { var g = (d.net != null ? d.net : d.mt) - d.mt; rows.push(['Engagement ' + d.ref + ' payé en ' + d.fx.dev, fmt(d.fx.mtd) + ' ' + d.fx.dev, fmt(d.fx.tx) + ' (engagement)', fmt(d.fx.txPay), g, g > 0 ? ['Perte', 'b-ko'] : (g < 0 ? ['Gain', 'b-ok'] : ['Neutre', 'b-neutral'])]); });
+    (DP.docs || []).filter(function (d) { return d.fx && DP_RANK[d.st] >= 2 && DP_RANK[d.st] < 6 && d.dt && d.dt.eng && d.dt.eng.slice(0, 4) === ex; }).forEach(function (d) { var r = srcRate(d.fx.dev, today) || d.fx.tx, g = d.fx.mtd * (r - d.fx.tx); rows.push(['Engagement ' + d.ref + ' à payer en ' + d.fx.dev + ' (latent)', fmt(d.fx.mtd) + ' ' + d.fx.dev, fmt(d.fx.tx) + ' (engagement)', fmt(r) + ' (aujourd’hui)', g, g > 0 ? ['Perte latente', 'b-warn'] : (g < 0 ? ['Gain latent', 'b-info'] : ['Neutre', 'b-neutral'])]); });
+    return rows;
+  }
+  function anaFxBlock(b, ex) {
+    var rows = anaFxRows(ex); if (!rows.length) return;
+    var tot = rows.reduce(function (a, r) { return a + (r[5][0].indexOf('Perte') === 0 ? -Math.abs(r[4]) : (r[5][0].indexOf('Gain') === 0 ? Math.abs(r[4]) : 0)); }, 0);
+    anaBlock(b, 'Écarts de change', dpMini(['Opération', 'Montant en devise', 'Taux de référence', 'Taux réel', 'Écart (MGA)', 'Nature'], rows.map(function (r) { return [r[0], r[1], r[2], r[3], anaSg(r[4]), badge(r[5][0], r[5][1])]; }).concat([['Résultat de change (gains moins pertes)', '', '', '', anaSg(tot), badge(tot >= 0 ? 'Gain net' : 'Perte nette', tot >= 0 ? 'b-ok' : 'b-ko')]]), [4], ''));
+  }
+  /* Clôture : réévaluation des engagements en devise restant à payer, au taux du 31 décembre */
+  function repFxBlock(body, ex) {
+    var close = ex + '-12-31', rows = (DP.docs || []).filter(function (d) { return d.fx && DP_RANK[d.st] >= 2 && DP_RANK[d.st] < 6; }).map(function (d) { var r = srcRate(d.fx.dev, close) || d.fx.tx, g = d.fx.mtd * (r - d.fx.tx); return [d.ref + ' — ' + d.tiers, fmt(d.fx.mtd) + ' ' + d.fx.dev, fmt(d.fx.tx), fmt(r), anaSg(g)]; });
+    anaBlock(body, 'Réévaluation de clôture (taux du 31/12/' + ex + ')', dpMini(['Engagement en devise à payer', 'Reste à payer', 'Taux d’engagement', 'Taux de clôture', 'Écart latent (MGA)'], rows, [1, 2, 3, 4], 'Aucun engagement en devise à réévaluer.'));
+  }
   function sxFormSetup() {
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
     document.getElementById('sxf-d1').value = cadToday(); document.getElementById('sxf-d2').value = cadToday().slice(0, 4) + '-12-31';
@@ -22017,7 +22050,7 @@ var EXEC_REC = [
   function sxSources() { return SX.kind === 'eng' ? ['SoftAccounting', 'Soft e-Procurement', 'Compte administratif'] : (SX.kind === 'phy' ? ['SoftSE', 'Compte administratif'] : ['SoftAccounting', 'Compte administratif']); }
   /* Ce que contient chaque source, indépendamment de ce qui est déjà dans le suivi */
   function sxSrcData(src, kind) {
-    sxSeed(); if (src !== 'Compte administratif') return ((SX.store[src] || {})[kind] || []).map(function (r) { return { key: r.key, date: r.date, ref: r.ref, tiers: r.tiers, mt: r.mt, unit: r.unit, eng: r.eng, d1: r.d1, d2: r.d2 }; });
+    sxSeed(); if (src !== 'Compte administratif') return ((SX.store[src] || {})[kind] || []).map(function (r) { return { key: r.key, date: r.date, ref: r.ref, tiers: r.tiers, mt: r.mt, unit: r.unit, eng: r.eng, d1: r.d1, d2: r.d2, fx: r.fx }; });
     var out = [];
     (DP.docs || []).forEach(function (d) {
       var q = d.dt || {}, c = null; if (d.mis) { sxMisItems(d).forEach(function (i) { if (i.kind === kind) out.push(Object.assign({ key: d.key, date: i.date, ref: i.ref, tiers: d.tiers, mt: i.mt }, i.x)); }); return; }
@@ -22025,9 +22058,9 @@ var EXEC_REC = [
       if (kind === 'liq' && d.kind !== 'avance' && DP_RANK[d.st] >= 3) c = { key: d.key, date: q.liq, ref: d.fac, tiers: d.tiers, mt: d.mt, eng: d.ref };
       if (kind === 'pay' && DP_RANK[d.st] >= 6) c = { key: d.key, date: q.pay, ref: d.mandat, tiers: d.tiers, mt: dfoAmt(d), eng: d.ref };
       if (kind === 'phy' && d.volReal) c = { key: d.key, date: q.liq, ref: 'AP-' + d.id, tiers: d.objet, mt: d.volReal, unit: d.volUnit };
-      if (c && c.ref) out.push(c);
+      if (c && d.fx) { c.fx = sxFx(d, kind === 'liq' ? 'liq' : (kind === 'pay' ? 'pay' : 'eng')).fx; if (kind === 'liq' && d.fx.liqMt != null) c.mt = d.fx.liqMt; } if (c && c.ref) out.push(c);
     });
-    if (kind === 'enc') { DFS.versements.forEach(function (v) { out.push({ key: null, date: v.date, ref: v.ref, tiers: 'Bailleur — ' + v.lib.toLowerCase(), mt: v.mt }); }); CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') out.push({ key: null, date: x.dPaie, ref: x.id, tiers: 'Bailleur — reconstitution du compte', mt: x.mtAcc }); }); }
+    if (kind === 'enc') { DFS.versements.forEach(function (v) { out.push({ key: null, date: v.date, ref: v.ref, tiers: 'Bailleur — ' + v.lib.toLowerCase(), mt: v.mt, fx: sxFxEnc(v.mt, v.date).fx }); }); CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') out.push({ key: null, date: x.dPaie, ref: x.id, tiers: 'Bailleur — reconstitution du compte', mt: x.mtAcc, fx: sxFxEnc(x.mtAcc, x.dPaie).fx }); }); }
     return out;
   }
   function sxPlan() {
@@ -22076,8 +22109,8 @@ var EXEC_REC = [
       bk.addEventListener('click', function () {
         var n = { 'new': 0, upd: 0, del: 0 }, done = {};
         P.plan.forEach(function (x) {
-          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, unit: x.r.unit, eng: x.r.eng, d1: x.r.d1, d2: x.r.d2, src: P.src }); n['new']++; done[x.r.ref] = true; if (x.r.clot || x.r.lib || x.r.maint) sxLifeApply(SX.items[SX.items.length - 1], x.r); }
-          if (x.act === 'upd') { if (x.st.mt !== x.r.mt) delete x.st.ech; x.st.eng = x.r.eng; x.st.d1 = x.r.d1; x.st.d2 = x.r.d2; x.st.mt = x.r.mt; x.st.unit = x.r.unit; x.st.date = x.r.date; x.st.tiers = x.r.tiers; x.st.key = x.r.key; x.st.src = P.src; n.upd++; done[x.r.ref] = true; }
+          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, unit: x.r.unit, eng: x.r.eng, d1: x.r.d1, d2: x.r.d2, fx: x.r.fx, src: P.src }); n['new']++; done[x.r.ref] = true; if (x.r.clot || x.r.lib || x.r.maint) sxLifeApply(SX.items[SX.items.length - 1], x.r); }
+          if (x.act === 'upd') { if (x.st.mt !== x.r.mt) delete x.st.ech; x.st.eng = x.r.eng; x.st.fx = x.r.fx; x.st.d1 = x.r.d1; x.st.d2 = x.r.d2; x.st.mt = x.r.mt; x.st.unit = x.r.unit; x.st.date = x.r.date; x.st.tiers = x.r.tiers; x.st.key = x.r.key; x.st.src = P.src; n.upd++; done[x.r.ref] = true; }
           if (x.act === 'life') { sxLifeApply(x.st, x.r); n.upd++; } if (x.act === 'del') { SX.items.splice(SX.items.indexOf(x.st), 1); n.del++; }
         });
         [SX.extra, SX.pool['SoftSE']].forEach(function (pl0) { if (pl0[SX.kind]) pl0[SX.kind] = pl0[SX.kind].filter(function (e) { return !done[e.ref]; }); }); if (SX.kind === 'phy') sxPhyApply();
