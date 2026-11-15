@@ -6560,6 +6560,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'arb' && typeof renderValCfg === 'function') renderValCfg();
     if (typeof DP_RENDER !== 'undefined' && DP_RENDER[name]) DP_RENDER[name]();
     if ((name === 'ptba' || name === 'pta') && typeof renderBv === 'function') { bvKind = name; renderBv(); }
+    if (name === 'dashboard' && typeof renderDash === 'function') renderDash();
     if (name === 'resu' && typeof resuRender === 'function') resuRender();
     if (name === 'avini' && typeof aviniRender === 'function') aviniRender();
     if (name === 'avanc' && typeof avancRender === 'function') avancRender();
@@ -17537,6 +17538,8 @@ var EXEC_REC = [
     return out;
   }
   function renderDash() {
+    if (typeof DP !== 'undefined' && DP && typeof dashPrj === 'function' && activeCode() === 'prj') { dashPrj(); return; }
+    if (typeof dashTitles === 'function' && typeof DP !== 'undefined' && DP) { dashTitles(false); document.getElementById('db-kpis').className = 'kpis'; }
     var prof = document.getElementById('db-prof').value || 'Tous les profils';
     var exv = document.getElementById('db-ex').value;
     var perSel = document.getElementById('db-per');
@@ -20642,6 +20645,52 @@ var EXEC_REC = [
   }
   function dpNo(id) { return document.getElementById(id) || { addEventListener: function () {} }; }
   var DP_RENDER = { dpeng: dpEngRender, dpliq: dpLiqRender, dpord: dpOrdRender, dppay: dpPayRender };
+  /* ----- Tableau de bord du projet : chiffres tirés des écrans de détail (PTBA validé, compte administratif, trésorerie, plans) ----- */
+  function dashTitles(prj) {
+    var h = document.querySelector('#v-dashboard .head p'), h1 = document.getElementById('db-status').previousElementSibling, h2 = document.getElementById('db-bars-t');
+    if (prj) { h.textContent = 'Budget validé, exécution de la dépense, trésorerie et alertes du projet : chiffres cohérents avec les écrans de détail'; h1.firstChild.nodeValue = 'Chaîne de la dépense '; h2.textContent = 'Engagement par ligne du PTBA'; }
+    else { h.textContent = 'Budgets, exécution, alertes et échéances selon votre profil d’accès — chiffres cohérents avec les écrans de détail'; h1.firstChild.nodeValue = 'Budgets par statut '; }
+    ['db-prof', 'db-ex', 'db-per'].forEach(function (id) { document.getElementById(id).style.display = prj ? 'none' : ''; });
+  }
+  function dashPrj() {
+    dpSeed(); dashTitles(true);
+    var t = dpTot(), a = dfoAcc(), docs = DP.docs || [], lots = bvList(), pct = function (v, d) { return d ? pctf(v / d) : '—'; };
+    var k = document.getElementById('db-kpis'); k.innerHTML = ''; k.className = '';
+    k.appendChild(dpTiles([['Budget validé (PTBA)', fmt(t.ouv) + ' MGA', 'brand'], ['Engagé · ' + pct(t.e, t.ouv), fmt(t.e) + ' MGA', 'info'], ['Payé · ' + pct(t.p, t.ouv), fmt(t.p) + ' MGA', 'ok'], ['Solde du compte spécial', fmt(a.solde) + ' MGA', a.solde < 0 ? 'ko' : (a.solde < a.plaf * DFS.seuil / 100 ? 'warn' : 'ok')]], { cols: 4 }));
+    /* Chaîne de la dépense : où en sont les dossiers */
+    var sb = document.getElementById('db-status'); sb.innerHTML = ''; document.getElementById('db-status-n').textContent = pl(docs.length, 'dossier');
+    ['soumis', 'vise', 'liquide', 'ordonnance', 'paye'].forEach(function (s) {
+      var g = docs.filter(function (d) { return d.st === s; }), row = cvEl('div', 'list-row'), l = cvEl('div'); row.style.alignItems = 'center';
+      row.appendChild(badge(DP_ST[s][0], DP_ST[s][1])); var am = cvEl('span', 'hby', fmt(g.reduce(function (x, d) { return x + dfoAmt(d); }, 0)) + ' MGA'); am.style.marginLeft = '12px'; row.appendChild(am);
+      var n = cvEl('b', null, String(g.length)); n.style.marginLeft = 'auto'; row.appendChild(n); sb.appendChild(row);
+    });
+    /* Engagement par ligne */
+    var bb = document.getElementById('db-bars'); bb.innerHTML = '';
+    dpLines().forEach(function (z) {
+      var s = dpStat(z.key), ratio = s.ouv ? s.e / s.ouv : 0, row = cvEl('div', 'bar-row'), tk = cvEl('div', 'track'), fl = cvEl('div', 'fill' + (ratio > 1 ? ' ko' : (ratio >= 0.9 ? ' warn' : '')));
+      row.appendChild(cvEl('span', null, z.l.c + ' — ' + (z.l.lib || z.l.l))); fl.style.width = Math.min(100, Math.round(ratio * 100)) + '%'; tk.appendChild(fl); row.appendChild(tk); row.appendChild(cvEl('span', 'num', pctf(ratio))); bb.appendChild(row);
+    });
+    /* Alertes */
+    var al = [];
+    dpLines().forEach(function (z) { var s = dpStat(z.key), r = s.ouv ? s.e / s.ouv : 0; if (s.dispo < 0) al.push({ k: 'ko', b: 'Dépassement', m: z.l.c + ' — ' + (z.l.lib || z.l.l) + ' : crédit dépassé de ' + fmt(-s.dispo) + ' MGA' }); else if (r >= 0.9) al.push({ k: 'warn', b: 'Alerte seuil', m: z.l.c + ' — ' + (z.l.lib || z.l.l) + ' engagée à ' + pctf(r) }); });
+    docs.filter(function (d) { return d.rejet; }).forEach(function (d) { al.push({ k: 'ko', b: 'Rejet', m: d.id + ' (' + d.tiers + ') : ' + d.rejet.toLowerCase() }); });
+    if (a.solde < 0) al.push({ k: 'ko', b: 'Trésorerie', m: 'Le compte spécial est insuffisant : ' + fmt(-a.solde) + ' MGA à reconstituer' }); else if (a.solde < a.plaf * DFS.seuil / 100) al.push({ k: 'warn', b: 'Trésorerie', m: 'Solde du compte spécial bas (' + fmt(a.solde) + ' MGA) : préparez une reconstitution' });
+    CDF.items.filter(function (x) { return x.st === 'Rejetée'; }).forEach(function (x) { al.push({ k: 'warn', b: 'Bailleur', m: x.id + ' rejetée : ' + x.motif }); });
+    lots.forEach(function (r) { var S = pdcSim(pdcNeeds(r)), neg = []; S.bal.forEach(function (v, m) { if (m >= S.s && v < 0) neg.push(PDC_MOIS[m]); }); if (neg.length) al.push({ k: 'ko', b: 'Plan de décaissement', m: 'Solde négatif prévu en ' + neg.join(', ') + ' (exercice ' + cvCamp(r).ex + ')' }); });
+    lots.forEach(function (r) { var ac = ppmLotActs(r), no = ac.filter(function (x) { return !ppmActTotal(x.key); }).length; if (no) al.push({ k: 'warn', b: 'PPM', m: pl(no, 'ligne') + ' du PTBA sans marché planifié (exercice ' + cvCamp(r).ex + ')' }); });
+    var ab = document.getElementById('db-alerts'); ab.innerHTML = '';
+    if (!al.length) ab.appendChild(cvEl('div', 'hint', 'Aucune alerte pour ce projet.'));
+    al.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x.b, x.k === 'ko' ? 'b-ko' : 'b-warn')); row.appendChild(cvEl('div', null, x.m)); ab.appendChild(row); });
+    /* Tâches : ce qui attend une action dans chaque menu */
+    var tk2 = [], cnt = function (s) { return docs.filter(function (d) { return d.st === s; }); };
+    function add(list, verb, sub, go) { if (list.length) tk2.push({ t: verb + ' ' + pl(list.length, 'dossier'), s: sub, go: go }); }
+    add(cnt('soumis'), 'Viser', 'Engagements en attente du Contrôle financier', 'dpeng'); add(cnt('vise'), 'Liquider', 'Engagements visés, service fait à certifier', 'dpliq'); add(cnt('liquide'), 'Ordonnancer', 'Liquidations à mettre en mandat', 'dpord'); add(cnt('ordonnance'), 'Payer', 'Mandats chez le comptable', 'dppay');
+    CDF.items.forEach(function (x) { var v = { 'Préparée': 'Soumettre au bailleur', 'Soumise': 'Enregistrer la réponse du bailleur pour', 'Acceptée': x.type === 'DPD' ? 'Constater le paiement de' : 'Constater la reconstitution de' }[x.st]; if (v) tk2.push({ t: v + (x.st === 'Préparée' ? ' ' : ' ') + x.id, s: (x.type === 'DPD' ? 'Paiement direct' : 'Réapprovisionnement') + ' · ' + fmt(x.mt) + ' MGA', go: 'dfon' }); });
+    lots.forEach(function (r) { var ac = ppmLotActs(r), c = ac.reduce(function (s, x) { return s + x.cost; }, 0), p = ac.reduce(function (s, x) { return s + ppmActTotal(x.key); }, 0); if (p < c) tk2.push({ t: 'Compléter le PPM ' + cvCamp(r).ex, s: 'Couverture du PTBA : ' + Math.round(100 * p / c) + ' %', go: 'ppm' }); });
+    var tb = document.getElementById('db-tasks'); tb.innerHTML = '';
+    if (!tk2.length) tb.appendChild(cvEl('div', 'hint', 'Aucune tâche en attente.'));
+    tk2.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; var d = cvEl('div'); d.appendChild(cvEl('b', null, x.t)); d.appendChild(cvEl('div', 'hby', x.s)); row.appendChild(d); var b = cvEl('button', 'btn small', 'Ouvrir'); b.type = 'button'; b.style.marginLeft = 'auto'; b.addEventListener('click', function () { show(x.go); }); row.appendChild(b); tb.appendChild(row); });
+  }
   /* ----- Tableau de restitution : exécution de chaque ligne du PTBA validé (version du crédit au choix) ----- */
   DP.tabVer = 0; DP.ops = {}; DP.vers = []; DP.frozen = null;
   function dpCred(z, ver) { if (!ver) return z.ouv; var v = bvVers(z.r)[ver - 1]; var s = v && v.snap[z.perim + '|' + z.l.c]; return s ? s.dem : 0; }
