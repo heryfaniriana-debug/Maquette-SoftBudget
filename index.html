@@ -20276,7 +20276,7 @@ var EXEC_REC = [
   function dpTot(f) { var t = { ouv: 0, e: 0, r: 0, l: 0, o: 0, p: 0, dispo: 0 }; dpLines().forEach(function (z) { var s = dpStat(z.key); Object.keys(t).forEach(function (k) { t[k] += s[k]; }); }); return t; }
   function dpShort(d) { var z = dpLine(d.key); return z ? z.l.c + ' — ' + (z.l.lib || z.l.l) : '—'; }
   function dpMsg(id, text, bad) { var m = document.getElementById(id); if (!m) return; m.hidden = !text; m.textContent = text || ''; m.style.background = bad ? 'var(--ko-bg)' : 'var(--ok-bg)'; m.style.color = bad ? 'var(--ko)' : 'var(--ok)'; }
-  function dpKpis(id, arr) { var box = document.getElementById(id); box.innerHTML = ''; box.className = 'co-kpis'; box.style.gridTemplateColumns = 'repeat(auto-fit, minmax(190px, 1fr))'; box.style.marginBottom = '14px'; arr.forEach(function (a) { box.appendChild(cvKpi(a[0], a[1])); }); }
+  function dpKpis(id, arr) { var box = document.getElementById(id); box.innerHTML = ''; box.appendChild(dpTiles(arr.map(function (a) { return [a[0], a[1], a[2] || 'brand']; }))); }
   function dpStatBadge(d) { var s = DP_ST[d.st], f = document.createDocumentFragment(); f.appendChild(badge(s[0], s[1])); if (d.rejet) { var b = badge('Rejeté : ' + d.rejet, 'b-ko'); b.style.marginLeft = '6px'; f.appendChild(b); } return f; }
   /* Tableau générique : lignes sélectionnables (une seule, ou plusieurs avec cases à cocher) */
   function dpTable(o) {
@@ -20291,17 +20291,22 @@ var EXEC_REC = [
     });
   }
   function dpBar(id, items) { var bar = document.getElementById(id); bar.innerHTML = ''; items.forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); }); }
-  function dpTiles(arr) { var g = cvEl('div', 'co-kpis'); g.style.gridTemplateColumns = 'repeat(auto-fit, minmax(190px, 1fr))'; g.style.marginBottom = '14px'; arr.forEach(function (a) { g.appendChild(cvKpi(a[0], a[1])); }); return g; }
+  /* Tuiles de lecture : libellé, valeur en gras avec unité discrète, couleur selon le sens (charte : marine, info, ok, alerte, erreur) */
+  function dpTiles(arr, opt) {
+    opt = opt || {}; var g = cvEl('div', 'dp-tiles' + (opt.small ? ' small' : '')); g.style.setProperty('--c', String(opt.cols || arr.length)); g.style.marginBottom = '14px';
+    arr.forEach(function (a) { var t = cvEl('div', 'dp-tile ' + (a[2] || 'n')), v = cvEl('div', 'v'), s = String(a[1]), m = s.match(/^(.*?)(\s(?:MGA))$/); t.appendChild(cvEl('div', 'l', a[0])); if (m) { v.appendChild(document.createTextNode(m[1])); v.appendChild(cvEl('span', 'u', 'MGA')); } else v.textContent = s; t.appendChild(v); g.appendChild(t); });
+    return g;
+  }
   function dpWork(z) {
     var l = z.l, w = l.wk, sec = cvEl('section', 'co-blk'); sec.appendChild(cvEl('div', 'kb-h', 'Programmation : ce que cette dépense finance'));
     var pr = z.r ? (bvData(z.r).c.perims.filter(function (p) { return p.p === z.perim; })[0] || {}) : {};
     var inds = ((w && w.inds) || []).map(function (k) { var i = (pr.inds || []).filter(function (q) { return q.id === k.id; })[0]; return i ? i.lib + ' (' + fmt(k.contrib) + ' ' + i.unit + ')' : null; }).filter(Boolean);
-    sec.appendChild(dpTiles([['Composante', z.perim], ['Travail prévu', w ? w.task : 'Non renseigné'], ['Période', w ? isoToFr(w.d1) + ' → ' + isoToFr(w.d2) : '—'], ['Indicateurs servis', inds.length ? inds.join(' · ') : 'Aucun']]));
+    sec.appendChild(dpTiles([['Composante', z.perim], ['Travail prévu', w ? w.task : 'Non renseigné'], ['Période', w ? isoToFr(w.d1) + ' → ' + isoToFr(w.d2) : '—'], ['Indicateurs servis', inds.length ? inds.join(' · ') : 'Aucun']], { small: true }));
     return sec;
   }
   function dpDispoBand(key, mt) {
     var s = dpStat(key), ok = s.dispo - mt >= 0, band = cvEl('section', 'co-blk'); band.appendChild(cvEl('div', 'kb-h', 'Contrôle de disponibilité (budget validé)'));
-    band.appendChild(dpTiles([['Crédit validé', fmt(s.ouv) + ' MGA'], ['Engagements visés', fmt(s.e) + ' MGA'], ['En attente de visa', fmt(s.r) + ' MGA'], ['Disponible avant', fmt(s.dispo) + ' MGA'], ['Présent engagement', fmt(mt) + ' MGA'], ['Disponible après', fmt(s.dispo - mt) + ' MGA']]));
+    band.appendChild(dpTiles([['Crédit validé', fmt(s.ouv) + ' MGA', 'brand'], ['Engagements visés', fmt(s.e) + ' MGA', 'n'], ['En attente de visa', fmt(s.r) + ' MGA', s.r ? 'warn' : 'n'], ['Disponible avant', fmt(s.dispo) + ' MGA', 'info'], ['Présent engagement', fmt(mt) + ' MGA', 'warn'], ['Disponible après', fmt(s.dispo - mt) + ' MGA', ok ? 'ok' : 'ko']], { cols: 3 }));
     band.appendChild(badge(ok ? 'Crédits suffisants' : 'Dépassement : soumission bloquée', ok ? 'b-ok' : 'b-ko')); return band;
   }
   /* ----- Engagements ----- */
@@ -20330,7 +20335,7 @@ var EXEC_REC = [
     function fld(label, el, full) { var d = cvEl('div', full ? 'full' : ''); d.appendChild(cvEl('label', null, label)); d.appendChild(el); g.appendChild(d); return el; }
     var ls = dpLines(), sl = cvEl('select', 'field'); ls.forEach(function (z) { var o = cvEl('option', null, z.l.c + ' — ' + (z.l.lib || z.l.l) + ' · ' + z.perim + ' (disponible ' + fmt(dpStat(z.key).dispo) + ' MGA)'); o.value = z.key; sl.appendChild(o); }); sl.value = f.key;
     sl.addEventListener('change', function () { f.key = sl.value; f.ppm = ''; dpEngPaint(); }); fld('Ligne du PTBA validé (activité du plan de travail)', sl, true);
-    body.appendChild(g); var z0 = dpLine(f.key); body.appendChild(dpWork(z0)); body.appendChild(dpDispoBand(f.key, mt));
+    g.style.marginBottom = '22px'; body.appendChild(g); var z0 = dpLine(f.key); body.appendChild(dpWork(z0)); body.appendChild(dpDispoBand(f.key, mt));
     var g2 = cvEl('div', 'fgrid'); g = g2;
     var pp = cvEl('select', 'field'); var o0 = cvEl('option', null, '— Aucun (saisie libre) —'); o0.value = ''; pp.appendChild(o0);
     CPP.items.filter(function (x) { return x.act === f.key.split('|').filter(function (_, i) { return i !== 1; }).join('|') && ['Attribué', 'Signé', 'En exécution'].indexOf(x.st) >= 0; }).forEach(function (x) { var o = cvEl('option', null, x.ref + ' — ' + x.des + ' (' + fmt(x.est) + ' MGA)'); o.value = x.ref; pp.appendChild(o); }); pp.value = f.ppm;
@@ -20341,7 +20346,7 @@ var EXEC_REC = [
     var mi = cvEl('input', 'field'); mi.type = 'text'; mi.setAttribute('inputmode', 'numeric'); mi.placeholder = '0'; mi.value = f.montant ? fmt(parseInt0(f.montant) || 0) : ''; mi.addEventListener('input', function () { f.montant = mi.value; });
     mi.addEventListener('change', function () { f.montant = String(parseInt0(mi.value) || ''); dpEngPaint(); }); fld('Montant TTC (MGA)', mi);
     var oi = cvEl('textarea', 'field'); oi.placeholder = 'Objet de la dépense'; oi.value = f.objet; oi.addEventListener('input', function () { f.objet = oi.value; sv.disabled = !(ok && mt > 0 && f.objet.trim()); }); fld('Objet', oi, true);
-    body.appendChild(g2);
+    g2.style.marginTop = '8px'; body.appendChild(g2);
   }
   /* ----- Liquidations ----- */
   function dpLiqRender() {
@@ -21090,6 +21095,20 @@ function pcRenderEnv(){
 
 </script>
 <style>
+  .dp-tiles { display: grid; grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 1200px) { .dp-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .dp-tile { border: 1px solid var(--border); border-left: 4px solid var(--navy-200, #CAD9FB); border-radius: 10px; background: #fff; padding: 12px 14px; min-width: 0; }
+  .dp-tile .l { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .02em; margin-bottom: 6px; }
+  .dp-tile .v { font-size: 19px; font-weight: 700; color: var(--navy-900, #18244F); font-variant-numeric: tabular-nums; line-height: 1.25; overflow-wrap: anywhere; }
+  .dp-tile .v .u { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 5px; }
+  .dp-tiles.small .v { font-size: 14.5px; font-weight: 600; }
+  .dp-tile.brand { background: var(--navy-50, #F4F7FE); border-left-color: var(--navy-700, #2E427B); }
+  .dp-tile.info { background: var(--info-bg); border-left-color: var(--info); }
+  .dp-tile.warn { background: var(--warn-bg); border-left-color: var(--warn); }
+  .dp-tile.ok { background: var(--ok-bg); border-left-color: var(--ok); }
+  .dp-tile.ok .v { color: var(--ok); }
+  .dp-tile.ko { background: var(--ko-bg); border-left-color: var(--ko); }
+  .dp-tile.ko .v { color: var(--ko); }
   .row-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; justify-content: flex-start; }
   .row-toolbar .rt-hint { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
   /* Détail d'une contribution reçue : lisible d'un coup d'œil */
