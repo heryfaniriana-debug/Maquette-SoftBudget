@@ -1869,12 +1869,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div id="pc-s-chip"></div>
         </div>
         <div class="pc-note ko" id="pc-s-ret" hidden></div>
+        <div class="pc-card pc-env" id="pc-s-instr"></div>
         <div class="pc-card pc-env" id="pc-s-env"></div>
         <div class="pc-card pc-scroll">
           <table class="pc-tbl" id="pc-s-tbl">
-            <thead><tr><th>Ligne budgétaire</th><th>Catégorie</th><th>Unité</th><th class="r">Quantité</th><th class="r">Montant unitaire (MGA)</th><th class="r">Total (MGA)</th><th>Répartition</th><th>Justification</th><th>Contrôle</th><th></th></tr></thead>
+            <thead><tr><th>Activité du plan analytique</th><th>Catégorie</th><th>Unité</th><th class="r">Quantité</th><th class="r">Montant unitaire (MGA)</th><th class="r">Total (MGA)</th><th>Répartition dans l’année</th><th>Sites</th><th>Pièces jointes</th><th>Justification</th><th>Contrôle</th><th></th></tr></thead>
             <tbody id="pc-s-body"></tbody>
-            <tfoot><tr><td colspan="5">Total du périmètre</td><td class="r" id="pc-s-tot"></td><td colspan="4"></td></tr></tfoot>
+            <tfoot><tr><td colspan="5">Total du périmètre</td><td class="r" id="pc-s-tot"></td><td colspan="6"></td></tr></tfoot>
           </table>
         </div>
         <div class="pc-bar" id="pc-s-bar">
@@ -2041,6 +2042,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="bkacc">Comptes bancaires</button>
           <button data-go="bkdec" title="Plan de trésorerie prévisionnel">Plan de trésorerie</button>
                                         <button data-go="sites" title="Sites : centres de saisie du projet" style="display:none">Sites</button>
+          <button data-go="roles" title="Groupes de rôles" style="display:none">Groupes de rôles</button>
+          <button data-go="echeanc" title="Échéances" style="display:none">Échéances</button>
+          <button data-go="alrt" title="Alertes et dépassements" style="display:none">Alertes et dépassements</button>
           <button data-go="usr" title="Utilisateurs et droits" style="display:none">Utilisateurs et droits</button>
           <button data-go="plana" title="Plan analytique : activités du projet" style="display:none">Plan analytique</button><button data-go="revpl" title="Révisions des plans : circuit et approbation du bailleur" style="display:none">Révisions</button><button data-go="rep" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
           <button data-go="pdec" title="Plan de décaissement du projet">Plan de décaissement</button>
@@ -2128,6 +2132,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <svg class="ico chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
         <div id="app-switch-menu" role="listbox" hidden style="position:absolute;top:calc(100% + 6px);left:0;min-width:100%;z-index:60;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.14);padding:6px"></div>
       </div>
+      
       <label class="search">
         <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         <input type="text" placeholder="Rechercher un budget, une campagne, une ligne" aria-label="Rechercher">
@@ -3686,6 +3691,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
               <div><label for="cm-d1">Ouverture de la collecte <em>*</em></label><input id="cm-d1" class="field" type="date"></div>
               <div><label for="cm-d2">Clôture de la collecte <em>*</em></label><input id="cm-d2" class="field" type="date"><div class="hint">Dates de la collecte, indépendantes de l’exercice : on peut collecter en 2026 le budget de 2027.</div></div>
                             <div class="full" id="cm-rep-w" hidden><label class="chk"><input type="checkbox" id="cm-rep" checked> Reprendre automatiquement les reports de l’exercice précédent<span id="cm-rep-txt"></span></label></div><div class="full"><label for="cm-tpl">Modèle de saisie</label><select id="cm-tpl" class="field"></select></div>
+              <div class="full" id="cm-sites-w" hidden><label>Sites qui renseignent la collecte</label><div class="dd" id="cm-sdd"><button type="button" class="field dd-btn" id="cm-sdd-btn" aria-haspopup="true" aria-expanded="false"><span id="cm-sdd-txt">Tous les sites</span><span aria-hidden="true">▾</span></button><div class="dd-panel" id="cm-sdd-panel" hidden><label class="chk sm dd-all"><input type="checkbox" id="cm-sall" checked aria-label="Tous les sites"> Tous les sites</label><div class="chkcol" id="cm-sites"></div></div></div><div class="hint">Chaque ligne se répartit ensuite entre ces sites, en pourcentage : une même personne peut saisir pour les trois sites, ou chaque site saisit sa part.</div></div>
+              <div class="full" id="cm-pj-w" hidden><label for="cm-pj">Pièce justificative demandée aux contributeurs</label><select id="cm-pj" class="field"><option>Non requise</option><option selected>Facultative</option><option>Obligatoire</option><option>Obligatoire si variation au-delà du seuil</option></select><div class="hint">Règle de la collecte : « Obligatoire » bloque l’envoi d’une contribution sans pièce jointe ; « Obligatoire si variation » l’exige quand la ligne varie au-delà du seuil de contrôle.</div></div>
               <div class="full"><label for="cm-instr">Instructions aux contributeurs</label><textarea id="cm-instr" class="field" placeholder="Consignes, plafonds, calendrier…"></textarea></div>
               <div class="full"><label>Périmètres de contribution <em>*</em></label>
                 <div class="dd" id="cm-dd">
@@ -5542,6 +5549,18 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="panel" id="site-rep" hidden><h2><span id="site-rep-title">Répartir la ligne</span></h2><div class="body" id="site-rep-body"></div></div>
       </section>
 
+      <!-- ===== Paramètres : rôles ===== -->
+      <section class="view" id="v-roles">
+        <div class="head"><div><h1>Groupes de rôles</h1><p>Ce que chaque groupe de rôles du projet peut faire. Les groupes sont préparamétrés, y compris le rôle tenu dans le circuit du compte administratif (visa, ordonnancement, paiement).</p></div></div>
+        <div id="ro-body"></div>
+      </section>
+
+      <!-- ===== Paramètres : alertes et dépassements ===== -->
+      <section class="view" id="v-alrt">
+        <div class="head"><div><h1>Alertes et dépassements</h1><p>Que faire quand un seuil est dépassé : informer, notifier, escalader ou bloquer, et qui prévenir.</p></div></div>
+        <div id="alr-body"></div>
+      </section>
+
       <!-- ===== Paramètres : gestion des utilisateurs ===== -->
       <section class="view" id="v-usr">
         <div class="head"><div><h1 id="gu-title">Gestion des utilisateurs</h1><p id="gu-sub"></p></div><div class="actions"><button class="btn primary" id="gu-new">+ Nouveau</button></div></div>
@@ -6147,6 +6166,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="callout" id="nc-msg" hidden style="margin-bottom:12px"></div>
         <div class="callout" id="nc-ro" hidden style="margin-bottom:12px;background:var(--warn-bg);color:#B45309">La configuration est réservée aux administrateurs : vous la consultez en lecture seule.</div>
         <div class="callout" id="nc-svc-note" hidden style="margin-bottom:12px;background:var(--warn-bg);color:#B45309">Le service de notification commun n’est pas disponible : les rappels et les escalades sont suspendus. Les notifications dans l’application restent actives.</div>
+        <div id="npr-body" hidden></div>
 
         <div class="card" style="margin-bottom:12px">
           <h2 style="margin:0;font-size:14px;font-weight:600;padding:12px 16px;border-bottom:1px solid #E9EBF0">Événements notifiés</h2>
@@ -6675,7 +6695,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'plana', 'sites', 'usr', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'plana', 'sites', 'usr', 'roles', 'alrt', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6753,6 +6773,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     plana: ['Paramètres', 'Plan analytique'],
     sites: ['Paramètres', 'Sites'],
     usr: ['Paramètres', 'Utilisateurs et droits'],
+    roles: ['Paramètres', 'Groupes de rôles'],
+    echeanc: ['Paramètres', 'Échéances'],
+    alrt: ['Paramètres', 'Alertes et dépassements'],
     ansit: ['Analyses', 'Comparaison entre sites'],
     revpl: ['Plans annuels', 'R\u00e9visions des plans'],
     rep: ['Plans annuels', 'Report et cl\u00f4ture de l\u2019exercice'],
@@ -6778,14 +6801,14 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-plan': ['ptba', 'pta', 'ppm', 'pdec', 'revpl', 'rep'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
     'nav-rapports': ['ansit', 'anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
-    'nav-params': ['params', 'usr', 'plana', 'sites', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
+    'nav-params': ['params', 'usr', 'roles', 'echeanc', 'alrt', 'plana', 'sites', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
   };
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
   var MENU_OF = { create: 'list', detail: 'bud', saisie: 'bud', valid: 'arb' };
   var LABELLED = ['soon', 'params', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl', 'appr'];
-  var VIEWALIAS = { ansit: 'ana', anfin: 'ana', aneng: 'ana', anrea: 'ana', andec: 'ana', anphy: 'ana', anfp: 'ana', anplu: 'ana', anale: 'ana', anver: 'ana', sxphy: 'sx', sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
+  var VIEWALIAS = { echeanc: 'notifcfg', ansit: 'ana', anfin: 'ana', aneng: 'ana', anrea: 'ana', andec: 'ana', anphy: 'ana', anfp: 'ana', anplu: 'ana', anale: 'ana', anver: 'ana', sxphy: 'sx', sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
   function show(name, label) {
-    var vn = VIEWALIAS[name] || name;
+    window.__curView = name; var vn = VIEWALIAS[name] || name;
     views.forEach(function (v) {
       document.getElementById('v-' + v).classList.toggle('on', v === vn);
     });
@@ -6825,6 +6848,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'plana' && typeof planaRender === 'function') planaRender();
     if (name === 'sites' && typeof sitesRender === 'function') sitesRender();
     if (name === 'usr' && typeof guRender === 'function') guRender();
+    if (name === 'roles' && typeof roRender === 'function') roRender();
+    if (name === 'alrt' && typeof alrRender === 'function') alrRender();
+    if ((name === 'notifcfg' || name === 'echeanc') && typeof ncSplit === 'function') ncSplit(name);
     if (name === 'droits' && typeof renderRights === 'function') { renderRights(); var dh = document.querySelector('#v-droits .head h1'), dc = document.querySelector('#crumbs .current'), pj = activeCode() === 'prj'; if (dh) dh.textContent = pj ? 'Séparation des responsabilités' : 'Rôles et droits'; if (pj) { openPtab('dr-sep'); if (dc) dc.textContent = 'Séparation des responsabilités'; } }
     if (name === 'revpl' && typeof revRender === 'function') revRender();
     if (name === 'rep' && typeof repRender === 'function') repRender();
@@ -10394,6 +10420,11 @@ function fmAxes() {
     document.getElementById('cm-all').checked = all.length > 0 && on.length === all.length;
     document.getElementById('cm-dd-txt').textContent = !on.length ? 'Sélectionner les périmètres' : (on.length === all.length ? 'Tous les périmètres (' + on.length + ')' : (on.length <= 2 ? on.join(', ') : on.length + ' périmètres sélectionnés'));
   }
+  function cmSitesUpd() { var all = document.querySelectorAll('#cm-sites input'), on = document.querySelectorAll('#cm-sites input:checked'), t = document.getElementById('cm-sdd-txt'); if (!t) return; document.getElementById('cm-sall').checked = all.length > 0 && on.length === all.length; t.textContent = !on.length ? 'Sélectionner les sites' : (on.length === all.length ? 'Tous les sites' : Array.prototype.map.call(on, function (i) { return i.parentNode.textContent.trim(); }).join(', ')); }
+  document.getElementById('cm-sdd-btn').addEventListener('click', function (ev) { ev.stopPropagation(); var p = document.getElementById('cm-sdd-panel'); p.hidden = !p.hidden; this.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); });
+  document.getElementById('cm-sdd-panel').addEventListener('click', function (ev) { ev.stopPropagation(); });
+  document.getElementById('cm-sall').addEventListener('change', function () { var v = this.checked; document.querySelectorAll('#cm-sites input').forEach(function (i) { i.checked = v; }); cmSitesUpd(); });
+  document.addEventListener('click', function () { var p = document.getElementById('cm-sdd-panel'); if (p) p.hidden = true; });
   function cmDdOpen(open) { document.getElementById('cm-dd-panel').hidden = !open; document.getElementById('cm-dd-btn').setAttribute('aria-expanded', open ? 'true' : 'false'); }
   document.getElementById('cm-dd-btn').addEventListener('click', function (ev) { ev.stopPropagation(); cmDdOpen(document.getElementById('cm-dd-panel').hidden); });
   document.getElementById('cm-dd-panel').addEventListener('click', function (ev) { ev.stopPropagation(); });
@@ -10475,7 +10506,7 @@ function fmAxes() {
     while (cur <= end) { var yi = CPAD.years.indexOf(cur.getFullYear()); if (yi >= 0) tot += (env[yi] || 0) / 12; cur.setMonth(cur.getMonth() + 1); }
     return Math.round(tot) || null;
   }
-  function prjCampHide() { if (activeCode() === 'prj') ['cm-tpl'].forEach(function (id) { document.getElementById(id).parentNode.hidden = true; }); }
+  function prjCampHide() { var pj = activeCode() === 'prj'; if (pj) ['cm-tpl'].forEach(function (id) { document.getElementById(id).parentNode.hidden = true; }); document.getElementById('cm-pj-w').hidden = !pj; var sw = document.getElementById('cm-sites-w'); sw.hidden = !pj; if (pj) { var sb = document.getElementById('cm-sites'), old = {}; sb.querySelectorAll('input').forEach(function (i) { old[i.value] = i.checked; }); sb.innerHTML = ''; sitesList().filter(function (x) { return x.on; }).forEach(function (x) { var l = mkChk(old[x.code] !== false, x.nom, function () { }); l.querySelector('input').value = x.code; sb.appendChild(l); l.querySelector('input').addEventListener('change', cmSitesUpd); }); cmSitesUpd(); } }
   function prjCampSync(pa) {
     var prj = activeCode() === 'prj';
     document.querySelector('label[for="cm-par"]').firstChild.nodeValue = prj ? 'Configuration ' : 'Paramétrage ';
@@ -10571,9 +10602,9 @@ function fmAxes() {
   var m = models.filter(function (x) { return x.id === mid; })[0];
     var code = 'CAMP-' + ex + '-' + (camps.length + 1 < 10 ? '0' : '') + (camps.length + 1);
     var nbud = { code: nextBudgetCode(ex), lib: lib, prof: paC.prof, ex: ex, per: perV, par: paC.id, ent: paC.ent, proj: paC.proj || '', amt: 0, st: 'Brouillon', nature: paC.nature, devise: paC.devise, period: paC.period, axes: JSON.parse(JSON.stringify(paC.axes || [])) };
-    BUDGETS.unshift(nbud);
+    BUDGETS.unshift(nbud); document.getElementById('cm-sites').innerHTML = '';
     auditAdd('Création', 'Budget ' + nbud.code, 'Budget créé par la campagne ' + code + ' (' + paC.lib + ', ' + perLabel(nbud) + ')', nbud.prof);
-    camps.unshift({ code: code, bud: nbud.code, par: paC.id, per: perV, lib: lib, prof: prof, ex: ex, model: mid, mver: m.ver, open: d2f(d1), close: d2f(d2), st: 'Brouillon', tpl: document.getElementById('cm-tpl').value, instr: document.getElementById('cm-instr').value,
+    camps.unshift({ code: code, bud: nbud.code, par: paC.id, per: perV, lib: lib, prof: prof, ex: ex, model: mid, mver: m.ver, open: d2f(d1), close: d2f(d2), st: 'Brouillon', tpl: document.getElementById('cm-tpl').value, pj: document.getElementById('cm-pj').value, sites: (function () { var a = []; document.querySelectorAll('#cm-sites input:checked').forEach(function (i) { a.push(i.value); }); return a.length ? a : sitesList().filter(function (x) { return x.on; }).map(function (x) { return x.code; }); })(), instr: document.getElementById('cm-instr').value,
       perims: perims.map(function (p) { return { p: p, who: cmWho[p] || '', obj: (cmObj[p] || '').trim(), lines: planLines(p), inds: (cmInds[p] || []).map(function (z) { return { id: 'IF-' + (++INDUID), lib: z.lib.trim(), unit: z.unit.trim(), base: 0, cible: z.cible, fixed: true }; }), st: 'Non démarrée', amt: 0, env: cmEnv[p] != null ? cmEnv[p] : null, min: cmMin[p] != null ? cmMin[p] : null }; }),
       hist: [{ t: 'Campagne créée (brouillon) pour ' + paC.lib + ' — ' + perLabel(nbud), by: ME, on: nowStr() }] });
     renderBudgets();
@@ -11241,6 +11272,7 @@ function fmAxes() {
         var bd = document.createElement('button'); bd.className = 'btn small'; bd.type = 'button'; bd.style.marginLeft = '6px'; bd.textContent = 'Supprimer';
         bd.addEventListener('click', function () { var ix = lines2.indexOf(l); if (ix >= 0) lines2.splice(ix, 1); syncAmt(pname); renderSaisie(pname); });
         ta.appendChild(bm); ta.appendChild(bd);
+        if (activeCode() === 'prj' && campSitesOf(c).length > 1) { var bs = cvEl('button', 'btn small', l.sites ? 'Sites : ' + sitesSummary(l.sites) : 'Répartir par site'); bs.type = 'button'; bs.style.marginLeft = '6px'; bs.title = 'Répartition de la ligne entre les sites'; bs.addEventListener('click', function () { sitesAsk(campSitesOf(c), l.sites, 'Répartir la ligne ' + l.c + ' entre les sites', function (m) { l.sites = m; renderSaisie(pname); }); }); ta.appendChild(bs); }
       }
       function upd() {
         tm.textContent = fmt(l.dem);
@@ -11251,7 +11283,7 @@ function fmAxes() {
         var w = one.warns.filter(function (x) { return x.c === l.c; })[0];
         if (e) tk.appendChild(badge(l.dem == null ? 'Montant manquant' : 'Plafond dépassé', 'b-ko'));
         else if (w) tk.appendChild(badge('Justifier la variation', 'b-warn'));
-        else if (l.dem != null) tk.appendChild(badge('OK', 'b-ok'));
+        else if (l.dem != null) tk.appendChild(activeCode() === 'prj' && campSitesOf(c).length > 1 && !l.sites ? badge('Sites à répartir', 'b-warn') : badge('OK', 'b-ok'));
         totals();
       }
       ji.addEventListener('input', function () { l.just = ji.value; upd(); });
@@ -11978,31 +12010,46 @@ function fmAxes() {
     return m;
   }
   function bvSum(arr) { return arr.reduce(function (s, v) { return s + v; }, 0); }
+  /* Une ligne du plan devient une ligne par site (part en %), filtrée sur le site de l'utilisateur s'il n'en a qu'un */
+  function siteSplit(l, total, dec) {
+    var map = l && l.sites && Object.keys(l.sites).length ? l.sites : { COO: 100 }, ks = Object.keys(map), f = Math.pow(10, dec || 0), out = [], acc = 0;
+    ks.forEach(function (c, i) { var a = i === ks.length - 1 ? Math.round((total - acc) * f) / f : Math.round(total * map[c] / 100 * f) / f; acc += a; out.push({ code: c, pct: map[c], amt: a }); });
+    return SITE_CTX ? out.filter(function (o) { return o.code === SITE_CTX; }) : out;
+  }
+  /* Une ligne du PTBA devient une ligne par valeur d'axe (financement, géographie…) selon les % saisis au rattachement */
+  function bvAxSplit(l, a) { var w = a.n !== 'Comptable' && l.axw && l.axw[a.n], ks = w ? Object.keys(w).filter(function (k) { return w[k]; }) : []; return ks.length ? ks.map(function (k) { return { v: k, pct: w[k] }; }) : [{ v: bvAxVal(l, a.n) || 'À rattacher', pct: 100 }]; }
+  function bvAxExpand(l, axes, parts) { axes.forEach(function (a) { var sp = bvAxSplit(l, a), out = []; parts.forEach(function (p) { var acc = 0; sp.forEach(function (q, i) { var amt = i === sp.length - 1 ? p.amt - acc : Math.round(p.amt * q.pct / 100); acc += amt; out.push({ code: p.code, amt: amt, ax: p.ax.concat([q.v]) }); }); }); parts = out; }); return parts; }
   function bvPtba(r) {
     var d = bvData(r), pa = d.pa, axes = (pa && pa.axes ? pa.axes : []).filter(function (a) { return !a.c; }), ex = d.c.ex;
-    var head = ['Périmètre de collecte', 'Ligne', 'Période'].concat(axes.map(function (a) { return a.n; }), ['Montant annuel (MGA)'], BVMOIS), tot = new Array(13).fill(0);
-    var rows = d.lines.map(function (x) {
-      var l = x.l, mo = bvSpread(l.dem, l, ex), amt = l.dem || 0; tot[0] += amt; mo.forEach(function (v, i) { tot[i + 1] += v; });
-      return { c: [x.perim, l.c + ' — ' + (l.lib || l.l), l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : ''].concat(axes.map(function (a) { return bvAxVal(l, a.n) || 'À rattacher'; }), [amt], mo), ref: { perim: x.perim, c: l.c } };
+    var head = ['Périmètre de collecte', 'Ligne', 'Période', 'Site'].concat(axes.map(function (a) { return a.n; }), ['Montant annuel (MGA)'], BVMOIS), tot = new Array(13).fill(0), rows = [];
+    d.lines.forEach(function (x) {
+      var l = x.l;
+      siteSplit(l, l.dem || 0, 0).forEach(function (sp0) { bvAxExpand(l, axes, [{ code: sp0.code, amt: sp0.amt, ax: [] }]).forEach(function (sp) {
+        var amt = sp.amt, mo = bvSpread(amt, l, ex); tot[0] += amt; mo.forEach(function (v, i) { tot[i + 1] += v; });
+        rows.push({ c: [x.perim, l.c + ' — ' + (l.lib || l.l), l.wk ? isoToFr(l.wk.d1) + ' → ' + isoToFr(l.wk.d2) : '', siteLbl(sp.code)].concat(sp.ax, [amt], mo), ref: { perim: x.perim, c: l.c } });
+      }); });
     });
-    if (rows.length) rows.push({ k: 'tot', c: ['Total', '', ''].concat(axes.map(function () { return ''; }), tot) });
-    return { title: 'PTBA — Plan de travail et budget annuel : montants par mois', hint: 'Les montants de chaque ligne sont répartis sur les mois de son travail prévu.', head: head, rows: rows, numFrom: 3 + axes.length };
+    if (rows.length) rows.push({ k: 'tot', c: ['Total', '', '', ''].concat(axes.map(function () { return ''; }), tot) });
+    return { title: 'PTBA — Plan de travail et budget annuel : une ligne par site et par axe, montants par mois', hint: 'Chaque ligne du plan est répartie entre les sites concernés et entre les valeurs des autres axes (par exemple 30 % / 70 % de financement) : une ligne par combinaison, avec sa part du montant, répartie sur les mois du travail prévu.', head: head, rows: rows, numFrom: 4 + axes.length };
   }
   function bvPta(r) {
-    var d = bvData(r), ex = d.c.ex, head = ['Périmètre de collecte', 'Indicateur / travail', 'Unité', 'Cible annuelle'].concat(BVMOIS, ['Total']), rows = [];
+    var d = bvData(r), ex = d.c.ex, head = ['Périmètre de collecte', 'Indicateur / travail', 'Site', 'Unité', 'Cible annuelle'].concat(BVMOIS, ['Total']), rows = [];
     d.c.perims.forEach(function (pr) {
       var ls = d.lines.filter(function (x) { return x.perim === pr.p; });
       (pr.inds || []).forEach(function (ind) {
         var sub = [], tot = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         ls.forEach(function (x) {
           var k = x.l.wk && (x.l.wk.inds || []).filter(function (z) { return z.id === ind.id; })[0]; if (!k) return;
-          var mo = bvSpread(k.contrib, x.l, ex); mo.forEach(function (v, i) { tot[i] += v; });
-          sub.push({ c: ['', '   ' + x.l.c + ' — ' + (x.l.wk.task || x.l.l), ind.unit, k.contrib].concat(mo, [bvSum(mo)]), ref: { perim: x.perim, c: x.l.c, id: ind.id } });
+          siteSplit(x.l, k.contrib || 0, 2).forEach(function (sp) {
+            var mo = bvSpread(sp.amt, x.l, ex); mo.forEach(function (v, i) { tot[i] += v; });
+            sub.push({ c: ['', '   ' + x.l.c + ' — ' + (x.l.wk.task || x.l.l), siteLbl(sp.code), ind.unit, sp.amt].concat(mo, [bvSum(mo)]), ref: { perim: x.perim, c: x.l.c, id: ind.id } });
+          });
         });
-        rows.push({ k: 'ind', c: [pr.p, ind.lib, ind.unit, ind.cible != null ? ind.cible : ''].concat(tot, [bvSum(tot)]) }); sub.forEach(function (s) { rows.push(s); });
+        if (SITE_CTX && !sub.length) return;
+        rows.push({ k: 'ind', c: [pr.p, ind.lib, '', ind.unit, SITE_CTX ? '' : (ind.cible != null ? ind.cible : '')].concat(tot, [bvSum(tot)]) }); sub.forEach(function (s) { rows.push(s); });
       });
     });
-    return { title: 'PTA — Plan de travail annuel : indicateurs et travaux par mois', hint: 'Chaque indicateur est suivi mois par mois ; les travaux qui y contribuent sont détaillés dessous (volumes répartis sur leur période).', head: head, rows: rows, numFrom: 3 };
+    return { title: 'PTA — Plan de travail annuel : indicateurs et travaux par site et par mois', hint: 'Chaque travail est détaillé par site (une ligne par site, avec sa part du volume), réparti sur sa période.', head: head, rows: rows, numFrom: 4 };
   }
   /* Rattachement des lignes du PTBA aux autres plans (plan comptable, financement, géographie…) : les techniciens ne saisissent que le plan d'activité */
   var BVPLANOPT = { 'Financier': ['Don du partenaire', 'Budget national'], 'Géographique': ['Région Nord', 'Région Sud'], 'Analytique': ['Programme Éducation', 'Programme Santé'] };
@@ -12015,38 +12062,62 @@ function fmAxes() {
     });
     return plans;
   }
-  function bvLinkVal(l, p) { return p.key === 'Comptable' ? (l.nat && NATL[l.nat] ? l.nat : '') : ((l.axv && l.axv[p.key]) || ''); }
+  function bvLinkVal(l, p) { if (p.key !== 'Comptable' && l.axw && l.axw[p.key] && Object.keys(l.axw[p.key]).some(function (k) { return l.axw[p.key][k]; })) return '__split'; return p.key === 'Comptable' ? (l.nat && NATL[l.nat] ? l.nat : '') : ((l.axv && l.axv[p.key]) || ''); }
   function bvLinkMissing(r) {
     var plans = bvPlans(r), n = 0;
     bvData(r).lines.forEach(function (x) { if (plans.some(function (p) { return !bvLinkVal(x.l, p); })) n++; });
     return n;
   }
+  /* Répartition en % d'un axe (financement, géographie…) : une ligne du PTBA devient plusieurs lignes, une par valeur de l'axe */
+  function pctAsk(items, cur, title, cb) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), ins = {}; cur = cur || {};
+    items.forEach(function (it) { var d = cvEl('div'), i = cvEl('input', 'field'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = cur[it[0]] != null ? String(cur[it[0]]).replace('.', ',') : ''; i.placeholder = '0'; ins[it[0]] = i; d.appendChild(cvEl('label', null, it[1] + ' (part en %)')); d.appendChild(i); g.appendChild(d); }); f.appendChild(g);
+    var sum = cvEl('div'); sum.style.margin = '10px 0'; f.appendChild(sum);
+    function tot() { var t = 0; items.forEach(function (it) { t += parseFloat(String(ins[it[0]].value).replace(',', '.')) || 0; }); return Math.round(t * 10) / 10; }
+    function upd() { var t = tot(); sum.innerHTML = ''; sum.appendChild(badge('Total : ' + String(t).replace('.', ',') + ' %', Math.abs(t - 100) < 0.05 ? 'b-ok' : 'b-ko')); } items.forEach(function (it) { ins[it[0]].addEventListener('input', upd); }); upd();
+    var err = cvEl('div', 'err'); f.appendChild(err);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:8px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Valider'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+    bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () { if (Math.abs(tot() - 100) > 0.05) { err.textContent = 'Le total doit être égal à 100 % (actuellement ' + String(tot()).replace('.', ',') + ' %).'; return; } var m = {}; items.forEach(function (it) { var v = Math.round((parseFloat(String(ins[it[0]].value).replace(',', '.')) || 0) * 10) / 10; if (v) m[it[0]] = v; }); guModalClose(); cb(m); });
+    guModal(title, f, 520);
+  }
   function bvLinkOpen(r) {
     var d = bvData(r), plans = bvPlans(r), draft = {}, body = document.getElementById('bv-link-body');
-    function draftVal(x, i, p) { var k = i + '|' + p.n; return k in draft ? draft[k] : bvLinkVal(x.l, p); }
+    function draftVal(x, i, p) { var k = i + '|' + p.n; if (k in draft) return draft[k]; return bvLinkVal(x.l, p) === '__split' ? Object.assign({}, x.l.axw[p.key]) : bvLinkVal(x.l, p); }
     function paint() {
       body.innerHTML = '';
       var miss = 0; d.lines.forEach(function (x, i) { if (plans.some(function (p) { return !draftVal(x, i, p); })) miss++; });
       var bar = cvEl('div', 'row-toolbar'), sv = cvEl('button', 'btn primary', 'Enregistrer le rattachement'); sv.type = 'button';
       sv.addEventListener('click', function () {
-        d.lines.forEach(function (x, i) { plans.forEach(function (p) { var k = i + '|' + p.n; if (!(k in draft)) return; if (p.key !== 'Comptable') { x.l.axv = x.l.axv || {}; x.l.axv[p.key] = draft[k]; } else x.l.nat = draft[k]; }); });
+        d.lines.forEach(function (x, i) { plans.forEach(function (p) { var k = i + '|' + p.n; if (!(k in draft)) return; var v = draft[k];
+          if (p.key === 'Comptable') { x.l.nat = v; return; }
+          x.l.axv = x.l.axv || {}; x.l.axw = x.l.axw || {};
+          if (v && typeof v === 'object') { x.l.axw[p.key] = v; x.l.axv[p.key] = ''; } else { delete x.l.axw[p.key]; x.l.axv[p.key] = v; }
+        }); });
         r.pt && r.pt.hist.unshift({ t: 'Lignes rattachées aux autres plans (' + plans.map(function (p) { return p.n; }).join(', ') + ')', by: ME, on: nowStr() });
         document.getElementById('bv-link').hidden = true; bvAfter(r, 'Rattachement enregistré : ' + (bvLinkMissing(r) ? pl(bvLinkMissing(r), 'ligne') + ' reste à rattacher.' : 'toutes les lignes sont rattachées.'));
       });
       bar.appendChild(sv); body.appendChild(bar);
-      var info = cvEl('div', 'callout', 'Les techniciens ne saisissent que les activités du plan de travail. Ici, vous rattachez chaque ligne du PTBA aux autres plans : ' + plans.map(function (p) { return p.n.toLowerCase(); }).join(', ') + '. ' + (miss ? pl(miss, 'ligne') + ' à rattacher.' : 'Toutes les lignes sont rattachées.'));
+      var info = cvEl('div', 'callout', 'Les techniciens ne saisissent que les activités du plan de travail. Ici, vous rattachez chaque ligne du PTBA aux autres plans : ' + plans.map(function (p) { return p.n.toLowerCase(); }).join(', ') + '. Une ligne peut être répartie en % entre plusieurs valeurs d’un axe (par exemple 30 % Don du partenaire et 70 % Budget national) : elle devient alors une ligne par valeur dans le PTBA. ' + (miss ? pl(miss, 'ligne') + ' à rattacher.' : 'Toutes les lignes sont rattachées.'));
       info.style.marginBottom = '14px'; body.appendChild(info);
-      var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = '820px';
+      var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = '900px';
       tb.innerHTML = '<thead><tr><th>Ligne du PTBA</th><th class="num">Montant (MGA)</th>' + plans.map(function (p) { return '<th>' + escH(p.n) + '</th>'; }).join('') + '</tr></thead>';
       var tbd = cvEl('tbody');
       d.lines.forEach(function (x, i) {
         var tr = cvEl('tr'); cell(tr, x.l.c + ' — ' + (x.l.lib || x.l.l), 'name'); cell(tr, fmt(x.l.dem || 0), 'num');
         plans.forEach(function (p) {
-          var td = cell(tr, ''), sel = cvEl('select', 'field'); sel.style.width = '100%'; sel.setAttribute('aria-label', p.n + ' de la ligne ' + x.l.c);
+          var td = cell(tr, ''), cur = draftVal(x, i, p), split = cur && typeof cur === 'object', can = p.key !== 'Comptable' && p.opts.length > 1;
+          function openSplit() { pctAsk(p.opts.map(function (o) { return [o[0], o[1]]; }), split ? cur : null, 'Répartir la ligne ' + x.l.c + ' — ' + p.n, function (m) { draft[i + '|' + p.n] = m; paint(); }); }
+          if (split) {
+            var txt = cvEl('div', 'hby', Object.keys(cur).map(function (k) { return k + ' ' + String(cur[k]).replace('.', ',') + ' %'; }).join(' · ')); txt.style.marginBottom = '4px'; td.appendChild(txt);
+            var bm = cvEl('button', 'btn small', 'Modifier'), bu = cvEl('button', 'btn small', 'Une seule valeur'); bm.type = bu.type = 'button'; bu.style.marginLeft = '6px'; bm.addEventListener('click', openSplit); bu.addEventListener('click', function () { draft[i + '|' + p.n] = ''; paint(); }); td.appendChild(bm); td.appendChild(bu); return;
+          }
+          var sel = cvEl('select', 'field'); sel.style.width = can ? 'calc(100% - 92px)' : '100%'; sel.setAttribute('aria-label', p.n + ' de la ligne ' + x.l.c);
           var o0 = cvEl('option', null, '— À rattacher —'); o0.value = ''; sel.appendChild(o0);
           p.opts.forEach(function (o) { var op = cvEl('option', null, o[1]); op.value = o[0]; sel.appendChild(op); });
-          var cur = draftVal(x, i, p); if (cur && !p.opts.some(function (o) { return o[0] === cur; })) { var oc = cvEl('option', null, cur); oc.value = cur; sel.appendChild(oc); }
+          if (cur && !p.opts.some(function (o) { return o[0] === cur; })) { var oc = cvEl('option', null, cur); oc.value = cur; sel.appendChild(oc); }
           sel.value = cur; sel.addEventListener('change', function () { draft[i + '|' + p.n] = sel.value; paint(); }); td.appendChild(sel);
+          if (can) { var br = cvEl('button', 'btn small', 'Répartir %'); br.type = 'button'; br.style.marginLeft = '6px'; br.title = 'Répartir cette ligne entre plusieurs valeurs'; br.addEventListener('click', openSplit); td.appendChild(br); }
         });
         tbd.appendChild(tr);
       });
@@ -14716,7 +14787,7 @@ var EXEC_REC = [
       { g: 'Compte administratif', items: ca },
       { g: 'Exécution', items: [[rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Avancement physique', rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
       { g: 'Analyses', items: [['Vue d’ensemble', rAlways], ['Engagements et PPM', rAlways], ['Réalisations et PTBA', rAlways], ['Décaissements et plan', treso], ['Physique et PTA', rAlways], ['Finances et physique', rAlways], ['Par site', rAlways], ['Pluriannuel', rAlways], ['Alertes', rAlways]] },
-      { g: 'Paramètres', items: [['Général (mode et modules)', rAlways], ['Financement', rAlways], ['Cadre analytique', rAlways], ['Utilisateurs et droits', rAlways], ['Données et échanges', rAlways], ['Suivi', rAlways]] }
+      { g: 'Paramètres', items: [['Général (mode et modules)', rAlways], ['Financement', rAlways], ['Sites', rAlways], ['Groupes de rôles', rAlways], ['Utilisateurs et droits', rAlways], ['Notifications', rAlways], ['Échéances', rAlways], ['Alertes et dépassements', rAlways]] }
     ];
   })();
   function menuPreview(code, cfg) {
@@ -14766,7 +14837,7 @@ var EXEC_REC = [
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
     put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
-    put('g-params', [['plana', 'Plan analytique', 'Plan analytique : activités du projet'], ['sites', 'Sites', 'Sites : centres de saisie du projet'], ['usr', 'Utilisateurs et droits', 'Utilisateurs et droits']]);
+    put('g-params', [['sites', 'Sites', 'Sites : centres de saisie du projet'], ['roles', 'Groupes de rôles', 'Groupes de rôles'], ['usr', 'Utilisateurs et droits', 'Utilisateurs et droits'], ['notifcfg', 'Notifications', 'Notifications'], ['echeanc', 'Échéances', 'Échéances'], ['alrt', 'Alertes et dépassements', 'Alertes et dépassements']]);
     put('g-budgets', [['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
@@ -14794,10 +14865,12 @@ var EXEC_REC = [
   var PRM_SECT = [
     { t: 'Général', d: 'Profil, mode de gestion, régime et modules', m: [['regime', 'Général']] },
     { t: 'Financement', d: 'Bailleurs, sources de financement et taux de change', m: [['bailleurs', 'Bailleurs'], ['sources', 'Sources de financement'], ['taux', 'Taux de change']] },
-    { t: 'Cadre analytique', d: 'Plan analytique et sites', m: [['plana', 'Plan analytique'], ['sites', 'Sites']] },
-    { t: 'Utilisateurs et droits', d: 'Utilisateurs, permissions, privilèges et séparation des responsabilités', m: [['usr', 'Gestion des utilisateurs'], ['droits', 'Séparation des responsabilités']] },
-    { t: 'Données et échanges', d: 'Modèles de collecte, correspondances et interfaces', m: [['ctpl', 'Modèles de collecte'], ['corresp', 'Correspondances'], ['interfaces', 'Interfaces']] },
-    { t: 'Suivi', d: 'Historique et notifications', m: [['audit', 'Historique'], ['notifcfg', 'Notifications']] }
+    { t: 'Sites', d: 'Centres de saisie du projet : coordination et antennes', m: [['sites', 'Sites']] },
+    { t: 'Groupes de rôles', d: 'Actions autorisées par groupe de rôles, circuit du compte administratif compris', m: [['roles', 'Groupes de rôles']] },
+    { t: 'Utilisateurs et droits', d: 'Utilisateurs, permissions et privilèges', m: [['usr', 'Gestion des utilisateurs']] },
+    { t: 'Notifications', d: 'Événements notifiés et destinataires', m: [['notifcfg', 'Notifications']] },
+    { t: 'Échéances', d: 'Délais, rappels et escalades', m: [['echeanc', 'Échéances']] },
+    { t: 'Alertes et dépassements', d: 'Réaction aux dépassements de seuil', m: [['alrt', 'Alertes et dépassements']] }
   ];
   function prmAvail(n) {
     var code = activeCode(), cfg = REG[code], adv = modes[code] === 'Avancé';
@@ -14845,10 +14918,11 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', code === 'prj'); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('.sub button[data-go="usr"]', code === 'prj'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code !== 'prj'); regSetVis('.sub button[data-go="usr"]', code === 'prj'); regSetVis('.sub button[data-go="roles"]', code === 'prj'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
-    prmMenu(code);
-    regSetVis('#g-params .sub button[data-go="params"]', code !== 'prj'); /* projet : le mode se règle dans Général */
+    prmMenu(code); if (typeof siteCtxSync === 'function') siteCtxSync();
+    regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code !== 'prj'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
+    regSetVis('#g-params .sub button[data-go="params"], #g-params .sub button[data-go="droits"]', code !== 'prj'); /* projet : plus de séparation des accès */ /* projet : le mode se règle dans Général */
     if (code === 'prj') { regSetVis('#g-budgets', adv && cfg.mods.elab !== false); regSetVis('#g-cadm', adv && circ && cfg.mods.cadm); } else regSetVis('#g-budgets', true); /* projet : élaboration et compte administratif seulement en mode Avancé */
     if (typeof renderRights === 'function') renderRights();
     regSetVis('#g-params .sub button[data-go="rclot"], #g-params .sub button[data-go="trev"], #g-params .sub button[data-go="ctrl"], #g-params .sub button[data-go="circuits"]', code !== 'prj' && (cfg.regime !== 'importe' || true)); /* projet : clôture, révisions, contrôles budgétaires et circuits de visa n’existent plus (menus Plans annuels, alertes des Analyses, circuit du cadre budgétaire) */
@@ -15222,6 +15296,7 @@ var EXEC_REC = [
     var code = document.getElementById('reg-prof').value, cfg = REGD, saved = REG[code];
     document.getElementById('reg-mode').textContent = 'Mode ' + modes[code] + ' (défini dans Profils et modes).';
     var pj = code === 'prj' && activeCode() === 'prj';
+    document.getElementById('reg-prev').closest('.panel').style.display = pj ? 'none' : '';
     document.getElementById('reg-modebox').hidden = !pj; document.getElementById('reg-profbox').hidden = pj; document.getElementById('reg-regbox').hidden = pj;
     var rh = document.querySelector('#v-regime .head h1'), rp = document.querySelector('#v-regime .head p'); if (rh) rh.textContent = pj ? 'Général' : 'Régime et modules'; if (rp) rp.textContent = pj ? 'Le mode de gestion du projet et les modules activés. Le choix du profil se fait avec le sélecteur SoftBudget en haut.' : 'Le menu se compose à partir du profil, du mode et du régime d’exécution. Chaque module s’active séparément.';
     var cc = document.querySelector('#crumbs .current'); if (pj && cc && document.getElementById('v-regime').classList.contains('on')) cc.textContent = 'Général';
@@ -18353,7 +18428,7 @@ var EXEC_REC = [
     { key: 'g-cadm', label: 'Compte administratif', kids: [['dpeng', 'Engagements', 'adm'], ['dpliq', 'Liquidations', 'adm'], ['dpord', 'Ordonnancement', 'adm'], ['dppay', 'Paiements', 'adm'], ['dptab', 'Tableau de restitution', 'adm'], ['dpclot', 'Clôture de l’exercice', 'adm'], ['cadint', 'Interface comptable', 'adm']] },
     { key: 'g-suivi', label: 'Exécution', kids: [['sxeng', 'Engagements', 'ecr'], ['sxliq', 'Liquidations', 'ecr'], ['sxpay', 'Paiements', 'ecr'], ['sxenc', 'Encaissements', 'ecr'], ['sxphy', 'Avancement physique', 'ecr']] },
     { key: 'g-rapports', label: 'Analyses', kids: [['anfin', 'Vue d’ensemble', 'ana'], ['aneng', 'Engagements et PPM', 'ana'], ['anrea', 'Réalisations et PTBA', 'ana'], ['andec', 'Décaissements et plan', 'ana'], ['anphy', 'Physique et PTA', 'ana'], ['anfp', 'Finances et physique', 'ana'], ['ansit', 'Par site', 'ana'], ['anplu', 'Pluriannuel', 'ana'], ['anale', 'Alertes', 'ana']] },
-    { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['plana', 'Plan analytique', 'plana'], ['sites', 'Sites', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['droits', 'Séparation des responsabilités', 'prm'], ['ctpl', 'Modèles de collecte', 'prm'], ['corresp', 'Correspondances', 'prm'], ['interfaces', 'Interfaces', 'prm'], ['audit', 'Historique', 'prm'], ['notifcfg', 'Notifications', 'prm']] }
+    { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['sites', 'Sites', 'prm'], ['roles', 'Groupes de rôles', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['alrt', 'Alertes et dépassements', 'prm'], ['notifcfg', 'Notifications', 'prm']] }
   ];
   var GU_PRIV = [
     ['export', 'Exporter des données', 'Peut exporter les listes et les analyses en CSV, Excel et PDF', 2], ['toutes_sites', 'Tous les sites', 'Voit les écritures de tous les sites (sinon : son propre site)', 3],
@@ -18408,8 +18483,8 @@ var EXEC_REC = [
     var titles = { users: ['Gestion des utilisateurs', 'Administration — SoftBudget Projet'], perm: ['Permissions', 'Définir les droits (voir, créer, modifier, supprimer, valider) pour chaque groupe et chaque menu.'], priv: ['Privilèges', 'Activer, pour chaque utilisateur individuellement, les droits et privilèges dont il dispose dans SoftBudget.'] }[GU.tab];
     document.getElementById('gu-title').textContent = titles[0]; document.getElementById('gu-sub').textContent = titles[1];
     var nb = document.getElementById('gu-new'); nb.style.display = GU.tab === 'users' ? '' : 'none';
-    var card = cvEl('div', 'gu-card'), tabs = cvEl('div', 'gu-tabs');
-    [['users', 'Utilisateurs'], ['perm', 'Permissions'], ['priv', 'Privilèges']].forEach(function (t) { var x = cvEl('button', GU.tab === t[0] ? 'on' : '', t[1]); x.type = 'button'; x.addEventListener('click', function () { if ((GU.dirty || GU.pdirty) && !confirm('Des modifications non enregistrées seront perdues. Continuer ?')) return; GU.dirty = GU.pdirty = false; GU.work = null; GU.pwork = null; GU.tab = t[0]; guRender(); }); tabs.appendChild(x); });
+    var card = cvEl('div', 'gu-card'), tabs = cvEl('div', 'tabs gu-tabs'); tabs.setAttribute('role', 'tablist');
+    [['users', 'Utilisateurs'], ['perm', 'Permissions'], ['priv', 'Privilèges']].forEach(function (t) { var x = cvEl('button', 'ptab' + (GU.tab === t[0] ? ' on' : ''), t[1]); x.type = 'button'; x.addEventListener('click', function () { if ((GU.dirty || GU.pdirty) && !confirm('Des modifications non enregistrées seront perdues. Continuer ?')) return; GU.dirty = GU.pdirty = false; GU.work = null; GU.pwork = null; GU.tab = t[0]; guRender(); }); tabs.appendChild(x); });
     card.appendChild(tabs); var inner = cvEl('div', 'gu-pad'); card.appendChild(inner); b.appendChild(card);
     if (GU.tab === 'users') guUsers(inner); else if (GU.tab === 'perm') guPermTab(inner); else guPrivTab(inner);
   }
@@ -18466,7 +18541,7 @@ var EXEC_REC = [
       var n = nom.value.trim(), p = pre.value.trim(), lg = log.value.trim(), m = em.value.trim();
       if (!n) { err.textContent = 'Le nom est obligatoire.'; return; } if (!lg) { err.textContent = 'L’identifiant est obligatoire.'; return; } if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)) { err.textContent = 'Adresse e-mail invalide.'; return; }
       var full = (p ? p + ' ' : '') + n;
-      if (u) { if (u.roles[0] === 'Administrateur' && gs.value !== 'Administrateur' && PRJ_USERS.filter(function (x) { return x.act && x.roles.indexOf('Administrateur') >= 0; }).length === 1) { err.textContent = 'Au moins un administrateur actif est requis.'; return; } u.n = full; u.email = m; u.roles = [gs.value]; u.site = ss.value; auditAdd('Configuration', 'Utilisateur ' + u.n, 'Utilisateur modifié (groupe ' + gs.value + ', site ' + ss.value + ')'); guModalClose(); guRender(); guToast('Utilisateur modifié.'); return; }
+      if (u) { if (u.roles[0] === 'Administrateur' && gs.value !== 'Administrateur' && PRJ_USERS.filter(function (x) { return x.act && x.roles.indexOf('Administrateur') >= 0; }).length === 1) { err.textContent = 'Au moins un administrateur actif est requis.'; return; } u.n = full; u.email = m; u.roles = [gs.value]; u.site = ss.value; if (typeof siteCtxSync === 'function') siteCtxSync(); auditAdd('Configuration', 'Utilisateur ' + u.n, 'Utilisateur modifié (groupe ' + gs.value + ', site ' + ss.value + ')'); guModalClose(); guRender(); guToast('Utilisateur modifié.'); return; }
       if (PRJ_USERS.some(function (x) { return x.login.toLowerCase() === lg.toLowerCase(); })) { err.textContent = 'Cet identifiant existe déjà.'; return; }
       var nu = pjU(full, [gs.value], ss.value); nu.login = lg; nu.email = m; PRJ_USERS.push(nu); auditAdd('Configuration', 'Utilisateur ' + full, 'Utilisateur créé (groupe ' + gs.value + ', site ' + ss.value + ')'); guModalClose(); guRender(); guToast('Utilisateur ajouté : identifiants envoyés par e-mail.');
     });
@@ -18503,8 +18578,63 @@ var EXEC_REC = [
       tbd.appendChild(tr);
       if (open) n.kids.forEach(function (k) { var r2 = cvEl('tr'), t2 = cvEl('td', null, k[1]); t2.style.paddingLeft = '40px'; r2.appendChild(t2); var p = GU.work.perms[k[0]]; GU_COLS.forEach(function (c) { r2.appendChild(cellFor(c, p[c], false, g.fixe || (c !== 'menu' && !p.menu), function (v) { setP(k[0], c, v); GU.dirty = true; guRender(); })); }); tbd.appendChild(r2); });
     });
-    tbl.appendChild(tbd); var sc = cvEl('div', 'scroll'); sc.style.maxHeight = '540px'; sc.style.overflow = 'auto'; sc.appendChild(tbl); right.appendChild(sc);
+    tbl.appendChild(tbd); var sc = cvEl('div', 'scroll'); sc.appendChild(tbl); right.appendChild(sc);
     grid.appendChild(left); grid.appendChild(right); box.appendChild(grid);
+  }
+  /* --- menu Rôles : actions autorisées par rôle (préparamétrées mais toujours modifiables), dont le circuit du compte administratif --- */
+  var GU_RDESC = { 'Coordonnateur': 'Dirige le projet : valide les plans, soumet les révisions au bailleur et clôture l’exercice.', 'RAF': 'Prépare le PTBA et le plan de décaissement, gère les écritures, les avances, les taux et les devises.', 'Comptable': 'Saisit ou synchronise les écritures et justifie les avances.', 'Suivi-évaluation': 'Prépare le PTA, saisit l’avancement physique et commente les écarts.', 'Passation des marchés': 'Prépare et suit le plan de passation des marchés (PPM).', 'Chef d’antenne': 'Saisit et consulte les écritures de son site.', 'Contrôleur interne': 'Consulte et exporte sans rien modifier ; voit tous les sites.', 'Bailleur': 'Consulte les plans soumis, les révisions et les analyses.', 'Administrateur': 'Configure les paramètres et gère les utilisateurs.' };
+  var GU_ACTGRP = [['Plans', ['Consulter', 'Préparer ou réviser les plans', 'Valider les plans', 'Soumettre au bailleur']], ['Exécution', ['Saisir ou synchroniser les écritures', 'Gérer les avances et justifications', 'Clôturer l’exercice']], ['Référentiels', ['Gérer les taux et devises']], ['Transverse', ['Voir tous les sites', 'Exporter', 'Administrer']]];
+  var GU_CADMAP = { 'Coordonnateur': 'dir', 'RAF': 'raf', 'Comptable': 'afc', 'Suivi-évaluation': 'spse', 'Passation des marchés': 'rpm' };
+  var GU_RM0 = null, GU_CAD0 = null, GU_CADMAP0 = null;
+  function roRender() {
+    guInit(); var box = document.getElementById('ro-body'); box.innerHTML = '';
+    if (!GU_RM0) { GU_RM0 = JSON.parse(JSON.stringify(PRJ_RM)); GU_CAD0 = JSON.parse(JSON.stringify(CAD_ACT)); GU_CADMAP0 = JSON.parse(JSON.stringify(GU_CADMAP)); }
+    var gs = GU.groups;
+    if (!GU.rl || !guGroup(GU.rl)) {
+      GU.rl = null; GU.rwork = null; GU.rdirty = false;
+      var rows = gs.map(function (x) {
+        var nm = cvEl('div'); nm.appendChild(cvEl('b', null, x.nom)); nm.appendChild(cvEl('div', 'hby', GU_RDESC[x.nom] || 'Groupe de rôles personnalisé.'));
+        var nA = Object.keys(PRJ_RM[x.nom] || {}).filter(function (k) { return PRJ_RM[x.nom][k]; }).length, ck = GU_CADMAP[x.nom], ac = cvEl('div', 'gu-ac'), bo = cvEl('button', 'btn small', 'Configurer'); bo.type = 'button'; bo.addEventListener('click', function () { GU.rl = x.nom; GU.rwork = null; roRender(); }); ac.appendChild(bo);
+        return [nm, String(guMembers().filter(function (u) { return u.roles[0] === x.nom; }).length), String(nA) + ' / ' + PRJ_ACTIONS.length, ck ? CAD_ROLES[ck] : '—', ac];
+      });
+      var lt = dpMini(['Groupe de rôles', 'Utilisateurs', 'Actions du projet', 'Rôle du circuit', ''], rows, [1, 2], 'Aucun groupe de rôles.');
+      lt.querySelectorAll('tbody tr').forEach(function (tr, i) { tr.style.cursor = 'pointer'; tr.addEventListener('click', function (e) { if (e.target.closest('button')) return; GU.rl = gs[i].nom; GU.rwork = null; roRender(); }); });
+      box.appendChild(lt); return;
+    }
+    var g = guGroup(GU.rl);
+    function cadHas(ck, a) { return !!ck && CAD_ACT[a].indexOf(ck) >= 0; }
+    if (!GU.rwork || GU.rwork.g !== g.nom) { var ck0 = GU_CADMAP[g.nom] || ''; GU.rwork = { g: g.nom, a: JSON.parse(JSON.stringify(PRJ_RM[g.nom] || {})), ck: ck0, cad: {} }; Object.keys(CAD_ACT).forEach(function (a) { GU.rwork.cad[a] = cadHas(ck0, a); }); GU.rdirty = false; }
+    var W = GU.rwork;
+    var grid = cvEl('div', 'gu-split'), left = cvEl('div', 'gu-side'), lh = cvEl('div', 'gu-side-h'); lh.appendChild(cvEl('div', 'gu-cap', 'Groupes de rôles du projet')); lh.appendChild(cvEl('div', 'hby', 'Chaque utilisateur appartient à un groupe de rôles. Les droits par menu (Permissions) en découlent.')); left.appendChild(lh);
+    var list = cvEl('div', 'gu-gl'); gs.forEach(function (x) {
+      var it = cvEl('button', 'gu-g' + (x.nom === g.nom ? ' on' : '')); it.type = 'button'; var t = cvEl('div', 'gu-g-t'); t.appendChild(cvEl('b', null, x.nom)); t.appendChild(cvEl('span', 'gu-n', String(guMembers().filter(function (u) { return u.roles[0] === x.nom; }).length))); it.appendChild(t); it.appendChild(cvEl('div', 'hby', Object.keys(PRJ_RM[x.nom] || {}).filter(function (k) { return PRJ_RM[x.nom][k]; }).length + ' action(s) autorisée(s)'));
+      it.addEventListener('click', function () { if (GU.rdirty && !confirm('Des modifications non enregistrées seront perdues. Continuer ?')) return; GU.rdirty = false; GU.rl = x.nom; GU.rwork = null; roRender(); }); list.appendChild(it);
+    }); left.appendChild(list);
+    var right = cvEl('div', 'gu-main'), rh = cvEl('div', 'gu-main-h'), rt = cvEl('div'); rt.appendChild(cvEl('b', null, 'Groupe de rôles — ' + g.nom)); rt.appendChild(cvEl('div', 'hby', GU_RDESC[g.nom] || 'Groupe de rôles personnalisé.')); rh.appendChild(rt);
+    var ra = cvEl('div', 'gu-ac'), rs = cvEl('button', 'btn', 'Valeurs par défaut'); rs.type = 'button';
+    rs.addEventListener('click', function () { W.a = JSON.parse(JSON.stringify(GU_RM0[g.nom] || {})); W.ck = GU_CADMAP0[g.nom] || ''; Object.keys(CAD_ACT).forEach(function (a) { W.cad[a] = !!W.ck && GU_CAD0[a].indexOf(W.ck) >= 0; }); GU.rdirty = true; roRender(); }); ra.appendChild(rs);
+    var sv = cvEl('button', 'btn primary', 'Enregistrer'); sv.type = 'button'; sv.disabled = !GU.rdirty;
+    sv.addEventListener('click', function () {
+      W.a['Administrer'] = g.fixe ? true : W.a['Administrer']; PRJ_RM[g.nom] = JSON.parse(JSON.stringify(W.a));
+      if (W.ck) { GU_CADMAP[g.nom] = W.ck; Object.keys(CAD_ACT).forEach(function (a) { var i = CAD_ACT[a].indexOf(W.ck); if (W.cad[a] && i < 0) CAD_ACT[a].push(W.ck); else if (!W.cad[a] && i >= 0 && CAD_ACT[a].length > 1) CAD_ACT[a].splice(i, 1); }); } else delete GU_CADMAP[g.nom];
+      g.perms = {}; GU.work = null; GU.rdirty = false; GU.rwork = null; auditAdd('Configuration', 'Groupe de rôles ' + g.nom, 'Actions du groupe et du circuit du compte administratif enregistrées'); guToast('Groupe de rôles « ' + g.nom + ' » enregistré : les permissions par menu sont recalculées.'); roRender();
+    }); ra.appendChild(sv); rh.appendChild(ra); right.appendChild(rh);
+    var body = cvEl('div', 'gu-priv');
+    GU_ACTGRP.forEach(function (sec) {
+      body.appendChild(cvEl('div', 'gu-cap', sec[0]));
+      sec[1].forEach(function (a) {
+        var row = cvEl('div', 'gu-prow'), t = cvEl('div'); t.appendChild(cvEl('b', null, a)); row.appendChild(t);
+        var lock = g.fixe && a === 'Administrer', sw = mkSwitch(lock ? true : !!W.a[a], a, function (v) { W.a[a] = v; GU.rdirty = true; roRender(); }); if (lock) sw.querySelector('input').disabled = true; row.appendChild(sw); body.appendChild(row);
+      });
+    });
+    /* circuit du compte administratif : préparamétré, modifiable */
+    body.appendChild(cvEl('div', 'gu-cap', 'Compte administratif — circuit (visa, ordonnancement, paiement)'));
+    var rowc = cvEl('div', 'gu-prow'), tc = cvEl('div'); tc.appendChild(cvEl('b', null, 'Rôle tenu dans le circuit')); tc.appendChild(cvEl('div', 'hby', 'Préparamétré selon le rôle ; modifiable. Les actions d’un rôle de circuit sont communes à tous les rôles du projet qui le tiennent.')); rowc.appendChild(tc);
+    var cs = guSel([['', '— Aucun —']].concat(Object.keys(CAD_ROLES).map(function (k) { return [k, CAD_ROLES[k]]; })), W.ck, function (v) { W.ck = v; Object.keys(CAD_ACT).forEach(function (a) { W.cad[a] = cadHas(v, a); }); GU.rdirty = true; roRender(); }, 'Rôle du circuit'); rowc.appendChild(cs); body.appendChild(rowc);
+    if (!W.ck) body.appendChild(cvEl('div', 'hint', 'Ce rôle n’intervient pas dans le circuit du compte administratif. Choisissez un rôle du circuit pour lui attribuer des actions.'));
+    else Object.keys(CAD_ACT).forEach(function (a) { var row = cvEl('div', 'gu-prow'), t = cvEl('div'); t.appendChild(cvEl('b', null, CAD_ACT_LBL[a] || a)); row.appendChild(t); var sw = mkSwitch(!!W.cad[a], CAD_ACT_LBL[a] || a, function (v) { W.cad[a] = v; GU.rdirty = true; roRender(); }); row.appendChild(sw); body.appendChild(row); });
+    if (g.fixe) body.appendChild(cvEl('div', 'hint', 'L’administrateur garde l’action « Administrer » (sinon plus personne ne pourrait régler les droits) et reste habilité sur tout le circuit du compte administratif.'));
+    right.appendChild(body); var bk = cvEl('button', 'btn', '← Tous les groupes de rôles'); bk.type = 'button'; bk.style.marginBottom = '12px'; bk.addEventListener('click', function () { if (GU.rdirty && !confirm('Des modifications non enregistrées seront perdues. Continuer ?')) return; GU.rl = null; GU.rwork = null; GU.rdirty = false; roRender(); }); box.appendChild(bk); box.appendChild(right);
   }
   function guGroupNew() {
     var f = cvEl('div'), n = cvEl('input', 'field'), s = guSel([['', '— Aucun (sans droits) —']].concat(GU.groups.map(function (g) { return [g.nom, g.nom]; })), '', function () { }, 'Copier les droits de'); s.style.width = '100%'; n.type = 'text'; f.appendChild(guField('Nom du groupe', n, true)); f.appendChild(guField('Copier les droits de', s)); var err = cvEl('div', 'err'); f.appendChild(err);
@@ -18517,29 +18647,186 @@ var EXEC_REC = [
     guModal('Nouveau groupe', f, 440);
   }
   /* --- onglet Privilèges --- */
-  function guPrivVal(u, k) { if (u.priv && u.priv[k[0]] != null) return !!u.priv[k[0]]; return (GU_LV[u.roles[0]] != null ? GU_LV[u.roles[0]] : 1) >= k[3]; }
+  function guPrivDef(u, k) { return (GU_LV[u.roles[0]] != null ? GU_LV[u.roles[0]] : 1) >= k[3]; }
+  function guPrivVal(u, k) { return !(u.priv && u.priv[k[0]] === false); }
   function guPrivTab(box) {
     var us = guMembers(); if (!GU.pu || us.indexOf(GU.pu) < 0) GU.pu = us[0]; var u = GU.pu;
-    if (!GU.pwork || GU.pwork.u !== u) { GU.pwork = { u: u, v: {} }; GU_PRIV.forEach(function (k) { GU.pwork.v[k[0]] = guPrivVal(u, k); }); GU.pdirty = false; }
+    if (!GU.pwork || GU.pwork.u !== u) { GU.pwork = { u: u, v: {} }; GU_PRIV.forEach(function (k) { if (guPrivDef(u, k)) GU.pwork.v[k[0]] = guPrivVal(u, k); }); GU.pdirty = false; }
     var grid = cvEl('div', 'gu-split'), left = cvEl('div', 'gu-side'), lh = cvEl('div', 'gu-side-h'); lh.appendChild(cvEl('div', 'gu-cap', 'Utilisateurs'));
     var q = cvEl('input', 'field'); q.id = 'gu-pq'; q.type = 'text'; q.placeholder = 'Rechercher'; q.value = GU.pq; q.style.marginTop = '8px'; q.addEventListener('input', function () { GU.pq = q.value; guRender(); var i = document.getElementById('gu-pq'); i.focus(); i.setSelectionRange(q.value.length, q.value.length); }); lh.appendChild(q); left.appendChild(lh);
     var list = cvEl('div', 'gu-gl'); us.filter(function (x) { return !GU.pq || x.n.toLowerCase().indexOf(GU.pq.toLowerCase()) >= 0; }).forEach(function (x) {
       var it = cvEl('button', 'gu-g' + (x === u ? ' on' : '')); it.type = 'button'; var t = cvEl('div', 'gu-nm'); t.appendChild(guAvatar(x, 32)); var tt = cvEl('div'); tt.appendChild(cvEl('b', null, x.n)); tt.appendChild(cvEl('div', 'hby', x.roles[0])); t.appendChild(tt); it.appendChild(t);
       it.addEventListener('click', function () { if (GU.pdirty && !confirm('Des modifications non enregistrées seront perdues. Continuer ?')) return; GU.pdirty = false; GU.pu = x; GU.pwork = null; guRender(); }); list.appendChild(it);
     }); left.appendChild(list);
-    var right = cvEl('div', 'gu-main'), rh = cvEl('div', 'gu-main-h'), rt = cvEl('div'); rt.appendChild(cvEl('b', null, 'Privilèges — ' + u.n)); rt.appendChild(cvEl('div', 'hby', 'Groupe : ' + u.roles[0] + ' · les valeurs par défaut viennent du groupe, chaque privilège peut être ajusté pour cet utilisateur.')); rh.appendChild(rt);
-    var ra = cvEl('div', 'gu-ac'), rs = cvEl('button', 'btn', 'Valeurs du groupe'); rs.type = 'button'; rs.disabled = u.sys; rs.addEventListener('click', function () { GU_PRIV.forEach(function (k) { GU.pwork.v[k[0]] = (GU_LV[u.roles[0]] != null ? GU_LV[u.roles[0]] : 1) >= k[3]; }); GU.pdirty = true; guRender(); }); ra.appendChild(rs);
-    var sv = cvEl('button', 'btn primary', 'Enregistrer'); sv.type = 'button'; sv.disabled = !GU.pdirty; sv.addEventListener('click', function () { u.priv = {}; GU_PRIV.forEach(function (k) { var def = (GU_LV[u.roles[0]] != null ? GU_LV[u.roles[0]] : 1) >= k[3]; if (GU.pwork.v[k[0]] !== def) u.priv[k[0]] = GU.pwork.v[k[0]]; }); GU.pdirty = false; auditAdd('Configuration', 'Utilisateur ' + u.n, 'Privilèges enregistrés'); guToast('Privilèges de ' + u.n + ' enregistrés.'); guRender(); }); ra.appendChild(sv); rh.appendChild(ra); right.appendChild(rh);
+    var right = cvEl('div', 'gu-main'), rh = cvEl('div', 'gu-main-h'), rt = cvEl('div'), att = GU_PRIV.filter(function (k) { return guPrivDef(u, k); }); rt.appendChild(cvEl('b', null, 'Privilèges — ' + u.n)); rt.appendChild(cvEl('div', 'hby', 'Groupe : ' + u.roles[0] + ' · seuls les privilèges rattachés au groupe sont listés ; vous pouvez en retirer pour cet utilisateur.')); rh.appendChild(rt);
+    var ra = cvEl('div', 'gu-ac'), rs = cvEl('button', 'btn', 'Rétablir ceux du groupe'); rs.type = 'button'; rs.disabled = u.sys; rs.addEventListener('click', function () { att.forEach(function (k) { GU.pwork.v[k[0]] = true; }); GU.pdirty = true; guRender(); }); ra.appendChild(rs);
+    var sv = cvEl('button', 'btn primary', 'Enregistrer'); sv.type = 'button'; sv.disabled = !GU.pdirty; sv.addEventListener('click', function () { u.priv = {}; att.forEach(function (k) { if (GU.pwork.v[k[0]] === false) u.priv[k[0]] = false; }); GU.pdirty = false; auditAdd('Configuration', 'Utilisateur ' + u.n, 'Privilèges enregistrés'); guToast('Privilèges de ' + u.n + ' enregistrés.'); guRender(); }); ra.appendChild(sv); rh.appendChild(ra); right.appendChild(rh);
     var body = cvEl('div', 'gu-priv');
-    [['Privilèges communs', GU_PRIV.slice(0, 6)], ['Privilèges propres au projet', GU_PRIV.slice(6)]].forEach(function (sec) {
-      body.appendChild(cvEl('div', 'gu-cap', sec[0]));
-      sec[1].forEach(function (k) { var row = cvEl('div', 'gu-prow'), t = cvEl('div'); t.appendChild(cvEl('b', null, k[1])); t.appendChild(cvEl('div', 'hby', k[2])); row.appendChild(t); var def = (GU_LV[u.roles[0]] != null ? GU_LV[u.roles[0]] : 1) >= k[3], v = GU.pwork.v[k[0]];
-        var tag = cvEl('span', 'gu-tag', v === def ? 'Hérité du groupe' : 'Ajusté'); if (v !== def) tag.classList.add('adj'); row.appendChild(tag);
+    [['Privilèges communs', att.filter(function (k) { return GU_PRIV.indexOf(k) < 6; })], ['Privilèges propres au projet', att.filter(function (k) { return GU_PRIV.indexOf(k) >= 6; })]].forEach(function (sec) {
+      if (!sec[1].length) return; body.appendChild(cvEl('div', 'gu-cap', sec[0]));
+      sec[1].forEach(function (k) { var row = cvEl('div', 'gu-prow'), t = cvEl('div'); t.appendChild(cvEl('b', null, k[1])); t.appendChild(cvEl('div', 'hby', k[2])); row.appendChild(t); var v = GU.pwork.v[k[0]] !== false;
+        var tag = cvEl('span', 'gu-tag', v ? 'Rattaché au groupe' : 'Retiré pour cet utilisateur'); if (!v) tag.classList.add('adj'); row.appendChild(tag);
         var sw = mkSwitch(v, k[1], function (x) { GU.pwork.v[k[0]] = x; GU.pdirty = true; guRender(); }); if (u.sys) sw.querySelector('input').disabled = true; row.appendChild(sw); body.appendChild(row); });
     });
+    if (!att.length) body.appendChild(cvEl('div', 'hint', 'Aucun privilège n’est rattaché à ce groupe de rôles.'));
     right.appendChild(body); grid.appendChild(left); grid.appendChild(right); box.appendChild(grid);
   }
   document.getElementById('gu-new').addEventListener('click', function () { guUserOpen(null); });
+
+  /* ----- Notifications / Échéances (deux menus) et Alertes et dépassements ----- */
+  function ncSplit(name) {
+    var prj = activeCode() === 'prj', cards = document.querySelectorAll('#v-notifcfg > .card'), h1 = document.querySelector('#v-notifcfg .head h1'), p = document.querySelector('#v-notifcfg .head p');
+    if (cards.length < 2) return;
+    cards[0].style.display = prj ? 'none' : ''; cards[1].style.display = prj && name === 'notifcfg' ? 'none' : ''; var nb = document.getElementById('npr-body'); nb.hidden = !(prj && name === 'notifcfg'); if (!nb.hidden) nprRender();
+    if (h1) h1.textContent = !prj ? 'Notifications et échéances' : (name === 'echeanc' ? 'Échéances' : 'Notifications');
+    if (p) p.textContent = !prj ? 'Événements notifiés, destinataires, délais standard, rappels et escalades' : (name === 'echeanc' ? 'Délais standard, rappels avant échéance et escalades en cas de retard' : 'Créez les règles : quand un événement se produit, qui est prévenu, pour faire quoi et par quel canal');
+  }
+  var ALR_REAC = ['Informer à l’écran', 'Notifier', 'Notifier et escalader', 'Bloquer'];
+  var ALR = [
+    { id: 'A1', lib: 'Dépassement d’une ligne du PTBA', seuil: 100, unit: '% du crédit', reac: 'Notifier', dest: ['RAF', 'Coordonnateur'], on: true },
+    { id: 'A2', lib: 'Engagement supérieur au crédit disponible', seuil: 100, unit: '% du crédit', reac: 'Bloquer', dest: ['RAF'], on: true },
+    { id: 'A3', lib: 'Retard de réalisation par rapport au PTBA', seuil: 20, unit: '% d’écart', reac: 'Notifier', dest: ['RAF', 'Suivi-évaluation'], on: true },
+    { id: 'A4', lib: 'Retard d’avancement physique par rapport au PTA', seuil: 20, unit: '% d’écart', reac: 'Notifier', dest: ['Suivi-évaluation', 'Coordonnateur'], on: true },
+    { id: 'A5', lib: 'Retard de décaissement par rapport au plan', seuil: 20, unit: '% d’écart', reac: 'Notifier', dest: ['RAF'], on: true },
+    { id: 'A6', lib: 'Avance sur mission non justifiée', seuil: 30, unit: 'jours après la fin de la mission', reac: 'Notifier et escalader', dest: ['Comptable', 'RAF'], on: true },
+    { id: 'A7', lib: 'Contribution au-dessus du plafond de la campagne', seuil: 100, unit: '% du maximum', reac: 'Bloquer', dest: ['Chef d’antenne'], on: true },
+    { id: 'A8', lib: 'Contribution sous le minimum de la campagne', seuil: 100, unit: '% du minimum', reac: 'Notifier', dest: ['Coordonnateur'], on: true },
+    { id: 'A9', lib: 'Clôture proche d’une source de financement', seuil: 90, unit: 'jours avant la clôture', reac: 'Notifier', dest: ['Coordonnateur', 'RAF'], on: true },
+    { id: 'A10', lib: 'Écart de change important sur un engagement', seuil: 5, unit: '% du montant', reac: 'Informer à l’écran', dest: ['RAF'], on: false }
+  ];
+  var ALR_DIRTY = false, ALR_WORK = null;
+  function alrRender() {
+    guInit(); var box = document.getElementById('alr-body'); box.innerHTML = '';
+    if (!ALR_WORK) { ALR_WORK = JSON.parse(JSON.stringify(ALR)); ALR_DIRTY = false; }
+    var W = ALR_WORK, rows = W.map(function (r) {
+      var nm = cvEl('div'); nm.appendChild(cvEl('b', null, r.lib)); nm.appendChild(cvEl('div', 'hby', 'Seuil : ' + r.seuil + ' ' + r.unit));
+      var th = cvEl('input', 'field'); th.type = 'text'; th.setAttribute('inputmode', 'decimal'); th.value = String(r.seuil).replace('.', ','); th.style.width = '90px'; th.setAttribute('aria-label', 'Seuil'); th.addEventListener('change', function () { var v = parseFloat(String(th.value).replace(',', '.')); if (!isNaN(v) && v >= 0) { r.seuil = v; ALR_DIRTY = true; alrRender(); } else th.value = String(r.seuil).replace('.', ','); });
+      var rc = guSel(ALR_REAC.map(function (x) { return [x, x]; }), r.reac, function (v) { r.reac = v; ALR_DIRTY = true; alrRender(); }, 'Réaction'); rc.style.width = '210px';
+      var ds = cvEl('div', 'gu-ac'); ds.style.justifyContent = 'flex-start'; ds.style.flexWrap = 'wrap'; r.dest.forEach(function (d) { ds.appendChild(badge(d, 'b-neutral')); }); if (!r.dest.length) ds.appendChild(document.createTextNode('—'));
+      var bd = cvEl('button', 'btn small', 'Destinataires'); bd.type = 'button'; bd.disabled = r.reac === 'Informer à l’écran'; bd.addEventListener('click', function () { alrDest(r); }); ds.appendChild(bd);
+      var sw = mkSwitch(r.on, 'Règle active : ' + r.lib, function (v) { r.on = v; ALR_DIRTY = true; alrRender(); });
+      return [nm, th, rc, ds, sw];
+    });
+    var tb = dpMini(['Situation', 'Seuil', 'Réaction', 'Destinataires', 'Active'], rows, [], 'Aucune règle.'); box.appendChild(tb);
+    var note = cvEl('div', 'hint'); note.style.margin = '10px 0'; note.textContent = 'Informer à l’écran : un badge s’affiche seulement. Notifier : les groupes de rôles choisis reçoivent une notification (voir Notifications). Notifier et escalader : relance puis escalade selon les Échéances. Bloquer : l’action n’est pas possible tant que la situation n’est pas corrigée.'; box.appendChild(note);
+    var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn', 'Annuler les modifications'), bo = cvEl('button', 'btn primary', 'Enregistrer'); bc.type = bo.type = 'button'; bc.disabled = bo.disabled = !ALR_DIRTY;
+    bc.addEventListener('click', function () { ALR_WORK = null; alrRender(); });
+    bo.addEventListener('click', function () { ALR.length = 0; W.forEach(function (r) { ALR.push(r); }); ALR_WORK = null; ALR_DIRTY = false; auditAdd('Configuration', 'Alertes et dépassements', 'Règles enregistrées'); guToast('Règles d’alerte enregistrées.'); alrRender(); });
+    ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
+  }
+  function alrDest(r) {
+    var f = cvEl('div'), boxes = [];
+    GU.groups.forEach(function (g) { var l = mkChk(r.dest.indexOf(g.nom) >= 0, g.nom, function () { }); l.style.display = 'block'; l.style.margin = '6px 0'; boxes.push([g.nom, l.querySelector('input')]); f.appendChild(l); });
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Valider'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+    bc.addEventListener('click', guModalClose); bo.addEventListener('click', function () { r.dest = boxes.filter(function (b) { return b[1].checked; }).map(function (b) { return b[0]; }); ALR_DIRTY = true; guModalClose(); alrRender(); });
+    guModal('Destinataires — ' + r.lib, f, 460);
+  }
+
+  /* ----- Notifications du projet : règles créées par l'administrateur (événement + condition + destinataires + action) ----- */
+  var NPR_EV = [
+    { id: 'plan_soumis', g: 'Plans', lib: 'Plan soumis à validation', desc: 'Un plan (PTBA, PTA, PPM) est soumis.', c: { k: 'sel', lab: 'Plan concerné', opts: ['Tous les plans', 'PTBA', 'PTA', 'PPM', 'Plan de décaissement'] } },
+    { id: 'plan_valide', g: 'Plans', lib: 'Plan validé', desc: 'Un plan est validé.', c: { k: 'sel', lab: 'Plan concerné', opts: ['Tous les plans', 'PTBA', 'PTA', 'PPM', 'Plan de décaissement'] } },
+    { id: 'plan_retourne', g: 'Plans', lib: 'Plan retourné pour correction', desc: 'Un plan est renvoyé à son auteur avec un motif.', c: { k: 'sel', lab: 'Plan concerné', opts: ['Tous les plans', 'PTBA', 'PTA', 'PPM', 'Plan de décaissement'] } },
+    { id: 'revision_soumise', g: 'Révisions', lib: 'Révision de plan soumise', desc: 'Une révision est proposée.', c: { k: 'num', lab: 'Montant de la révision supérieur à', unit: 'MGA (vide : toutes)' } },
+    { id: 'revision_reponse', g: 'Révisions', lib: 'Réponse du bailleur à une révision', desc: 'Le bailleur approuve ou refuse (ANO).', c: { k: 'sel', lab: 'Réponse', opts: ['Toutes', 'Approuvée', 'Refusée'] } },
+    { id: 'contrib_soumise', g: 'Collecte', lib: 'Contribution soumise', desc: 'Un contributeur envoie sa collecte.', c: { k: 'txt', lab: 'Périmètre concerné', ph: 'Vide : tous les périmètres' } },
+    { id: 'collecte_cloture', g: 'Collecte', lib: 'Clôture de collecte proche', desc: 'La date de clôture d’une campagne approche.', c: { k: 'num', lab: 'Jours avant la clôture', unit: 'jours' } },
+    { id: 'ecriture_importee', g: 'Exécution', lib: 'Écritures importées ou synchronisées', desc: 'Des engagements, réalisations ou paiements arrivent.', c: { k: 'sel', lab: 'Type d’écriture', opts: ['Tous les types', 'Engagements', 'Réalisations', 'Paiements', 'Encaissements'] } },
+    { id: 'ecart_seuil', g: 'Exécution', lib: 'Écart entre le prévu et le réalisé', desc: 'Une ligne s’écarte de son plan.', c: { k: 'num', lab: 'Écart supérieur à', unit: '%' } },
+    { id: 'avance_retard', g: 'Avances', lib: 'Avance sur mission non justifiée', desc: 'Une avance reste sans justificatif.', c: { k: 'num', lab: 'Jours après la fin de la mission', unit: 'jours' } },
+    { id: 'financement_cloture', g: 'Financement', lib: 'Clôture proche d’une source de financement', desc: 'L’accord d’une source arrive à échéance.', c: { k: 'num', lab: 'Jours avant la clôture', unit: 'jours' } },
+    { id: 'cloture_exercice', g: 'Financement', lib: 'Clôture de l’exercice', desc: 'La clôture de l’exercice est lancée ou terminée.', c: null },
+    { id: 'acces_refuse', g: 'Sécurité', lib: 'Tentative d’accès refusée', desc: 'Une action est tentée sans le droit nécessaire.', c: null }
+  ];
+  var NPR_ACT = ['Prendre connaissance', 'Valider ou retourner', 'Corriger puis soumettre à nouveau', 'Examiner et répondre', 'Relancer le responsable', 'Vérifier les données', 'Examiner la tentative'];
+  var NPR = [
+    { id: 'N1', ev: 'contrib_soumise', cond: '', dest: ['Coordonnateur'], action: 'Valider ou retourner', ch: 'Application + e-mail', on: true },
+    { id: 'N2', ev: 'plan_soumis', cond: 'Tous les plans', dest: ['Coordonnateur'], action: 'Valider ou retourner', ch: 'Application + e-mail', on: true },
+    { id: 'N3', ev: 'plan_valide', cond: 'Tous les plans', dest: ['RAF'], action: 'Prendre connaissance', ch: 'Application', on: true },
+    { id: 'N4', ev: 'plan_retourne', cond: 'Tous les plans', dest: ['RAF'], action: 'Corriger puis soumettre à nouveau', ch: 'Application + e-mail', on: true },
+    { id: 'N5', ev: 'revision_soumise', cond: '', dest: ['Coordonnateur', 'RAF'], action: 'Examiner et répondre', ch: 'Application', on: true },
+    { id: 'N6', ev: 'ecriture_importee', cond: 'Tous les types', dest: ['RAF'], action: 'Vérifier les données', ch: 'Application', on: true },
+    { id: 'N7', ev: 'avance_retard', cond: '30', dest: ['Comptable', 'RAF'], action: 'Relancer le responsable', ch: 'Application + e-mail', on: true },
+    { id: 'N8', ev: 'acces_refuse', cond: '', dest: ['Administrateur'], action: 'Examiner la tentative', ch: 'Application + e-mail', on: true }
+  ];
+  function nprEv(id) { return NPR_EV.filter(function (e) { return e.id === id; })[0]; }
+  function nprCondTxt(r) { var e = nprEv(r.ev); if (!e || !e.c || r.cond === '' || r.cond == null) return e && e.c ? 'Sans condition' : ''; return e.c.lab + ' : ' + r.cond + (e.c.k === 'num' ? ' ' + e.c.unit.split(' ')[0] : ''); }
+  function nprRender() {
+    guInit(); var box = document.getElementById('npr-body'); if (!box) return; box.innerHTML = '';
+    var bar = cvEl('div', 'gu-bar'); bar.style.borderRadius = '10px'; bar.style.borderBottom = '1px solid var(--border)'; bar.style.marginBottom = '12px'; bar.appendChild(cvEl('span', 'gu-count', NPR.length + ' règle' + (NPR.length > 1 ? 's' : '') + ' de notification'));
+    var nb = cvEl('button', 'btn primary', '+ Nouvelle règle'); nb.type = 'button'; nb.addEventListener('click', function () { nprForm(null); }); bar.appendChild(nb); box.appendChild(bar);
+    var rows = NPR.map(function (r) {
+      var e = nprEv(r.ev) || { lib: r.ev, desc: '' }, nm = cvEl('div'); nm.appendChild(cvEl('b', null, e.lib)); var ct = nprCondTxt(r); nm.appendChild(cvEl('div', 'hby', (ct ? ct + ' · ' : '') + e.desc));
+      var ds = cvEl('div', 'gu-ac'); ds.style.justifyContent = 'flex-start'; ds.style.flexWrap = 'wrap'; r.dest.forEach(function (d) { ds.appendChild(badge(d, 'b-neutral')); }); if (!r.dest.length) ds.appendChild(document.createTextNode('—'));
+      var sw = mkSwitch(r.on, 'Règle active : ' + e.lib, function (v) { r.on = v; auditAdd('Configuration', 'Notifications', 'Règle « ' + e.lib + ' » ' + (v ? 'activée' : 'désactivée')); guToast('Règle ' + (v ? 'activée' : 'désactivée') + '.'); nprRender(); });
+      var ac = cvEl('div', 'gu-ac'), be = cvEl('button', 'btn small', 'Modifier'), bd = cvEl('button', 'btn small gu-del', 'Supprimer'); be.type = bd.type = 'button'; be.addEventListener('click', function () { nprForm(r); }); bd.addEventListener('click', function () { if (NPR_DEL !== r.id) { NPR_DEL = r.id; nprRender(); return; } NPR.splice(NPR.indexOf(r), 1); NPR_DEL = null; auditAdd('Configuration', 'Notifications', 'Règle « ' + e.lib + ' » supprimée'); guToast('Règle supprimée.'); nprRender(); });
+      bd.textContent = NPR_DEL === r.id ? 'Confirmer' : 'Supprimer'; ac.appendChild(be); ac.appendChild(bd);
+      return [nm, ds, r.action, r.ch, sw, ac];
+    });
+    box.appendChild(dpMini(['Quand', 'Qui est prévenu', 'Action attendue', 'Canal', 'Active', ''], rows, [], 'Aucune règle : créez-en une avec « + Nouvelle règle ».'));
+  }
+  var NPR_DEL = null;
+  function nprForm(r) {
+    var W = r ? JSON.parse(JSON.stringify(r)) : { id: '', ev: NPR_EV[0].id, cond: '', dest: [], action: NPR_ACT[0], ch: 'Application', on: true };
+    var f = cvEl('div'), g = cvEl('div', 'fgrid');
+    var evSel = cvEl('select', 'field'); evSel.style.width = '100%'; var cur = '';
+    NPR_EV.forEach(function (e) { if (e.g !== cur) { cur = e.g; } var o = cvEl('option', null, e.g + ' — ' + e.lib); o.value = e.id; if (e.id === W.ev) o.selected = true; evSel.appendChild(o); });
+    var cw = cvEl('div'), dsc = cvEl('div', 'hint');
+    function drawCond() {
+      var e = nprEv(evSel.value); W.ev = e.id; cw.innerHTML = ''; dsc.textContent = 'Déclencheur : ' + e.desc;
+      if (!e.c) { cw.appendChild(cvEl('div', 'hint', 'Cet événement n’a pas de condition.')); W.cond = ''; return; }
+      cw.appendChild(cvEl('label', null, e.c.lab));
+      if (e.c.k === 'sel') { var s = cvEl('select', 'field'); s.style.width = '100%'; e.c.opts.forEach(function (o) { var op = cvEl('option', null, o); if (o === W.cond) op.selected = true; s.appendChild(op); }); W.cond = s.value; s.addEventListener('change', function () { W.cond = s.value; }); cw.appendChild(s); }
+      else { var i = cvEl('input', 'field'); i.type = 'text'; if (e.c.k === 'num') i.setAttribute('inputmode', 'decimal'); i.placeholder = e.c.ph || e.c.unit || ''; i.value = W.cond || ''; i.addEventListener('input', function () { W.cond = i.value.trim(); }); cw.appendChild(i); if (e.c.unit) cw.appendChild(cvEl('div', 'hint', 'Unité : ' + e.c.unit)); }
+    }
+    evSel.addEventListener('change', function () { W.cond = ''; drawCond(); });
+    var d1 = cvEl('div'); d1.className = 'full'; d1.appendChild(cvEl('label', null, 'Quand cet événement se produit *')); d1.appendChild(evSel); d1.appendChild(dsc); g.appendChild(d1);
+    var d2 = cvEl('div'); d2.className = 'full'; d2.appendChild(cw); g.appendChild(d2);
+    var d3 = cvEl('div'); d3.className = 'full'; d3.appendChild(cvEl('label', null, 'Qui est prévenu (groupes de rôles) *')); var cr = cvEl('div', 'chkrow'); var bx = []; GU.groups.forEach(function (gr) { var l = mkChk(W.dest.indexOf(gr.nom) >= 0, gr.nom, function () { }); bx.push([gr.nom, l.querySelector('input')]); cr.appendChild(l); }); d3.appendChild(cr); g.appendChild(d3);
+    var as = guSel(NPR_ACT.map(function (a) { return [a, a]; }), W.action, function (v) { W.action = v; }, 'Action attendue'); as.style.width = '100%'; g.appendChild(guField('Action attendue du destinataire', as));
+    var cs = guSel([['Application', 'Application'], ['Application + e-mail', 'Application + e-mail']], W.ch, function (v) { W.ch = v; }, 'Canal'); cs.style.width = '100%'; g.appendChild(guField('Canal', cs));
+    f.appendChild(g); var err = cvEl('div', 'err'); f.appendChild(err); drawCond();
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', r ? 'Enregistrer' : 'Créer la règle'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () {
+      W.dest = bx.filter(function (b) { return b[1].checked; }).map(function (b) { return b[0]; }); var e = nprEv(W.ev);
+      if (!W.dest.length) { err.textContent = 'Choisissez au moins un groupe de rôles à prévenir.'; return; }
+      if (e.c && e.c.k === 'num' && W.cond !== '' && isNaN(parseFloat(String(W.cond).replace(',', '.')))) { err.textContent = 'La condition doit être un nombre.'; return; }
+      if (NPR.some(function (x) { return x !== r && x.ev === W.ev && x.cond === W.cond && x.dest.join() === W.dest.join(); })) { err.textContent = 'Une règle identique existe déjà.'; return; }
+      if (r) { Object.assign(r, { ev: W.ev, cond: W.cond, dest: W.dest, action: W.action, ch: W.ch }); auditAdd('Configuration', 'Notifications', 'Règle « ' + e.lib + ' » modifiée'); guToast('Règle modifiée.'); }
+      else { var n = 1; while (NPR.some(function (x) { return x.id === 'N' + n; })) n++; NPR.push({ id: 'N' + n, ev: W.ev, cond: W.cond, dest: W.dest, action: W.action, ch: W.ch, on: true }); auditAdd('Configuration', 'Notifications', 'Règle « ' + e.lib + ' » créée'); guToast('Règle créée : ' + W.dest.join(', ') + ' seront prévenus.'); }
+      guModalClose(); nprRender();
+    });
+    guModal(r ? 'Modifier la règle de notification' : 'Nouvelle règle de notification', f, 620);
+  }
+
+  /* ----- Site de l'utilisateur : une personne rattachée à un seul site ne voit que les données de ce site ----- */
+  var SITE_CTX = '';
+  function meSite() { var u = typeof PRJ_USERS !== 'undefined' && PRJ_USERS ? PRJ_USERS.filter(function (x) { return x.n === ME; })[0] : null; return u && u.site && u.site !== 'Tous les sites' ? u.site : ''; }
+  function siteCtxSync() {
+    SITE_CTX = activeCode() === 'prj' ? meSite() : '';
+    if (typeof SX !== 'undefined' && SX) SX.site = SITE_CTX; if (typeof ANA !== 'undefined' && ANA) ANA.site = SITE_CTX;
+    var bn = document.getElementById('site-banner');
+    if (!bn) { bn = document.createElement('div'); bn.id = 'site-banner'; bn.className = 'callout'; bn.style.cssText = 'margin:12px 24px 0;display:none'; var v = document.querySelector('.view'); if (v && v.parentNode) v.parentNode.insertBefore(bn, v.parentNode.firstChild); }
+    if (SITE_CTX) { bn.style.display = ''; bn.textContent = 'Vous êtes rattaché au site « ' + siteLbl(SITE_CTX) + ' » : vous ne voyez que les données de ce site (plans, exécution, compte administratif, analyses).'; } else bn.style.display = 'none';
+  }
+
+  /* ----- Sites d'une campagne : quels sites renseignent la collecte, et répartition d'une ligne entre eux ----- */
+  function campSitesOf(c) { var a = c && c.sites && c.sites.length ? c.sites : sitesList().filter(function (s) { return s.on; }).map(function (s) { return s.code; }); return a; }
+  function sitesSummary(m) { var k = Object.keys(m || {}).filter(function (c) { return m[c]; }); return k.length ? k.map(function (c) { return c + ' ' + String(m[c]).replace('.', ',') + ' %'; }).join(' · ') : 'À répartir'; }
+  function sitesAsk(codes, cur, title, cb) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), ins = {}; cur = cur || {};
+    codes.forEach(function (c) { var d = cvEl('div'), i = cvEl('input', 'field'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = cur[c] != null ? String(cur[c]).replace('.', ',') : ''; i.placeholder = '0'; ins[c] = i; d.appendChild(cvEl('label', null, siteLbl(c) + ' (part en %)')); d.appendChild(i); g.appendChild(d); }); f.appendChild(g);
+    var sum = cvEl('div'); sum.style.margin = '10px 0'; f.appendChild(sum);
+    function tot() { var t = 0; codes.forEach(function (c) { t += parseFloat(String(ins[c].value).replace(',', '.')) || 0; }); return Math.round(t * 10) / 10; }
+    function upd() { var t = tot(); sum.innerHTML = ''; sum.appendChild(badge('Total : ' + String(t).replace('.', ',') + ' %', Math.abs(t - 100) < 0.05 ? 'b-ok' : 'b-ko')); } codes.forEach(function (c) { ins[c].addEventListener('input', upd); }); upd();
+    var err = cvEl('div', 'err'); f.appendChild(err);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:8px;padding-top:12px'; var be = cvEl('button', 'btn', 'Parts égales'), bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Valider'); be.type = bc.type = bo.type = 'button'; ft.appendChild(be); ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+    be.addEventListener('click', function () { var n = codes.length, base = Math.floor(1000 / n) / 10, rest = Math.round((100 - base * n) * 10) / 10; codes.forEach(function (c, i) { ins[c].value = String(i === 0 ? Math.round((base + rest) * 10) / 10 : base).replace('.', ','); }); upd(); });
+    bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () { if (Math.abs(tot() - 100) > 0.05) { err.textContent = 'Le total doit être égal à 100 % (actuellement ' + String(tot()).replace('.', ',') + ' %).'; return; } var m = {}; codes.forEach(function (c) { var v = Math.round((parseFloat(String(ins[c].value).replace(',', '.')) || 0) * 10) / 10; if (v) m[c] = v; }); guModalClose(); cb(m); });
+    guModal(title, f, 520);
+  }
+  window.sbSitesAsk = sitesAsk; window.sbSitesSummary = sitesSummary; window.sbModal = guModal; window.sbModalClose = guModalClose;
 
   /* Historique des actions */
   function parseTs(on) {
@@ -18899,17 +19186,20 @@ var EXEC_REC = [
 
   /* Paramétrage */
   function ncMsg(t, k) { noteTo('nc-msg', t, k); }
+  var NR_MAP = { 'Valideur': 'Coordonnateur', 'Préparateur': 'RAF', 'Contrôleur': 'Contrôleur interne', 'Direction Générale': 'Coordonnateur', 'Direction Financière': 'RAF', 'Responsable de campagne': 'Chef d’antenne', 'Comité de pilotage': 'Coordonnateur' };
+  function nrGrp(v) { return NR_MAP[v] || v; }
   function renderNotifCfg() {
-    var adm = isAdmin();
+    var adm = isAdmin(), prj = typeof activeCode === 'function' && activeCode() === 'prj' && typeof guInit === 'function', grp = null; if (prj) { guInit(); grp = GU.groups.map(function (g) { return g.nom; }); }
     document.getElementById('nc-ro').hidden = adm;
     document.getElementById('nc-svc-note').hidden = SVC;
     var body = document.getElementById('nc-rules');
     body.innerHTML = '';
     NRULES.forEach(function (r) {
       var tr = document.createElement('tr');
-      cell(tr, r.ev, 'name');
+      var NV = { 'Soumission': ['Contribution ou plan soumis', 'Quand un contributeur soumet sa collecte, ou qu’un plan (PTBA, PTA, PPM) est soumis à validation.'], 'Validation': ['Plan ou contribution validé', 'Quand un plan ou une contribution est validé : l’auteur en est informé.'], 'Rejet / retour': ['Retourné pour correction', 'Quand un plan ou une contribution est renvoyé à son auteur avec un motif.'], 'Révision': ['Révision de plan à examiner', 'Quand une révision de plan est soumise, ou que le bailleur y répond.'], 'Import': ['Import ou synchronisation des données', 'Quand des engagements ou des réalisations arrivent par import ou synchronisation.'], 'Tentative refusée': ['Tentative d’accès refusée', 'Quand quelqu’un essaie une action qu’il n’a pas le droit de faire.'] };
+      if (prj && NV[r.ev]) { var tn = cell(tr, '', 'name'); tn.appendChild(cvEl('b', null, NV[r.ev][0])); tn.appendChild(cvEl('div', 'hby', NV[r.ev][1])); } else cell(tr, r.ev, 'name');
       var t1 = document.createElement('td');
-      var s1 = mkSelect(['Valideur', 'Préparateur', 'Contrôleur', 'Administrateur'], r.to, 'stepsel', 'Destinataire pour ' + r.ev, function (v) { var o = r.to; r.to = v; auditAdd('Configuration', 'Notifications', 'Événement « ' + r.ev + ' » : destinataire ' + o + ' → ' + v); renderAll2(); });
+      var s1 = mkSelect(prj ? grp : ['Valideur', 'Préparateur', 'Contrôleur', 'Administrateur'], prj ? nrGrp(r.to) : r.to, 'stepsel', 'Destinataire pour ' + r.ev, function (v) { var o = r.to; r.to = v; auditAdd('Configuration', 'Notifications', 'Événement « ' + r.ev + ' » : destinataire ' + o + ' → ' + v); renderAll2(); });
       s1.disabled = !adm; t1.appendChild(s1); tr.appendChild(t1);
       var t2 = document.createElement('td');
       var i2 = document.createElement('input'); i2.type = 'text'; i2.className = 'field stepin'; i2.value = r.action; i2.disabled = !adm; i2.setAttribute('aria-label', 'Action attendue pour ' + r.ev);
@@ -18939,7 +19229,7 @@ var EXEC_REC = [
         td.appendChild(i); tr.appendChild(td);
       });
       var tt = document.createElement('td');
-      var st = mkSelect(DLTO, d.to, 'stepsel', 'Escalade vers pour ' + k, function (v) { var o = d.to; d.to = v; auditAdd('Configuration', 'Échéances', k + ' : escalade ' + o + ' → ' + v); renderAll2(); });
+      var st = mkSelect(prj ? grp : DLTO, prj ? nrGrp(d.to) : d.to, 'stepsel', 'Escalade vers pour ' + k, function (v) { var o = d.to; d.to = v; auditAdd('Configuration', 'Échéances', k + ' : escalade ' + o + ' → ' + v); renderAll2(); });
       st.disabled = !adm || !SVC; tt.appendChild(st); tr.appendChild(tt);
       var ta = document.createElement('td');
       var sw2 = mkSwitch(d.act, 'Activer ' + k, function (v) { d.act = v; auditAdd('Configuration', 'Échéances', k + ' : ' + (v ? 'activée' : 'désactivée')); renderAll2(); });
@@ -21058,6 +21348,7 @@ var EXEC_REC = [
   function dpStatBadge(d) { var s = DP_ST[d.st], f = document.createDocumentFragment(); f.appendChild(badge(s[0], s[1])); if (d.rejet) { var b = badge('Rejeté : ' + d.rejet, 'b-ko'); b.style.marginLeft = '6px'; f.appendChild(b); } return f; }
   /* Tableau générique : lignes sélectionnables (une seule, ou plusieurs avec cases à cocher) */
   function dpTable(o) {
+    var sited = o.rows.length && o.rows[0] && o.rows[0].site !== undefined && o.cells; if (sited) { if (SITE_CTX) o = Object.assign({}, o, { rows: o.rows.filter(function (d) { return (d.site || 'COO') === SITE_CTX; }) }); var oc = o.cells; o = Object.assign({}, o, { head: o.head.concat(['Site']), cells: function (d) { return oc(d).concat([siteLbl(d.site)]); } }); }
     var th = document.getElementById(o.id + '-h'), tb = document.getElementById(o.id + '-b'); th.innerHTML = '<tr>' + (o.multi ? '<th style="width:36px"></th>' : '') + o.head.map(function (h, i) { return '<th' + (o.num && o.num.indexOf(i) >= 0 ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr>'; tb.innerHTML = '';
     if (!o.rows.length) { var t0 = cvEl('tr'), c0 = cell(t0, o.empty); c0.colSpan = o.head.length + (o.multi ? 1 : 0); c0.style.textAlign = 'left'; tb.appendChild(t0); return; }
     o.rows.forEach(function (d) {
@@ -21580,7 +21871,7 @@ var EXEC_REC = [
   function anaRender() {
     var ex = anaEx(), K = ANA_K[ANA.kind], b = document.getElementById('ana-body'); if (!b) return; b.innerHTML = '';
     document.querySelector('#v-ana > .head h1').textContent = K[0]; document.querySelector('#v-ana > .head p').textContent = K[1] + (['plu', 'ale', 'ver'].indexOf(ANA.kind) >= 0 ? '' : ' — exercice ' + ex + ', situation au ' + isoToFr(cadToday()));
-    document.getElementById('ana-new').style.display = ANA.kind === 'ale' ? '' : 'none'; ANA_SITE = ANA.kind === 'rea' ? (ANA.site || '') : ''; var asl = document.getElementById('ana-site'); asl.style.display = ANA.kind === 'rea' ? '' : 'none'; if (ANA.kind === 'rea') { siteFill(asl, true); asl.value = ANA.site || ''; asl.onchange = function () { ANA.site = asl.value; anaRender(); }; }
+    document.getElementById('ana-new').style.display = ANA.kind === 'ale' ? '' : 'none'; ANA_SITE = (ANA.kind === 'rea' || ANA.kind === 'eng') ? (ANA.site || '') : ''; var asl = document.getElementById('ana-site'); asl.style.display = ANA.kind === 'rea' && !SITE_CTX ? '' : 'none'; if (ANA.kind === 'rea') { siteFill(asl, true); asl.value = ANA.site || ''; asl.onchange = function () { ANA.site = asl.value; anaRender(); }; }
     if (ANA.kind === 'ale') anaAle(b, ex); else if (ANA.kind === 'sit') anaSite(b, ex); else if (ANA.kind === 'plu') anaPlu(b); else if (ANA.kind === 'ver') anaVer(b, ex); else anaCompare(b, ANA.kind, ex);
   }
   (function () {
@@ -21697,7 +21988,7 @@ var EXEC_REC = [
   }  function sxRender() {
     sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind && (!SX.site || (i.site || 'COO') === SX.site); }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
     document.querySelector('#v-sx > .head h1').textContent = K.h; document.querySelector('#v-sx > .head p').textContent = K.p;
-    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; var ssl = document.getElementById('sx-site'); siteFill(ssl, true); ssl.value = SX.site || ''; ssl.onchange = function () { SX.site = ssl.value; sxRender(); }; document.getElementById('sx-suivi-b').style.display = SX.kind === 'liq' ? '' : 'none'; document.getElementById('sx-trait-b').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
+    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; var ssl = document.getElementById('sx-site'); siteFill(ssl, true); ssl.value = SX.site || ''; ssl.style.display = SITE_CTX ? 'none' : ''; ssl.onchange = function () { SX.site = ssl.value; sxRender(); }; document.getElementById('sx-suivi-b').style.display = SX.kind === 'liq' ? '' : 'none'; document.getElementById('sx-trait-b').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
     var sum = function (s) { return items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).reduce(function (a, i) { return a + i.mt; }, 0); };
     var kb = document.getElementById('sx-k'); kb.innerHTML = ''; var cn = function (s) { return String(items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).length); };
     var sd = function (dp) { return items.filter(function (i) { return sxIsDpd(i) === dp; }).reduce(function (a, i) { return a + i.mt; }, 0); };
@@ -23246,20 +23537,25 @@ function sbLogout(){
 // ======================= Portail de collecte (5e espace) =======================
 var PC = {
   user:{ nom:'RAKOTO Hanta', prenom:'Hanta', init:'RH' },
-  camp:{ lib:'PTBA 2027 — Santé Communautaire', cloture:'30/11/2026', min:120000000, max:450000000 },
+  camp:{ lib:'PTBA 2027 — Santé Communautaire', cloture:'30/11/2026', min:120000000, max:450000000, pj:'Obligatoire', sites:['COO','TOL','FIA'], niveau:'Activité (niveau 3 du plan analytique)', instr:'Chaque composante détaille les travaux à réaliser en 2027 pour atteindre l’objectif fixé, avec le budget correspondant. Choisissez l’activité dans le plan analytique, indiquez la quantité et le montant unitaire (les virgules sont acceptées), répartissez le montant dans l’année et joignez les pièces justificatives.' },
+  plan:{
+    p1:[ { c:'A1.1.1', lib:'Formation des agents communautaires', unite:'personne', cat:'Formations' }, { c:'A1.1.2', lib:'Kits nutritionnels pour enfants de 6 à 23 mois', unite:'kit', cat:'Biens' }, { c:'A1.1.3', lib:'Supervision trimestrielle des CSB', unite:'mission', cat:'Services' } ],
+    p2:[ { c:'A2.1.1', lib:'Équipement de salles d’accouchement', unite:'lot', cat:'Biens' }, { c:'A2.1.2', lib:'Transport des référencements d’urgence', unite:'trajet', cat:'Services' }, { c:'A2.2.1', lib:'Distribution de kits maternels', unite:'kit', cat:'Biens' } ],
+    p3:[ { c:'A3.1.1', lib:'Réhabilitation de points d’eau', unite:'point d’eau', cat:'Travaux' }, { c:'A3.1.2', lib:'Kits de chloration communautaires', unite:'kit', cat:'Biens' }, { c:'A3.2.1', lib:'Latrines familiales', unite:'latrine', cat:'Travaux' } ]
+  },
   cats:['Biens','Travaux','Services','Formations','Fonctionnement'],
   reps:['Équitable par trimestre','Début d’année','Fin d’année','Personnalisée'],
   perims:[
-    { id:'p1', nom:'Composante 1 — Nutrition communautaire', st:'Brouillon', retourne:false, pj:1, saved:'', lignes:[
+    { id:'p1', nom:'Composante 1 — Nutrition communautaire', obj:'Réduire la malnutrition des enfants de moins de 2 ans dans les 6 communes d’intervention.', inds:[ { lib:'Enfants de 6 à 23 mois recevant un kit', unite:'enfants', cible:3000 }, { lib:'Agents communautaires formés', unite:'personnes', cible:240 } ], st:'Brouillon', retourne:false, pj:1, saved:'', lignes:[
       { lib:'Kits nutritionnels pour enfants de 6 à 23 mois', cat:'Biens', unite:'kit', qte:3000, pu:45000, rep:'Équitable par trimestre', just:'Cible 2027 identique à 2026' },
       { lib:'Formation des agents communautaires', cat:'Formations', unite:'personne', qte:240, pu:350000, rep:'Début d’année', just:'' },
       { lib:'Supervision trimestrielle des CSB', cat:'Services', unite:'mission', qte:16, pu:2800000, rep:'Équitable par trimestre', just:'' } ] },
-    { id:'p2', nom:'Composante 2 — Santé maternelle et infantile', st:'Brouillon', retourne:true, pj:0, saved:'',
+    { id:'p2', nom:'Composante 2 — Santé maternelle et infantile', obj:'Améliorer la prise en charge des accouchements et des urgences.', inds:[ { lib:'Salles d’accouchement équipées', unite:'salles', cible:10 }, { lib:'Référencements d’urgence assurés', unite:'transports', cible:900 } ], st:'Brouillon', retourne:true, pj:0, saved:'',
       retour:{ par:'Voahangy RASOARIMALALA, responsable de collecte', le:'10/11/2026', txt:'L’enveloppe maximale du périmètre est dépassée : réduisez d’au moins 6,5 M MGA et précisez l’unité de la ligne « Transport des référencements ».' },
       lignes:[
       { lib:'Équipement de salles d’accouchement', cat:'Biens', unite:'lot', qte:10, pu:38000000, rep:'Début d’année', just:'10 CSB prioritaires' },
       { lib:'Transport des référencements d’urgence', cat:'Services', unite:'', qte:900, pu:85000, rep:'Équitable par trimestre', just:'' } ] },
-    { id:'p3', nom:'Composante 3 — Eau, hygiène et assainissement', st:'Clôturé', retourne:false, pj:2, saved:'', lignes:[
+    { id:'p3', nom:'Composante 3 — Eau, hygiène et assainissement', obj:'Garantir l’accès à l’eau potable et à l’assainissement.', inds:[ { lib:'Points d’eau réhabilités', unite:'points d’eau', cible:12 }, { lib:'Ménages équipés en kits de chloration', unite:'ménages', cible:520 } ], st:'Clôturé', retourne:false, pj:2, saved:'', lignes:[
       { lib:'Réhabilitation de points d’eau', cat:'Travaux', unite:'point d’eau', qte:12, pu:11500000, rep:'Fin d’année', just:'' },
       { lib:'Kits de chloration communautaires', cat:'Biens', unite:'kit', qte:520, pu:100000, rep:'Équitable par trimestre', just:'' } ] }
   ],
@@ -23278,7 +23574,7 @@ var PC = {
   ],
   cur:null, tab:'home'
 };
-function pcFmt(n){ return String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00A0'); }
+function pcFmt(n){ n=Number(n)||0; var neg=n<0, a=Math.abs(n), frac=Math.abs(a-Math.round(a))>0.004, t=(frac?a.toFixed(2):String(Math.round(a))).split('.'); t[0]=t[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u00A0'); return (neg?'-':'')+t.join(','); }
 function pcEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function pcTot(p){ return p.lignes.reduce(function(a,l){ return a + (Number(l.qte)||0)*(Number(l.pu)||0); },0); }
 function pcLigneOk(l){ return !!(String(l.lib).trim() && l.unite && Number(l.qte)>0 && Number(l.pu)>0); }
@@ -23341,7 +23637,7 @@ function pcRenderHome(){
 
 // ---------- Collecte budgétaire ----------
 function pcRenderPerims(){
-  document.getElementById('pc-camp-sub').innerHTML='Campagne <strong>'+pcEsc(PC.camp.lib)+'</strong> · ouverte jusqu’au '+PC.camp.cloture+'. Vous ne voyez que les périmètres qui vous sont affectés.';
+  document.getElementById('pc-camp-sub').innerHTML='Campagne <strong>'+pcEsc(PC.camp.lib)+'</strong> · ouverte jusqu’au '+PC.camp.cloture+'. Pièce justificative : '+pcEsc(PC.camp.pj.toLowerCase())+'. Vous ne voyez que les périmètres qui vous sont affectés.';
   document.getElementById('pc-perims').innerHTML=PC.perims.map(function(p){
     var tot=pcTot(p);
     return '<div class="pc-per"><div class="pc-per-h"><strong>'+pcEsc(p.nom)+'</strong><span>'+pcStChip(p)+'</span></div>'+
@@ -23361,40 +23657,94 @@ function pcRenderSaisie(){
   document.getElementById('pc-s-nom').textContent=p.nom;
   document.getElementById('pc-s-sub').textContent=PC.camp.lib+' · exercice 2027';
   document.getElementById('pc-s-chip').innerHTML=pcStChip(p);
+  var inst=document.getElementById('pc-s-instr');
+  inst.innerHTML='<div class="pc-env-top"><strong>Consignes de la campagne</strong><span class="pc-chip info">Niveau de collecte : '+pcEsc(PC.camp.niveau)+'</span></div>'+
+    '<p style="margin:0 0 10px;font-size:14px">'+pcEsc(PC.camp.instr)+'</p>'+
+    '<p style="margin:0 0 10px;font-size:13px;color:var(--n-600)">Pièce justificative : <strong>'+pcEsc(PC.camp.pj.toLowerCase())+'</strong> · Sites concernés : '+PC.camp.sites.map(function(c){ return pcEsc(c); }).join(', ')+'</p>'+
+    (p.obj?'<div style="font-size:14px;margin-bottom:8px"><strong>Objectif du périmètre :</strong> '+pcEsc(p.obj)+'</div>':'')+
+    ((p.inds&&p.inds.length)?'<div style="font-size:13px"><strong>Indicateurs à atteindre :</strong><ul style="margin:6px 0 0 18px;padding:0">'+p.inds.map(function(x){ return '<li>'+pcEsc(x.lib)+' — cible '+pcFmt(x.cible)+' '+pcEsc(x.unite)+'</li>'; }).join('')+'</ul></div>':'');
   var r=document.getElementById('pc-s-ret');
   if(p.retourne && p.retour){ r.hidden=false; r.innerHTML='<strong>Retourné par '+pcEsc(p.retour.par)+' le '+p.retour.le+'</strong><br>'+pcEsc(p.retour.txt); } else { r.hidden=true; }
-  document.getElementById('pc-s-body').innerHTML=p.lignes.map(function(l,i){ return pcLigneRow(l,i,ed); }).join('')||'<tr><td colspan="10" class="pc-empty">Aucune ligne — ajoutez votre première ligne budgétaire.</td></tr>';
+  document.getElementById('pc-s-body').innerHTML=p.lignes.map(function(l,i){ return pcLigneRow(l,i,ed); }).join('')||'<tr><td colspan="12" class="pc-empty">Aucune ligne — ajoutez votre première ligne budgétaire.</td></tr>';
   ['pc-s-add','pc-s-imp','pc-s-save','pc-s-submit'].forEach(function(b){ document.getElementById(b).disabled=!ed; });
   document.getElementById('pc-s-pjn').textContent=p.pj;
   document.getElementById('pc-s-pj').disabled=!ed;
   document.getElementById('pc-s-saved').textContent = ed ? (p.saved?('Brouillon enregistré à '+p.saved):'') : (p.st==='Clôturé'?'Contribution clôturée — lecture seule':'Contribution soumise — en attente de validation');
   pcRecalcBud();
 }
+function pcNum(s){ var t=String(s==null?'':s).replace(/[\s ]/g,'').replace(',','.'); if(t==='') return ''; var n=parseFloat(t); return isNaN(n)?null:n; }
+function pcDec(n){ return (n===''||n==null)?'':String(n).replace('.',','); }
+function pcLTot(l){ return (Number(l.qte)||0)*(Number(l.pu)||0); }
+var PCM=['Janv','Févr','Mars','Avr','Mai','Juin','Juil','Août','Sept','Oct','Nov','Déc'];
+function pcRepArr(l){
+  if(Array.isArray(l.repm)) return l.repm.slice();
+  var t=pcLTot(l), a=[0,0,0,0,0,0,0,0,0,0,0,0], m=String(l.rep||'');
+  if(/Début/.test(m)) a[0]=t; else if(/Fin/.test(m)) a[11]=t; else { var q=Math.round(t/4*100)/100; a[0]=q; a[3]=q; a[6]=q; a[9]=Math.round((t-3*q)*100)/100; }
+  return a;
+}
+function pcRepOk(l){ if(!Array.isArray(l.repm)) return true; return Math.abs(l.repm.reduce(function(s,v){ return s+(Number(v)||0); },0)-pcLTot(l))<0.5; }
+function pcRepTxt(l){
+  var a=pcRepArr(l), k=[]; a.forEach(function(v,i){ if(Number(v)) k.push(PCM[i]+' '+pcFmt(v)); });
+  if(!k.length) return 'Répartir'; return k.slice(0,2).join(' · ')+(k.length>2?' · +'+(k.length-2):'');
+}
+function pcRepAsk(i){
+  var p=pcCur(); if(!p||!pcEditable(p)||!window.sbModal) return; var l=p.lignes[i], t=pcLTot(l), a=pcRepArr(l), ins=[];
+  var f=document.createElement('div'), info=document.createElement('div'); info.className='hint'; info.style.marginBottom='10px'; info.textContent='Indiquez quel montant tombe sur quelle période. Le total doit être égal au montant de la ligne : '+pcFmt(t)+' MGA.'; f.appendChild(info);
+  var g=document.createElement('div'); g.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:10px';
+  PCM.forEach(function(m,k){ var d=document.createElement('div'), lb=document.createElement('label'), inp=document.createElement('input'); lb.textContent=m; inp.type='text'; inp.className='field'; inp.setAttribute('inputmode','decimal'); inp.value=a[k]?pcDec(a[k]):''; inp.placeholder='0'; inp.addEventListener('input',upd); ins.push(inp); d.appendChild(lb); d.appendChild(inp); g.appendChild(d); }); f.appendChild(g);
+  var sum=document.createElement('div'); sum.style.cssText='margin:12px 0;font-weight:600'; f.appendChild(sum);
+  function vals(){ return ins.map(function(x){ var n=pcNum(x.value); return n===''||n===null?0:n; }); }
+  function upd(){ var s=vals().reduce(function(x,y){ return x+y; },0), ok=Math.abs(s-t)<0.5; sum.style.color=ok?'#047857':'#BE123C'; sum.textContent='Réparti : '+pcFmt(s)+' MGA sur '+pcFmt(t)+' MGA'+(ok?' — total atteint':' — reste '+pcFmt(t-s)+' MGA'); } upd();
+  function setAll(arr){ arr.forEach(function(v,k){ ins[k].value=v?pcDec(v):''; }); upd(); }
+  var qs=document.createElement('div'); qs.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px';
+  [['Équitable sur 12 mois',function(){ var q=Math.round(t/12*100)/100, r=[]; for(var k=0;k<12;k++) r.push(q); r[11]=Math.round((t-q*11)*100)/100; return r; }],['Par trimestre',function(){ return pcRepArr({qte:l.qte,pu:l.pu,rep:'Équitable par trimestre'}); }],['Début d’année',function(){ var r=new Array(12).fill(0); r[0]=t; return r; }],['Fin d’année',function(){ var r=new Array(12).fill(0); r[11]=t; return r; }]].forEach(function(q){ var b=document.createElement('button'); b.type='button'; b.className='btn small'; b.textContent=q[0]; b.addEventListener('click',function(){ setAll(q[1]()); }); qs.appendChild(b); });
+  f.insertBefore(qs,g);
+  var err=document.createElement('div'); err.className='err'; f.appendChild(err);
+  var ft=document.createElement('div'); ft.className='form-foot'; ft.style.cssText='margin-top:10px;padding-top:12px'; var bc=document.createElement('button'), bo=document.createElement('button'); bc.type=bo.type='button'; bc.className='btn'; bo.className='btn primary'; bc.textContent='Annuler'; bo.textContent='Valider la répartition'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+  bc.addEventListener('click',window.sbModalClose);
+  bo.addEventListener('click',function(){ var v=vals(), s=v.reduce(function(x,y){ return x+y; },0); if(Math.abs(s-t)>=0.5){ err.textContent='Le total réparti doit être égal au montant de la ligne ('+pcFmt(t)+' MGA).'; return; } l.repm=v; l.rep='Personnalisée'; p.saved=''; window.sbModalClose(); pcRenderSaisie(); });
+  window.sbModal('Répartir la ligne dans l’année',f,620);
+}
+function pcPjAdd(i,inp){ var p=pcCur(); if(!p||!pcEditable(p)||!inp.files||!inp.files[0]) return; var l=p.lignes[i]; (l.pjs=l.pjs||[]).push(inp.files[0].name); p.saved=''; pcRenderSaisie(); }
+function pcPjDel(i){ var p=pcCur(); if(!p||!pcEditable(p)) return; var l=p.lignes[i]; if(l.pjs&&l.pjs.length){ l.pjs.pop(); p.saved=''; pcRenderSaisie(); } }
+function pcPlanOf(p){ return (PC.plan&&PC.plan[p.id])||[]; }
+function pcActSet(i,code){
+  var p=pcCur(); if(!p||!pcEditable(p)) return; var l=p.lignes[i];
+  if(code==='autre'){ l.act='autre'; l.lib=''; } else { var a=pcPlanOf(p).filter(function(x){ return x.c===code; })[0]; if(a){ l.act=a.c; l.lib=a.lib; l.unite=a.unite; l.cat=a.cat; } else { l.act=''; l.lib=''; } }
+  p.saved=''; pcRenderSaisie();
+}
 function pcLigneRow(l,i,ed){
-  var d=ed?'':' disabled';
+  var d=ed?'':' disabled', p=pcCur(), plan=pcPlanOf(p);
   var cats=PC.cats.map(function(c){ return '<option'+(c===l.cat?' selected':'')+'>'+c+'</option>'; }).join('');
-  var reps=PC.reps.map(function(c){ return '<option'+(c===l.rep?' selected':'')+'>'+c+'</option>'; }).join('');
-  return '<tr data-i="'+i+'"><td><input type="text" value="'+pcEsc(l.lib)+'" placeholder="Libellé libre de la ligne" style="min-width:280px"'+d+' oninput="pcSetL('+i+',\'lib\',this.value)" aria-label="Ligne budgétaire"></td>'+
+  var inPlan=plan.filter(function(x){ return x.lib===l.lib; })[0], isAutre=l.act==='autre'||(!inPlan&&String(l.lib).trim()!==''), selCode=isAutre?'autre':(inPlan?inPlan.c:'');
+  var acts='<option value="">— Choisir une activité du plan —</option>'+plan.map(function(x){ return '<option value="'+x.c+'"'+(x.c===selCode?' selected':'')+'>'+x.c+' — '+pcEsc(x.lib)+'</option>'; }).join('')+'<option value="autre"'+(selCode==='autre'?' selected':'')+'>Autre activité (à proposer au plan analytique)</option>';
+  var libCell='<select'+d+' onchange="pcActSet('+i+',this.value)" aria-label="Activité du plan analytique" style="min-width:300px">'+acts+'</select>'+(selCode==='autre'?'<input type="text" value="'+pcEsc(l.lib)+'" placeholder="Intitulé de l’activité proposée" style="min-width:300px;margin-top:6px"'+d+' oninput="pcSetL('+i+',\'lib\',this.value)" aria-label="Activité proposée">':'');
+  var pjn=(l.pjs||[]).length;
+  var pjCell=(ed?'<label class="pc-btn sm" style="cursor:pointer" title="Joindre une pièce à cette ligne">＋ PJ<input type="file" hidden onchange="pcPjAdd('+i+',this)"></label>':'')+(pjn?' <span class="pc-cnt" title="'+pcEsc(l.pjs.join(', '))+'">'+pjn+'</span>'+(ed?' <button type="button" class="pc-btn sm" onclick="pcPjDel('+i+')" aria-label="Retirer la dernière pièce" title="Retirer la dernière pièce">✕</button>':''):(ed?'':'—'));
+  return '<tr data-i="'+i+'"><td>'+libCell+'</td>'+
    '<td><select'+d+' onchange="pcSetL('+i+',\'cat\',this.value)" aria-label="Catégorie" style="min-width:150px">'+cats+'</select></td>'+
    '<td><input type="text" value="'+pcEsc(l.unite)+'" placeholder="Ex. kit"'+d+' oninput="pcSetL('+i+',\'unite\',this.value)" style="min-width:90px" aria-label="Unité"></td>'+
-   '<td class="r"><input type="number" min="0" value="'+(l.qte===''?'':l.qte)+'"'+d+' oninput="pcSetL('+i+',\'qte\',this.value)" style="min-width:90px" aria-label="Quantité"></td>'+
-   '<td class="r"><input type="number" min="0" value="'+(l.pu===''?'':l.pu)+'"'+d+' oninput="pcSetL('+i+',\'pu\',this.value)" style="min-width:130px" aria-label="Montant unitaire"></td>'+
+   '<td class="r"><input type="text" inputmode="decimal" value="'+pcDec(l.qte)+'"'+d+' oninput="pcSetL('+i+',\'qte\',this.value)" style="min-width:90px" aria-label="Quantité"></td>'+
+   '<td class="r"><input type="text" inputmode="decimal" value="'+pcDec(l.pu)+'"'+d+' oninput="pcSetL('+i+',\'pu\',this.value)" style="min-width:130px" aria-label="Montant unitaire (virgule acceptée)"></td>'+
    '<td class="r" id="pc-lt-'+i+'"></td>'+
-   '<td><select'+d+' onchange="pcSetL('+i+',\'rep\',this.value)" aria-label="Répartition" style="min-width:170px">'+reps+'</select></td>'+
+   '<td><button type="button" class="pc-btn sm"'+d+' onclick="pcRepAsk('+i+')" title="Répartir le montant par période" style="min-width:150px">'+pcEsc(pcRepTxt(l))+'</button></td>'+
+   '<td><button type="button" class="pc-btn sm"'+d+' onclick="pcSites('+i+')" title="Répartir la ligne entre les sites">'+(l.sites?window.sbSitesSummary(l.sites):'Répartir')+'</button></td>'+
+   '<td style="white-space:nowrap">'+pjCell+'</td>'+
    '<td><input type="text" value="'+pcEsc(l.just)+'" placeholder="Facultatif"'+d+' oninput="pcSetL('+i+',\'just\',this.value)" style="min-width:160px" aria-label="Justification"></td>'+
    '<td id="pc-lc-'+i+'"></td>'+
    '<td>'+(ed?'<button type="button" class="pc-btn sm" onclick="pcDelL('+i+')" aria-label="Supprimer la ligne" title="Supprimer la ligne">✕</button>':'')+'</td></tr>';
 }
-function pcSetL(i,k,v){ var p=pcCur(); if(!p||!pcEditable(p)) return; p.lignes[i][k]=(k==='qte'||k==='pu')?(v===''?'':Number(v)):v; p.saved=''; document.getElementById('pc-s-saved').textContent=''; pcRecalcBud(); }
+function pcSetL(i,k,v){ var p=pcCur(); if(!p||!pcEditable(p)) return; var l=p.lignes[i]; if(k==='qte'||k==='pu'){ var n=pcNum(v); if(n===null) return; l[k]=n; if(Array.isArray(l.repm)&&!pcRepOk(l)){} } else l[k]=v; p.saved=''; document.getElementById('pc-s-saved').textContent=''; pcRecalcBud(); }
 function pcAddL(){ }
-function pcAddLigne(){ var p=pcCur(); p.lignes.push({lib:'',cat:'Biens',unite:'',qte:'',pu:'',rep:PC.reps[0],just:''}); pcRenderSaisie(); }
+function pcSites(i){ var p=pcCur(); if(!p||!pcEditable(p)) return; window.sbSitesAsk(PC.camp.sites, p.lignes[i].sites, 'Répartir la ligne entre les sites', function(m){ p.lignes[i].sites=m; p.saved=''; pcRenderSaisie(); }); }
+function pcAddLigne(){ var p=pcCur(); p.lignes.push({lib:'',act:'',cat:'Biens',unite:'',qte:'',pu:'',rep:PC.reps[0],pjs:[],just:''}); pcRenderSaisie(); }
 function pcDelL(i){ var p=pcCur(); p.lignes.splice(i,1); pcRenderSaisie(); }
 function pcRecalcBud(){
   var p=pcCur(); if(!p) return;
   p.lignes.forEach(function(l,i){
-    var t=(Number(l.qte)||0)*(Number(l.pu)||0);
+    var t=pcLTot(l);
     var c=document.getElementById('pc-lt-'+i); if(c) c.textContent=pcFmt(t);
-    var k=document.getElementById('pc-lc-'+i); if(k) k.innerHTML=pcLigneOk(l)?'<span class="pc-chip ok">✓ Complète</span>':'<span class="pc-chip warn">Incomplète</span>';
+    var k=document.getElementById('pc-lc-'+i); if(k) k.innerHTML=!pcLigneOk(l)?'<span class="pc-chip warn">Incomplète</span>':(!pcRepOk(l)?'<span class="pc-chip warn" title="Le montant réparti ne correspond plus au total de la ligne">Répartition à revoir</span>':'<span class="pc-chip ok">✓ Complète</span>');
   });
   var tot=pcTot(p); document.getElementById('pc-s-tot').textContent=pcFmt(tot);
   var min=PC.camp.min,max=PC.camp.max,top=Math.max(max*1.15,tot*1.05);
@@ -23412,6 +23762,9 @@ function pcSubmitBud(){
   var inc=p.lignes.filter(function(l){ return !pcLigneOk(l); }).length;
   if(inc){ sbPortalNotice(inc+' ligne'+(inc>1?'s sont incomplètes':' est incomplète')+' : libellé, unité, quantité et montant unitaire sont obligatoires.'); return; }
   var tot=pcTot(p);
+  var rv=p.lignes.filter(function(l){ return !pcRepOk(l); }).length; if(rv){ sbPortalNotice(rv+' ligne'+(rv>1?'s ont':' a')+' une répartition dans l’année qui ne correspond plus au montant : ouvrez « Répartition dans l’année » pour la corriger.'); return; }
+  if(PC.camp.pj==='Obligatoire' && !(p.pj||p.lignes.some(function(l){ return l.pjs&&l.pjs.length; }))){ sbPortalNotice('Envoi bloqué : une pièce justificative est obligatoire pour cette campagne. Ajoutez une pièce jointe.'); return; }
+  var nos=p.lignes.filter(function(l){ return PC.camp.sites.length>1 && !l.sites; }).length; if(nos){ sbPortalNotice(nos+' ligne'+(nos>1?'s ne sont pas réparties':' n’est pas répartie')+' entre les sites : indiquez la part de chaque site.'); return; }
   if(tot>PC.camp.max){ sbPortalNotice('Envoi bloqué : le maximum du périmètre est dépassé de '+pcFmt(tot-PC.camp.max)+' MGA.'); return; }
   p.st='Soumis pour validation'; p.retourne=false;
   PC.envois.unshift({ date:pcToday(), type:'Budget', obj:p.nom, ref:PC.camp.lib, st:'Soumis' });
@@ -23501,9 +23854,7 @@ function pcRenderEnv(){
   .dp-stack .lg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
   /* Gestion des utilisateurs (modèle SoftGRH) */
   .gu-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; }
-  .gu-tabs { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--border); }
-  .gu-tabs button { padding: 14px 18px; font-size: 13.5px; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; cursor: pointer; }
-  .gu-tabs button.on { color: var(--text, #1f2430); font-weight: 600; border-bottom-color: var(--brand, #2E427B); }
+  .gu-tabs { margin: 0; padding: 0 16px; }
   .gu-pad { padding: 20px; }
   .gu-tool { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
   .gu-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: var(--surface-2, #F5F7F9); border: 1px solid var(--border); border-bottom: 0; border-radius: 10px 10px 0 0; }
@@ -23519,7 +23870,12 @@ function pcRenderEnv(){
   .gu-side, .gu-main { border: 1px solid var(--border); border-radius: 12px; background: #fff; overflow: hidden; }
   .gu-side-h { padding: 14px 16px; border-bottom: 1px solid var(--border); }
   .gu-cap { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-  .gu-gl { padding: 8px; display: flex; flex-direction: column; gap: 4px; max-height: 520px; overflow: auto; }
+  .gu-gl { padding: 8px; display: flex; flex-direction: column; gap: 4px; flex: 1; min-height: 0; overflow: auto; }
+  .gu-split { height: calc(100vh - 340px); min-height: 420px; align-items: stretch; }
+  .gu-side, .gu-main { display: flex; flex-direction: column; min-height: 0; }
+  .gu-side-h, .gu-main-h { flex: none; }
+  .gu-priv, .gu-main > .scroll { flex: 1; min-height: 0; overflow: auto; }
+  @media (max-width: 900px) { .gu-split { height: auto; } .gu-gl { max-height: 320px; } .gu-priv, .gu-main > .scroll { overflow: visible; } }
   .gu-g { text-align: left; padding: 10px 12px; border-radius: 8px; border: 0; border-left: 4px solid transparent; background: none; cursor: pointer; }
   .gu-g:hover { background: var(--surface-2, #F5F7F9); }
   .gu-g.on { background: #EAEDF4; border-left-color: var(--brand, #2E427B); }
