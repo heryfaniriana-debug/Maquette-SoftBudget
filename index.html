@@ -4034,7 +4034,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div class="card" style="margin-bottom:16px">
               <div class="scroll">
                 <table style="min-width:980px">
-                  <thead><tr><th>Configuration</th><th>Campagne consolidée</th><th class="num">Montant consolidé</th><th>Étape</th><th>Validateur</th><th>Statut</th><th>Dernière action</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>Cadre budgétaire</th><th>Campagne consolidée</th><th class="num">Montant consolidé</th><th>Étape</th><th>Validateur</th><th>Statut</th><th>Dernière action</th><th>Actions</th></tr></thead>
                   <tbody id="cv-body"></tbody>
                 </table>
               </div>
@@ -4301,7 +4301,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="card">
             <div class="scroll">
               <table style="min-width:860px">
-                <thead><tr><th>Lot de collecte</th><th>Configuration</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du PTBA</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Lot de collecte</th><th>Cadre budgétaire</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du PTBA</th><th>Actions</th></tr></thead>
                 <tbody id="bv-body"></tbody>
               </table>
             </div>
@@ -5299,7 +5299,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 <!-- ===== Projet : plan de passation des marchés ===== -->
       <section class="view" id="v-ppm">
         <div class="head"><div><h1>PPM — Plan de passation des marchés</h1><p>Un plan par exercice, construit à partir des lignes du PTBA validé : le système propose ce qu’il faut acquérir et la méthode de passation.</p></div></div>
-        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead><tr><th>Lot de collecte</th><th>Configuration</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du PPM</th><th>Actions</th></tr></thead><tbody id="ppm-lots"></tbody></table></div></div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead><tr><th>Lot de collecte</th><th>Cadre budgétaire</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du PPM</th><th>Actions</th></tr></thead><tbody id="ppm-lots"></tbody></table></div></div>
         <div class="panel" id="ppm-det" hidden><h2><span id="ppm-det-title">PPM</span></h2><div class="body" id="ppm-det-body"></div></div>
         <div class="panel" id="ppm-guide" hidden><h2><span id="ppm-guide-title">Planifier la passation</span></h2><div class="body" id="ppm-guide-body"></div></div>
       </section>
@@ -5347,7 +5347,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       <!-- ===== Projet : plan de décaissement prévisionnel ===== -->
       <section class="view" id="v-pdec">
         <div class="head"><div><h1>Plan de décaissement</h1><p>Un plan par exercice : les demandes de réapprovisionnement à prévoir, à partir de l’avance initiale, du PTBA et du PPM.</p></div></div>
-        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead><tr><th>Plan</th><th>Configuration</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du plan</th><th>Actions</th></tr></thead><tbody id="pdc-lots"></tbody></table></div></div>
+        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead><tr><th>Plan</th><th>Cadre budgétaire</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du plan</th><th>Actions</th></tr></thead><tbody id="pdc-lots"></tbody></table></div></div>
         <div class="panel" id="pdc-det" hidden><h2><span id="pdc-det-title">Plan de décaissement</span></h2><div class="body" id="pdc-det-body"></div></div>
       </section>
       <!-- ===== Projet : demandes de fonds (DRF et DPD) ===== -->
@@ -6635,6 +6635,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (typeof DP_RENDER !== 'undefined' && DP_RENDER[name]) DP_RENDER[name]();
     if ((name === 'ptba' || name === 'pta') && typeof renderBv === 'function') { bvKind = name; renderBv(); }
     if (name === 'dashboard' && typeof renderDash === 'function') renderDash();
+    if (name === 'list') { var lh = document.querySelector('#v-list .head h1'); if (lh) lh.textContent = (typeof activeCode === 'function' && activeCode() === 'prj') ? 'Cadre budgétaire' : 'Paramétrage des budgets'; }
     if (name === 'resu' && typeof resuRender === 'function') resuRender();
     if (name === 'avini' && typeof aviniRender === 'function') aviniRender();
     if (/^sx(eng|liq|pay|enc|phy)$/.test(name) && typeof sxRender === 'function') { SX.kind = name.slice(2); sxRender(); }
@@ -14499,8 +14500,8 @@ var EXEC_REC = [
     var adv = function (c, a) { return a; }, simple = function (c, a) { return !a; }, treso = function (c, a, f) { return f.mods.treso; };
     var ca = [['Engagements', rPrj], ['Liquidations', rPrj], ['Ordonnancement', rPrj], ['Paiements', rPrj], ['Tableau de restitution', rPrj], ['Clôture de l’exercice', rPrj], ['Fichiers d’interface', rPrj]];
     return [
-      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
-      { g: 'Élaboration', items: [['Configuration', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
+      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Cadre budgétaire', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
+      { g: 'Élaboration', items: [['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso]] },
       { g: 'Compte administratif', items: ca },
       { g: 'Exécution', items: [[rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Avancement physique', rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
@@ -14514,7 +14515,7 @@ var EXEC_REC = [
   }
   var NAV_ORIG = null;
   var PRJ_GROUP_LBL = {
-    'g-budgets': ['Élaboration', 'Élaboration : configuration, campagnes, collecte, validation et budgets'],
+    'g-budgets': ['Élaboration', 'Élaboration : campagnes, collecte, validation et budgets'],
     'g-plan': ['Plans annuels', 'PTBA, PTA, plan de passation des marchés et plan de décaissement'],
     'g-treso': ['Trésorerie', 'Décaissements, demandes de fonds et comptes bancaires'],
     'g-suivi': ['Exécution', 'Renseigner l’exécution : engagements, réalisations, décaissements et encaissements']
@@ -14554,8 +14555,8 @@ var EXEC_REC = [
       var sub = document.querySelector('#' + gid + ' > .sub');
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
-    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['avini', 'Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
-    put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
+    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
+    put('g-budgets', [['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
     gT.style.display = 'none';
@@ -14573,7 +14574,7 @@ var EXEC_REC = [
     var gid = prjGroupOf(name); if (!gid || !PRJ_CRUMB_G[gid]) return t;
     var b = prjBtn(name), h = navHead(document.getElementById(gid));
     var lbl = (!label && b.dataset.o !== undefined && (MENU_OF[name] || name) === name) ? b.textContent.trim() : t[1];
-    if (name === 'create') lbl = 'Nouvelle configuration';
+    if (name === 'create') lbl = 'Nouveau cadre budgétaire';
     return [h.textContent.trim(), lbl];
   }
   function regSetVis(sel, vis) { document.querySelectorAll(sel).forEach(function (e) { e.style.display = vis ? '' : 'none'; }); }
@@ -18650,16 +18651,16 @@ var EXEC_REC = [
     var allowed = accProfiles(), adv = modes[activeCode()] === 'Avancé';
     var prj = activeCode() === 'prj';
     var vis = PARAMS.filter(function (x) { return allowed.indexOf(x.prof) >= 0 && (!prj || (x.prof === 'Projet / Programme' && x.id !== 'PAR-009')); });
-    var h1 = document.querySelector('#v-list > .head h1'); if (h1) h1.textContent = prj ? 'Configuration' : 'Paramétrage des budgets';
-    var nbt = document.querySelector('#bl-actions [data-go="create"]'); if (nbt) nbt.textContent = prj ? '+ Nouvelle configuration' : '+ Créer un paramétrage';
-    document.getElementById('bl-q').placeholder = prj ? 'Rechercher une configuration…' : 'Rechercher un paramétrage…'; document.getElementById('bl-nat').hidden = prj;
+    var h1 = document.querySelector('#v-list > .head h1'); if (h1) h1.textContent = prj ? 'Cadre budgétaire' : 'Paramétrage des budgets';
+    var nbt = document.querySelector('#bl-actions [data-go="create"]'); if (nbt) nbt.textContent = prj ? '+ Nouveau cadre budgétaire' : '+ Créer un paramétrage';
+    document.getElementById('bl-q').placeholder = prj ? 'Rechercher un cadre budgétaire…' : 'Rechercher un paramétrage…'; document.getElementById('bl-nat').hidden = prj;
     var q = document.getElementById('bl-q').value.trim().toLowerCase();
     var fn = document.getElementById('bl-nat').value;
     var list = vis.filter(function (x) { return (!q || (x.id + ' ' + x.lib).toLowerCase().indexOf(q) >= 0) && (prj || fn === 'Toutes les natures' || x.nature === fn); });
     if (parSel && !list.some(function (x) { return x.id === parSel; })) parSel = null;
     var head = document.getElementById('bl-head'); head.innerHTML = '';
     var hr = document.createElement('tr');
-    (prj ? ['Configuration', 'Périodicité', 'Ventilation', 'Sources couvertes'] : ['Paramétrage', 'Nature', 'Devise', 'Périodicité']).concat(adv ? ['Périmètre de collecte'] : []).forEach(function (h) { var th = document.createElement('th'); th.textContent = h; hr.appendChild(th); });
+    (prj ? ['Cadre budgétaire', 'Périodicité', 'Ventilation', 'Sources couvertes'] : ['Paramétrage', 'Nature', 'Devise', 'Périodicité']).concat(adv ? ['Périmètre de collecte'] : []).forEach(function (h) { var th = document.createElement('th'); th.textContent = h; hr.appendChild(th); });
     head.appendChild(hr);
     var body = document.getElementById('bl-body'); body.innerHTML = '';
     var cols = 4 + (adv ? 1 : 0);
@@ -20873,15 +20874,23 @@ var EXEC_REC = [
   function anaPc(a, b) { return b ? pctf(a / b) : '—'; }
   function anaBlock(body, title, node) { var x = cvEl('section', 'co-blk'); if (title) x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); return x; }
   /* Commentaire de l'écart et décision de glissement */
+  /* Commentaire de l'écart et décision de glissement : deux icônes alignées */
+  var ANA_IC = {
+    com: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    dec: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/><path d="m11 15 2 2 3-3"/></svg>'
+  };
+  function anaIcon(svg, title, on, off, fn) {
+    var b = cvEl('button', 'btn small ana-ic' + (on ? ' on' : '')); b.type = 'button'; b.innerHTML = svg; b.title = title; b.setAttribute('aria-label', title);
+    if (off) b.disabled = true; else b.addEventListener('click', fn); return b;
+  }
   function anaActions(kind, x) {
-    var box = cvEl('div'), key = kind + '|' + x.id; box.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
-    var c = ANA.com[key], b1 = cvEl('button', 'btn small', c ? 'Modifier le commentaire' : 'Commenter'); b1.type = 'button';
-    b1.addEventListener('click', function () { cvAsk({ title: 'Commenter l’écart — ' + x.label, ok: 'Enregistrer', required: true, cLabel: 'Commentaire', placeholder: 'Expliquez l’écart constaté', value: c ? c.t : '' }, function (t) { ANA.com[key] = { t: t, by: ME, on: nowStr() }; anaRender(); }); }); box.appendChild(b1);
-    var gap = x.planTo - x.real;
-    if (['eng', 'rea', 'dec', 'phy'].indexOf(kind) >= 0 && gap > 0) {
-      var d0 = ANA.dec.filter(function (d) { return d.key === key; })[0], b2 = cvEl('button', 'btn small', d0 ? 'Changer la décision' : 'Décider du glissement'); b2.type = 'button';
-      b2.addEventListener('click', function () { cvAsk({ title: 'Glissement — ' + x.label, ok: 'Enregistrer la décision', required: true, cLabel: 'Motif de la décision', optLabel: 'Que faire du reliquat de ' + fmt(gap) + (x.unit ? ' ' + x.unit : ' MGA') + ' ?', options: ANA_OPT, placeholder: 'Pourquoi cette décision ?' }, function (motif, opt) { ANA.dec = ANA.dec.filter(function (d) { return d.key !== key; }); ANA.dec.push({ key: key, kind: kind, id: x.id, label: x.label, amt: gap, unit: x.unit || 'MGA', opt: opt, motif: motif, by: ME, on: nowStr() }); anaRender(); }); }); box.appendChild(b2);
+    var box = cvEl('div', 'ana-acts'), key = kind + '|' + x.id, c = ANA.com[key];
+    box.appendChild(anaIcon(ANA_IC.com, c ? 'Modifier le commentaire' : 'Commenter l’écart', !!c, false, function () { cvAsk({ title: 'Commenter l’écart — ' + x.label, ok: 'Enregistrer', required: true, cLabel: 'Commentaire', placeholder: 'Expliquez l’écart constaté', value: c ? c.t : '' }, function (t) { ANA.com[key] = { t: t, by: ME, on: nowStr() }; anaRender(); }); }));
+    if (['eng', 'rea', 'dec', 'phy'].indexOf(kind) >= 0) {
+      var gap = x.planTo - x.real, d0 = ANA.dec.filter(function (d) { return d.key === key; })[0];
+      box.appendChild(anaIcon(ANA_IC.dec, d0 ? 'Changer la décision de glissement' : 'Décider du glissement', !!d0, !(gap > 0) && !d0, function () { cvAsk({ title: 'Glissement — ' + x.label, ok: 'Enregistrer la décision', required: true, cLabel: 'Motif de la décision', optLabel: 'Que faire du reliquat de ' + fmt(gap) + (x.unit ? ' ' + x.unit : ' MGA') + ' ?', options: ANA_OPT, placeholder: 'Pourquoi cette décision ?' }, function (motif, opt) { ANA.dec = ANA.dec.filter(function (d) { return d.key !== key; }); ANA.dec.push({ key: key, kind: kind, id: x.id, label: x.label, amt: gap, unit: x.unit || 'MGA', opt: opt, motif: motif, by: ME, on: nowStr() }); anaRender(); }); }));
     }
+    box.appendChild(document.createTextNode('​'));
     return box;
   }
   function anaComCell(kind, x) {
@@ -20890,7 +20899,8 @@ var EXEC_REC = [
     if (d) { var bd = badge(d.opt, 'b-info'); bd.style.marginTop = '6px'; bd.style.display = 'inline-block'; n.appendChild(bd); }
     return n;
   }
-  function anaSit(kind, x, sb) { var n = cvEl('div'), c = anaComCell(kind, x), a = anaActions(kind, x); n.style.minWidth = '230px'; n.style.textAlign = 'left'; n.appendChild(sb); if (c.textContent !== '—' && c.textContent !== '—') { c.style.margin = '6px 0'; n.appendChild(c); } a.style.marginTop = '6px'; n.appendChild(a); return n; }
+  function anaSit(kind, x, sb) { return [sb, anaComCell(kind, x), anaActions(kind, x)]; }
+  function anaSitOld(kind, x, sb) { var n = cvEl('div'), c = anaComCell(kind, x), a = anaActions(kind, x); n.style.minWidth = '230px'; n.style.textAlign = 'left'; n.appendChild(sb); if (c.textContent !== '—' && c.textContent !== '—') { c.style.margin = '6px 0'; n.appendChild(c); } a.style.marginTop = '6px'; n.appendChild(a); return n; }
   function anaLabel(x) { var n = cvEl('div'); n.appendChild(cvEl('b', null, x.label)); if (x.sub) n.appendChild(cvEl('div', 'hby', x.sub)); return n; }
   /* Écran type : indicateurs, graphique, tableau d'écarts commentables, décisions */
   function anaCompare(b, kind, ex) {
@@ -20916,20 +20926,20 @@ var EXEC_REC = [
     }
     /* Tableau */
     var head, num, trs;
-    if (kind === 'dec') { head = ['Mois', 'Prévu (compte spécial)', 'Décaissé', 'Écart', 'Prévu (paiements directs)', 'Payé directement', 'Écart', 'Situation et commentaire']; num = [1, 2, 3, 4, 5, 6]; }
-    else if (kind === 'fp') { head = ['Ligne', 'Dépensé', 'Réalisé physique', 'Attendu au vu des dépenses', 'Écart', 'Reste à réaliser', 'Situation et commentaire']; num = [1, 2, 3, 4, 5]; }
-    else if (kind === 'phy') { head = ['Travail', 'Cible annuelle', 'Cible à date', 'Réalisé', 'Écart', 'Taux', 'Situation et commentaire']; num = [1, 2, 3, 4, 5]; }
-    else { head = [kind === 'eng' ? 'Marché' : (kind === 'rea' ? 'Ligne du PTBA' : 'Étape'), kind === 'eng' ? 'Prévu au PPM' : (kind === 'rea' ? 'PTBA' : 'Prévu sur l’exercice'), 'Prévu à date', kind === 'eng' ? 'Engagé' : 'Réalisé', 'Écart', 'Taux', 'Situation et commentaire']; num = [1, 2, 3, 4, 5]; }
+    if (kind === 'dec') { head = ['Mois', 'Prévu (compte spécial)', 'Décaissé', 'Écart', 'Prévu (paiements directs)', 'Payé directement', 'Écart', 'Situation', 'Commentaire', '']; num = [1, 2, 3, 4, 5, 6]; }
+    else if (kind === 'fp') { head = ['Ligne', 'Dépensé', 'Réalisé physique', 'Attendu au vu des dépenses', 'Écart', 'Reste à réaliser', 'Situation', 'Commentaire', '']; num = [1, 2, 3, 4, 5]; }
+    else if (kind === 'phy') { head = ['Travail', 'Cible annuelle', 'Cible à date', 'Réalisé', 'Écart', 'Taux', 'Situation', 'Commentaire', '']; num = [1, 2, 3, 4, 5]; }
+    else { head = [kind === 'eng' ? 'Marché' : (kind === 'rea' ? 'Ligne du PTBA' : 'Étape'), kind === 'eng' ? 'Prévu au PPM' : (kind === 'rea' ? 'PTBA' : 'Prévu sur l’exercice'), 'Prévu à date', kind === 'eng' ? 'Engagé' : 'Réalisé', 'Écart', 'Taux', 'Situation', 'Commentaire', '']; num = [1, 2, 3, 4, 5]; }
     trs = rows.map(function (x) {
       var st, u = x.unit, sb;
       if (kind === 'fp') {
         var tp = x.plan ? x.real / x.plan : 0, gp = tp - x.tf, att = Math.round(x.plan * x.tf); x.planTo = att; x.ecart = x.real - att;
         st = gp < -0.35 ? ['Dépenses très en avance', 'b-ko'] : (gp < -0.2 ? ['Dépenses en avance', 'b-warn'] : (gp > 0.2 ? ['Physique en avance', 'b-info'] : ['Cohérent', 'b-ok']));
-        return [anaLabel(x), anaPc(x.liq, x.cred), anaPc(x.real, x.plan), fmt(att) + ' ' + u, anaSg(x.real - att, u), fmt(Math.max(0, x.plan - x.real)) + ' ' + u, anaSit(kind, x, badge(st[0], st[1]))];
+        return [anaLabel(x), anaPc(x.liq, x.cred), anaPc(x.real, x.plan), fmt(att) + ' ' + u, anaSg(x.real - att, u), fmt(Math.max(0, x.plan - x.real)) + ' ' + u].concat(anaSit(kind, x, badge(st[0], st[1])));
       }
       st = anaState(x, thr); sb = badge(st[0], st[1]);
-      if (kind === 'dec') return [x.label, fmt(x.plan), fmt(x.real), anaSg(x.real - x.plan), fmt(x.plan2), fmt(x.real2), anaSg(x.real2 - x.plan2), anaSit(kind, x, sb)];
-      return [anaLabel(x), fmt(x.plan) + (u ? ' ' + u : ''), fmt(x.planTo) + (u ? ' ' + u : ''), fmt(x.real) + (u ? ' ' + u : ''), anaSg(x.ecart, u), anaPc(x.real, x.planTo), anaSit(kind, x, sb)];
+      if (kind === 'dec') return [x.label, fmt(x.plan), fmt(x.real), anaSg(x.real - x.plan), fmt(x.plan2), fmt(x.real2), anaSg(x.real2 - x.plan2)].concat(anaSit(kind, x, sb));
+      return [anaLabel(x), fmt(x.plan) + (u ? ' ' + u : ''), fmt(x.planTo) + (u ? ' ' + u : ''), fmt(x.real) + (u ? ' ' + u : ''), anaSg(x.ecart, u), anaPc(x.real, x.planTo)].concat(anaSit(kind, x, sb));
     });
     anaBlock(b, kind === 'fin' ? 'Du financement prévu aux encaissements' : 'Écarts à date', dpMini(head, trs, num, 'Aucune donnée pour cet exercice.'));
     /* Décisions de glissement */
@@ -22312,6 +22322,10 @@ function pcRenderEnv(){
   tr.ra-row { cursor: pointer; }
   tr.ra-sel > td { background: var(--info-bg); }
   .ra-hide { display: none !important; }
+  .ana-acts { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; }
+  .ana-ic { width: 30px; height: 30px; padding: 0 !important; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .ana-ic.on { background: var(--info-bg); color: #2E427B; border-color: #5F77B9; }
+  .ana-ic:disabled { opacity: .35; }
 </style>
 <script>
 /* Actions de ligne : tous les boutons d'action d'un tableau sont regroupés en haut à gauche.
