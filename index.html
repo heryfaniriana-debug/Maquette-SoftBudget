@@ -5399,12 +5399,14 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       <!-- ===== Projet : suivi de l'exécution (engagements, réalisations, paiements, encaissements) ===== -->
       <section class="view" id="v-sx">
         <div class="head"><div><h1>Engagements</h1><p></p></div>
-          <div class="actions"><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-sync">⟳ Synchroniser</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
+          <div class="actions"><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-suivi-b">Suivi sur une période</button><button class="btn" id="sx-sync">⟳ Synchroniser</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
         <div class="callout" id="sx-msg" hidden style="margin-bottom:12px"></div>
         <div id="sx-k"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead id="sx-th"></thead><tbody id="sx-b"></tbody></table></div></div>
         <section class="co-blk"><div class="kb-h">Récupérations, imports et saisies</div><div class="card" id="sx-log"></div></section>
-        <div class="panel" id="sx-sy" hidden><h2><span id="sx-sy-title">Synchroniser</span></h2><div class="body" id="sx-sy-body"></div></div>
+                <div class="panel" id="sx-suivi" hidden><h2><span>Suivi des engagements sur une période</span></h2><div class="body" id="sx-suivi-body"></div></div>
+        <div class="panel" id="sx-ech" hidden><h2><span id="sx-ech-title">Échéancier</span></h2><div class="body" id="sx-ech-body"></div></div>
+<div class="panel" id="sx-sy" hidden><h2><span id="sx-sy-title">Synchroniser</span></h2><div class="body" id="sx-sy-body"></div></div>
         <div class="panel" id="sx-form" hidden><h2><span id="sx-form-title">Saisie directe</span></h2><div class="body">
           <div class="fgrid">
             <div><label for="sxf-date">Date <em>*</em></label><input id="sxf-date" class="field" type="date"></div>
@@ -5412,7 +5414,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div><label for="sxf-ref"><span id="sxf-reflbl">Référence</span> <em>*</em></label><input id="sxf-ref" class="field" type="text"></div>
             <div><label for="sxf-tiers"><span id="sxf-tglbl">Bénéficiaire</span></label><input id="sxf-tiers" class="field" type="text"></div>
             <div><label for="sxf-mt"><span id="sxf-mtlbl">Montant (MGA)</span> <em>*</em></label><input id="sxf-mt" class="field" type="text" inputmode="numeric"></div>
-            <div id="sxf-dw" hidden><label class="chk"><input type="checkbox" id="sxf-dpd"> Paiement direct du bailleur (hors décaissements du projet)</label></div>
+                        <div id="sxf-pw" hidden><label for="sxf-d1">Début de l’engagement</label><input id="sxf-d1" class="field" type="date"></div>
+            <div id="sxf-p2w" hidden><label for="sxf-d2">Fin de l’engagement</label><input id="sxf-d2" class="field" type="date"></div>
+            <div id="sxf-ew" hidden><label for="sxf-eng">Engagement rattaché</label><select id="sxf-eng" class="field"></select></div><div id="sxf-dw" hidden><label class="chk"><input type="checkbox" id="sxf-dpd"> Paiement direct du bailleur (hors décaissements du projet)</label></div>
           </div>
           <div class="err" id="sxf-err"></div>
           <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="sxf-cancel">Annuler</button><button class="btn primary" id="sxf-save">Enregistrer</button></div>
@@ -20137,7 +20141,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20774,7 +20778,7 @@ var EXEC_REC = [
   function anaSnap(z) { if (!ANA.ver) return null; var v = bvVers(z.r)[ANA.ver - 1]; return v ? v.snap[z.perim + '|' + z.l.c] : null; }
   function anaCred(z) { var s = anaSnap(z); return s ? s.dem : (z.l.dem || 0); }
   function anaVol(z) { var w = z.l.wk; if (!w) return 0; var s = anaSnap(z); if (s && s.inds && s.inds.length === 1) return s.inds[0][1]; return w.vol || 0; }
-  function anaSx(kind, key, ex, upto) { sxSeed(); return (SX.items || []).filter(function (i) { return i.kind === kind && (key == null || i.key === key) && i.date && i.date.slice(0, 4) === ex && (!upto || i.date <= upto); }).reduce(function (a, i) { return a + i.mt; }, 0); }
+  function anaSx(kind, key, ex, upto) { sxSeed(); if (kind === 'eng') return (SX.items || []).filter(function (i) { return i.kind === 'eng' && (key == null || i.key === key); }).reduce(function (a, i) { return a + sxPart(i, ex); }, 0); return (SX.items || []).filter(function (i) { return i.kind === kind && (key == null || i.key === key) && i.date && i.date.slice(0, 4) === ex && (!upto || i.date <= upto); }).reduce(function (a, i) { return a + i.mt; }, 0); }
   function anaRules() {
     if (!ANA.rules) { ANA.seq = 5; ANA.rules = [
       { id: 1, nom: 'Engagements en retard sur le PPM', real: 'eng', plan: 'ppm', seuil: 20, sens: 'sous', on: true },
@@ -20794,7 +20798,7 @@ var EXEC_REC = [
       ppmLotItems(r).forEach(function (x) { var d = x.d3 || x.d2 || x.d1; if (d && d.slice(0, 4) === ex) S.ppm[+d.slice(5, 7) - 1] += x.est; });
     });
     anaLines(ex).forEach(function (z) { var sp = bvSpread(anaCred(z), z.l, ex); for (m = 0; m < 12; m++) S.ptba[m] += sp[m]; });
-    (SX.items || []).forEach(function (i) { if (!i.date || i.date.slice(0, 4) !== ex) return; var k = i.kind === 'pay' && sxIsDpd(i) ? 'dpd' : i.kind; if (S[k] && k !== 'inf') S[k][+i.date.slice(5, 7) - 1] += i.mt; });
+    (SX.items || []).forEach(function (i) { if (i.kind === 'eng') { var pt = sxPart(i, ex); if (pt) S.eng[i.date.slice(0, 4) === ex ? +i.date.slice(5, 7) - 1 : 0] += pt; return; } if (!i.date || i.date.slice(0, 4) !== ex) return; var k = i.kind === 'pay' && sxIsDpd(i) ? 'dpd' : i.kind; if (S[k] && k !== 'inf') S[k][+i.date.slice(5, 7) - 1] += i.mt; });
     return S;
   }
   /* Lignes de comparaison : une ligne par marché, par ligne du PTBA, par travail ou par mois */
@@ -20928,7 +20932,7 @@ var EXEC_REC = [
     });
     anaBlock(b, kind === 'fin' ? 'Du financement prévu aux encaissements' : 'Écarts à date', dpMini(head, trs, num, 'Aucune donnée pour cet exercice.'));
     /* Décisions de glissement */
-    var ds = ANA.dec.filter(function (d) { return d.kind === kind; });
+    if (kind === 'eng') anaEngReport(b, ex); var ds = ANA.dec.filter(function (d) { return d.kind === kind; });
     if (ds.length) anaBlock(b, 'Décisions de glissement', dpMini(['Écart', 'Montant', 'Décision', 'Motif', 'Prise le', ''], ds.map(function (d) { var bt = cvEl('button', 'btn small', 'Annuler la décision'); bt.type = 'button'; bt.addEventListener('click', function () { ANA.dec = ANA.dec.filter(function (q) { return q !== d; }); anaRender(); }); return [d.label, fmt(d.amt) + ' ' + d.unit, badge(d.opt, 'b-info'), d.motif, d.by + ' · ' + d.on, bt]; }), [1], ''));
   }
   /* Alertes : règles choisies par l'utilisateur, évaluées à la date du jour */
@@ -21095,32 +21099,33 @@ var EXEC_REC = [
   function sxId() { return 'SX-' + ('000' + (++SX.seq)).slice(-4); }
   function sxLineKey(code) { var z = dpLines().filter(function (x) { return x.l.c === code; })[0]; return z ? z.key : null; }
   function sxSeed() {
-    if (SX.items) return; dpSeed(); if (!DP.docs) return; SX.items = []; var today = cadToday();
-    function add(kind, key, date, ref, tiers, mt, src, unit) { SX.items.push({ id: sxId(), kind: kind, key: key, date: date, ref: ref, tiers: tiers, mt: mt, src: src || 'SoftAccounting', unit: unit }); }
+    if (SX.items) return; dpSeed(); if (!DP.docs) return; SX.items = []; SX.free = []; var today = cadToday();
+    function add(kind, key, date, ref, tiers, mt, src, unit, x) { var o = { id: sxId(), kind: kind, key: key, date: date, ref: ref, tiers: tiers, mt: mt, src: src || 'SoftAccounting', unit: unit }; if (x) Object.keys(x).forEach(function (k) { o[k] = x[k]; }); SX.items.push(o); }
     DP.docs.forEach(function (d) {
       var q = d.dt || {};
-      if (d.kind !== 'avance' && DP_RANK[d.st] >= 2) add('eng', d.key, q.eng, d.ref, d.tiers, d.id === 'ENG-2026-0009' ? d.mt - 2000000 : d.mt);
-      if (d.kind !== 'avance' && DP_RANK[d.st] >= 3) add('liq', d.key, q.liq, d.fac, d.tiers, d.mt);
-      if (DP_RANK[d.st] >= 6 && d.id !== 'ENG-2026-0010') add('pay', d.key, q.pay, d.mandat, d.tiers, dfoAmt(d));
-      if (d.id === 'ENG-2026-0005') add('pay', d.key, '2026-11-12', 'VIR-0460', d.tiers, d.mt);
+      if (d.kind !== 'avance' && DP_RANK[d.st] >= 2) add('eng', d.key, q.eng, d.ref, d.tiers, d.id === 'ENG-2026-0009' ? d.mt - 2000000 : d.mt, undefined, undefined, sxDefPer(d));
+      if (d.kind !== 'avance' && DP_RANK[d.st] >= 3) add('liq', d.key, q.liq, d.fac, d.tiers, d.mt, undefined, undefined, { eng: d.ref });
+      if (DP_RANK[d.st] >= 6 && d.id !== 'ENG-2026-0010') add('pay', d.key, q.pay, d.mandat, d.tiers, dfoAmt(d), undefined, undefined, { eng: d.ref });
+      if (d.id === 'ENG-2026-0005') add('pay', d.key, '2026-11-12', 'VIR-0460', d.tiers, d.mt, undefined, undefined, { eng: d.ref });
     });
     DFS.versements.forEach(function (v) { add('enc', null, v.date, v.ref, 'Bailleur — ' + v.lib.toLowerCase(), v.mt); });
     CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') add('enc', null, x.dPaie, x.id, 'Bailleur — reconstitution du compte', x.mtAcc); });
     var QE = ['-03-31', '-06-30', '-09-30', '-12-31'];
     dpLines().forEach(function (z) { var w = z.l.wk; if (!w || !w.real) return; var ex = z.r.ex || '2026', prev = 0; w.real.forEach(function (v, q) { if (v == null) return; if (v > prev) add('phy', z.key, ex + QE[q], 'AP-' + z.l.c + '-T' + (q + 1), w.task, v - prev, 'SoftSE', w.unit); prev = v; }); });
     var k21 = sxLineKey('2.1'), w21 = (dpLine(k21) || { l: {} }).l.wk || {};
-    SX.pool = { 'SoftAccounting': { eng: [{ key: k21, date: today, ref: 'BC-2026-0190', tiers: 'FOURNITEC SARL', mt: 12000000 }], liq: [], pay: [{ key: k21, date: today, ref: 'VIR-0471', tiers: 'Cabinet RAKOTO Conseil', mt: 12000000 }], enc: [] }, 'SoftSE': { phy: [{ key: k21, date: today, ref: 'AP-2.1-T4', tiers: w21.task, mt: 1, unit: w21.unit }] }, 'Soft e-Procurement': { eng: [{ key: k21, date: '2026-11-10', ref: 'M-2026-070', tiers: 'ELECTRO-MED Madagascar', mt: 18000000 }, { key: sxLineKey('1.1'), date: '2026-11-12', ref: 'M-2026-071', tiers: 'BTP Andriana', mt: 8000000 }], liq: [], pay: [], enc: [] } }; SX.extra = SX.pool['SoftAccounting'];
+    SX.pool = { 'SoftAccounting': { eng: [{ key: k21, date: today, ref: 'BC-2026-0190', tiers: 'FOURNITEC SARL', mt: 12000000 }], liq: [{ key: k21, date: today, ref: 'FAC-0990', tiers: 'Entreprise Sud B\u00e2timent', mt: 54000000, eng: 'M-2026-051' }], pay: [{ eng: 'CT-2026-016', key: k21, date: today, ref: 'VIR-0471', tiers: 'Cabinet RAKOTO Conseil', mt: 12000000 }], enc: [] }, 'SoftSE': { phy: [{ key: k21, date: today, ref: 'AP-2.1-T4', tiers: w21.task, mt: 1, unit: w21.unit }] }, 'Soft e-Procurement': { eng: [{ key: k21, date: '2026-11-10', ref: 'M-2026-070', tiers: 'ELECTRO-MED Madagascar', mt: 18000000 }, { key: sxLineKey('1.1'), date: '2026-11-12', ref: 'M-2026-071', tiers: 'BTP Andriana', mt: 8000000 }], liq: [], pay: [], enc: [] } }; SX.extra = SX.pool['SoftAccounting'];
     SX.store = { 'SoftAccounting': {}, 'Soft e-Procurement': {}, 'SoftSE': {} };
     SX.store['SoftSE'].phy = SX.items.filter(function (i) { return i.kind === 'phy'; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt, unit: i.unit }; }).concat(SX.pool['SoftSE'].phy); SX.store['SoftSE'].phy.forEach(function (r) { if (r.ref === 'AP-2.2-T3') r.mt = 12; });
-    ['eng', 'liq', 'pay', 'enc'].forEach(function (k) { SX.store['SoftAccounting'][k] = SX.items.filter(function (i) { return i.kind === k; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt }; }).concat(SX.pool['SoftAccounting'][k]); SX.store['Soft e-Procurement'][k] = SX.pool['Soft e-Procurement'][k].slice(); });
+    ['eng', 'liq', 'pay', 'enc'].forEach(function (k) { SX.store['SoftAccounting'][k] = SX.items.filter(function (i) { return i.kind === k; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt, eng: i.eng, d1: i.d1, d2: i.d2 }; }).concat(SX.pool['SoftAccounting'][k]); SX.store['Soft e-Procurement'][k] = SX.pool['Soft e-Procurement'][k].slice(); });
     SX.store['SoftAccounting'].eng.forEach(function (r) { if (r.ref === 'BC-2026-0171') r.mt = 40000000; });
+    var e51 = SX.items.filter(function (i) { return i.kind === 'eng' && i.ref === 'M-2026-051'; })[0]; if (e51) e51.ech = { '2026': Math.round(e51.mt * 2 / 3), '2027': e51.mt - Math.round(e51.mt * 2 / 3) };
     SX.log = [{ on: '10/11/2026 08:30', src: 'Synchronisation de la comptabilité', n: SX.items.length, by: 'Système' }]; DP.impLog = SX.log;
   }
   /* Ce que la comptabilité ou le fichier dit, ligne du PTBA par ligne : base du rapprochement avec le compte administratif */
   function sxAgg() { sxSeed(); var o = {}; (SX.items || []).forEach(function (i) { if (!i.key || ['eng', 'liq', 'pay'].indexOf(i.kind) < 0) return; var r = o[i.key] = o[i.key] || { eng: 0, liq: 0, pay: 0 }; r[i.kind] += i.mt; }); return o; }
   function sxPull(label, src, kind) {
     sxSeed(); var n = 0, kinds = kind ? [kind] : ['eng', 'liq', 'pay', 'enc'], pool = kind === 'phy' ? SX.pool['SoftSE'] : SX.extra;
-    kinds.forEach(function (k) { var e = (pool[k] || []).shift(); if (e) { SX.items.push({ id: sxId(), kind: k, key: e.key, date: e.date, ref: e.ref, tiers: e.tiers, mt: e.mt, unit: e.unit, src: src }); n++; } });
+    kinds.forEach(function (k) { var e = (pool[k] || []).shift(); if (e) { SX.items.push({ id: sxId(), kind: k, key: e.key, date: e.date, ref: e.ref, tiers: e.tiers, mt: e.mt, unit: e.unit, eng: e.eng, d1: e.d1, d2: e.d2, src: src }); n++; } });
     SX.log.unshift({ on: nowStr(), src: label, n: n, by: ME }); if (kind === 'phy') sxPhyApply(); return n;
   }
   /* Les quantités mesurées alimentent l'avancement physique cumulé de chaque ligne (par trimestre) */
@@ -21134,17 +21139,129 @@ var EXEC_REC = [
   }  function sxRender() {
     sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
     document.querySelector('#v-sx > .head h1').textContent = K.h; document.querySelector('#v-sx > .head p').textContent = K.p;
-    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
+    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-suivi-b').style.display = (SX.kind === 'eng' || SX.kind === 'liq') ? '' : 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
     var sum = function (s) { return items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).reduce(function (a, i) { return a + i.mt; }, 0); };
     var kb = document.getElementById('sx-k'); kb.innerHTML = ''; var cn = function (s) { return String(items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).length); };
     var sd = function (dp) { return items.filter(function (i) { return sxIsDpd(i) === dp; }).reduce(function (a, i) { return a + i.mt; }, 0); };
-    kb.appendChild(SX.kind === 'pay' ? dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Décaissements du projet', fmt(sd(false)) + ' MGA', 'info'], ['Paiements directs du bailleur', fmt(sd(true)) + ' MGA', 'warn'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info']], { cols: 4 }) : SX.kind === 'phy' ? dpTiles([['Mesures', cn(), 'brand'], ['Synchronisées', cn('sync'), 'info'], ['Importées', cn('Import'), 'info'], ['Saisies directement', cn('Saisie directe'), 'info']], { cols: 4 }) : dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
+    kb.appendChild(SX.kind === 'eng' ? sxEngTiles(items) : SX.kind === 'pay' ? dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Décaissements du projet', fmt(sd(false)) + ' MGA', 'info'], ['Paiements directs du bailleur', fmt(sd(true)) + ' MGA', 'warn'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info']], { cols: 4 }) : SX.kind === 'phy' ? dpTiles([['Mesures', cn(), 'brand'], ['Synchronisées', cn('sync'), 'info'], ['Importées', cn('Import'), 'info'], ['Saisies directement', cn('Saisie directe'), 'info']], { cols: 4 }) : dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
     var tb = document.getElementById('sx-b'); tb.innerHTML = '';
-    document.getElementById('sx-th').innerHTML = '<tr><th>Date</th><th>Référence</th><th>' + escH(K.tg) + '</th><th>' + (SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA') + '</th><th class="num">' + (SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)') + '</th><th>Source</th></tr>';
-    if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune écriture : récupérez-les de la comptabilité, importez un fichier ou saisissez-les directement.'); c0.colSpan = 6; c0.style.textAlign = 'left'; tb.appendChild(t0); }
-    items.forEach(function (i) { var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'); cell(tr, fmt(i.mt) + (i.unit ? ' ' + i.unit : ''), 'num'); var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); if (SX.kind === 'pay' && sxIsDpd(i)) { var bd = badge('Paiement direct', 'b-warn'); bd.style.marginLeft = '6px'; sc.appendChild(bd); } tb.appendChild(tr); });
+    var cols = sxCols(); document.getElementById('sx-th').innerHTML = '<tr>' + cols.map(function (c) { return '<th' + (/MGA\)|Quantit/.test(c) ? ' class="num"' : '') + '>' + escH(c) + '</th>'; }).join('') + '</tr>';
+    if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune écriture : récupérez-les de la comptabilité, importez un fichier ou saisissez-les directement.'); c0.colSpan = cols.length; c0.style.textAlign = 'left'; tb.appendChild(t0); }
+    items.forEach(function (i) { tb.appendChild(sxRow(i)); });
     var lg = document.getElementById('sx-log'); lg.innerHTML = ''; SX.log.forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.src)); l.appendChild(cvEl('div', 'hby', pl(n.n, 'écriture') + ' · ' + n.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); lg.appendChild(row); });
   }
+  /* ----- Engagements : période, échéancier par exercice, réalisations rattachées et reste à réaliser ----- */
+  function sxEngCol() { return SX.kind === 'liq' || SX.kind === 'pay'; }
+  function sxD(s) { return new Date(s + 'T12:00:00'); }
+  function sxEngs() { sxSeed(); return (SX.items || []).filter(function (i) { return i.kind === 'eng'; }); }
+  function sxEngOf(ref) { return sxEngs().filter(function (i) { return i.ref === ref; })[0]; }
+  function sxPer(i) { var d = i.date || ''; return { d1: i.d1 || d, d2: i.d2 || (d.slice(0, 4) + '-12-31') }; }
+  /* Période par défaut d'un engagement venu du compte administratif : un marché ou un contrat encore ouvert court sur plus d'un exercice */
+  function sxDefPer(d) {
+    var q = d.dt || {}, e = q.eng || '', y = e.slice(0, 4);
+    if ((d.acte === 'Marché' || d.acte === 'Contrat') && DP_RANK[d.st] < 3) { var t = sxD(e); t.setMonth(t.getMonth() + 14); return { d1: e, d2: isoOf(t) }; }
+    return { d1: e, d2: y + '-12-31' };
+  }
+  /* Échéancier : part de l'engagement qui revient à chaque exercice (saisi, sinon réparti au prorata de la période) */
+  function sxEch(i) {
+    if (i.ech) return i.ech; var p = sxPer(i), a0 = sxD(p.d1), b0 = sxD(p.d2), y1 = a0.getFullYear(), y2 = b0.getFullYear(), o = {}, acc = 0, span = (b0 - a0) || 1;
+    if (y2 <= y1) { o[y1] = i.mt; return o; }
+    for (var y = y1; y <= y2; y++) { var a = y === y1 ? a0 : sxD(y + '-01-01'), b = y === y2 ? b0 : sxD(y + '-12-31'), v = y === y2 ? i.mt - acc : Math.round(i.mt * (b - a) / span); o[y] = v; acc += v; }
+    return o;
+  }
+  function sxPart(i, ex) { return sxEch(i)[ex] || 0; }
+  function sxRealz(ref, d1, d2) { return (SX.items || []).filter(function (i) { return i.kind === 'liq' && i.eng === ref && (!d1 || i.date >= d1) && (!d2 || i.date <= d2); }).reduce(function (a, i) { return a + i.mt; }, 0); }
+  function sxRealzB(ref, d) { return (SX.items || []).filter(function (i) { return i.kind === 'liq' && i.eng === ref && i.date < d; }).reduce(function (a, i) { return a + i.mt; }, 0); }
+  function sxFreed(ref, d1, d2) { return (SX.free || []).filter(function (f) { return f.eng === ref && (!d1 || f.date >= d1) && (!d2 || f.date <= d2); }).reduce(function (a, f) { return a + f.amt; }, 0); }
+  function sxFreedB(ref, d) { return (SX.free || []).filter(function (f) { return f.eng === ref && f.date < d; }).reduce(function (a, f) { return a + f.amt; }, 0); }
+  function sxReste(i) { return Math.max(0, i.mt - sxRealz(i.ref) - sxFreed(i.ref)); }
+  function sxEngTiles(items) {
+    var ex = anaEx(), t = items.reduce(function (a, i) { return a + i.mt; }, 0), pe = items.reduce(function (a, i) { return a + sxPart(i, ex); }, 0), rz = items.reduce(function (a, i) { return a + sxRealz(i.ref); }, 0), rs = items.reduce(function (a, i) { return a + sxReste(i); }, 0);
+    return dpTiles([['Total engagé', fmt(t) + ' MGA', 'brand'], ['Part de l’exercice ' + ex, fmt(pe) + ' MGA', 'info'], ['Réalisé sur ces engagements', fmt(rz) + ' MGA', 'ok'], ['Reste à réaliser', fmt(rs) + ' MGA', 'warn']], { cols: 4 });
+  }
+  function sxCols() {
+    var K = SX_K[SX.kind];
+    if (SX.kind === 'eng') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Période', 'Montant (MGA)', 'Réalisé (MGA)', 'Reste à réaliser (MGA)', 'Source', ''];
+    if (SX.kind === 'liq' || SX.kind === 'pay') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Engagement', 'Montant (MGA)', 'Source'];
+    return ['Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)', 'Source'];
+  }
+  function sxRow(i) {
+    var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur');
+    if (SX.kind === 'eng') {
+      var p = sxPer(i), ys = Object.keys(sxEch(i)), pc = cell(tr, isoToFr(p.d1) + ' → ' + isoToFr(p.d2)); if (ys.length > 1) { var bd = badge(ys.length + ' exercices', 'b-info'); bd.style.marginLeft = '6px'; pc.appendChild(bd); }
+      cell(tr, fmt(i.mt), 'num'); var rz = sxRealz(i.ref); cell(tr, fmt(rz), 'num'); var rc = cell(tr, '', 'num'); if (rz > i.mt) rc.appendChild(badge('Dépassé de ' + fmt(rz - i.mt), 'b-ko')); else rc.textContent = fmt(sxReste(i));
+    } else if (SX.kind === 'liq' || SX.kind === 'pay') {
+      var ec = cell(tr, i.eng || ''); if (!i.eng) ec.appendChild(badge('Sans engagement', 'b-warn')); else { var en = sxEngOf(i.eng); if (!en) ec.appendChild(badge('Engagement introuvable', 'b-ko')); else if (i.kind === 'liq' && sxRealz(i.eng) > en.mt) { var bx = badge('Dépasse l’engagement', 'b-ko'); bx.style.marginLeft = '6px'; ec.appendChild(bx); } }
+      cell(tr, fmt(i.mt), 'num');
+    } else cell(tr, fmt(i.mt) + (i.unit ? ' ' + i.unit : ''), 'num');
+    var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); if (SX.kind === 'pay' && sxIsDpd(i)) { var bd2 = badge('Paiement direct', 'b-warn'); bd2.style.marginLeft = '6px'; sc.appendChild(bd2); }
+    if (SX.kind === 'eng') { var ac = cell(tr, ''), b = cvEl('button', 'btn small', 'Échéancier'); b.type = 'button'; b.addEventListener('click', function () { sxEchOpen(i); }); ac.appendChild(b); }
+    return tr;
+  }
+  /* Échéancier d'un engagement : période et part de chaque exercice */
+  var SXE = { ref: '', d1: '', d2: '' };
+  function sxEchOpen(i) { var p = sxPer(i); SXE = { ref: i.ref, d1: p.d1, d2: p.d2 }; sxEchPaint(); document.getElementById('sx-ech').hidden = false; }
+  function sxEchPaint() {
+    var i = sxEngOf(SXE.ref), body = document.getElementById('sx-ech-body'); body.innerHTML = ''; if (!i) return; document.getElementById('sx-ech-title').textContent = 'Échéancier de l’engagement ' + i.ref;
+    body.appendChild(dpDl([['Engagement', i.ref + ' · ' + (i.tiers || '—')], ['Montant engagé', fmt(i.mt) + ' MGA'], ['Réalisé à ce jour', fmt(sxRealz(i.ref)) + ' MGA'], ['Reste à réaliser', fmt(sxReste(i)) + ' MGA']]));
+    var g = cvEl('div', 'fgrid'); g.style.marginTop = '14px';
+    function dt(label, k) { var d = cvEl('div'), inp = cvEl('input', 'field'); inp.type = 'date'; inp.value = SXE[k]; inp.addEventListener('change', function () { SXE[k] = inp.value; }); d.appendChild(cvEl('label', null, label)); d.appendChild(inp); g.appendChild(d); }
+    dt('Début de l’engagement', 'd1'); dt('Fin de l’engagement', 'd2'); body.appendChild(g);
+    var y1 = +SXE.d1.slice(0, 4), y2 = +SXE.d2.slice(0, 4), cur = sxEch(i), tb = cvEl('table'), th = cvEl('thead'), tbody = cvEl('tbody'), inputs = {};
+    th.innerHTML = '<tr><th>Exercice</th><th class="num">Part prévue (MGA)</th><th class="num">Réalisé (MGA)</th><th class="num">Reste à réaliser (MGA)</th></tr>'; tb.appendChild(th);
+    for (var y = y1; y <= y2; y++) (function (y) {
+      var tr = cvEl('tr'), inp = cvEl('input', 'field'), rz = sxRealz(i.ref, y + '-01-01', y + '-12-31'); inp.type = 'text'; inp.setAttribute('inputmode', 'numeric'); inp.value = fmt(cur[y] || 0); inp.style.textAlign = 'right'; inputs[y] = inp;
+      cell(tr, String(y), 'name'); var c = cell(tr, '', 'num'); c.appendChild(inp); cell(tr, fmt(rz), 'num'); cell(tr, fmt(Math.max(0, (cur[y] || 0) - rz)), 'num'); tbody.appendChild(tr);
+    })(y);
+    tb.appendChild(tbody); var sc = cvEl('div', 'scroll'); sc.appendChild(tb); var card = cvEl('div', 'card'); card.style.marginTop = '14px'; card.appendChild(sc); body.appendChild(card);
+    var err = cvEl('div', 'err'); body.appendChild(err);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bp = cvEl('button', 'btn', 'Répartir au prorata'), bo = cvEl('button', 'btn primary', 'Enregistrer l’échéancier'); bc.type = bp.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bp); ft.appendChild(bo); body.appendChild(ft);
+    bc.addEventListener('click', function () { document.getElementById('sx-ech').hidden = true; });
+    bp.addEventListener('click', function () { if (!SXE.d1 || !SXE.d2 || SXE.d1 > SXE.d2) { err.textContent = 'La période est invalide : la date de début doit précéder la date de fin.'; return; } i.d1 = SXE.d1; i.d2 = SXE.d2; delete i.ech; sxEchPaint(); });
+    bo.addEventListener('click', function () {
+      if (!SXE.d1 || !SXE.d2 || SXE.d1 > SXE.d2) { err.textContent = 'La période est invalide : la date de début doit précéder la date de fin.'; return; }
+      var o = {}, s = 0; Object.keys(inputs).forEach(function (y) { var v = parseInt0(inputs[y].value) || 0; o[y] = v; s += v; });
+      if (s !== i.mt) { err.textContent = 'La somme des parts (' + fmt(s) + ' MGA) doit être égale au montant engagé (' + fmt(i.mt) + ' MGA).'; return; }
+      i.d1 = SXE.d1; i.d2 = SXE.d2; i.ech = o; document.getElementById('sx-ech').hidden = true; sxMsg('Échéancier de ' + i.ref + ' enregistré.'); sxRender();
+    });
+  }
+  /* Suivi des engagements sur une période : ce qui est engagé au début, les nouveaux engagements, les réalisations qui les consomment et ce qui reste */
+  var SXV = { d1: '', d2: '' };
+  function sxSuiviPaint() {
+    var body = document.getElementById('sx-suivi-body'); body.innerHTML = ''; var P = SXV;
+    var g = cvEl('div', 'fgrid');
+    [['Début de la période', 'd1'], ['Fin de la période', 'd2']].forEach(function (f) { var d = cvEl('div'), inp = cvEl('input', 'field'); inp.type = 'date'; inp.value = P[f[1]]; inp.addEventListener('change', function () { P[f[1]] = inp.value; sxSuiviPaint(); }); d.appendChild(cvEl('label', null, f[0])); d.appendChild(inp); g.appendChild(d); });
+    body.appendChild(g);
+    if (!P.d1 || !P.d2 || P.d1 > P.d2) { var e = cvEl('div', 'err', 'La période est invalide : la date de début doit précéder la date de fin.'); e.style.marginTop = '10px'; body.appendChild(e); return; }
+    var rows = [], T = { op: 0, nv: 0, rz: 0, lb: 0, fin: 0 };
+    sxEngs().forEach(function (i) {
+      var op = i.date < P.d1 ? Math.max(0, i.mt - sxRealzB(i.ref, P.d1) - sxFreedB(i.ref, P.d1)) : 0, nv = i.date >= P.d1 && i.date <= P.d2 ? i.mt : 0, rz = sxRealz(i.ref, P.d1, P.d2), lb = sxFreed(i.ref, P.d1, P.d2), fin = Math.max(0, op + nv - rz - lb);
+      if (!op && !nv && !rz && !lb) return; T.op += op; T.nv += nv; T.rz += rz; T.lb += lb; T.fin += fin; rows.push({ i: i, op: op, nv: nv, rz: rz, lb: lb, fin: fin });
+    });
+    var tl = dpTiles([['Engagé au début', fmt(T.op) + ' MGA', 'brand'], ['Nouveaux engagements', fmt(T.nv) + ' MGA', 'info'], ['Réalisé sur la période', fmt(T.rz) + ' MGA', 'ok'], ['Libéré', fmt(T.lb) + ' MGA', 'n'], ['Reste à réaliser', fmt(T.fin) + ' MGA', 'warn']], { cols: 5 }); tl.style.marginTop = '14px'; body.appendChild(tl);
+    var tr0 = rows.map(function (r) {
+      var n = cvEl('div'); n.appendChild(cvEl('b', null, r.i.ref)); n.appendChild(cvEl('div', 'hby', r.i.tiers || '—'));
+      var a = cvEl('div'); if (r.fin > 0) { var b = cvEl('button', 'btn small', 'Libérer le reliquat'); b.type = 'button'; b.addEventListener('click', function () { cvAsk({ title: 'Libérer le reliquat de ' + r.i.ref, ok: 'Libérer ' + fmt(r.fin) + ' MGA', required: true, cLabel: 'Motif', placeholder: 'Pourquoi le reliquat n’est-il plus à réaliser ?' }, function (m) { var t = cadToday(); SX.free.push({ eng: r.i.ref, amt: r.fin, date: P.d2 < t ? P.d2 : t, motif: m, by: ME, on: nowStr() }); sxSuiviPaint(); sxRender(); sxMsg('Reliquat de ' + fmt(r.fin) + ' MGA libéré sur ' + r.i.ref + ' : le disponible de la ligne est rétabli.'); }); }); a.appendChild(b); }
+      return [n, fmt(r.op), fmt(r.nv), fmt(r.rz), fmt(r.lb), fmt(r.fin), a];
+    });
+    var blk = cvEl('section', 'co-blk'); blk.style.marginTop = '14px'; blk.appendChild(cvEl('div', 'kb-h', 'Engagements de la période')); blk.appendChild(dpMini(['Engagement', 'Engagé au début', 'Nouveau', 'Réalisé', 'Libéré', 'Reste à réaliser', ''], tr0, [1, 2, 3, 4, 5], 'Aucun engagement actif sur cette période.')); body.appendChild(blk);
+    var an = [];
+    (SX.items || []).filter(function (i) { return i.kind === 'liq' && i.date >= P.d1 && i.date <= P.d2; }).forEach(function (i) { if (!i.eng) an.push([i.ref, i.tiers || '—', fmt(i.mt), badge('Sans engagement', 'b-warn')]); else if (!sxEngOf(i.eng)) an.push([i.ref, i.tiers || '—', fmt(i.mt), badge('Engagement ' + i.eng + ' introuvable', 'b-ko')]); });
+    sxEngs().forEach(function (i) { var z = sxRealz(i.ref) - i.mt; if (z > 0) an.push([i.ref, i.tiers || '—', fmt(z), badge('Réalisations supérieures à l’engagement', 'b-ko')]); });
+    var b2 = cvEl('section', 'co-blk'); b2.appendChild(cvEl('div', 'kb-h', 'Anomalies de rattachement')); b2.appendChild(dpMini(['Référence', 'Tiers', 'Montant (MGA)', 'Anomalie'], an, [2], 'Aucune anomalie : toutes les réalisations sont rattachées à un engagement.')); body.appendChild(b2);
+  }
+  function sxFormSetup() {
+    var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
+    document.getElementById('sxf-d1').value = cadToday(); document.getElementById('sxf-d2').value = cadToday().slice(0, 4) + '-12-31';
+    var s = document.getElementById('sxf-eng'); s.innerHTML = '<option value="">Aucun engagement</option>' + sxEngs().map(function (i) { return '<option value="' + escH(i.ref) + '">' + escH(i.ref + ' — ' + (i.tiers || '') + ' (reste ' + fmt(sxReste(i)) + ')') + '</option>'; }).join('');
+  }
+  /* Analyses : engagements qui se prolongent sur les exercices suivants */
+  function anaEngReport(b, ex) {
+    var rows = sxEngs().filter(function (i) { return sxPart(i, ex) || sxReste(i); }).map(function (i) { var pe = sxPart(i, ex), later = Object.keys(sxEch(i)).filter(function (y) { return y > ex; }).reduce(function (a, y) { return a + sxEch(i)[y]; }, 0); return [i.ref + ' — ' + (i.tiers || ''), fmt(i.mt), fmt(pe), fmt(later), fmt(sxRealz(i.ref)), fmt(sxReste(i))]; });
+    anaBlock(b, 'Engagements à cheval sur plusieurs exercices', dpMini(['Engagement', 'Montant total', 'Part de ' + ex, 'Exercices suivants', 'Réalisé', 'Reste à réaliser'], rows, [1, 2, 3, 4, 5], 'Aucun engagement.'));
+  }
+  document.getElementById('sx-suivi-b').addEventListener('click', function () { var t = cadToday(); SXV = { d1: t.slice(0, 4) + '-01-01', d2: t }; sxSuiviPaint(); document.getElementById('sx-suivi').hidden = false; });
+
   function sxIsDpd(i) { return !!i.dpd || (DP.docs || []).some(function (d) { return d.mandat && d.mandat === i.ref && (dpPm(d) === 'dpd' || d.mode === DFO_DIRECT); }); }
   function sxMsg(t, bad) { dpMsg('sx-msg', t, bad); }
   /* Synchronisation : on précise d'abord la source, la période, la ligne et le mode (ajouter, mettre à jour, remplacer), puis on contrôle la liste des changements avant de confirmer */
@@ -21154,13 +21271,13 @@ var EXEC_REC = [
   function sxSources() { return SX.kind === 'eng' ? ['SoftAccounting', 'Soft e-Procurement', 'Compte administratif'] : (SX.kind === 'phy' ? ['SoftSE', 'Compte administratif'] : ['SoftAccounting', 'Compte administratif']); }
   /* Ce que contient chaque source, indépendamment de ce qui est déjà dans le suivi */
   function sxSrcData(src, kind) {
-    sxSeed(); if (src !== 'Compte administratif') return ((SX.store[src] || {})[kind] || []).map(function (r) { return { key: r.key, date: r.date, ref: r.ref, tiers: r.tiers, mt: r.mt, unit: r.unit }; });
+    sxSeed(); if (src !== 'Compte administratif') return ((SX.store[src] || {})[kind] || []).map(function (r) { return { key: r.key, date: r.date, ref: r.ref, tiers: r.tiers, mt: r.mt, unit: r.unit, eng: r.eng, d1: r.d1, d2: r.d2 }; });
     var out = [];
     (DP.docs || []).forEach(function (d) {
       var q = d.dt || {}, c = null;
-      if (kind === 'eng' && d.kind !== 'avance' && DP_RANK[d.st] >= 2) c = { key: d.key, date: q.eng, ref: d.ref, tiers: d.tiers, mt: d.mt };
-      if (kind === 'liq' && d.kind !== 'avance' && DP_RANK[d.st] >= 3) c = { key: d.key, date: q.liq, ref: d.fac, tiers: d.tiers, mt: d.mt };
-      if (kind === 'pay' && DP_RANK[d.st] >= 6) c = { key: d.key, date: q.pay, ref: d.mandat, tiers: d.tiers, mt: dfoAmt(d) };
+      if (kind === 'eng' && d.kind !== 'avance' && DP_RANK[d.st] >= 2) c = { key: d.key, date: q.eng, ref: d.ref, tiers: d.tiers, mt: d.mt, d1: sxDefPer(d).d1, d2: sxDefPer(d).d2 };
+      if (kind === 'liq' && d.kind !== 'avance' && DP_RANK[d.st] >= 3) c = { key: d.key, date: q.liq, ref: d.fac, tiers: d.tiers, mt: d.mt, eng: d.ref };
+      if (kind === 'pay' && DP_RANK[d.st] >= 6) c = { key: d.key, date: q.pay, ref: d.mandat, tiers: d.tiers, mt: dfoAmt(d), eng: d.ref };
       if (kind === 'phy' && d.volReal) c = { key: d.key, date: q.liq, ref: 'AP-' + d.id, tiers: d.objet, mt: d.volReal, unit: d.volUnit };
       if (c && c.ref) out.push(c);
     });
@@ -21205,16 +21322,16 @@ var EXEC_REC = [
       body.appendChild(dpTiles([['Nouvelles', String(c('new').length), 'ok'], ['Mises à jour', String(c('upd').length), 'info'], ['Inchangées', String(c('same').length + c('skip').length + c('conflict').length), 'n'], ['Supprimées', String(c('del').length), c('del').length ? 'ko' : 'n']], { cols: 4 }));
       var rows = P.plan.slice().sort(function (a, b) { var o = { 'new': 0, upd: 1, del: 2, conflict: 3, skip: 4, same: 5 }; return o[a.act] - o[b.act] || (a.r.date < b.r.date ? 1 : -1); }).map(function (x) {
         var A = SX_ACT[x.act], u = x.r.unit ? ' ' + x.r.unit : '', mt = x.act === 'upd' ? fmt(x.st.mt) + ' → ' + fmt(x.r.mt) + u : fmt(x.r.mt) + u;
-        return [badge(A[0], A[1]), isoToFr(x.r.date), x.r.ref, x.r.tiers || '—', x.r.key ? dpShort({ key: x.r.key }) : 'Compte spécial du bailleur', mt];
+        return [badge(A[0], A[1]), isoToFr(x.r.date), x.r.ref, x.r.tiers || '—', x.r.key ? dpShort({ key: x.r.key }) : 'Compte spécial du bailleur'].concat(sxEngCol() ? [x.r.eng || 'Sans engagement'] : [], [mt]);
       });
-      body.appendChild(dpMini(['Changement', 'Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', SX.kind === 'phy' ? 'Quantité' : 'Montant (MGA)'], rows, [5], 'Aucune écriture de cette source sur la période choisie.'));
+      body.appendChild(dpMini(['Changement', 'Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA'].concat(sxEngCol() ? ['Engagement'] : [], [SX.kind === 'phy' ? 'Quantité' : 'Montant (MGA)']), rows, [sxEngCol() ? 6 : 5], 'Aucune écriture de cette source sur la période choisie.'));
       var ft2 = cvEl('div', 'form-foot'); ft2.style.cssText = 'margin-top:12px;padding-top:12px'; var bb = cvEl('button', 'btn', 'Modifier les paramètres'), bk = cvEl('button', 'btn primary', applied ? 'Confirmer la synchronisation (' + applied + ' changement' + (applied > 1 ? 's' : '') + ')' : 'Rien à synchroniser'); bb.type = bk.type = 'button'; bk.disabled = !applied; ft2.appendChild(bb); ft2.appendChild(bk); body.appendChild(ft2);
       bb.addEventListener('click', function () { P.stage = 1; sxSyPaint(); });
       bk.addEventListener('click', function () {
         var n = { 'new': 0, upd: 0, del: 0 }, done = {};
         P.plan.forEach(function (x) {
-          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, unit: x.r.unit, src: P.src }); n['new']++; done[x.r.ref] = true; }
-          if (x.act === 'upd') { x.st.mt = x.r.mt; x.st.unit = x.r.unit; x.st.date = x.r.date; x.st.tiers = x.r.tiers; x.st.key = x.r.key; x.st.src = P.src; n.upd++; done[x.r.ref] = true; }
+          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, unit: x.r.unit, eng: x.r.eng, d1: x.r.d1, d2: x.r.d2, src: P.src }); n['new']++; done[x.r.ref] = true; }
+          if (x.act === 'upd') { if (x.st.mt !== x.r.mt) delete x.st.ech; x.st.eng = x.r.eng; x.st.d1 = x.r.d1; x.st.d2 = x.r.d2; x.st.mt = x.r.mt; x.st.unit = x.r.unit; x.st.date = x.r.date; x.st.tiers = x.r.tiers; x.st.key = x.r.key; x.st.src = P.src; n.upd++; done[x.r.ref] = true; }
           if (x.act === 'del') { SX.items.splice(SX.items.indexOf(x.st), 1); n.del++; }
         });
         [SX.extra, SX.pool['SoftSE']].forEach(function (pl0) { if (pl0[SX.kind]) pl0[SX.kind] = pl0[SX.kind].filter(function (e) { return !done[e.ref]; }); }); if (SX.kind === 'phy') sxPhyApply();
@@ -21227,15 +21344,15 @@ var EXEC_REC = [
   document.getElementById('sx-imp').addEventListener('click', function () { cvAsk({ title: 'Importer un fichier Excel', ok: 'Importer', required: true, cLabel: 'Nom du fichier', placeholder: 'Ex. execution_novembre_2026.xlsx' }, function (f) { var n = sxPull('Fichier Excel « ' + f + ' »', 'Import', SX.kind); sxMsg(n ? 'Fichier importé : ' + pl(n, 'nouvelle écriture') + '.' : 'Fichier importé : aucune nouvelle écriture.'); sxRender(); }); });
   document.getElementById('sx-rap').addEventListener('click', function () { show('dprap'); });
   document.getElementById('sx-new').addEventListener('click', function () {
-    var ls = dpLines(), sl = document.getElementById('sxf-ligne'); sl.innerHTML = ls.map(function (z) { return '<option value="' + escH(z.key) + '">' + escH(z.l.c + ' — ' + (z.l.lib || z.l.l)) + '</option>'; }).join('');
+    sxFormSetup(); var ls = dpLines(), sl = document.getElementById('sxf-ligne'); sl.innerHTML = ls.map(function (z) { return '<option value="' + escH(z.key) + '">' + escH(z.l.c + ' — ' + (z.l.lib || z.l.l)) + '</option>'; }).join('');
     document.getElementById('sxf-lw').hidden = SX.kind === 'enc'; document.getElementById('sxf-dw').hidden = SX.kind !== 'pay'; document.getElementById('sxf-dpd').checked = false; document.getElementById('sxf-date').value = cadToday(); ['sxf-ref', 'sxf-tiers', 'sxf-mt'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('sxf-err').textContent = '';
     document.getElementById('sxf-reflbl').textContent = SX_K[SX.kind].ref; document.getElementById('sxf-mtlbl').textContent = SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)'; document.getElementById('sxf-tglbl').textContent = SX_K[SX.kind].tg; document.getElementById('sx-form-title').textContent = 'Saisie directe : ' + SX_K[SX.kind].h.toLowerCase(); document.getElementById('sx-form').hidden = false;
   });
   document.getElementById('sxf-cancel').addEventListener('click', function () { document.getElementById('sx-form').hidden = true; });
   document.getElementById('sxf-save').addEventListener('click', function () {
     var err = document.getElementById('sxf-err'), mt = parseInt0(document.getElementById('sxf-mt').value), ref = document.getElementById('sxf-ref').value.trim(), dt = document.getElementById('sxf-date').value;
-    if (!dt) { err.textContent = 'Indiquez la date.'; return; } if (ref.length < 3) { err.textContent = 'Indiquez la référence.'; return; } if (!mt || mt <= 0) { err.textContent = 'Le montant doit être positif.'; return; }
-    SX.items.push({ id: sxId(), kind: SX.kind, key: SX.kind === 'enc' ? null : document.getElementById('sxf-ligne').value, date: dt, ref: ref, tiers: document.getElementById('sxf-tiers').value.trim(), mt: mt, src: 'Saisie directe', dpd: SX.kind === 'pay' && document.getElementById('sxf-dpd').checked, unit: SX.kind === 'phy' ? ((dpLine(document.getElementById('sxf-ligne').value) || { l: {} }).l.wk || {}).unit : undefined });
+    if (!dt) { err.textContent = 'Indiquez la date.'; return; } if (SX.kind === 'eng' && document.getElementById('sxf-d2').value < document.getElementById('sxf-d1').value) { err.textContent = 'La fin de l\u2019engagement doit suivre son d\u00e9but.'; return; } if (ref.length < 3) { err.textContent = 'Indiquez la référence.'; return; } if (!mt || mt <= 0) { err.textContent = 'Le montant doit être positif.'; return; }
+    SX.items.push({ id: sxId(), kind: SX.kind, key: SX.kind === 'enc' ? null : document.getElementById('sxf-ligne').value, date: dt, ref: ref, tiers: document.getElementById('sxf-tiers').value.trim(), mt: mt, src: 'Saisie directe', d1: SX.kind === 'eng' ? document.getElementById('sxf-d1').value : undefined, d2: SX.kind === 'eng' ? document.getElementById('sxf-d2').value : undefined, eng: (SX.kind === 'liq' || SX.kind === 'pay') ? document.getElementById('sxf-eng').value || undefined : undefined, dpd: SX.kind === 'pay' && document.getElementById('sxf-dpd').checked, unit: SX.kind === 'phy' ? ((dpLine(document.getElementById('sxf-ligne').value) || { l: {} }).l.wk || {}).unit : undefined });
     if (SX.kind === 'phy') sxPhyApply(); SX.log.unshift({ on: nowStr(), src: 'Saisie directe', n: 1, by: ME }); document.getElementById('sx-form').hidden = true; sxMsg('Écriture enregistrée (saisie directe).'); sxRender();
   });
   /* ----- Trésorerie : encaissements et décaissements, pas seulement les décaissements ----- */
