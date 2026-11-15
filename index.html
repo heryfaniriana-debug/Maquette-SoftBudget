@@ -14423,7 +14423,7 @@ var EXEC_REC = [
       { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways]] },
       { g: 'Programmation', items: [['Configuration', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['PTBA', rAlways], ['Plan de passation des marchés', rAlways], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Compte administratif', items: ca },
-      { g: 'Financement et trésorerie', items: [['Demandes de fonds (DRF et DPD)', treso], ['Plan de décaissement', treso], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement', treso]] },
+      { g: 'Trésorerie', items: [['Demandes de fonds (DRF et DPD)', treso], ['Plan de décaissement', treso], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement', treso]] },
       { g: 'Suivi', items: [['Budgets verrouillés', rAlways], [rImp('Engagements', 'Engagements importés'), rAlways], [rImp('Réalisations', 'Réalisations importées'), rAlways], [rImp('Paiements comptabilisés', 'Paiements importés'), rAlways], [rImp('Recettes comptabilisées', 'Recettes importées'), rAlways]] },
       grp('Analyses'),
       { g: 'Paramètres', items: grp('Paramètres').items.filter(function (it) { return it[0] !== 'Bailleurs' && it[0] !== 'Sources de financement' && it[0] !== 'Taux de change'; }) }
@@ -14436,7 +14436,7 @@ var EXEC_REC = [
   var NAV_ORIG = null;
   var PRJ_GROUP_LBL = {
     'g-budgets': ['Programmation', 'Programmation : configuration, campagnes, collecte, PTBA et marchés'],
-    'g-treso': ['Financement et trésorerie', 'Demandes de fonds, décaissements et trésorerie'],
+    'g-treso': ['Trésorerie', 'Décaissements, demandes de fonds et comptes bancaires'],
     'g-suivi': ['Suivi', 'Suivi de l’exécution']
   };
   function navHead(g) { return g.querySelector(':scope > .item'); }
