@@ -21579,7 +21579,7 @@ var EXEC_REC = [
   }
   document.getElementById('cm-ex').addEventListener('change', cmRepRefresh); document.getElementById('cm-new').addEventListener('click', function () { setTimeout(cmRepRefresh, 0); });
   /* ----- Révisions des plans : brouillon, soumission, validation, approbation du bailleur (ANO), puis nouvelle version de référence ----- */
-  var REV = { seq: 0, items: [] }, REVC = { rev: null, ch: null }, REVD = null;
+  var REV = { seq: 0, items: [] }, REVC = { rev: null, ch: null }, REVD = null, REVT = 'mod';
   var REV_CLS = { 'Brouillon': 'b-neutral', 'Soumise': 'b-warn', 'Validée': 'b-info', 'Approuvée': 'b-ok', 'Rejetée': 'b-ko' };
   function revLot(rev) { return bvList().filter(function (r) { return r.camp === rev.lot; })[0]; }
   function revGet(id) { return REV.items.filter(function (x) { return x.id === id; })[0]; }
@@ -21655,33 +21655,38 @@ var EXEC_REC = [
     }
     anaBlock(body, 'Répartition du nouveau montant — ' + c.label, box);
   }
-  function revDetOpen(rev) { REVD = rev.id; revDetPaint(); document.getElementById('revpl-det').hidden = false; }
+  function revDetOpen(rev) { REVD = rev.id; REVT = 'mod'; revDetPaint(); document.getElementById('revpl-det').hidden = false; }
   function revDetPaint() {
     var rev = revGet(REVD), body = document.getElementById('revpl-det-body'); if (!rev) return; body.innerHTML = ''; document.getElementById('revpl-det-title').textContent = 'Révision ' + rev.id;
     var r = revLot(rev), draft = rev.st === 'Brouillon', stb = cvEl('div'); stb.style.marginBottom = '12px'; stb.appendChild(badge(rev.st, REV_CLS[rev.st])); body.appendChild(stb);
     anaBlock(body, 'Informations', dpDl([['Exercice', rev.ex], ['Créée par', rev.by + ' · ' + rev.on], ['Motif', rev.motif, true], ['ANO du bailleur', rev.ano ? rev.ano.ref + ' du ' + isoToFr(rev.ano.date) + (rev.ano.doc ? ' · ' + rev.ano.doc : '') : '—']]));
-    if (draft) { var ab = cvEl('div'); ab.style.marginBottom = '10px'; var ba = cvEl('button', 'btn', 'Modifier une ligne ou un marché'), bn = cvEl('button', 'btn primary', '+ Créer une nouvelle ligne'); ba.type = bn.type = 'button'; bn.style.marginLeft = '8px'; ba.addEventListener('click', function () { revChgOpen(rev, null); }); bn.addEventListener('click', function () { revChgOpen(rev, null, { type: 'N' }); }); ab.appendChild(ba); ab.appendChild(bn); body.appendChild(ab); }
-    var rows = rev.changes.map(function (c) {
-      var n = cvEl('div'); n.appendChild(cvEl('b', null, c.label)); n.appendChild(cvEl('div', 'hby', c.k === 'L' ? 'Ligne du PTBA' : (c.k === 'P' ? 'Marché du PPM' : 'Nouvelle ligne du PTBA')));
-      var a = cvEl('div'); if (draft) { var bm = cvEl('button', 'btn small', 'Modifier'), br = cvEl('button', 'btn small', 'Retirer'); bm.type = br.type = 'button'; bm.addEventListener('click', function () { revChgOpen(rev, c); }); br.addEventListener('click', function () { rev.changes = rev.changes.filter(function (x) { return x !== c; }); revDetPaint(); }); a.appendChild(bm); a.appendChild(br); }
-      return [n, fmt(c.from), fmt(c.to), anaSg(c.to - c.from), c.k === 'N' ? (c.vol ? 'Cible ' + fmt(c.vol) + ' ' + c.unit : '—') : (c.k === 'L' && c.qTo != null && c.qTo !== c.qFrom ? fmt(c.qFrom) + ' → ' + fmt(c.qTo) + ' ' + c.unit : (c.k === 'P' && c.dTo ? 'Signature le ' + isoToFr(c.dTo) : '—')), a];
-    });
-    anaBlock(body, 'Modifications', dpMini(['Élément', 'Actuel (MGA)', 'Révisé (MGA)', 'Écart (MGA)', 'Cible ou date', ''], rows, [1, 2, 3], 'Aucune modification : ajoutez-en au moins une.'));
-    var I = null;
-    if (rev.st !== 'Approuvée' && rev.st !== 'Rejetée') {
-      I = revImpact(rev); var card = cvEl('div', 'card'); card.style.padding = '4px 16px';
-      var free = I.t0 - I.t1;
+    var done = rev.st === 'Approuvée' || rev.st === 'Rejetée', I = done ? null : revImpact(rev), alerts = I ? I.out.filter(function (x) { return x[0] === 'warn' || x[0] === 'ko'; }).length : 0;
+    var tabs = [['mod', 'Modifications (' + rev.changes.length + ')']]; if (!done) { tabs.push(['imp', 'Impact' + (alerts ? ' (' + alerts + ' alerte' + (alerts > 1 ? 's' : '') + ')' : '')]); tabs.push(['rep', 'Répartition']); } tabs.push(['his', 'Historique']);
+    if (!tabs.some(function (t) { return t[0] === REVT; })) REVT = 'mod';
+    var tb = cvEl('div', 'seg dp-tabs'); tb.style.marginBottom = '14px'; tabs.forEach(function (t) { var b = cvEl('button', REVT === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { REVT = t[0]; revDetPaint(); }); tb.appendChild(b); }); body.appendChild(tb);
+    if (REVT === 'mod') {
+      if (draft) { var ab = cvEl('div'); ab.style.marginBottom = '10px'; var ba = cvEl('button', 'btn', 'Modifier une ligne ou un marché'), bn = cvEl('button', 'btn primary', '+ Créer une nouvelle ligne'); ba.type = bn.type = 'button'; bn.style.marginLeft = '8px'; ba.addEventListener('click', function () { revChgOpen(rev, null); }); bn.addEventListener('click', function () { revChgOpen(rev, null, { type: 'N' }); }); ab.appendChild(ba); ab.appendChild(bn); body.appendChild(ab); }
+      var rows = rev.changes.map(function (c) {
+        var n = cvEl('div'); n.appendChild(cvEl('b', null, c.label)); n.appendChild(cvEl('div', 'hby', c.k === 'L' ? 'Ligne du PTBA' : (c.k === 'P' ? 'Marché du PPM' : 'Nouvelle ligne du PTBA')));
+        var a = cvEl('div'); if (draft) { var bm = cvEl('button', 'btn small', 'Modifier'), br = cvEl('button', 'btn small', 'Retirer'); bm.type = br.type = 'button'; bm.addEventListener('click', function () { revChgOpen(rev, c); }); br.addEventListener('click', function () { rev.changes = rev.changes.filter(function (x) { return x !== c; }); revDetPaint(); }); a.appendChild(bm); a.appendChild(br); }
+        return [n, fmt(c.from), fmt(c.to), anaSg(c.to - c.from), c.k === 'N' ? (c.vol ? 'Cible ' + fmt(c.vol) + ' ' + c.unit : '—') : (c.k === 'L' && c.qTo != null && c.qTo !== c.qFrom ? fmt(c.qFrom) + ' → ' + fmt(c.qTo) + ' ' + c.unit : (c.k === 'P' && c.dTo ? 'Signature le ' + isoToFr(c.dTo) : '—')), a];
+      });
+      body.appendChild(dpMini(['Élément', 'Actuel (MGA)', 'Révisé (MGA)', 'Écart (MGA)', 'Cible ou date', ''], rows, [1, 2, 3], 'Aucune modification : ajoutez-en au moins une.'));
+    } else if (REVT === 'imp') {
+      var card = cvEl('div', 'card'); card.style.padding = '4px 16px'; var free = I.t0 - I.t1;
       if (draft && free > 0) {
         var fr = cvEl('div', 'list-row'); fr.style.alignItems = 'center'; fr.appendChild(badge('À réaffecter', 'b-warn')); var ft0 = cvEl('div', null, fmt(free) + ' MGA sont libérés par cette révision : vous pouvez les réaffecter directement.'); ft0.style.cssText = 'margin-left:12px;flex:1'; fr.appendChild(ft0);
         var ga = cvEl('button', 'btn small', 'Augmenter une ligne'), gb = cvEl('button', 'btn small', 'Créer une nouvelle ligne'); ga.type = gb.type = 'button'; gb.style.marginLeft = '6px';
         ga.addEventListener('click', function () { revChgOpen(rev, null, { type: 'L', add: free }); }); gb.addEventListener('click', function () { revChgOpen(rev, null, { type: 'N', add: free }); }); fr.appendChild(ga); fr.appendChild(gb); card.appendChild(fr);
       } else if (I.out.length && free < 0) { var fr2 = cvEl('div', 'list-row'); fr2.style.alignItems = 'center'; fr2.appendChild(badge('Budget en hausse', 'b-info')); var ft2 = cvEl('div', null, 'La révision augmente le budget de ' + fmt(-free) + ' MGA : vérifiez le financement.'); ft2.style.marginLeft = '12px'; fr2.appendChild(ft2); card.appendChild(fr2); }
-      if (!I.out.length) card.appendChild(cvEl('div', 'list-row', 'Aucun impact à afficher.'));
+      if (!I.out.length) card.appendChild(cvEl('div', 'list-row', 'Aucun impact à afficher : ajoutez d’abord une modification.'));
       I.out.forEach(function (x) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; row.appendChild(badge(x[1], { ok: 'b-ok', warn: 'b-warn', ko: 'b-ko', info: 'b-info' }[x[0]])); var t = cvEl('div', null, x[2]); t.style.marginLeft = '12px'; row.appendChild(t); card.appendChild(row); });
-      anaBlock(body, 'Aperçu d’impact', card);
-      rev.changes.filter(function (c) { return c.k === 'L' || c.k === 'N'; }).forEach(function (c) { revDistBlock(body, rev, c, draft); });
-    }
-    anaBlock(body, 'Historique', dpMini(['Date', 'Événement', 'Par'], rev.hist.map(function (h) { return [h.on, h.t, h.by]; }), [], ''));
+      body.appendChild(card);
+    } else if (REVT === 'rep') {
+      var cs = rev.changes.filter(function (c) { return c.k === 'L' || c.k === 'N'; });
+      if (!cs.length) { var nm = cvEl('div', 'card', 'Aucune ligne modifiée ou créée : la répartition du nouveau montant apparaît ici.'); nm.style.padding = '14px 16px'; body.appendChild(nm); }
+      cs.forEach(function (c) { revDistBlock(body, rev, c, draft); });
+    } else body.appendChild(dpMini(['Date', 'Événement', 'Par'], rev.hist.map(function (h) { return [h.on, h.t, h.by]; }), [], ''));
     var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px';
     function btn(txt, cls, fn, dis) { var b = cvEl('button', 'btn' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; b.disabled = !!dis; b.addEventListener('click', fn); ft.appendChild(b); return b; }
     btn('Fermer', '', function () { document.getElementById('revpl-det').hidden = true; revRender(); });
