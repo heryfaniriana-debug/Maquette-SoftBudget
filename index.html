@@ -5428,6 +5428,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="err" id="revpl-cerr"></div>
           <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="revpl-ccancel">Annuler</button><button class="btn primary" id="revpl-csave">Enregistrer la modification</button></div>
         </div></div>
+                <div class="panel" id="revpl-dos" hidden><h2><span>Dossier à envoyer au bailleur</span></h2><div class="body" id="revpl-dos-body"></div></div>
         <div class="panel" id="revpl-ano" hidden><h2><span>Approbation du bailleur (ANO)</span></h2><div class="body">
           <div class="fgrid">
             <div><label for="revpl-aref">Référence de l’ANO <em>*</em></label><input id="revpl-aref" class="field" type="text"></div>
@@ -20208,7 +20209,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'revpl-dos', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -21092,7 +21093,7 @@ var EXEC_REC = [
     var dp = dec.rows.reduce(function (a, x) { return a + x.plan - x.real; }, 0); if (dp > 0) out.push({ k: 'warn', b: 'Décaissements', go: 'andec', m: 'Les décaissements du projet sont inférieurs de ' + fmt(dp) + ' MGA au plan : vérifier les paiements en attente.' });
     var lp = phy.rows.filter(function (x) { return x.planTo && x.real / x.planTo < 0.85; }); if (lp.length) out.push({ k: 'warn', b: 'Avancement physique', go: 'anphy', m: 'Accélérer ' + (lp.length > 1 ? lp.length + ' travaux' : '1 travail') + ' en retard sur la cible du PTA : ' + lp.slice(0, 2).map(function (x) { return x.label.split(' — ')[0]; }).join(' et ') + '.' });
     var fp = phy.rows.filter(function (x) { return x.plan && x.tf - x.real / x.plan > 0.2; }); if (fp.length) out.push({ k: 'ko', b: 'Dépenses et physique', go: 'anfp', m: 'Vérifier ' + pl(fp.length, 'ligne') + ' dont les dépenses dépassent nettement le réalisé physique.' });
-    var rp = REV.items.filter(function (x) { return x.st === 'Soumise' || x.st === 'Validée'; }); if (rp.length) out.push({ k: 'warn', b: 'Révisions', go: 'revpl', m: pl(rp.length, 'révision') + ' en attente d’approbation depuis ' + Math.max.apply(null, rp.map(function (x) { return engDays(x.since, cadToday()); })) + ' jour(s) au plus.' });
+    var rp = REV.items.filter(function (x) { return x.st === 'Soumise' || x.st === 'Validée' || x.st === 'Envoyée au bailleur'; }); if (rp.length) out.push({ k: 'warn', b: 'Révisions', go: 'revpl', m: pl(rp.length, 'révision') + ' en attente d’approbation depuis ' + Math.max.apply(null, rp.map(function (x) { return engDays(x.since, cadToday()); })) + ' jour(s) au plus.' });
     var td = sxEngs().filter(function (i) { return sxStat(i).todo; }).length; if (td) out.push({ k: 'warn', b: 'Engagements', go: 'sxeng', m: td + ' engagement' + (td > 1 ? 's' : '') + ' \u00e0 traiter : fin d\u00e9pass\u00e9e ou sans mouvement.' }); var nc = 0; ['rea', 'eng', 'dec', 'phy'].forEach(function (k) { anaRows(k, ex).rows.forEach(function (x) { if (x.planTo - x.real > 0 && !ANA.com[k + '|' + x.id]) nc++; }); }); if (nc) out.push({ k: 'warn', b: 'Écarts', go: 'anrea', m: pl(nc, 'écart') + ' à commenter et à arbitrer (glissement).' });
     lots_req: { var lots = anaLots(ex); for (var i = 0; i < lots.length; i++) { var P = pdcSim(pdcNeeds(lots[i])), q = P.req.filter(function (z) { return z.m >= cm; })[0]; if (q) { out.push({ k: 'warn', b: 'Trésorerie', go: 'pdec', m: 'Déposer la demande de réapprovisionnement de ' + fmt(q.mt) + ' MGA avant fin ' + PDC_MOIS[q.m] + ' pour éviter un solde négatif.' }); break lots_req; } } }
     return out;
@@ -21580,7 +21581,7 @@ var EXEC_REC = [
   document.getElementById('cm-ex').addEventListener('change', cmRepRefresh); document.getElementById('cm-new').addEventListener('click', function () { setTimeout(cmRepRefresh, 0); });
   /* ----- Révisions des plans : brouillon, soumission, validation, approbation du bailleur (ANO), puis nouvelle version de référence ----- */
   var REV = { seq: 0, items: [] }, REVC = { rev: null, ch: null }, REVD = null, REVT = 'mod';
-  var REV_CLS = { 'Brouillon': 'b-neutral', 'Soumise': 'b-warn', 'Validée': 'b-info', 'Approuvée': 'b-ok', 'Rejetée': 'b-ko' };
+  var REV_CLS = { 'Brouillon': 'b-neutral', 'Soumise': 'b-warn', 'Validée': 'b-info', 'Approuvée': 'b-ok', 'Rejetée': 'b-ko', 'Envoyée au bailleur': 'b-warn' };
   function revLot(rev) { return bvList().filter(function (r) { return r.camp === rev.lot; })[0]; }
   function revGet(id) { return REV.items.filter(function (x) { return x.id === id; })[0]; }
   function revStamp(rev, txt) { rev.since = cadToday(); rev.hist.unshift({ t: txt, by: ME, on: nowStr() }); }
@@ -21617,7 +21618,7 @@ var EXEC_REC = [
   }
   function revRender() {
     var ex = anaEx(), lot = anaLots(ex)[0], items = REV.items, n = function (s) { return items.filter(function (x) { return s.indexOf(x.st) >= 0; }).length; };
-    var k = document.getElementById('revpl-k'); k.innerHTML = ''; k.appendChild(dpTiles([['Brouillons', String(n(['Brouillon'])), 'brand'], ['En attente d’approbation', String(n(['Soumise', 'Validée'])), 'warn'], ['Approuvées', String(n(['Approuvée'])), 'ok'], ['Rejetées', String(n(['Rejetée'])), 'ko']], { cols: 4 }));
+    var k = document.getElementById('revpl-k'); k.innerHTML = ''; k.appendChild(dpTiles([['Brouillons', String(n(['Brouillon'])), 'brand'], ['En attente d’approbation', String(n(['Soumise', 'Validée', 'Envoyée au bailleur'])), 'warn'], ['Approuvées', String(n(['Approuvée'])), 'ok'], ['Rejetées', String(n(['Rejetée'])), 'ko']], { cols: 4 }));
     document.getElementById('revpl-th').innerHTML = '<tr><th>N°</th><th>Exercice</th><th>Motif</th><th class="num">Modifications</th><th class="num">Écart sur le PTBA (MGA)</th><th>Statut</th><th>Depuis</th><th></th></tr>';
     var tb = document.getElementById('revpl-b'); tb.innerHTML = '';
     if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune révision : cliquez sur « Nouvelle révision » pour modifier le PTBA, le PTA ou le PPM.'); c0.colSpan = 8; c0.style.textAlign = 'left'; tb.appendChild(t0); }
@@ -21693,9 +21694,55 @@ var EXEC_REC = [
     btn('Fermer', '', function () { document.getElementById('revpl-det').hidden = true; revRender(); });
     if (draft) { btn('Supprimer le brouillon', '', function () { REV.items = REV.items.filter(function (x) { return x !== rev; }); document.getElementById('revpl-det').hidden = true; revRender(); }); btn('Soumettre', 'primary', function () { rev.st = 'Soumise'; revStamp(rev, 'Soumise à la validation'); revDetPaint(); }, !rev.changes.length || (I && I.block)); }
     if (rev.st === 'Soumise') { btn('Rejeter', '', function () { revReject(rev); }); btn('Valider', 'primary', function () { cvAsk({ title: 'Valider ' + rev.id, ok: 'Valider', required: false, placeholder: 'Observation de la direction' }, function (m) { rev.st = 'Validée'; revStamp(rev, 'Validée par la direction' + (m ? ' — ' + m : '')); revDetPaint(); }); }); }
-    if (rev.st === 'Validée') { btn('Rejeter', '', function () { revReject(rev); }); btn('Enregistrer l’approbation du bailleur', 'primary', function () { document.getElementById('revpl-aref').value = ''; document.getElementById('revpl-adoc').value = ''; document.getElementById('revpl-adate').value = cadToday(); document.getElementById('revpl-aerr').textContent = ''; document.getElementById('revpl-ano').hidden = false; }); }
+    if (rev.st === 'Validée') { btn('Rejeter', '', function () { revReject(rev); }); btn('Préparer le dossier du bailleur', 'primary', function () { revDosOpen(rev); }); }
+    if (rev.st === 'Envoyée au bailleur') { btn('Rejeter', '', function () { revReject(rev); }); btn('Dossier du bailleur', '', function () { revDosOpen(rev); }); btn('Correction demandée', '', function () { revCorr(rev); }); btn('Enregistrer l’approbation du bailleur', 'primary', function () { document.getElementById('revpl-aref').value = ''; document.getElementById('revpl-adoc').value = ''; document.getElementById('revpl-adate').value = cadToday(); document.getElementById('revpl-aerr').textContent = ''; document.getElementById('revpl-ano').hidden = false; }); }
     body.appendChild(ft);
   }
+  /* Dossier à envoyer au bailleur : PTBA complet révisé, tableau comparatif et note de justification */
+  function revWith(rev, fn) { var r = revLot(rev), undo = revApplyCore(r, rev, []); try { fn(r); } finally { undo.reverse().forEach(function (f) { f(); }); } }
+  function revCmpRows(rev) {
+    var P = revProject(rev), vo = 'V' + P.n, vp = 'V' + (P.n + 1), kb = {}, kp = {}; P.before.lines.forEach(function (x) { kb[x.key] = x; }); P.before.ppm.forEach(function (x) { kp[x.ref] = x; });
+    return {
+      vo: vo, vp: vp,
+      ptba: P.after.lines.map(function (a) { var b = kb[a.key]; return [a.label + (b ? '' : ' (nouvelle ligne)'), b ? b.dem : 0, a.dem, a.dem - (b ? b.dem : 0)]; }),
+      pta: P.after.lines.filter(function (a) { return a.vol != null; }).map(function (a) { var b = kb[a.key]; return [a.label + (a.task ? ' — ' + a.task : ''), b && b.vol != null ? b.vol : 0, a.vol, a.unit]; }),
+      ppm: P.after.ppm.map(function (a) { var b = kp[a.ref]; return [a.label, b ? b.est : 0, a.est, a.est - (b ? b.est : 0)]; })
+    };
+  }
+  function revDosCmpXlsx(rev) {
+    var C = revCmpRows(rev), H = function (t) { return [[t], ['Élément', C.vo + ' officielle (MGA)', C.vp + ' projetée (MGA)', 'Écart']]; };
+    sbDl('comparatif-' + sbSlug(rev.id) + '-' + sbStamp() + '.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', sbXlsx([
+      { name: 'PTBA', rows: [['Comparatif du PTBA ' + C.vo + ' / ' + C.vp + ' — ' + rev.id], ['Ligne', C.vo + ' officielle (MGA)', C.vp + ' projetée (MGA)', 'Écart (MGA)']].concat(C.ptba), head: 1 },
+      { name: 'PTA', rows: [['Cibles du PTA ' + C.vo + ' / ' + C.vp], ['Travail', C.vo + ' officielle', C.vp + ' projetée', 'Unité']].concat(C.pta), head: 1 },
+      { name: 'PPM', rows: [['Marchés du PPM ' + C.vo + ' / ' + C.vp], ['Marché', C.vo + ' officielle (MGA)', C.vp + ' projetée (MGA)', 'Écart (MGA)']].concat(C.ppm), head: 1 }]));
+  }
+  function revDosTbl(head, rows) { var E = sbXml; return '<table><thead><tr>' + head.map(function (h, i) { return '<th' + (i ? ' class="num"' : '') + '>' + E(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.map(function (rw) { return '<tr>' + rw.map(function (c, i) { return '<td' + (i ? ' class="num"' : '') + '>' + E(typeof c === 'number' ? fmt(c) : String(c)) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>'; }
+  function revDosCmpPdf(rev) {
+    var C = revCmpRows(rev), E = sbXml;
+    sbPrint('Comparatif ' + rev.id, '<h1>Comparatif ' + E(C.vo) + ' / ' + E(C.vp) + ' — ' + E(rev.id) + '</h1><div class="meta">Exercice ' + E(rev.ex) + ' · Motif : ' + E(rev.motif) + '</div><h2>PTBA</h2>' + revDosTbl(['Ligne', C.vo + ' officielle (MGA)', C.vp + ' projetée (MGA)', 'Écart (MGA)'], C.ptba) + '<h2>PTA — cibles</h2>' + revDosTbl(['Travail', C.vo + ' officielle', C.vp + ' projetée', 'Unité'], C.pta) + '<h2>PPM</h2>' + revDosTbl(['Marché', C.vo + ' officielle (MGA)', C.vp + ' projetée (MGA)', 'Écart (MGA)'], C.ppm));
+  }
+  function revDosNote(rev) {
+    var E = sbXml, I = revImpact(rev), C = revCmpRows(rev), ch = rev.changes.map(function (c) { return [c.label, c.k === 'L' ? 'Ligne du PTBA' : (c.k === 'P' ? 'Marché du PPM' : 'Nouvelle ligne'), c.from, c.to, c.to - c.from]; });
+    sbPrint('Note de justification ' + rev.id, '<h1>Note de justification — révision ' + E(rev.id) + '</h1><div class="meta">Exercice ' + E(rev.ex) + ' · Établie par ' + E(rev.by) + ' le ' + E(rev.on) + '<br>Version proposée : ' + E(C.vp) + ' (la version ' + E(C.vo) + ' reste en vigueur jusqu’à l’approbation du bailleur)</div><h2>Motif de la révision</h2><p>' + E(rev.motif) + '</p><h2>Modifications proposées</h2>' + revDosTbl(['Élément', 'Type', 'Actuel (MGA)', 'Révisé (MGA)', 'Écart (MGA)'], ch) + '<h2>Impact sur les autres plans et contrôles</h2><ul>' + I.out.map(function (x) { return '<li><b>' + E(x[1]) + '</b> : ' + E(x[2]) + '</li>'; }).join('') + '</ul>');
+  }
+  function revDosOpen(rev) { revDosPaint(rev); document.getElementById('revpl-dos').hidden = false; }
+  function revDosPaint(rev) {
+    var body = document.getElementById('revpl-dos-body'), sent = rev.st === 'Envoyée au bailleur', C = revCmpRows(rev); body.innerHTML = '';
+    function piece(title, sub, btns) { var row = cvEl('div', 'list-row'); row.style.alignItems = 'center'; var d = cvEl('div'); d.style.flex = '1'; d.appendChild(cvEl('b', null, title)); d.appendChild(cvEl('div', 'hby', sub)); row.appendChild(d); btns.forEach(function (b) { var x = cvEl('button', 'btn small', b[0]); x.type = 'button'; x.style.marginLeft = '6px'; x.addEventListener('click', b[1]); row.appendChild(x); }); return row; }
+    var card = cvEl('div', 'card'); card.style.padding = '4px 16px';
+    card.appendChild(piece('1. PTBA complet révisé (' + C.vp + ')', 'Toutes les lignes, avec les nouveaux montants, la répartition mensuelle et les cibles.', [['Excel', function () { revWith(rev, function (r) { bvExportXlsx(r); }); }], ['PDF', function () { revWith(rev, function (r) { bvExportPdf(r); }); }]]));
+    card.appendChild(piece('2. Tableau comparatif ' + C.vo + ' / ' + C.vp, 'PTBA, cibles du PTA et marchés du PPM, avec l’écart de chaque élément.', [['Excel', function () { revDosCmpXlsx(rev); }], ['PDF', function () { revDosCmpPdf(rev); }]]));
+    card.appendChild(piece('3. Note de justification', 'Motif, modifications, impact sur les plans et contrôles.', [['PDF', function () { revDosNote(rev); }]]));
+    anaBlock(body, 'Pièces du dossier', card);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bf = cvEl('button', 'btn', 'Fermer'); bf.type = 'button'; bf.addEventListener('click', function () { document.getElementById('revpl-dos').hidden = true; }); ft.appendChild(bf);
+    if (sent) { var env = rev.envoi || {}; anaBlock(body, 'Envoi', dpDl([['Envoyée le', isoToFr(env.date)], ['Mode d’envoi ou référence du courrier', env.ref || '—']])); }
+    else {
+      var g = cvEl('div', 'fgrid'), d1 = cvEl('div'), d2 = cvEl('div'), i1 = cvEl('input', 'field'), i2 = cvEl('input', 'field'); i1.type = 'date'; i1.value = cadToday(); i2.type = 'text'; i2.placeholder = 'Ex. Courrier N° 214/PROJ/2026, e-mail'; d1.appendChild(cvEl('label', null, 'Date d’envoi')); d1.appendChild(i1); d2.appendChild(cvEl('label', null, 'Mode d’envoi ou référence du courrier')); d2.appendChild(i2); g.appendChild(d1); g.appendChild(d2); anaBlock(body, 'Envoi au bailleur', g);
+      var err = cvEl('div', 'err'); body.appendChild(err); var bs = cvEl('button', 'btn primary', 'Marquer comme envoyée au bailleur'); bs.type = 'button'; bs.addEventListener('click', function () { if (!i1.value) { err.textContent = 'Indiquez la date d’envoi.'; return; } rev.envoi = { date: i1.value, ref: i2.value.trim() }; rev.st = 'Envoyée au bailleur'; revStamp(rev, 'Dossier envoyé au bailleur le ' + isoToFr(i1.value) + (i2.value.trim() ? ' (' + i2.value.trim() + ')' : '')); document.getElementById('revpl-dos').hidden = true; revDetPaint(); }); ft.appendChild(bs);
+    }
+    body.appendChild(ft);
+  }
+  function revCorr(rev) { cvAsk({ title: 'Correction demandée par le bailleur', ok: 'Renvoyer en brouillon', required: true, cLabel: 'Observation du bailleur', placeholder: 'Que demande le bailleur de corriger ?' }, function (m) { rev.st = 'Brouillon'; revStamp(rev, 'Correction demandée par le bailleur — ' + m); revDetPaint(); }); }
   function revReject(rev) { cvAsk({ title: 'Rejeter ' + rev.id, ok: 'Rejeter', required: true, cLabel: 'Motif du rejet', placeholder: 'Pourquoi la révision est-elle rejetée ?' }, function (m) { rev.st = 'Rejetée'; revStamp(rev, 'Rejetée — ' + m); revDetPaint(); }); }
   /* Formulaire d'une modification : ligne existante, marché du PPM ou nouvelle ligne du PTBA */
   function revChgOpen(rev, ch, opts) {
