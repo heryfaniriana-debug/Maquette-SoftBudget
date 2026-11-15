@@ -15413,23 +15413,20 @@ var EXEC_REC = [
   dpNo('crg-mclose').addEventListener('click', function () { document.getElementById('crg-match').hidden = true; });
 
   /* ----- Fichiers d'interface ----- */
+  /* Fichiers d'interface : alimentés par la chaîne de la dépense du projet (engagements, liquidations, paiements) */
   function citRows(type, d1, d2, mode) {
-    var rows = [], dt = function (iso) { return iso >= d1 && iso <= d2; };
-    if (type === 'ecr') {
-      CAD.eng.filter(function (e) { return e.st === 'Visé' && dt(e.date) && (mode === 'all' || !e.sentAcc); }).forEach(function (e) { rows.push({ obj: e, j: 'ENG', date: e.date, pc: e.fiche, d: cadCpt(e.ligne), c: '9001 · Engagements à régulariser', lib: 'Engagement ' + e.id + ' — ' + e.sup, mt: e.ttc, kind: 'eng' }); });
-      CAD.liq.filter(function (x) { return x.st === 'Liquidée' && dt(x.fdate) && (mode === 'all' || !x.sentAcc); }).forEach(function (x) {
-        if (x.kind === 'retenue') { rows.push({ obj: x, j: 'ACH', date: x.fdate, pc: x.order, d: '4017 · Retenues de garantie', c: '401 · Fournisseurs', lib: 'Libération de retenue — ' + x.sup, mt: x.ttc, kind: 'liq' }); return; }
-        var rate = x.dev === 'MGA' ? 1 : (x.ttc / x.ttcD), htM = Math.round(x.ht * rate), tvaM = x.ttc - htM;
-        rows.push({ obj: x, j: 'ACH', date: x.fdate, pc: x.fno, d: cadCpt(x.ligne), c: '401 · Fournisseurs', lib: 'Prise en charge ' + x.fno + ' — ' + x.sup + ' (charge HT)', mt: htM, kind: 'liq' });
-        if (tvaM) rows.push({ obj: x, j: 'ACH', date: x.fdate, pc: x.fno, d: '4456 · TVA déductible', c: '401 · Fournisseurs', lib: 'TVA ' + x.fno, mt: tvaM, kind: 'liq', cont: true });
-        if (x.ret) rows.push({ obj: x, j: 'ACH', date: x.fdate, pc: x.fno, d: '401 · Fournisseurs', c: '4017 · Retenues de garantie', lib: 'Retenue de garantie ' + x.retPct + ' % — ' + x.fno, mt: x.ret, kind: 'liq', cont: true });
-      });
-    } else {
-      CAD.eng.filter(function (e) { return e.st === 'Visé' && (e.acte === 'Marché' || e.acte === 'Contrat') && dt(e.date) && (mode === 'all' || !e.sentMkt); }).forEach(function (e) { rows.push({ obj: e, j: 'MKT', date: e.date, pc: e.ref, d: e.ppm, c: e.ano || '—', lib: e.sup + ' — ' + e.objet, mt: e.ttc, kind: 'mkt', dev: e.dev }); });
-    }
+    dpSeed(); var rows = [], dt = function (iso) { return !!iso && iso >= d1 && iso <= d2; }, sent = function (d, k) { return !!(d.sent && d.sent[k]); };
+    function cpt(d) { var z = dpLine(d.key), n = z && z.l.nat; return n && PUB_NAT[n] ? PUB_NAT[n] + ' · ' + (NATL[n] || '').replace(/^\d+ — /, '') : 'À rattacher (plan comptable)'; }
+    (DP.docs || []).forEach(function (d) {
+      var k = DP_RANK[d.st], dd = d.dt || {};
+      if (type === 'ecr') {
+        if (k >= 2 && dt(dd.eng) && (mode === 'all' || !sent(d, 'eng'))) rows.push({ obj: d, j: 'ENG', date: dd.eng, pc: d.id, d: cpt(d), c: '9001 · Engagements à régulariser', lib: 'Engagement ' + d.id + ' — ' + d.tiers, mt: d.mt, kind: 'eng' });
+        if (k >= 3 && dt(dd.liq) && (mode === 'all' || !sent(d, 'liq'))) rows.push({ obj: d, j: 'ACH', date: dd.liq, pc: d.fac || d.id, d: cpt(d), c: '401 · Fournisseurs', lib: 'Prise en charge ' + (d.fac || d.id) + ' — ' + d.tiers, mt: d.mt, kind: 'liq' });
+        if (k >= 6 && dt(dd.pay) && (mode === 'all' || !sent(d, 'pay'))) rows.push({ obj: d, j: 'BQ', date: dd.pay, pc: d.mandat, d: '401 · Fournisseurs', c: '5121 · Banque', lib: 'Paiement ' + d.mandat + ' — ' + d.tiers + ' (' + (d.mode || 'virement') + ')', mt: d.mt, kind: 'pay' });
+      } else if (k >= 2 && (d.acte === 'Marché' || d.acte === 'Contrat') && dt(dd.eng) && (mode === 'all' || !sent(d, 'mkt'))) rows.push({ obj: d, j: 'MKT', date: dd.eng, pc: d.ref, d: d.ppm || '—', c: '—', lib: d.tiers + ' — ' + d.objet, mt: d.mt, kind: 'mkt', dev: 'MGA' });
+    });
     return rows;
-  }
-  function citRender() {
+  }  function citRender() {
     document.getElementById('cit-hist').innerHTML = CAD.files.length ? CAD.files.map(function (f) { return '<div class="list-row"><div><b>' + escH(f.file) + '</b><div class="hby">' + escH(f.type) + ' · ' + escH(f.per) + ' · ' + pl(f.n, 'ligne') + ' · ' + escH(f.by) + '</div></div><span class="when">' + f.on + '</span></div>'; }).join('') : '<div class="hint" style="padding:14px 16px">Aucun fichier généré.</div>';
     document.getElementById('cit-gen').disabled = !(CAD.citRows && CAD.citRows.length);
     cadLock('cit-lock');
@@ -15450,7 +15447,7 @@ var EXEC_REC = [
     if (!cadCan('int_gen')) { bkMsg('cit-msg', 'Action réservée à : ' + cadRolesTxt('int_gen') + '. Votre rôle : ' + cadRoleName() + '.', 'warn'); return; } var P = CAD.citPar, rows = CAD.citRows; if (!rows || !rows.length) return;
     var name = (P.type === 'ecr' ? 'ecritures-softaccounting-' : 'marches-sigmp-') + isoOf(new Date()).replace(/-/g, '') + '.csv';
     sbDl(name, 'text/csv;charset=utf-8', sbCsv(citCsv(P.type, rows)));
-    rows.forEach(function (r) { if (P.type === 'ecr') r.obj.sentAcc = nowStr(); else r.obj.sentMkt = nowStr(); });
+    rows.forEach(function (r) { (r.obj.sent = r.obj.sent || {})[r.kind] = nowStr(); });
     CAD.files.unshift({ on: nowStr(), type: P.type === 'ecr' ? 'Écritures comptables' : 'Marchés', per: 'du ' + isoToFr(P.d1) + ' au ' + isoToFr(P.d2), n: rows.length, by: cadRoleName(), file: name });
     EXPLOG.unshift({ on: nowStr(), rep: 'Interface — ' + (P.type === 'ecr' ? 'écritures comptables' : 'marchés'), fmt: 'CSV (.csv)', fil: 'du ' + isoToFr(P.d1) + ' au ' + isoToFr(P.d2) + ' · ' + (P.mode === 'all' ? 'tout retransmettre' : 'non transmis'), n: rows.length, by: ACC === 'admin' ? ME : ACCESS[ACC].label, st: 'Terminé', noAuto: true, file: name }); renderExports();
     cadAudit('Interface', 'Fichier ' + name + ' (' + rows.length + ' lignes)'); bkMsg('cit-msg', 'Fichier ' + name + ' généré : ' + pl(rows.length, 'ligne') + ' transmise' + (rows.length > 1 ? 's' : '') + (P.type === 'ecr' ? ' à SoftAccounting' : ' au SI des marchés publics') + '. Les dossiers sont marqués « transmis ».', 'ok');
@@ -20268,6 +20265,8 @@ var EXEC_REC = [
       d(5, '2.2', 'Hôtel Les Flamboyants', 'Séminaire de formation des agents de santé', 'Bon de commande', 'BC-2026-0121', 20000000, 'liquide', { fac: 'FAC-0460', rejet: DP_MOTIFS[0] }),
       d(6, '2.1', 'MEDIFROID SARL', 'Réfrigérateurs solaires pour les centres de santé', 'Bon de commande', 'BC-2026-0157', 45000000, 'soumis')
     ].filter(function (x) { return x.key; });
+    function dd(m, j) { return '2026-' + ('0' + m).slice(-2) + '-' + ('0' + j).slice(-2); }
+    DP.docs.forEach(function (x, i) { var k = i + 1; x.dt = { eng: dd(k + 1, 10) }; if (DP_RANK[x.st] >= 3) x.dt.liq = dd(k + 3, 15); if (DP_RANK[x.st] >= 4) x.dt.ord = dd(k + 3, 25); if (DP_RANK[x.st] >= 6) x.dt.pay = dd(k + 4, 5); });
   }
   function dpStat(key) {
     var ln = dpLine(key), s = { ouv: ln ? ln.ouv : 0, e: 0, r: 0, l: 0, o: 0, p: 0 };
@@ -20323,7 +20322,7 @@ var EXEC_REC = [
     var body = document.getElementById('dp-eng-body'), f = DP.f; body.innerHTML = '';
     var bar = cvEl('div', 'row-toolbar'), mt = parseInt0(f.montant) || 0, s = dpStat(f.key), ok = s.dispo - mt >= 0, sv = cvEl('button', 'btn primary', 'Enregistrer et soumettre au visa'); sv.type = 'button'; sv.disabled = !(ok && mt > 0 && f.objet.trim());
     sv.addEventListener('click', function () {
-      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '' });
+      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', dt: { eng: cadToday() } });
       document.getElementById('dp-eng-form').hidden = true; dpMsg('dpeng-msg', id + ' enregistré : crédit réservé sur la ligne ' + dpShort({ key: f.key }) + ', dossier transmis au Contrôle financier.'); DP.sel.dpeng = id; dpEngRender();
     });
     bar.appendChild(sv); body.appendChild(bar);
@@ -20355,7 +20354,7 @@ var EXEC_REC = [
   function dpLiqPaint(d) {
     var body = document.getElementById('dp-liq-body'), z = dpLine(d.key), lf = DP.lf; body.innerHTML = '';
     var bar = cvEl('div', 'row-toolbar'), sv = cvEl('button', 'btn primary', 'Valider la liquidation'); sv.type = 'button'; sv.disabled = !(lf.sf && lf.fac.trim());
-    sv.addEventListener('click', function () { d.st = 'liquide'; d.fac = lf.fac.trim(); d.rejet = ''; document.getElementById('dp-liq-form').hidden = true; dpMsg('dpliq-msg', d.id + ' liquidé : le net à payer est arrêté, il passe en ordonnancement.'); dpLiqRender(); });
+    sv.addEventListener('click', function () { d.st = 'liquide'; d.fac = lf.fac.trim(); d.rejet = ''; (d.dt = d.dt || {}).liq = cadToday(); document.getElementById('dp-liq-form').hidden = true; dpMsg('dpliq-msg', d.id + ' liquidé : le net à payer est arrêté, il passe en ordonnancement.'); dpLiqRender(); });
     bar.appendChild(sv); body.appendChild(bar);
     var h = cvEl('div', 'kb-h', d.id + ' · ' + d.tiers); body.appendChild(h);
     body.appendChild(dpTiles([['Imputation', dpShort(d)], ['Acte', d.acte + ' ' + d.ref], ['Montant engagé', fmt(d.mt) + ' MGA'], ['Objet', d.objet]]));
@@ -20374,7 +20373,7 @@ var EXEC_REC = [
     dpSeed(); var rows = dpOrdRows(), sel = dpOrdSel(), t = dpTot(), tot = sel.reduce(function (a, d) { return a + d.mt; }, 0);
     dpKpis('dpord-k', [['Liquidé', fmt(t.l) + ' MGA'], ['À ordonnancer', fmt(rows.reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA'], ['Mandaté', fmt(t.o) + ' MGA'], ['Sélection', sel.length + ' liquidation(s) · ' + fmt(tot) + ' MGA']]);
     dpBar('dpord-bar', [['Émettre les mandats', true, sel.length > 0, function () {
-      sel.forEach(function (d) { d.mandat = 'MD-2026-' + ('000' + (DP.seqM++)).slice(-4); d.st = 'ordonnance'; d.rejet = ''; }); var n = sel.length; DP.ordSel = {}; dpMsg('dpord-msg', n + ' mandat(s) émis et transmis au comptable avec le bordereau.'); dpOrdRender(); }],
+      sel.forEach(function (d) { d.mandat = 'MD-2026-' + ('000' + (DP.seqM++)).slice(-4); d.st = 'ordonnance'; d.rejet = ''; (d.dt = d.dt || {}).ord = cadToday(); }); var n = sel.length; DP.ordSel = {}; dpMsg('dpord-msg', n + ' mandat(s) émis et transmis au comptable avec le bordereau.'); dpOrdRender(); }],
       ['Imprimer les mandats', false, sel.length > 0, function () { dpPrintPaint(); document.getElementById('dp-print').hidden = false; }]]);
     dpTable({ id: 'dpord', multi: true, head: ['Engagement', 'Tiers', 'Ligne du PTBA', 'Facture', 'Net à payer (MGA)', 'Remarque'], num: [4], rows: rows, empty: 'Aucune liquidation en attente. Validez une liquidation dans « Liquidations ».', redraw: dpOrdRender,
       cells: function (d) { var r = d.rejet ? badge('Rejeté : ' + d.rejet, 'b-ko') : '—'; return [d.id, d.tiers, dpShort(d), d.fac, fmt(d.mt), r]; } });
@@ -20409,7 +20408,7 @@ var EXEC_REC = [
     dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'ordonnance'; }), done = (DP.docs || []).filter(function (d) { return d.st === 'paye'; }), sel = rows.filter(function (d) { return d.id === DP.sel.dppay; })[0], t = dpTot();
     dpKpis('dppay-k', [['Mandaté', fmt(t.o) + ' MGA'], ['Mandats chez le comptable', rows.length + ' · ' + fmt(rows.reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA'], ['Payé', fmt(t.p) + ' MGA'], ['Reste à payer', fmt(t.o - t.p) + ' MGA']]);
     dpBar('dppay-bar', [['Prendre en charge et payer', true, !!sel, function () {
-      cvAsk({ title: 'Prendre en charge et payer ' + sel.mandat, ok: 'Payer', required: false, optLabel: 'Mode de paiement *', options: DP_MODES, placeholder: 'Observation du comptable' }, function (c, mode) { sel.st = 'paye'; sel.mode = mode; DP.sel.dppay = null; dpMsg('dppay-msg', sel.mandat + ' pris en charge : ' + fmt(sel.mt) + ' MGA payés (' + mode.toLowerCase() + ').'); dpPayRender(); }); }],
+      cvAsk({ title: 'Prendre en charge et payer ' + sel.mandat, ok: 'Payer', required: false, optLabel: 'Mode de paiement *', options: DP_MODES, placeholder: 'Observation du comptable' }, function (c, mode) { sel.st = 'paye'; sel.mode = mode; (sel.dt = sel.dt || {}).pay = cadToday(); DP.sel.dppay = null; dpMsg('dppay-msg', sel.mandat + ' pris en charge : ' + fmt(sel.mt) + ' MGA payés (' + mode.toLowerCase() + ').'); dpPayRender(); }); }],
       ['Rejeter le mandat', false, !!sel, function () {
       cvAsk({ title: 'Rejeter ' + sel.mandat, ok: 'Rejeter', required: false, optLabel: 'Motif du rejet *', options: DP_MOTIFS, placeholder: 'Précisions pour l’ordonnateur' }, function (c, motif) { sel.st = 'liquide'; sel.mandat = ''; sel.rejet = motif; DP.sel.dppay = null; dpMsg('dppay-msg', 'Mandat rejeté (' + motif.toLowerCase() + ') : retour à l’ordonnateur.', true); dpPayRender(); }); }]]);
     dpTable({ id: 'dppay', head: ['Mandat', 'Bénéficiaire · objet', 'Ligne du PTBA', 'Facture', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun mandat en attente. Émettez un mandat dans « Ordonnancement ».', redraw: dpPayRender,
