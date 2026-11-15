@@ -16158,7 +16158,7 @@ var EXEC_REC = [
     return { pay: pay, rec: rec };
   }
   function pdcRender() {
-    var N = pdcNeeds(), S = pdcSim(N), A = pdcActual(N.ex), v0 = DFS.versements[0], now = new Date(), nm = String(now.getFullYear()) === N.ex ? now.getMonth() : 11, tot = bvSum(N.out), lowI = S.s, i;
+    var N = pdcNeeds(), S = pdcSim(N), v0 = DFS.versements[0], tot = bvSum(N.out), lowI = S.s, i;
     for (i = S.s; i < 12; i++) if (S.bal[i] < S.bal[lowI]) lowI = i;
     var low = S.bal[lowI], neg = []; for (i = S.s; i < 12; i++) if (S.bal[i] < 0) neg.push(PDC_MOIS[i]);
     dpKpis('pdc-k', [['Décaissements prévus', fmt(tot) + ' MGA', 'brand'], ['Avance initiale', fmt(v0.mt) + ' MGA', 'info'], ['Demandes à déposer', String(S.req.length), 'warn'], ['Solde prévu le plus bas (' + BVMOIS[lowI].replace('.', '') + ')', fmt(low) + ' MGA', low < 0 ? 'ko' : (low < S.seuil ? 'warn' : 'ok')]]);
@@ -16171,18 +16171,17 @@ var EXEC_REC = [
     S.req.forEach(function (r, j) {
       var rw = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'Demande ' + (j + 1) + ' : à déposer en ' + PDC_MOIS[r.m] + ', avant la fin du mois'));
       l.appendChild(cvEl('div', 'hby', 'Montant ' + fmt(r.mt) + ' MGA (dépenses payées depuis la dernière demande) · fonds attendus ' + (r.arr < 12 ? 'en ' + PDC_MOIS[r.arr] : 'après la fin de l’exercice'))); rw.appendChild(l);
-      var bd = r.m < nm ? badge('Échéance passée', 'b-neutral') : (r.m === nm ? badge('À déposer ce mois-ci', 'b-warn') : badge('À prévoir', 'b-info')); bd.style.marginLeft = 'auto'; rw.appendChild(bd); rq.appendChild(rw);
+      var bd = badge(fmt(r.mt) + ' MGA', 'b-warn'); bd.style.marginLeft = 'auto'; rw.appendChild(bd); rq.appendChild(rw);
     });
     var ch = document.getElementById('pdc-chart'); ch.innerHTML = '';
-    var cum = 0, rb = A.pay.map(function (p, m) { cum += A.rec[m] - p; return cum; }), cl = function (a) { return a.map(function (v) { return Math.max(0, v); }); };
-    ch.appendChild(dpLineChart([{ name: 'Solde prévu', color: DPC.brand, data: cl(S.bal) }, { name: 'Seuil d’alerte', color: DPC.warn, dash: true, data: S.bal.map(function () { return S.seuil; }) }, { name: 'Solde réel', color: DPC.ok, data: cl(rb.map(function (v, m) { return m <= nm ? v : rb[nm]; })) }], BVMOIS));
-    var tb = document.getElementById('pdc-tab'); tb.innerHTML = ''; var nz = function (v) { return v ? fmt(v) : '—'; }, past = function (a) { return a.map(function (v, m) { return m <= nm ? nz(v) : '—'; }); };
+    var cl = function (a) { return a.map(function (v) { return Math.max(0, v); }); };
+    ch.appendChild(dpLineChart([{ name: 'Solde prévu', color: DPC.brand, data: cl(S.bal) }, { name: 'Seuil d’alerte', color: DPC.warn, dash: true, data: S.bal.map(function () { return S.seuil; }) }], BVMOIS));
+    var tb = document.getElementById('pdc-tab'); tb.innerHTML = ''; var nz = function (v) { return v ? fmt(v) : '—'; };
     var reqM = {}; S.req.forEach(function (r) { reqM[r.m] = r; });
     tb.appendChild(dpMini(['MGA'].concat(BVMOIS, ['Total']), [
       ['Décaissements prévus (PTBA et PPM)'].concat(N.out.map(nz), [fmt(tot)]), ['dont marchés du PPM'].concat(N.ppmM.map(nz), [fmt(bvSum(N.ppmM))]),
       ['Fonds prévus (avance et réapprovisionnements)'].concat(S.inflow.map(nz), [fmt(bvSum(S.inflow))]), ['Solde prévu en fin de mois'].concat(S.bal.map(function (v) { return v ? fmt(v) : '—'; }), ['']),
-      ['Demande à déposer'].concat(S.bal.map(function (v, m) { return reqM[m] ? badge(fmt(reqM[m].mt), 'b-warn') : '—'; }), ['']),
-      ['Décaissements réalisés'].concat(past(A.pay), [fmt(bvSum(A.pay))]), ['Fonds reçus réels'].concat(past(A.rec), [fmt(bvSum(A.rec))])
+      ['Demande à déposer'].concat(S.bal.map(function (v, m) { return reqM[m] ? badge(fmt(reqM[m].mt), 'b-warn') : '—'; }), [''])
     ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
     var og = document.getElementById('pdc-orig'); og.innerHTML = '';
     og.appendChild(dpMini(['Ligne du PTBA', 'Source de financement', 'Marchés du PPM', 'Reste à programmer (PTBA)', 'Total prévu'], N.rows.map(function (r) { return [r.z.l.c + ' — ' + (r.z.l.lib || r.z.l.l), (r.z.l.axv && r.z.l.axv.Financier) || '—', fmt(r.ppm), fmt(r.ptba), fmt(r.ppm + r.ptba)]; }), [2, 3, 4], 'Aucune ligne financée par le bailleur.'));
