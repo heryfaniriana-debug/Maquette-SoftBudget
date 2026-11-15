@@ -5383,6 +5383,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div><label for="sxf-ref"><span id="sxf-reflbl">Référence</span> <em>*</em></label><input id="sxf-ref" class="field" type="text"></div>
             <div><label for="sxf-tiers"><span id="sxf-tglbl">Bénéficiaire</span></label><input id="sxf-tiers" class="field" type="text"></div>
             <div><label for="sxf-mt"><span id="sxf-mtlbl">Montant (MGA)</span> <em>*</em></label><input id="sxf-mt" class="field" type="text" inputmode="numeric"></div>
+            <div id="sxf-dw" hidden><label class="chk"><input type="checkbox" id="sxf-dpd"> Paiement direct du bailleur (hors décaissements du projet)</label></div>
           </div>
           <div class="err" id="sxf-err"></div>
           <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="sxf-cancel">Annuler</button><button class="btn primary" id="sxf-save">Enregistrer</button></div>
@@ -5399,7 +5400,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       </section>
       <!-- ===== Projet : avance initiale et compte spécial (cadre du projet) ===== -->
       <section class="view" id="v-avini">
-        <div class="head"><div><h1>Avance initiale</h1><p>Conditions de l’avance versée par le bailleur sur le compte spécial du projet : montant, plafond et lettre de décaissement</p></div>
+        <div class="head"><div><h1>Avance et paiement direct</h1><p>Conditions de décaissement fixées avec le bailleur : avance initiale, plafond du compte spécial, délai et seuil du paiement direct.</p></div>
           <div class="actions"><button class="btn primary" id="avini-edit">Modifier les conditions</button></div></div>
         <div class="callout" id="avini-msg" hidden style="margin-bottom:12px"></div>
         <div class="panel" id="avini-form" hidden style="margin-bottom:14px"><h2>Conditions de l’avance</h2><div class="body">
@@ -5410,6 +5411,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div><label for="avini-plaf">Plafond du compte spécial (MGA) <em>*</em></label><input id="avini-plaf" class="field" type="text" inputmode="numeric"></div>
             <div><label for="avini-seuil">Seuil d’alerte du solde (% du plafond) <em>*</em></label><input id="avini-seuil" class="field" type="text" inputmode="numeric"></div>
             <div><label for="avini-delai">Délai de traitement du bailleur <em>*</em></label><select id="avini-delai" class="field"><option value="1">1 mois</option><option value="2">2 mois</option><option value="3">3 mois</option></select></div>
+            <div><label for="avini-dpd">Seuil de paiement direct du bailleur (MGA) <em>*</em></label><input id="avini-dpd" class="field" type="text" inputmode="numeric"></div>
           </div>
           <div class="err" id="avini-err"></div>
           <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="avini-cancel">Annuler</button><button class="btn primary" id="avini-save">Enregistrer</button></div>
@@ -6534,7 +6536,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     ppm: ['Élaboration', 'PPM — Plan de passation des marchés'],
     pad: ['Cadre du projet', 'Plan de financement (PAD)'],
     resu: ['Cadre du projet', 'Cadre de résultats'],
-    avini: ['Cadre du projet', 'Avance initiale'],
+    avini: ['Cadre du projet', 'Avance et paiement direct'],
     sxeng: ['Exécution', 'Engagements'], sxliq: ['Exécution', 'Réalisations'], sxpay: ['Exécution', 'Décaissements'], sxenc: ['Exécution', 'Encaissements'], trpos: ['Exécution', 'Trésorerie'], sxphy: ['Exécution', 'Avancement physique'],
     avanc: ['Exécution', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
@@ -14461,7 +14463,7 @@ var EXEC_REC = [
     var adv = function (c, a) { return a; }, simple = function (c, a) { return !a; }, treso = function (c, a, f) { return f.mods.treso; };
     var ca = [['Engagements', rPrj], ['Liquidations', rPrj], ['Ordonnancement', rPrj], ['Paiements', rPrj], ['Tableau de restitution', rPrj], ['Clôture de l’exercice', rPrj], ['Fichiers d’interface', rPrj]];
     return [
-      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Avance initiale', treso], ['Cadre de résultats', rAlways]] },
+      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
       { g: 'Élaboration', items: [['Configuration', rAlways], ['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso]] },
       { g: 'Compte administratif', items: ca },
@@ -14516,7 +14518,7 @@ var EXEC_REC = [
       var sub = document.querySelector('#' + gid + ' > .sub');
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
-    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['avini', 'Avance initiale', 'Avance initiale et compte spécial du projet'], ['resu']]);
+    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['avini', 'Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
     put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
@@ -15835,13 +15837,13 @@ var EXEC_REC = [
     { ref: 'PPM-2026-50', des: 'Travaux d’aménagement des locaux de formation', ligne: 'C1.2', cat: 'Travaux', met: PPM_MET[1], est: 30000000, d1: '2026-09-15', d2: '2026-10-30', d3: '2026-11-15', st: 'Attribué' },
     { ref: 'PPM-2026-60', des: 'Construction de 6 salles de classe (lot 1)', ligne: 'C1.1', cat: 'Travaux', met: PPM_MET[1], est: 300000000, d1: '2026-01-15', d2: '2026-03-15', d3: '2026-04-10', st: 'En exécution', act: 'CAMP-2026-02|1.1' },
     { ref: 'PPM-2026-61', des: 'Construction de 3 salles de classe (lot 2)', ligne: 'C1.1', cat: 'Travaux', met: PPM_MET[1], est: 150000000, d1: '2026-03-01', d2: '2026-05-15', d3: '2026-06-10', st: 'Signé', act: 'CAMP-2026-02|1.1' },
-    { ref: 'PPM-2026-62', des: 'Construction de 4 centres de santé', ligne: 'C1.1', cat: 'Travaux', met: PPM_MET[1], est: 320000000, d1: '2026-04-01', d2: '2026-06-15', d3: '2026-07-10', st: 'Attribué', act: 'CAMP-2026-02|2.1' }
+    { pm: 'dpd', ref: 'PPM-2026-62', des: 'Construction de 4 centres de santé', ligne: 'C1.1', cat: 'Travaux', met: PPM_MET[1], est: 320000000, d1: '2026-04-01', d2: '2026-06-15', d3: '2026-07-10', st: 'Attribué', act: 'CAMP-2026-02|2.1' }
   ] };
   /* Liaison PPM ↔ PTBA : chaque marché découle d'une activité (ligne) d'un lot de collecte validé */
   function ppmActs() {
     var out = [];
     if (typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return out;
-    bvList().forEach(function (r) { var d = bvData(r); d.lines.forEach(function (x) { out.push({ key: r.camp + '|' + x.l.c, lot: r.camp, perim: x.perim, code: x.l.c, lib: x.l.lib || x.l.l, cost: x.l.dem || 0, node: nodeOfAct(x.perim, x.l.c), nat: x.l.nat, wk: x.l.wk, ex: d.c.ex }); }); });
+    bvList().forEach(function (r) { var d = bvData(r); d.lines.forEach(function (x) { out.push({ key: r.camp + '|' + x.l.c, lot: r.camp, perim: x.perim, code: x.l.c, lib: x.l.lib || x.l.l, cost: x.l.dem || 0, node: nodeOfAct(x.perim, x.l.c), nat: x.l.nat, wk: x.l.wk, ex: d.c.ex, fin: (x.l.axv && x.l.axv.Financier) || '' }); }); });
     return out;
   }
   function ppmActOf(key) { return ppmActs().filter(function (a) { return a.key === key; })[0]; }
@@ -16075,6 +16077,9 @@ var EXEC_REC = [
   /* ----- PPM par exercice : même entrée que le PTBA (un lot validé = un exercice) ; le détail guide la passation à partir des lignes du PTBA ----- */
   var PPM_DUR = [[120, 30], [75, 20], [30, 10], [100, 25], [10, 5]];
   var PPMG = { lot: null, g: null, msg: null };
+  function ppmPm(x) { return x.pm || 'projet'; }
+  function ppmPmSuggest(a, est) { return /Don|Bailleur|Prêt|Subvention/i.test(a.fin || '') && est > DFS.dpdSeuil ? 'dpd' : 'projet'; }
+  var PM_LBL = { projet: 'Par le projet (compte spécial)', dpd: 'Paiement direct du bailleur (DPD)' };
   function ppmGet(ref) { return CPP.items.filter(function (x) { return x.ref === ref; })[0]; }
   function ppmLig(code) { var l = CAD.lines.filter(function (x) { return x.code === code; })[0]; return l ? code + ' — ' + l.lib : code; }
   function ppmEngDp(ref) { dpSeed(); return (DP.docs || []).filter(function (d) { return d.ppm === ref && d.kind !== 'avance' && DP_RANK[d.st] >= 2; }).reduce(function (a, d) { return a + d.mt; }, 0); }
@@ -16112,16 +16117,16 @@ var EXEC_REC = [
       var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button'; b.addEventListener('click', function () { PPMG.lot = r; PPMG.g = null; PPMG.msg = null; ppmPaint(); document.getElementById('ppm-det').hidden = false; }); act.appendChild(b); body.appendChild(tr);
     });
   }
-  function ppmGuide(a) { var s = ppmSuggest(ppmCatOf(a), Math.max(a.cost - ppmActTotal(a.key), 0)), d = ppmDates(a, s.i); PPMG.g = { a: a, des: a.lib, cat: ppmCatOf(a), mi: s.i, est: Math.max(a.cost - ppmActTotal(a.key), 0), d: d, mT: false, dT: false }; ppmGuidePaint(); document.getElementById('ppm-guide').hidden = false; }
+  function ppmGuide(a) { var s = ppmSuggest(ppmCatOf(a), Math.max(a.cost - ppmActTotal(a.key), 0)), d = ppmDates(a, s.i); PPMG.g = { a: a, des: a.lib, cat: ppmCatOf(a), mi: s.i, est: Math.max(a.cost - ppmActTotal(a.key), 0), d: d, mT: false, dT: false, pm: '', pT: false }; PPMG.g.pm = ppmPmSuggest(a, PPMG.g.est); ppmGuidePaint(); document.getElementById('ppm-guide').hidden = false; }
   function ppmGuidePaint() {
     var g = PPMG.g; if (!g) return; var body = document.getElementById('ppm-guide-body'); body.innerHTML = ''; document.getElementById('ppm-guide-title').textContent = 'Planifier la passation : ligne ' + g.a.code + ' · ' + g.a.lib;
 
       var card = cvEl('div', 'card'); card.style.padding = '16px 18px'; var grid = cvEl('div', 'fgrid'); card.appendChild(grid);
       function fld(label, el, full, hint) { var d = cvEl('div', full ? 'full' : ''); d.appendChild(cvEl('label', null, label)); d.appendChild(el); if (hint) d.appendChild(cvEl('div', 'hint', hint)); grid.appendChild(d); return el; }
       var des = cvEl('input', 'field'); des.type = 'text'; des.value = g.des; des.addEventListener('change', function () { g.des = des.value; }); fld('1. Que va-t-on acquérir ? Désignation', des, true);
-      var sc = cvEl('select', 'field'); ['Travaux', 'Biens', 'Services', 'Consultants'].forEach(function (x) { sc.appendChild(cvEl('option', null, x)); }); sc.value = g.cat; sc.addEventListener('change', function () { g.cat = sc.value; if (!g.mT) g.mi = ppmSuggest(g.cat, g.est).i; if (!g.dT) g.d = ppmDates(g.a, g.mi); ppmGuidePaint(); }); fld('Nature du besoin', sc, false, 'Proposée d’après la ligne du PTBA : ' + ppmCatOf(g.a).toLowerCase() + '.');
-      var es = cvEl('input', 'field'); es.type = 'text'; es.setAttribute('inputmode', 'numeric'); es.value = fmt(g.est); es.addEventListener('change', function () { g.est = parseInt0(es.value) || 0; if (!g.mT) g.mi = ppmSuggest(g.cat, g.est).i; if (!g.dT) g.d = ppmDates(g.a, g.mi); ppmGuidePaint(); }); fld('Montant estimatif (MGA)', es, false, 'Reste à programmer sur la ligne : ' + fmt(Math.max(g.a.cost - ppmActTotal(g.a.key), 0)) + ' MGA. Fractionnez en plusieurs marchés pour allotir.');
-      var sm = cvEl('select', 'field'); PPM_MET.forEach(function (x, i) { var o = cvEl('option', null, x); o.value = String(i); sm.appendChild(o); }); sm.value = String(g.mi); sm.addEventListener('change', function () { g.mi = +sm.value; g.mT = true; if (!g.dT) g.d = ppmDates(g.a, g.mi); ppmGuidePaint(); }); var sg = ppmSuggest(g.cat, g.est); fld('2. Comment ? Méthode de passation', sm, true, 'Suggestion : ' + PPM_MET[sg.i] + ' (' + sg.why + ').');
+      var sc = cvEl('select', 'field'); ['Travaux', 'Biens', 'Services', 'Consultants'].forEach(function (x) { sc.appendChild(cvEl('option', null, x)); }); sc.value = g.cat; sc.addEventListener('change', function () { g.cat = sc.value; if (!g.mT) g.mi = ppmSuggest(g.cat, g.est).i; if (!g.dT) g.d = ppmDates(g.a, g.mi); if (!g.pT) g.pm = ppmPmSuggest(g.a, g.est); ppmGuidePaint(); }); fld('Nature du besoin', sc, false, 'Proposée d’après la ligne du PTBA : ' + ppmCatOf(g.a).toLowerCase() + '.');
+      var es = cvEl('input', 'field'); es.type = 'text'; es.setAttribute('inputmode', 'numeric'); es.value = fmt(g.est); es.addEventListener('change', function () { g.est = parseInt0(es.value) || 0; if (!g.mT) g.mi = ppmSuggest(g.cat, g.est).i; if (!g.dT) g.d = ppmDates(g.a, g.mi); if (!g.pT) g.pm = ppmPmSuggest(g.a, g.est); ppmGuidePaint(); }); fld('Montant estimatif (MGA)', es, false, 'Reste à programmer sur la ligne : ' + fmt(Math.max(g.a.cost - ppmActTotal(g.a.key), 0)) + ' MGA. Fractionnez en plusieurs marchés pour allotir.');
+      var sm = cvEl('select', 'field'); PPM_MET.forEach(function (x, i) { var o = cvEl('option', null, x); o.value = String(i); sm.appendChild(o); }); sm.value = String(g.mi); sm.addEventListener('change', function () { g.mi = +sm.value; g.mT = true; if (!g.dT) g.d = ppmDates(g.a, g.mi); ppmGuidePaint(); }); var sg = ppmSuggest(g.cat, g.est); fld('2. Comment ? Méthode de passation', sm, true, 'Suggestion : ' + PPM_MET[sg.i] + ' (' + sg.why + ').'); var sp = cvEl('select', 'field'); ['projet', 'dpd'].forEach(function (k) { var o = cvEl('option', null, PM_LBL[k]); o.value = k; sp.appendChild(o); }); sp.value = g.pm; sp.addEventListener('change', function () { g.pm = sp.value; g.pT = true; }); fld('Mode de paiement', sp, true);
       [['3. Quand ? Lancement de la procédure', 0], ['Attribution', 1], ['Signature du marché', 2]].forEach(function (x) { var di = cvEl('input', 'field'); di.type = 'date'; di.value = g.d[x[1]]; di.addEventListener('change', function () { g.d[x[1]] = di.value; g.dT = true; }); fld(x[0], di, false, x[1] === 2 ? 'Placée juste avant le démarrage du travail prévu.' : ''); });
       var er = cvEl('div', 'err'); card.appendChild(er); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bs = cvEl('button', 'btn primary', 'Ajouter au plan'); bc.type = bs.type = 'button'; ft.appendChild(bc); ft.appendChild(bs); card.appendChild(ft);
       bc.addEventListener('click', function () { PPMG.g = null; document.getElementById('ppm-guide').hidden = true; });
@@ -16130,7 +16135,7 @@ var EXEC_REC = [
         if ((g.des || '').trim().length < 5) { er.textContent = 'La désignation est obligatoire (5 caractères au moins).'; return; } if (!g.est || g.est <= 0) { er.textContent = 'Le montant estimatif doit être positif.'; return; }
         if (g.est > rest) { er.textContent = 'Le marché dépasserait le coût de la ligne au PTBA : il reste ' + fmt(Math.max(rest, 0)) + ' MGA à programmer.'; return; }
         if (!(g.d[0] && g.d[1] && g.d[2] && g.d[0] <= g.d[1] && g.d[1] <= g.d[2])) { er.textContent = 'Les dates doivent suivre l’ordre : lancement, attribution, signature.'; return; }
-        var ref = 'PPM-2026-' + (++CPP.seq); CPP.items.push({ ref: ref, des: g.des.trim(), ligne: g.a.code, cat: g.cat, met: PPM_MET[g.mi], est: g.est, d1: g.d[0], d2: g.d[1], d3: g.d[2], st: 'Planifié', act: g.a.key });
+        var ref = 'PPM-2026-' + (++CPP.seq); CPP.items.push({ ref: ref, des: g.des.trim(), ligne: g.a.code, cat: g.cat, met: PPM_MET[g.mi], est: g.est, d1: g.d[0], d2: g.d[1], d3: g.d[2], st: 'Planifié', act: g.a.key, pm: g.pm });
         cadAudit(ref, 'Marché ajouté au plan (' + fmt(g.est) + ' MGA)'); PPMG.g = null; PPMG.msg = [ref + ' ajouté au plan de passation (' + PPM_MET[g.mi] + ').', 'ok']; document.getElementById('ppm-guide').hidden = true; ppmPaint(); ppmRender();
       });
     body.appendChild(card);
@@ -16152,11 +16157,17 @@ var EXEC_REC = [
     /* Marchés du plan : planification pure, sans suivi d'exécution */
     var mk = items.map(function (x) {
       var cm = cvEl('div'); cm.appendChild(cvEl('b', null, x.cat)); cm.appendChild(cvEl('div', 'hint', x.met));
-      var bt = cvEl('div'), b = cvEl('button', 'btn small', 'Retirer du plan'); b.type = 'button'; b.disabled = ppmEngDp(x.ref) > 0; if (b.disabled) b.title = 'Des engagements référencent déjà ce marché.';
-      b.addEventListener('click', function () { if (!cadPerm('ppm_edit', 'ppm-dmsg')) return; CPP.items.splice(CPP.items.indexOf(x), 1); cadAudit(x.ref, 'Marché retiré du plan'); PPMG.msg = [x.ref + ' retiré du plan de passation.', 'info']; ppmPaint(); ppmRender(); }); bt.appendChild(b);
-      return [x.ref, x.des, cm, fmt(x.est), isoToFr(x.d1) + ' · ' + isoToFr(x.d2) + ' · ' + isoToFr(x.d3), bt];
+      var pmc = cvEl('div'); pmc.appendChild(badge(ppmPm(x) === 'dpd' ? 'Paiement direct' : 'Par le projet', ppmPm(x) === 'dpd' ? 'b-warn' : 'b-neutral')); if ((x.pmHist || []).length) pmc.appendChild(cvEl('div', 'hby', 'Modifié le ' + x.pmHist[0].on.slice(0, 10)));
+      var bt = cvEl('div'); bt.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
+      var bm = cvEl('button', 'btn small', 'Changer le mode de paiement'); bm.type = 'button';
+      bm.addEventListener('click', function () { if (!cadPerm('ppm_edit', 'ppm-dmsg')) return; var to = ppmPm(x) === 'dpd' ? 'projet' : 'dpd'; cvAsk({ title: 'Passer ' + x.ref + ' en « ' + PM_LBL[to] + ' »', ok: 'Changer', required: true, cLabel: 'Motif du changement', placeholder: 'Ex. exigence du bailleur, fournisseur étranger' }, function (why) { (x.pmHist = x.pmHist || []).unshift({ on: nowStr(), from: ppmPm(x), to: to, why: why, by: ME }); x.pm = to; cadAudit(x.ref, 'Mode de paiement : ' + PM_LBL[to]); PPMG.msg = [x.ref + ' : mode de paiement changé en « ' + PM_LBL[to] + ' ».', 'ok']; ppmPaint(); ppmRender(); }); });
+      var b = cvEl('button', 'btn small', 'Retirer du plan'); b.type = 'button'; b.disabled = ppmEngDp(x.ref) > 0; if (b.disabled) b.title = 'Des engagements référencent déjà ce marché.';
+      b.addEventListener('click', function () { if (!cadPerm('ppm_edit', 'ppm-dmsg')) return; CPP.items.splice(CPP.items.indexOf(x), 1); cadAudit(x.ref, 'Marché retiré du plan'); PPMG.msg = [x.ref + ' retiré du plan de passation.', 'info']; ppmPaint(); ppmRender(); });
+      bt.appendChild(bm); bt.appendChild(b);
+      return [x.ref, x.des, cm, fmt(x.est), pmc, isoToFr(x.d1) + ' · ' + isoToFr(x.d2) + ' · ' + isoToFr(x.d3), bt];
     });
-    block('Marchés du plan', dpMini(['Référence', 'Désignation', 'Catégorie · méthode', 'Estimatif', 'Lancement · attribution · signature', ''], mk, [3], 'Aucun marché planifié : commencez par une ligne du PTBA ci-dessus.'));    if (PPMG.msg) bkMsg('ppm-dmsg', PPMG.msg[0], PPMG.msg[1]);
+    block('Marchés du plan', dpMini(['Référence', 'Désignation', 'Catégorie · méthode', 'Estimatif', 'Paiement', 'Lancement · attribution · signature', ''], mk, [3], 'Aucun marché planifié : commencez par une ligne du PTBA ci-dessus.'));
+    if (PPMG.msg) bkMsg('ppm-dmsg', PPMG.msg[0], PPMG.msg[1]);
   }
   function cegPpmOpts() {
     var s = document.getElementById('ceg-ppm'); s.innerHTML = '<option value="">— Choisir un marché du plan de passation —</option>' + CPP.items.filter(function (x) { return x.st !== 'Clôturé'; }).map(function (x) { return '<option value="' + x.ref + '">' + escH(x.ref + ' — ' + x.des + ' (' + x.st + ')') + '</option>'; }).join('');
@@ -16178,16 +16189,16 @@ var EXEC_REC = [
   /* ----- Plan de décaissement : besoins du compte spécial dérivés du PTBA et du PPM, à partir de l'avance initiale ----- */
   var PDC_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   function pdcNeeds(r) {
-    dpSeed(); var z12 = function () { return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; }, out = z12(), ppmM = z12(), rows = [], ex = '2026';
+    dpSeed(); var z12 = function () { return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; }, out = z12(), ppmM = z12(), dpdM = z12(), dpdRows = [], rows = [], ex = '2026';
     dpLines().forEach(function (z) {
       if (r && z.r !== r) return; if (!dfoDocSrc({ key: z.key })) return; ex = z.r.ex || ex;
       var act = z.key.split('|').filter(function (_, i) { return i !== 1; }).join('|'), pp = (CPP.items || []).filter(function (x) { return x.act === act; }), ppT = 0, o = z12();
-      pp.forEach(function (x) { var d = x.d3 || x.d2 || x.d1; if (d && d.slice(0, 4) === ex) { o[+d.slice(5, 7) - 1] += x.est; ppT += x.est; } });
+      pp.forEach(function (x) { var d = x.d3 || x.d2 || x.d1; if (d && d.slice(0, 4) === ex) { var mm = +d.slice(5, 7) - 1; if (ppmPm(x) === 'dpd') { dpdM[mm] += x.est; dpdRows.push({ x: x, m: mm }); } else o[mm] += x.est; ppT += x.est; } });
       var rest = Math.max(0, z.ouv - ppT), sp = bvSpread(rest, z.l, ex);
       for (var m = 0; m < 12; m++) { out[m] += o[m] + sp[m]; ppmM[m] += o[m]; }
       rows.push({ z: z, ppm: ppT, ptba: rest });
     });
-    return { out: out, ppmM: ppmM, rows: rows, ex: ex };
+    return { out: out, ppmM: ppmM, dpdM: dpdM, dpdRows: dpdRows, rows: rows, ex: ex };
   }
   /* Simulation mois par mois : l'avance initiale arrive, les dépenses la consomment, et une demande de réapprovisionnement est déposée dès que le solde, après le délai du bailleur, passerait sous le seuil */
   function pdcSim(N) {
@@ -16217,24 +16228,35 @@ var EXEC_REC = [
       var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button'; b.addEventListener('click', function () { pdcOpen(r); }); act.appendChild(b); body.appendChild(tr);
     });
   }
-  function pdcOpen(r) {
-    var c = cvCamp(r), N = pdcNeeds(r), S = pdcSim(N), v0 = DFS.versements[0], tot = bvSum(N.out), lowI = S.s, i;
+  var PDCT = { r: null, tab: 'cs' };
+  function pdcOpen(r) { PDCT.r = r; PDCT.tab = 'cs'; pdcPaintDet(); document.getElementById('pdc-det').hidden = false; }
+  function pdcPaintDet() {
+    var r = PDCT.r, c = cvCamp(r), N = pdcNeeds(r), S = pdcSim(N), v0 = DFS.versements[0], tot = bvSum(N.out), dtot = bvSum(N.dpdM), lowI = S.s, i;
     document.getElementById('pdc-det-title').textContent = 'Plan de décaissement ' + c.ex + ' — ' + c.code;
     for (i = S.s; i < 12; i++) if (S.bal[i] < S.bal[lowI]) lowI = i;
     var neg = []; for (i = S.s; i < 12; i++) if (S.bal[i] < 0) neg.push(PDC_MOIS[i]);
     var body = document.getElementById('pdc-det-body'); body.innerHTML = '';
     function block(title, node) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); }
-    if (neg.length) { var al = cvEl('div', 'callout', 'Le solde du compte spécial serait négatif en ' + neg.join(', ') + ' : avancez une demande, augmentez l’avance ou relevez le plafond.'); al.style.cssText = 'margin-bottom:12px;background:var(--ko-bg);color:var(--ko)'; body.appendChild(al); }
-    block('Hypothèses', dpDl([['Avance initiale', fmt(v0.mt) + ' MGA · ' + isoToFr(v0.date)], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte', fmt(Math.round(S.seuil)) + ' MGA'], ['Délai de traitement du bailleur', DFS.delai + ' mois']]));
-    var cl = function (a) { return a.map(function (v) { return Math.max(0, v); }); };
-    var chart = cvEl('div', 'card'); chart.style.padding = '14px 16px'; chart.appendChild(dpLineChart([{ name: 'Solde prévu', color: DPC.brand, data: cl(S.bal) }, { name: 'Seuil d’alerte', color: DPC.warn, dash: true, data: S.bal.map(function () { return S.seuil; }) }], BVMOIS)); block('Évolution du solde du compte spécial', chart);
-    var nz = function (v) { return v ? fmt(v) : '—'; }, reqM = {}; S.req.forEach(function (q) { reqM[q.m] = q; });
-    block('Détail mensuel (MGA)', dpMini(['MGA'].concat(BVMOIS, ['Total']), [
-      ['Décaissements prévus (PTBA et PPM)'].concat(N.out.map(nz), [fmt(tot)]), ['dont marchés du PPM'].concat(N.ppmM.map(nz), [fmt(bvSum(N.ppmM))]),
-      ['Fonds prévus (avance et réapprovisionnements)'].concat(S.inflow.map(nz), [fmt(bvSum(S.inflow))]), ['Solde prévu en fin de mois'].concat(S.bal.map(nz), ['']),
-      ['Demande à déposer'].concat(S.bal.map(function (v, m) { return reqM[m] ? badge(fmt(reqM[m].mt), 'b-warn') : '—'; }), [''])
-    ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
-    document.getElementById('pdc-det').hidden = false;
+    var tabs = cvEl('div', 'seg dp-tabs'); [['cs', 'Compte spécial'], ['dpd', 'Paiements directs'], ['all', 'Ensemble']].forEach(function (t) { var b = cvEl('button', PDCT.tab === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { PDCT.tab = t[0]; pdcPaintDet(); }); tabs.appendChild(b); }); body.appendChild(tabs);
+    var nz = function (v) { return v ? fmt(v) : '—'; }, cl = function (a) { return a.map(function (v) { return Math.max(0, v); }); }, cum = function (a) { var s = 0; return a.map(function (v) { s += v; return s; }); }, MH = ['MGA'].concat(BVMOIS, ['Total']), NUM = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    if (PDCT.tab === 'cs') {
+      if (neg.length) { var al = cvEl('div', 'callout', 'Le solde du compte spécial serait négatif en ' + neg.join(', ') + ' : avancez une demande, augmentez l’avance ou relevez le plafond.'); al.style.cssText = 'margin-bottom:12px;background:var(--ko-bg);color:var(--ko)'; body.appendChild(al); }
+      block('Hypothèses', dpDl([['Avance initiale', fmt(v0.mt) + ' MGA · ' + isoToFr(v0.date)], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte', fmt(Math.round(S.seuil)) + ' MGA'], ['Délai de traitement du bailleur', DFS.delai + ' mois']]));
+      var chart = cvEl('div', 'card'); chart.style.padding = '14px 16px'; chart.appendChild(dpLineChart([{ name: 'Solde prévu', color: DPC.brand, data: cl(S.bal) }, { name: 'Seuil d’alerte', color: DPC.warn, dash: true, data: S.bal.map(function () { return S.seuil; }) }], BVMOIS)); block('Évolution du solde du compte spécial', chart);
+      var reqM = {}; S.req.forEach(function (q) { reqM[q.m] = q; });
+      block('Détail mensuel (MGA)', dpMini(MH, [
+        ['Décaissements prévus (PTBA et PPM)'].concat(N.out.map(nz), [fmt(tot)]), ['dont marchés du PPM'].concat(N.ppmM.map(nz), [fmt(bvSum(N.ppmM))]),
+        ['Fonds prévus (avance et réapprovisionnements)'].concat(S.inflow.map(nz), [fmt(bvSum(S.inflow))]), ['Solde prévu en fin de mois'].concat(S.bal.map(nz), ['']),
+        ['Demande à déposer'].concat(S.bal.map(function (v, m) { return reqM[m] ? badge(fmt(reqM[m].mt), 'b-warn') : '—'; }), [''])
+      ], NUM, ''));
+    } else if (PDCT.tab === 'dpd') {
+      block('Marchés en paiement direct', dpMini(['Marché', 'Désignation', 'Paiement prévu', 'Montant (MGA)'], N.dpdRows.map(function (d) { return [d.x.ref, d.x.des, PDC_MOIS[d.m], fmt(d.x.est)]; }), [3], 'Aucun marché en paiement direct : tous les marchés de ce plan sont payés par le projet.'));
+      block('Paiements directs par mois (MGA)', dpMini(MH, [['Paiements directs prévus'].concat(N.dpdM.map(nz), [fmt(dtot)]), ['Cumul'].concat(cum(N.dpdM).map(nz), [''])], NUM, ''));
+    } else {
+      var all = N.out.map(function (v, m) { return v + N.dpdM[m]; }), ch2 = cvEl('div', 'card'); ch2.style.padding = '14px 16px';
+      ch2.appendChild(dpLineChart([{ name: 'Compte spécial', color: DPC.brand, data: cum(N.out) }, { name: 'Paiements directs', color: DPC.warn, data: cum(N.dpdM) }, { name: 'Ensemble', color: DPC.ok, data: cum(all) }], BVMOIS)); block('Décaissements cumulés', ch2);
+      block('Détail mensuel (MGA)', dpMini(MH, [['Compte spécial (décaissements du projet)'].concat(N.out.map(nz), [fmt(tot)]), ['Paiements directs du bailleur'].concat(N.dpdM.map(nz), [fmt(dtot)]), ['Total des décaissements'].concat(all.map(nz), [fmt(tot + dtot)]), ['Total cumulé'].concat(cum(all).map(nz), [''])], NUM, ''));
+    }
   }
 
   /* ----- Demandes de fonds (DRF et DPD) : rattachées aux dépenses du compte administratif, avec l'avance initiale et le compte spécial du projet ----- */
@@ -16249,14 +16271,14 @@ var EXEC_REC = [
   ] };
   CDF.items.forEach(function (d) { d.hist = [{ on: isoToFr(d.date), role: 'AFC', t: 'Demande préparée' }]; if (d.dsoum) d.hist.unshift({ on: isoToFr(d.dsoum), role: 'AFC', t: 'Soumise au bailleur' }); if (d.dRep) d.hist.unshift({ on: isoToFr(d.dRep), role: 'Bailleur', t: d.st === 'Rejetée' ? 'Rejetée : ' + d.motif : 'Acceptée pour ' + fmt(d.mtAcc) + ' MGA' }); if (d.dPaie) d.hist.unshift({ on: isoToFr(d.dPaie), role: 'AFC', t: 'Reconstitution du compte constatée' }); });
   /* Avance initiale : fonds versés par le bailleur sur le compte spécial dès le démarrage, dans la limite d'un plafond fixé par la lettre de décaissement */
-  var DFS = { plaf: 500000000, seuil: 30, delai: 1, versements: [{ id: 'VS-001', date: '2026-02-12', lib: 'Avance initiale', mt: 400000000, ref: 'LD-2026-014' }] };
+  var DFS = { plaf: 500000000, seuil: 30, delai: 1, dpdSeuil: 300000000, versements: [{ id: 'VS-001', date: '2026-02-12', lib: 'Avance initiale', mt: 400000000, ref: 'LD-2026-014' }] };
   function dfoSrc(c) { return CAD.src.filter(function (s) { return s.code === c; })[0] || { code: c, lib: c }; }
   function dfoDocSrc(d) { var z = dpLine(d.key), f = (z && z.l.axv && z.l.axv.Financier) || ''; return /Don|Bailleur|Subvention/i.test(f) ? '02' : (/Prêt/i.test(f) ? '01' : null); }
   function dfoAmt(d) { return d.kind === 'avance' ? d.mt : dpNet(d); }
   function dfoDoc(id) { return (DP.docs || []).filter(function (x) { return x.id === id; })[0]; }
   function dfoAttached() { var a = {}; CDF.items.forEach(function (d) { if (d.st !== 'Rejetée') d.regs.forEach(function (r) { a[r] = true; }); }); return a; }
   /* Dépenses que l'on peut rattacher : DRF = payées sur le compte spécial et non encore justifiées ; DPD = mandatées, que le bailleur peut payer directement */
-  function dfoElig(type) { dpSeed(); var at = dfoAttached(); return (DP.docs || []).filter(function (d) { if (at[d.id] || !dfoDocSrc(d)) return false; return type === 'DRF' ? (DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT) : (d.st === 'ordonnance' && d.kind !== 'avance'); }); }
+  function dfoElig(type) { dpSeed(); var at = dfoAttached(); return (DP.docs || []).filter(function (d) { if (at[d.id] || !dfoDocSrc(d)) return false; return type === 'DRF' ? (DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT) : (d.st === 'ordonnance' && d.kind !== 'avance' && dpPm(d) === 'dpd'); }); }
   function dfoAcc() {
     dpSeed(); var paid = 0, just = 0, recu = 0, ini = DFS.versements.reduce(function (a, v) { return a + v.mt; }, 0);
     (DP.docs || []).forEach(function (d) { if (dfoDocSrc(d) && DP_RANK[d.st] >= 6 && d.mode !== DFO_DIRECT) paid += dfoAmt(d); });
@@ -16293,24 +16315,24 @@ var EXEC_REC = [
   function aviniRender() {
     var v = DFS.versements[0], box = document.getElementById('avini-fiche'); box.innerHTML = '';
     var card = cvEl('div', 'card'); card.style.padding = '16px 18px'; card.style.marginBottom = '14px';
-    card.appendChild(dpDl([['Source de financement', dfoSrc('02').lib], ['Lettre de décaissement', v.ref], ['Date de l’avance initiale', isoToFr(v.date)], ['Montant de l’avance initiale', fmt(v.mt) + ' MGA'], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte du solde', DFS.seuil + ' % du plafond (' + fmt(Math.round(DFS.plaf * DFS.seuil / 100)) + ' MGA)'], ['Délai de traitement du bailleur', DFS.delai + ' mois']]));
+    card.appendChild(dpDl([['Source de financement', dfoSrc('02').lib], ['Lettre de décaissement', v.ref], ['Date de l’avance initiale', isoToFr(v.date)], ['Montant de l’avance initiale', fmt(v.mt) + ' MGA'], ['Plafond du compte spécial', fmt(DFS.plaf) + ' MGA'], ['Seuil d’alerte du solde', DFS.seuil + ' % du plafond (' + fmt(Math.round(DFS.plaf * DFS.seuil / 100)) + ' MGA)'], ['Délai de traitement du bailleur', DFS.delai + ' mois'], ['Paiement direct du bailleur', 'Au-delà de ' + fmt(DFS.dpdSeuil) + ' MGA par marché']]));
     box.appendChild(card);
     var go = cvEl('div'); go.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap';
     var b = cvEl('button', 'btn', 'Suivre le compte spécial'); b.type = 'button'; b.addEventListener('click', function () { show('dfon'); }); go.appendChild(b); box.appendChild(go);
   }
   document.getElementById('avini-edit').addEventListener('click', function () {
     if (!cadPerm('dfo_resp', 'avini-msg')) return; var v = DFS.versements[0];
-    document.getElementById('avini-ref').value = v.ref; document.getElementById('avini-date').value = v.date; document.getElementById('avini-mt').value = fmt(v.mt); document.getElementById('avini-plaf').value = fmt(DFS.plaf); document.getElementById('avini-seuil').value = String(DFS.seuil); document.getElementById('avini-delai').value = String(DFS.delai); document.getElementById('avini-err').textContent = ''; document.getElementById('avini-form').hidden = false;
+    document.getElementById('avini-ref').value = v.ref; document.getElementById('avini-date').value = v.date; document.getElementById('avini-mt').value = fmt(v.mt); document.getElementById('avini-plaf').value = fmt(DFS.plaf); document.getElementById('avini-seuil').value = String(DFS.seuil); document.getElementById('avini-delai').value = String(DFS.delai); document.getElementById('avini-dpd').value = fmt(DFS.dpdSeuil); document.getElementById('avini-err').textContent = ''; document.getElementById('avini-form').hidden = false;
   });
   document.getElementById('avini-cancel').addEventListener('click', function () { document.getElementById('avini-form').hidden = true; });
   document.getElementById('avini-save').addEventListener('click', function () {
-    var err = document.getElementById('avini-err'), ref = document.getElementById('avini-ref').value.trim(), dt = document.getElementById('avini-date').value, mt = parseInt0(document.getElementById('avini-mt').value), pl0 = parseInt0(document.getElementById('avini-plaf').value), se = parseInt0(document.getElementById('avini-seuil').value), dl = +document.getElementById('avini-delai').value, v = DFS.versements[0], a = dfoAcc();
+    var err = document.getElementById('avini-err'), ref = document.getElementById('avini-ref').value.trim(), dt = document.getElementById('avini-date').value, mt = parseInt0(document.getElementById('avini-mt').value), pl0 = parseInt0(document.getElementById('avini-plaf').value), se = parseInt0(document.getElementById('avini-seuil').value), dl = +document.getElementById('avini-delai').value, dpd = parseInt0(document.getElementById('avini-dpd').value), v = DFS.versements[0], a = dfoAcc();
     if (!cadPerm('dfo_resp', 'avini-msg')) return;
     if (ref.length < 3) { err.textContent = 'Indiquez la référence de la lettre de décaissement.'; return; } if (!dt) { err.textContent = 'Indiquez la date de l’avance.'; return; }
     if (!mt || mt <= 0 || !pl0 || pl0 <= 0) { err.textContent = 'Les montants doivent être positifs.'; return; } if (mt > pl0) { err.textContent = 'L’avance initiale ne peut pas dépasser le plafond du compte spécial.'; return; }
-    if (!se || se < 5 || se > 80) { err.textContent = 'Le seuil d’alerte doit être compris entre 5 et 80 %.'; return; }
+    if (!dpd || dpd <= 0) { err.textContent = 'Le seuil de paiement direct doit être positif.'; return; } if (!se || se < 5 || se > 80) { err.textContent = 'Le seuil d’alerte doit être compris entre 5 et 80 %.'; return; }
     if (a.enCours - v.mt + mt > pl0) { err.textContent = 'Le plafond ne peut pas être inférieur à l’avance en cours (' + fmt(a.enCours - v.mt + mt) + ' MGA avec ces conditions).'; return; }
-    v.ref = ref; v.date = dt; v.mt = mt; DFS.plaf = pl0; DFS.seuil = se; DFS.delai = dl; document.getElementById('avini-form').hidden = true; cadAudit('Avance initiale', 'Conditions modifiées : avance ' + fmt(mt) + ' MGA, plafond ' + fmt(pl0) + ' MGA'); bkMsg('avini-msg', 'Conditions de l’avance initiale enregistrées.', 'ok'); aviniRender();
+    v.ref = ref; v.date = dt; v.mt = mt; DFS.plaf = pl0; DFS.seuil = se; DFS.delai = dl; DFS.dpdSeuil = dpd; document.getElementById('avini-form').hidden = true; cadAudit('Avance initiale', 'Conditions modifiées : avance ' + fmt(mt) + ' MGA, plafond ' + fmt(pl0) + ' MGA'); bkMsg('avini-msg', 'Conditions de l’avance initiale enregistrées.', 'ok'); aviniRender();
   });
   /* Prépare en un clic la demande de reconstitution avec toutes les dépenses payées et non justifiées */
   function dfoRecon() {
@@ -20450,7 +20472,7 @@ var EXEC_REC = [
       d(8, '2.1', 'Imprimerie nationale', 'Guides techniques à destination des centres de santé', 'Bon de commande', 'BC-2026-0166', 10000000, 'paye', { fac: 'FAC-0533', mandat: 'MD-2026-0004', mode: 'Virement bancaire', dt: { eng: '2026-07-05', liq: '2026-08-04', ord: '2026-08-12', pay: '2026-08-20' } }),
       d(9, '2.1', 'FOURNITEC SARL', 'Mobilier médical des centres de santé (lot 1)', 'Bon de commande', 'BC-2026-0171', 40000000, 'paye', { fac: 'FAC-0547', mandat: 'MD-2026-0005', mode: 'Virement bancaire', dt: { eng: '2026-07-15', liq: '2026-08-25', ord: '2026-09-03', pay: '2026-09-10' } }),
       d(10, '2.1', 'Centre de formation Vatsy', 'Formation à l’entretien des équipements', 'Contrat', 'CT-2026-015', 20000000, 'paye', { fac: 'FAC-0561', mandat: 'MD-2026-0006', mode: 'Mobile money', dt: { eng: '2026-08-10', liq: '2026-09-15', ord: '2026-09-22', pay: '2026-09-30' } }),
-      d(11, '2.1', 'FOURNITEC SARL', 'Équipements de laboratoire des centres de santé (lot 2)', 'Bon de commande', 'BC-2026-0180', 30000000, 'ordonnance', { fac: 'FAC-0574', mandat: 'MD-2026-0009', dt: { eng: '2026-09-01', liq: '2026-10-12', ord: '2026-10-22' } }),
+      d(11, '2.1', 'FOURNITEC SARL', 'Équipements de laboratoire des centres de santé (lot 2)', 'Bon de commande', 'BC-2026-0180', 30000000, 'ordonnance', { pm: 'dpd', pmNote: 'Passé en paiement direct après le PPM : fournisseur étranger', fac: 'FAC-0574', mandat: 'MD-2026-0009', dt: { eng: '2026-09-01', liq: '2026-10-12', ord: '2026-10-22' } }),
       d(12, '2.1', 'Cabinet RAKOTO Conseil', 'Supervision des travaux des centres de santé', 'Contrat', 'CT-2026-016', 12000000, 'paye', { fac: 'FAC-0589', mandat: 'MD-2026-0007', mode: 'Virement bancaire', dt: { eng: '2026-09-20', liq: '2026-10-20', ord: '2026-10-28', pay: '2026-11-05' } })
     ].filter(function (x) { return x.key; });
     function dd(m, j) { return '2026-' + ('0' + m).slice(-2) + '-' + ('0' + j).slice(-2); }
@@ -20462,6 +20484,8 @@ var EXEC_REC = [
     s.dispo = s.ouv - s.e - s.r; return s;
   }
   /* Avances de démarrage : l'avance est une partie de l'engagement, payée avant service fait puis recoupée sur le décompte */
+  function dpPm(d) { return d.pm || 'projet'; }
+  function dpPmPropose(f, mt) { var it = CPP.items.filter(function (x) { return x.ref === f.ppm; })[0]; return it ? ppmPm(it) : (mt > DFS.dpdSeuil ? 'dpd' : 'projet'); }
   function dpNet(d) { return d.net != null ? d.net : d.mt; }
   function dpRecoup(d) { return d.av && d.av.st === 'versee' ? d.av.amt : 0; }
   function dpHasAv(f) { return (f.acte === 'Marché' || f.acte === 'Contrat') && (parseInt0(f.avpct) || 0) > 0; }
@@ -20515,25 +20539,26 @@ var EXEC_REC = [
   function dpEngOpen() {
     if (DP.ops && DP.ops.stop) { dpMsg('dpeng-msg', 'Les engagements sont arrêtés pour l’exercice (clôture en cours).', true); return; }
     var ls = dpLines(); if (!ls.length) { dpMsg('dpeng-msg', 'Aucun budget validé : validez d’abord une campagne pour engager des dépenses.', true); return; }
-    DP.f = { key: ls[0].key, tiers: DP_TIERS[0], objet: '', montant: '', acte: 'Bon de commande', ref: '', ppm: '', avpct: '', gar: '' }; dpEngPaint(); document.getElementById('dp-eng-form').hidden = false;
+    DP.f = { key: ls[0].key, tiers: DP_TIERS[0], objet: '', montant: '', acte: 'Bon de commande', ref: '', ppm: '', avpct: '', gar: '', pm: '', pmT: false }; dpEngPaint(); document.getElementById('dp-eng-form').hidden = false;
   }
   function dpEngPaint() {
     var body = document.getElementById('dp-eng-body'), f = DP.f; body.innerHTML = '';
     var bar = cvEl('div', 'row-toolbar'), mt = parseInt0(f.montant) || 0, s = dpStat(f.key), ok = s.dispo - mt >= 0, sv = cvEl('button', 'btn primary', 'Enregistrer et soumettre au visa'); sv.type = 'button'; sv.disabled = !(ok && mt > 0 && f.objet.trim() && !(dpHasAv(f) && !f.gar.trim()));
     sv.addEventListener('click', function () {
-      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', dt: { eng: cadToday() }, av: dpHasAv(f) ? { pct: parseInt0(f.avpct), amt: Math.round(mt * parseInt0(f.avpct) / 100), garantie: f.gar.trim(), st: 'prevue' } : null });
+      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', pm: dfoDocSrc({ key: f.key }) ? (f.pm || 'projet') : 'projet', pmNote: f.pmT && f.pm !== dpPmPropose(f, mt) ? 'Mode de paiement modifié à l’engagement' : '', dt: { eng: cadToday() }, av: dpHasAv(f) ? { pct: parseInt0(f.avpct), amt: Math.round(mt * parseInt0(f.avpct) / 100), garantie: f.gar.trim(), st: 'prevue' } : null });
       document.getElementById('dp-eng-form').hidden = true; dpMsg('dpeng-msg', id + ' enregistré : crédit réservé sur la ligne ' + dpShort({ key: f.key }) + ', dossier transmis au Contrôle financier.'); DP.sel.dpeng = id; dpEngRender();
     });
     bar.appendChild(sv); body.appendChild(bar);
     var g = cvEl('div', 'fgrid');
     function fld(label, el, full) { var d = cvEl('div', full ? 'full' : ''); d.appendChild(cvEl('label', null, label)); d.appendChild(el); g.appendChild(d); return el; }
     var ls = dpLines(), sl = cvEl('select', 'field'); ls.forEach(function (z) { var o = cvEl('option', null, z.l.c + ' — ' + (z.l.lib || z.l.l) + ' · ' + z.perim + ' (disponible ' + fmt(dpStat(z.key).dispo) + ' MGA)'); o.value = z.key; sl.appendChild(o); }); sl.value = f.key;
-    sl.addEventListener('change', function () { f.key = sl.value; f.ppm = ''; dpEngPaint(); }); fld('Ligne du PTBA validé (activité du plan de travail)', sl, true);
+    sl.addEventListener('change', function () { f.key = sl.value; f.ppm = ''; f.pmT = false; dpEngPaint(); }); fld('Ligne du PTBA validé (activité du plan de travail)', sl, true);
     g.style.marginBottom = '22px'; body.appendChild(g); var z0 = dpLine(f.key); body.appendChild(dpWork(z0)); body.appendChild(dpDispoBand(f.key, mt));
     var g2 = cvEl('div', 'fgrid'); g = g2;
     var pp = cvEl('select', 'field'); var o0 = cvEl('option', null, '— Aucun (saisie libre) —'); o0.value = ''; pp.appendChild(o0);
     CPP.items.filter(function (x) { return x.act === f.key.split('|').filter(function (_, i) { return i !== 1; }).join('|'); }).forEach(function (x) { var o = cvEl('option', null, x.ref + ' — ' + x.des + ' (' + fmt(x.est) + ' MGA)'); o.value = x.ref; pp.appendChild(o); }); pp.value = f.ppm;
     pp.addEventListener('change', function () { f.ppm = pp.value; var it = CPP.items.filter(function (x) { return x.ref === pp.value; })[0]; if (it) { f.objet = it.des; f.montant = String(it.est); f.acte = 'Marché'; f.ref = it.ref; } dpEngPaint(); }); fld('Marché du PPM lié à cette activité (facultatif : reprend l’objet et le montant)', pp, true);
+    if (dfoDocSrc({ key: f.key })) { var spm = cvEl('select', 'field'); ['projet', 'dpd'].forEach(function (k) { var o = cvEl('option', null, PM_LBL[k]); o.value = k; spm.appendChild(o); }); if (!f.pmT) f.pm = dpPmPropose(f, mt); spm.value = f.pm; spm.addEventListener('change', function () { f.pm = spm.value; f.pmT = true; }); fld('Mode de paiement (proposé d’après le PPM ou le seuil)', spm, true); }
     var sa = cvEl('select', 'field'); ['Bon de commande', 'Marché', 'Contrat', 'Convention'].forEach(function (x) { sa.appendChild(cvEl('option', null, x)); }); sa.value = f.acte; sa.addEventListener('change', function () { f.acte = sa.value; dpEngPaint(); }); fld('Type d’acte', sa);
     var ri = cvEl('input', 'field'); ri.type = 'text'; ri.placeholder = 'BC-2026-…'; ri.value = f.ref; ri.addEventListener('input', function () { f.ref = ri.value; }); fld('Référence de l’acte', ri);
     var st = cvEl('select', 'field'); DP_TIERS.forEach(function (x) { st.appendChild(cvEl('option', null, x)); }); st.value = f.tiers; st.addEventListener('change', function () { f.tiers = st.value; }); fld('Tiers', st);
@@ -20659,7 +20684,7 @@ var EXEC_REC = [
   }
   /* ----- Paiements ----- */
   function dpPayRender() {
-    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'ordonnance'; }), sel = rows.filter(function (d) { return d.id === DP.sel.dppay; })[0];
+    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'ordonnance' && dpPm(d) !== 'dpd'; }), sel = rows.filter(function (d) { return d.id === DP.sel.dppay; })[0];
     document.getElementById('dppay-k').innerHTML = ''; document.getElementById('dppay-k').appendChild(dpTiles([['Mandats à traiter', String(rows.length), 'brand'], ['Montant à payer', fmt(rows.reduce(function (a, d) { return a + dpNet(d); }, 0)) + ' MGA', 'info']], { cols: 2 }));
     dpBar('dppay-bar', [['Ouvrir le mandat', true, !!sel, function () { dpPayOpen(sel); }]]);
     dpTable({ id: 'dppay', head: ['Mandat', 'Bénéficiaire · objet', 'Ligne du PTBA', 'Facture', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun mandat en attente. Émettez un mandat dans « Ordonnancement ».', redraw: dpPayRender,
@@ -20726,7 +20751,7 @@ var EXEC_REC = [
     /* Tâches : ce qui attend une action dans chaque menu */
     var tk2 = [], cnt = function (s) { return docs.filter(function (d) { return d.st === s; }); };
     function add(list, verb, sub, go) { if (list.length) tk2.push({ t: verb + ' ' + pl(list.length, 'dossier'), s: sub, go: go }); }
-    add(cnt('soumis'), 'Viser', 'Engagements en attente du Contrôle financier', 'dpeng'); add(cnt('vise'), 'Liquider', 'Engagements visés, service fait à certifier', 'dpliq'); add(cnt('liquide'), 'Ordonnancer', 'Liquidations à mettre en mandat', 'dpord'); add(cnt('ordonnance'), 'Payer', 'Mandats chez le comptable', 'dppay');
+    add(cnt('soumis'), 'Viser', 'Engagements en attente du Contrôle financier', 'dpeng'); add(cnt('vise'), 'Liquider', 'Engagements visés, service fait à certifier', 'dpliq'); add(cnt('liquide'), 'Ordonnancer', 'Liquidations à mettre en mandat', 'dpord'); add(cnt('ordonnance').filter(function (d) { return dpPm(d) !== 'dpd'; }), 'Payer', 'Mandats chez le comptable', 'dppay');
     CDF.items.forEach(function (x) { var v = { 'Préparée': 'Soumettre au bailleur', 'Soumise': 'Enregistrer la réponse du bailleur pour', 'Acceptée': x.type === 'DPD' ? 'Constater le paiement de' : 'Constater la reconstitution de' }[x.st]; if (v) tk2.push({ t: v + (x.st === 'Préparée' ? ' ' : ' ') + x.id, s: (x.type === 'DPD' ? 'Paiement direct' : 'Réapprovisionnement') + ' · ' + fmt(x.mt) + ' MGA', go: 'dfon' }); });
     lots.forEach(function (r) { var ac = ppmLotActs(r), c = ac.reduce(function (s, x) { return s + x.cost; }, 0), p = ac.reduce(function (s, x) { return s + ppmActTotal(x.key); }, 0); if (p < c) tk2.push({ t: 'Compléter le PPM ' + cvCamp(r).ex, s: 'Couverture du PTBA : ' + Math.round(100 * p / c) + ' %', go: 'ppm' }); });
     var tb = document.getElementById('db-tasks'); tb.innerHTML = '';
@@ -20787,13 +20812,15 @@ var EXEC_REC = [
     document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
     var sum = function (s) { return items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).reduce(function (a, i) { return a + i.mt; }, 0); };
     var kb = document.getElementById('sx-k'); kb.innerHTML = ''; var cn = function (s) { return String(items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).length); };
-    kb.appendChild(SX.kind === 'phy' ? dpTiles([['Mesures', cn(), 'brand'], ['Synchronisées', cn('sync'), 'info'], ['Importées', cn('Import'), 'info'], ['Saisies directement', cn('Saisie directe'), 'info']], { cols: 4 }) : dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
+    var sd = function (dp) { return items.filter(function (i) { return sxIsDpd(i) === dp; }).reduce(function (a, i) { return a + i.mt; }, 0); };
+    kb.appendChild(SX.kind === 'pay' ? dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Décaissements du projet', fmt(sd(false)) + ' MGA', 'info'], ['Paiements directs du bailleur', fmt(sd(true)) + ' MGA', 'warn'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info']], { cols: 4 }) : SX.kind === 'phy' ? dpTiles([['Mesures', cn(), 'brand'], ['Synchronisées', cn('sync'), 'info'], ['Importées', cn('Import'), 'info'], ['Saisies directement', cn('Saisie directe'), 'info']], { cols: 4 }) : dpTiles([['Total', fmt(sum()) + ' MGA', 'brand'], ['Synchronisé', fmt(sum('sync')) + ' MGA', 'info'], ['Importé', fmt(sum('Import')) + ' MGA', 'info'], ['Saisi directement', fmt(sum('Saisie directe')) + ' MGA', 'info']], { cols: 4 }));
     var tb = document.getElementById('sx-b'); tb.innerHTML = '';
     document.getElementById('sx-th').innerHTML = '<tr><th>Date</th><th>Référence</th><th>' + escH(K.tg) + '</th><th>' + (SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA') + '</th><th class="num">' + (SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)') + '</th><th>Source</th></tr>';
     if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune écriture : récupérez-les de la comptabilité, importez un fichier ou saisissez-les directement.'); c0.colSpan = 6; c0.style.textAlign = 'left'; tb.appendChild(t0); }
-    items.forEach(function (i) { var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'); cell(tr, fmt(i.mt) + (i.unit ? ' ' + i.unit : ''), 'num'); var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); tb.appendChild(tr); });
+    items.forEach(function (i) { var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'); cell(tr, fmt(i.mt) + (i.unit ? ' ' + i.unit : ''), 'num'); var sc = cell(tr, ''); sc.appendChild(badge(i.src, i.src === 'Import' ? 'b-warn' : (i.src === 'Saisie directe' ? 'b-neutral' : 'b-info'))); if (SX.kind === 'pay' && sxIsDpd(i)) { var bd = badge('Paiement direct', 'b-warn'); bd.style.marginLeft = '6px'; sc.appendChild(bd); } tb.appendChild(tr); });
     var lg = document.getElementById('sx-log'); lg.innerHTML = ''; SX.log.forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.src)); l.appendChild(cvEl('div', 'hby', pl(n.n, 'écriture') + ' · ' + n.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); lg.appendChild(row); });
   }
+  function sxIsDpd(i) { return !!i.dpd || (DP.docs || []).some(function (d) { return d.mandat && d.mandat === i.ref && (dpPm(d) === 'dpd' || d.mode === DFO_DIRECT); }); }
   function sxMsg(t, bad) { dpMsg('sx-msg', t, bad); }
   /* Synchronisation : on précise d'abord la source, la période, la ligne et le mode (ajouter, mettre à jour, remplacer), puis on contrôle la liste des changements avant de confirmer */
   var SXS = { stage: 1, src: '', d1: '', d2: '', line: '', mode: 'add', plan: [] };
@@ -20876,14 +20903,14 @@ var EXEC_REC = [
   document.getElementById('sx-rap').addEventListener('click', function () { show('dprap'); });
   document.getElementById('sx-new').addEventListener('click', function () {
     var ls = dpLines(), sl = document.getElementById('sxf-ligne'); sl.innerHTML = ls.map(function (z) { return '<option value="' + escH(z.key) + '">' + escH(z.l.c + ' — ' + (z.l.lib || z.l.l)) + '</option>'; }).join('');
-    document.getElementById('sxf-lw').hidden = SX.kind === 'enc'; document.getElementById('sxf-date').value = cadToday(); ['sxf-ref', 'sxf-tiers', 'sxf-mt'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('sxf-err').textContent = '';
+    document.getElementById('sxf-lw').hidden = SX.kind === 'enc'; document.getElementById('sxf-dw').hidden = SX.kind !== 'pay'; document.getElementById('sxf-dpd').checked = false; document.getElementById('sxf-date').value = cadToday(); ['sxf-ref', 'sxf-tiers', 'sxf-mt'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('sxf-err').textContent = '';
     document.getElementById('sxf-reflbl').textContent = SX_K[SX.kind].ref; document.getElementById('sxf-mtlbl').textContent = SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)'; document.getElementById('sxf-tglbl').textContent = SX_K[SX.kind].tg; document.getElementById('sx-form-title').textContent = 'Saisie directe : ' + SX_K[SX.kind].h.toLowerCase(); document.getElementById('sx-form').hidden = false;
   });
   document.getElementById('sxf-cancel').addEventListener('click', function () { document.getElementById('sx-form').hidden = true; });
   document.getElementById('sxf-save').addEventListener('click', function () {
     var err = document.getElementById('sxf-err'), mt = parseInt0(document.getElementById('sxf-mt').value), ref = document.getElementById('sxf-ref').value.trim(), dt = document.getElementById('sxf-date').value;
     if (!dt) { err.textContent = 'Indiquez la date.'; return; } if (ref.length < 3) { err.textContent = 'Indiquez la référence.'; return; } if (!mt || mt <= 0) { err.textContent = 'Le montant doit être positif.'; return; }
-    SX.items.push({ id: sxId(), kind: SX.kind, key: SX.kind === 'enc' ? null : document.getElementById('sxf-ligne').value, date: dt, ref: ref, tiers: document.getElementById('sxf-tiers').value.trim(), mt: mt, src: 'Saisie directe', unit: SX.kind === 'phy' ? ((dpLine(document.getElementById('sxf-ligne').value) || { l: {} }).l.wk || {}).unit : undefined });
+    SX.items.push({ id: sxId(), kind: SX.kind, key: SX.kind === 'enc' ? null : document.getElementById('sxf-ligne').value, date: dt, ref: ref, tiers: document.getElementById('sxf-tiers').value.trim(), mt: mt, src: 'Saisie directe', dpd: SX.kind === 'pay' && document.getElementById('sxf-dpd').checked, unit: SX.kind === 'phy' ? ((dpLine(document.getElementById('sxf-ligne').value) || { l: {} }).l.wk || {}).unit : undefined });
     if (SX.kind === 'phy') sxPhyApply(); SX.log.unshift({ on: nowStr(), src: 'Saisie directe', n: 1, by: ME }); document.getElementById('sx-form').hidden = true; sxMsg('Écriture enregistrée (saisie directe).'); sxRender();
   });
   /* ----- Trésorerie : encaissements et décaissements, pas seulement les décaissements ----- */
