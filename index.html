@@ -21826,7 +21826,7 @@ function pcRenderEnv(){
   .env-grid > .chk { white-space: normal; min-width: 0; }
   .env-grid .field, .env-grid .cellin, .env-grid select, .env-grid input[type="text"] { width: 100% !important; min-width: 0; box-sizing: border-box; margin: 0 !important; }
   .fgrid > div > .field, .fgrid > div > select, .fgrid > div > input { width: 100%; box-sizing: border-box; }
-  .fgrid > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .fgrid > .full:has(> select.field), .fgrid > .full:has(> input[type=date]), .fgrid > .full:has(> input[inputmode=numeric]), .fgrid > .full:has(> input[inputmode=decimal]) { grid-column: auto; }
   .sub-ind > td { background: var(--page-bg); color: var(--muted); font-size: 12.5px; padding-top: 6px; padding-bottom: 6px; padding-left: 28px; }
   .row-toolbar [hidden] { display: none !important; }
   /* Les barres d'action sont reflétées en haut à droite de la page (voir le dock d'en-tête) */
@@ -21973,6 +21973,35 @@ function pcRenderEnv(){
     }
     var tm = null; new MutationObserver(function () { if (!tm) tm = setTimeout(function () { tm = null; strip(); }, 40); }).observe(document.body, { childList: true, subtree: true, characterData: true });
     setTimeout(strip, 100);
+  })();
+  /* Champs de montant : on tape les chiffres, le système place les espaces des milliers (et la virgule pour les quantités décimales) */
+  (function () {
+    var SEP = '\u202f', EXCL = /RIB|chiffres|jour|%|mois|nombre|année|exercice|points|taux de change/i, INC = /\(MGA\)|\(UC\)|Montant|Coût|Plafond|Enveloppe|minimum|maximum|Budget|Valeur de départ|Cible|Volume/i;
+    function labelOf(el) {
+      var lb = el.id ? document.querySelector('label[for="' + el.id + '"]') : null;
+      if (!lb) { var q = el.previousElementSibling; while (q && q.tagName !== 'LABEL') q = q.previousElementSibling; lb = q || (el.parentElement && el.parentElement.querySelector(':scope > label')); }
+      return (lb ? lb.textContent : '') + ' ' + (el.placeholder || '');
+    }
+    function isMoney(el) {
+      if (!el || el.tagName !== 'INPUT' || el.readOnly || el.disabled || (el.type !== 'text' && el.type !== 'tel')) return false;
+      var im = el.getAttribute('inputmode'); if (im !== 'numeric' && im !== 'decimal') return false;
+      var t = labelOf(el); if (EXCL.test(t)) return false;
+      return !!el.closest('td') || INC.test(t) || /^Ex\.\s*\d{1,3}(\s\d{3})+/.test(el.placeholder || '');
+    }
+    function format(v, dec) {
+      var s = String(v).replace(/[^\d.,]/g, ''), i = s.search(/[.,]/), ip = i < 0 ? s : s.slice(0, i), fp = (dec && i >= 0) ? s.slice(i + 1).replace(/[^\d]/g, '') : null;
+      ip = ip.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, SEP); return ip + (fp !== null ? ',' + fp : '');
+    }
+    function apply(el) {
+      var dec = el.getAttribute('inputmode') === 'decimal' && !/MGA|UC|Montant|Coût/i.test(labelOf(el)), raw = el.value, nv = format(raw, dec); if (nv === raw) return;
+      var pos = el.selectionStart, n = (raw.slice(0, pos == null ? raw.length : pos).match(/\d/g) || []).length; el.value = nv;
+      if (document.activeElement === el) { var c = 0, k = 0; while (k < nv.length && c < n) { if (/\d/.test(nv.charAt(k))) c++; k++; } try { el.setSelectionRange(k, k); } catch (e) { /* ignore */ } }
+    }
+    document.addEventListener('input', function (e) { if (isMoney(e.target) && !e.isComposing) apply(e.target); }, true);
+    document.addEventListener('focusin', function (e) { if (isMoney(e.target)) apply(e.target); }, true);
+    function sweep() { document.querySelectorAll('input[inputmode="numeric"], input[inputmode="decimal"]').forEach(function (el) { if (document.activeElement !== el && /^\d{4,}$/.test(el.value) && isMoney(el)) apply(el); }); }
+    var tm2 = null; new MutationObserver(function () { if (!tm2) tm2 = setTimeout(function () { tm2 = null; sweep(); }, 60); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+    document.addEventListener('click', function () { setTimeout(sweep, 120); }, true); setTimeout(sweep, 200);
   })();
   var dockTimer = null;
   new MutationObserver(function (ms) {
