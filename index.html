@@ -5077,7 +5077,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="head"><div><h1>Clôture de l’exercice</h1><p>Opérations de clôture du compte administratif, validation par le RAF, adoption par le Directeur de projet et verrouillage de l’exercice.</p></div></div>
         <div class="callout" id="dpclot-msg" hidden style="margin-bottom:12px"></div>
         <div class="row-toolbar" id="dpclot-bar" style="margin-bottom:12px"></div>
-        <section class="co-blk"><div class="kb-h">Opérations de clôture</div><div class="card" id="dpclot-ops"></div></section>
+        <section class="co-blk"><div class="kb-h">Checklist de clôture · sélectionnez une étape pour agir</div><div class="card" id="dpclot-ops"></div></section>
+        <section class="co-blk"><div class="kb-h">Relances et notifications</div><div class="card" id="dpclot-notif"></div></section>
         <section class="co-blk"><div class="kb-h">Versions du compte administratif</div><div class="card" id="dpclot-ver"></div></section>
       </section>
       <!-- ===== Compte administratif : fichiers d'interface ===== -->
@@ -20592,28 +20593,64 @@ var EXEC_REC = [
     var E = sbXml; sbPrint('Compte administratif', '<h1>' + E(dpTabTitle()) + '</h1><table><thead><tr>' + DP_TABH.map(function (h, i) { return '<th' + (i && i < 10 ? ' class="num"' : '') + '>' + E(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + dpTabRowsOut().map(function (rw) { return '<tr>' + rw.map(function (c, i) { return '<td' + (i && i < 10 ? ' class="num"' : '') + '>' + E(typeof c === 'number' ? fmt(c) : c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>'); dpMsg('dptab-msg', 'Version imprimable ouverte.');
   }
   /* ----- Clôture de l'exercice ----- */
-  function dpClotRender() {
+  function dpClotItems() {
     dpSeed(); var O = DP.ops, docs = DP.docs || [], fr = DP.frozen, t = dpTot();
-    var soumis = docs.filter(function (d) { return d.st === 'soumis'; }), chez = docs.filter(function (d) { return d.st === 'ordonnance'; }), nonSolde = t.e - t.p;
-    var blockOk = !!(O.stop && O.rep && !soumis.length), res = chez.length + docs.filter(function (d) { return d.av && d.av.st === 'versee' && !d.av.recoupe; }).length;
-    function chip(k, tx) { return badge(tx, { ok: 'b-ok', warn: 'b-warn', ko: 'b-ko', neutral: 'b-neutral' }[k]); }
+    var soumis = docs.filter(function (d) { return d.st === 'soumis'; }), chez = docs.filter(function (d) { return d.st === 'ordonnance'; }), nonSolde = t.e - t.p, avs = docs.filter(function (d) { return d.av && d.av.st === 'versee' && !d.av.recoupe; });
+    var blockOk = !!(O.stop && O.rep && !soumis.length);
+    return [
+      { id: 'stop', t: 'Arrêter les engagements', sub: O.stop ? 'Arrêtés le ' + O.stop + ' : plus aucun engagement possible sur l’exercice.' : 'Plus aucun engagement ne doit être possible sur l’exercice.', st: O.stop ? 'done' : 'todo', who: 'Ordonnateur', bl: true },
+      { id: 'visa', t: 'Engagements en attente de visa', sub: soumis.length ? pl(soumis.length, 'engagement') + ' à viser ou à rejeter : ' + soumis.map(function (d) { return d.id; }).join(', ') + '.' : 'Aucun engagement en attente de visa.', st: soumis.length ? 'todo' : 'done', who: 'Contrôle financier', bl: true, n: soumis.length },
+      { id: 'rep', t: 'Engagements non soldés', sub: fmt(nonSolde) + ' MGA engagés et non encore payés à reporter ou à annuler.' + (O.rep ? ' Décision : ' + (O.rep === 'annule' ? 'annulation' : 'report sur l’exercice suivant') + '.' : ''), st: O.rep ? 'done' : (O.stop ? 'todo' : 'wait'), who: 'Ordonnateur', bl: true },
+      { id: 'chez', t: 'Mandats chez le comptable', sub: chez.length ? pl(chez.length, 'mandat') + ' non payé(s) : ' + chez.map(function (d) { return d.mandat; }).join(', ') + '.' : 'Tous les mandats sont payés ou rejetés.', st: chez.length ? 'warn' : 'done', who: 'Agent comptable', bl: false, n: chez.length },
+      { id: 'av', t: 'Avances non recoupées', sub: avs.length ? pl(avs.length, 'avance') + ' versée(s) non encore recoupée(s) : ' + avs.map(function (d) { return d.id + ' (' + fmt(d.av.amt) + ' MGA)'; }).join(', ') + '.' : 'Toutes les avances versées sont recoupées.', st: avs.length ? 'warn' : 'done', who: 'Ordonnateur', bl: false, n: avs.length },
+      { id: 'raf', t: 'Validation par le Responsable administratif et financier', sub: O.raf ? 'Validé le ' + O.raf + ' : « VU ET VÉRIFIÉ ».' : (blockOk ? 'Les opérations bloquantes sont faites : le RAF peut valider.' : 'Disponible quand les opérations bloquantes 1 à 3 sont faites.'), st: O.raf ? 'done' : (blockOk ? 'todo' : 'wait'), who: 'RAF', bl: true },
+      { id: 'adopt', t: 'Adoption par le Directeur de projet et verrouillage', sub: fr ? 'Version ' + fr.v + ' figée le ' + fr.on + ' : exercice verrouillé.' : 'Fige la version, avec ses réserves, et verrouille les écritures de l’exercice.', st: fr ? 'done' : (O.raf ? 'todo' : 'wait'), who: 'Directeur de projet', bl: true }
+    ];
+  }
+  function dpNotify(item, verb, to, onDone) {
+    cvAsk({ title: verb + ' — ' + to, ok: verb, required: false, placeholder: 'Message (facultatif) : ' + item.t }, function (msg) {
+      DP.notif = DP.notif || []; DP.notif.unshift({ on: nowStr(), to: to, what: item.t, verb: verb, msg: msg }); item.sent = (DP.notifN = DP.notifN || {}); DP.notifN[item.id] = (DP.notifN[item.id] || 0) + 1;
+      dpMsg('dpclot-msg', (verb === 'Relancer' ? 'Relance envoyée à ' : 'Notification envoyée à ') + to + ' pour « ' + item.t + ' ».'); dpClotRender(); if (onDone) onDone(); });
+  }
+  function dpClotRender() {
+    var items = dpClotItems(), O = DP.ops, fr = DP.frozen, docs = DP.docs || [], sel = items.filter(function (x) { return x.id === DP.sel.dpclot; })[0], done = items.filter(function (x) { return x.st === 'done'; }).length;
+    var res = items.filter(function (x) { return x.id === 'chez' || x.id === 'av'; }).reduce(function (a, x) { return a + (x.n || 0); }, 0);
     var box = document.getElementById('dpclot-ops'); box.innerHTML = '';
-    function op(title, sub, chips) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.style.flex = '1'; l.appendChild(cvEl('b', null, title)); l.appendChild(cvEl('div', 'hby', sub)); row.appendChild(l); chips.forEach(function (c) { c.style.marginLeft = '6px'; row.appendChild(c); }); box.appendChild(row); }
-    op('1 · Arrêt des engagements', O.stop ? 'Arrêtés le ' + O.stop + ' : plus aucun engagement possible sur l’exercice.' : 'Plus aucun engagement ne doit être possible sur l’exercice.', [chip(O.stop ? 'ok' : 'warn', O.stop ? 'Fait' : 'À faire'), chip('neutral', 'Bloquant')]);
-    op('2 · Engagements en attente de visa', soumis.length ? pl(soumis.length, 'engagement') + ' à viser ou à rejeter : ' + soumis.map(function (d) { return d.id; }).join(', ') + '.' : 'Aucun engagement en attente de visa.', [chip(soumis.length ? 'ko' : 'ok', soumis.length ? 'À traiter' : 'Conforme'), chip('neutral', 'Bloquant')]);
-    op('3 · Engagements non soldés', fmt(nonSolde) + ' MGA engagés et non encore payés à reporter ou à annuler.' + (O.rep ? ' Décision : ' + (O.rep === 'annule' ? 'annulation' : 'report sur l’exercice suivant') + '.' : ''), [chip(O.rep ? 'ok' : 'warn', O.rep ? 'Fait' : 'À faire'), chip('neutral', 'Bloquant')]);
-    op('4 · Mandats chez le comptable', chez.length ? pl(chez.length, 'mandat') + ' non payé(s) : ' + chez.map(function (d) { return d.mandat; }).join(', ') + '.' : 'Tous les mandats sont payés ou rejetés.', [chip(chez.length ? 'warn' : 'ok', chez.length ? 'Réserve' : 'Conforme')]);
-    var avs = docs.filter(function (d) { return d.av && d.av.st === 'versee' && !d.av.recoupe; }); op('4bis · Avances non recoupées', avs.length ? pl(avs.length, 'avance') + ' versée(s) non encore recoupée(s) : ' + avs.map(function (d) { return d.id + ' (' + fmt(d.av.amt) + ' MGA)'; }).join(', ') + '.' : 'Toutes les avances versées sont recoupées.', [chip(avs.length ? 'warn' : 'ok', avs.length ? 'Réserve' : 'Conforme')]);
-    op('5 · Validation par le Responsable administratif et financier', O.raf ? 'Validé le ' + O.raf + ' : « VU ET VÉRIFIÉ ».' : (blockOk ? 'Les opérations bloquantes sont faites : le RAF peut valider.' : 'Disponible quand les opérations bloquantes 1 à 3 sont faites.'), [chip(O.raf ? 'ok' : 'neutral', O.raf ? 'Validé' : 'En attente')]);
-    op('6 · Adoption par le Directeur de projet et verrouillage', fr ? 'Version ' + fr.v + ' figée le ' + fr.on + ' : exercice verrouillé.' : 'Fige la version avec ' + pl(res, 'réserve') + ' et verrouille les écritures de l’exercice.', [chip(fr ? 'ok' : 'neutral', fr ? 'Figé' : 'Projet')]);
+    var head = cvEl('div'); head.style.cssText = 'padding:14px 16px 4px'; var pg = cvEl('div', 'dp-meter'), tt = cvEl('div', 't'); tt.appendChild(cvEl('span', null, 'Avancement de la clôture')); tt.appendChild(cvEl('b', null, done + ' étape(s) sur ' + items.length + ' faite(s)')); pg.appendChild(tt); var tr = cvEl('div', 'tr'), bar = cvEl('i'); bar.style.width = Math.round(100 * done / items.length) + '%'; bar.style.background = done === items.length ? DPC.ok : DPC.brand; tr.appendChild(bar); pg.appendChild(tr); head.appendChild(pg); box.appendChild(head);
+    var ICON = { done: '✓', todo: '●', warn: '!', wait: '○' }, LBL = { done: 'Fait', todo: 'À faire', warn: 'Réserve', wait: 'En attente' }, TONE = { done: 'b-ok', todo: 'b-warn', warn: 'b-warn', wait: 'b-neutral' };
+    items.forEach(function (x, i) {
+      var row = cvEl('div', 'dp-ck ' + x.st + (sel && sel.id === x.id ? ' sel' : '')); row.tabIndex = 0;
+      var ic = cvEl('div', 'ic', x.st === 'done' ? ICON.done : String(i + 1)); row.appendChild(ic);
+      var mid = cvEl('div', 'mid'); mid.appendChild(cvEl('b', null, x.t)); mid.appendChild(cvEl('div', 'hby', x.sub));
+      var meta = cvEl('div', 'meta'); meta.appendChild(badge(LBL[x.st], TONE[x.st])); var wb = badge(x.who, 'b-neutral'); meta.appendChild(wb); meta.appendChild(badge(x.bl ? 'Bloquant' : 'Réserve', x.bl ? 'b-info' : 'b-neutral'));
+      var nn = (DP.notifN || {})[x.id]; if (nn) meta.appendChild(badge('Relancé ' + nn + ' fois', 'b-info')); mid.appendChild(meta); row.appendChild(mid);
+      function pick() { DP.sel.dpclot = sel && sel.id === x.id ? null : x.id; dpClotRender(); } row.addEventListener('click', pick); row.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+      box.appendChild(row);
+    });
+    /* Actions de l'étape sélectionnée (en haut à droite) */
+    var b = [];
+    if (sel) {
+      var id = sel.id, goTo = { visa: 'dpeng', chez: 'dppay', av: 'dpliq', rep: 'dpliq' }[id];
+      if (id === 'stop') b.push(['Arrêter les engagements', true, !O.stop && !fr, function () { O.stop = nowStr().split(' ')[0]; dpMsg('dpclot-msg', 'Engagements arrêtés pour l’exercice.'); dpClotRender(); }]);
+      if (id === 'visa') { b.push(['Relancer le Contrôle financier', true, sel.st === 'todo', function () { dpNotify(sel, 'Relancer', 'Contrôle financier'); }]); }
+      if (id === 'rep') b.push(['Traiter les engagements non soldés', true, !!O.stop && !O.rep && !fr, function () { var ns = dpTot(); cvAsk({ title: 'Engagements non soldés — ' + fmt(ns.e - ns.p) + ' MGA', ok: 'Appliquer', required: false, optLabel: 'Décision *', options: ['Reporter sur l’exercice suivant', 'Annuler'], placeholder: 'Commentaire' }, function (c, d) { O.rep = d === 'Annuler' ? 'annule' : 'reporte'; dpMsg('dpclot-msg', 'Engagements non soldés : ' + (O.rep === 'annule' ? 'annulation' : 'report') + ' enregistré.'); dpClotRender(); }); }]);
+      if (id === 'chez') b.push(['Relancer le comptable', true, sel.st === 'warn', function () { dpNotify(sel, 'Relancer', 'Agent comptable'); }]);
+      if (id === 'av') b.push(['Notifier l’ordonnateur', true, sel.st === 'warn', function () { dpNotify(sel, 'Notifier', 'Ordonnateur'); }]);
+      if (id === 'raf') { b.push(['Valider (RAF)', true, sel.st === 'todo' && !fr, function () { O.raf = nowStr().split(' ')[0]; dpMsg('dpclot-msg', 'Compte administratif validé par le RAF (« VU ET VÉRIFIÉ »).'); dpClotRender(); }]); b.push(['Notifier le RAF', false, sel.st === 'todo', function () { dpNotify(sel, 'Notifier', 'Responsable administratif et financier'); }]); }
+      if (id === 'adopt') {
+        b.push(['Adopter et figer', true, sel.st === 'todo' && !fr, function () { cvAsk({ title: 'Adopter et figer le compte administratif', ok: 'Adopter', required: false, placeholder: 'Commentaire du Directeur de projet' }, function () { var nv = DP.vers.length + 1; DP.frozen = { v: nv, on: nowStr() }; DP.vers.push({ v: nv, on: nowStr(), by: ME, res: res }); dpMsg('dpclot-msg', 'Compte administratif adopté et figé (version ' + nv + ') : exercice verrouillé.'); dpClotRender(); }); }]);
+        b.push(['Notifier le Directeur', false, sel.st === 'todo', function () { dpNotify(sel, 'Notifier', 'Directeur de projet'); }]);
+        b.push(['Créer une nouvelle version', false, !!fr, function () { DP.frozen = null; DP.ops.raf = null; dpMsg('dpclot-msg', 'Exercice déverrouillé : la validation du RAF est à refaire.'); dpClotRender(); }]);
+      }
+      if (goTo) b.push(['Aller à l’étape', false, true, function () { show(goTo); }]);
+    }
+    dpBar('dpclot-bar', b.length ? b : [['Sélectionnez une étape', false, false, function () {}]]);
+    var nb = document.getElementById('dpclot-notif'); nb.innerHTML = '';
+    if (!(DP.notif || []).length) nb.appendChild(cvEl('div', 'hint', 'Aucune relance ni notification envoyée.'));
+    (DP.notif || []).forEach(function (n) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, n.verb + ' — ' + n.to)); l.appendChild(cvEl('div', 'hby', n.what + (n.msg ? ' · « ' + n.msg + ' »' : ''))); row.appendChild(l); row.appendChild(cvEl('span', 'when', n.on)); nb.appendChild(row); });
     var vb = document.getElementById('dpclot-ver'); vb.innerHTML = '';
     if (!DP.vers.length) vb.appendChild(cvEl('div', 'hint', 'Aucune version figée : le compte administratif est un projet.'));
     DP.vers.slice().reverse().forEach(function (v) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'Version ' + v.v)); l.appendChild(cvEl('div', 'hby', v.by + ' · ' + pl(v.res, 'réserve'))); row.appendChild(l); row.appendChild(cvEl('span', 'when', v.on)); vb.appendChild(row); });
-    dpBar('dpclot-bar', [['Arrêter les engagements', false, !O.stop && !fr, function () { O.stop = nowStr().split(' ')[0]; dpMsg('dpclot-msg', 'Engagements arrêtés pour l’exercice.'); dpClotRender(); }],
-      ['Traiter les engagements non soldés', false, !!O.stop && !O.rep && !fr, function () { cvAsk({ title: 'Engagements non soldés — ' + fmt(nonSolde) + ' MGA', ok: 'Appliquer', required: false, optLabel: 'Décision *', options: ['Reporter sur l’exercice suivant', 'Annuler'], placeholder: 'Commentaire' }, function (c, d) { O.rep = d === 'Annuler' ? 'annule' : 'reporte'; dpMsg('dpclot-msg', 'Engagements non soldés : ' + (O.rep === 'annule' ? 'annulation' : 'report') + ' enregistré.'); dpClotRender(); }); }],
-      ['Valider (RAF)', false, blockOk && !O.raf && !fr, function () { O.raf = nowStr().split(' ')[0]; dpMsg('dpclot-msg', 'Compte administratif validé par le RAF (« VU ET VÉRIFIÉ »).'); dpClotRender(); }],
-      ['Adopter et figer', true, !!O.raf && !fr, function () { cvAsk({ title: 'Adopter et figer le compte administratif', ok: 'Adopter', required: false, placeholder: 'Commentaire du Directeur de projet' }, function () { var nv = DP.vers.length + 1; DP.frozen = { v: nv, on: nowStr() }; DP.vers.push({ v: nv, on: nowStr(), by: ME, res: res }); dpMsg('dpclot-msg', 'Compte administratif adopté et figé (version ' + nv + ') : exercice verrouillé.'); dpClotRender(); }); }],
-      ['Créer une nouvelle version', false, !!fr, function () { DP.frozen = null; DP.ops.raf = null; dpMsg('dpclot-msg', 'Exercice déverrouillé : la validation du RAF est à refaire.'); dpClotRender(); }]]);
   }
   DP_RENDER.dptab = dpTabRender; DP_RENDER.dpclot = dpClotRender;
   /* Menu en tiroir sous 1 024 px (charte §7.3) */
@@ -21208,7 +21245,16 @@ function pcRenderEnv(){
   .dp-dispo { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border); font-size: 13px; }
   .dp-stack .lg { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12.5px; color: var(--muted); }
   .dp-stack .lg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
-  .dp-chart { padding: 4px 0; }  .dp-tiles { display: grid; grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); gap: 12px; }
+  .dp-chart { padding: 4px 0; }  .dp-ck { display: flex; gap: 14px; padding: 14px 16px; border-top: 1px solid var(--border); cursor: pointer; border-left: 4px solid transparent; align-items: flex-start; }
+  .dp-ck:hover { background: var(--navy-50, #F4F7FE); }
+  .dp-ck.sel { background: var(--navy-50, #F4F7FE); border-left-color: var(--navy-700, #2E427B); }
+  .dp-ck .ic { flex: 0 0 30px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background: #E9EBF0; color: var(--muted); }
+  .dp-ck.done .ic { background: var(--ok-bg); color: var(--ok); }
+  .dp-ck.todo .ic { background: var(--warn-bg); color: var(--warn); box-shadow: inset 0 0 0 1.5px var(--warn); }
+  .dp-ck.warn .ic { background: var(--warn-bg); color: var(--warn); }
+  .dp-ck .mid { min-width: 0; flex: 1; }
+  .dp-ck .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .dp-ck.wait b { color: var(--muted); }  .dp-tiles { display: grid; grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); gap: 12px; }
   @media (max-width: 1200px) { .dp-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dp-tiles.odd { grid-template-columns: minmax(0, 1fr); } }
   .dp-tile { border: 1px solid var(--border); border-left: 4px solid var(--navy-200, #CAD9FB); border-radius: 10px; background: #fff; padding: 12px 14px; min-width: 0; }
   .dp-tile .l { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .02em; margin-bottom: 6px; }
