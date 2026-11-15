@@ -5070,7 +5070,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="row-toolbar" id="dptab-bar" style="margin-bottom:12px"></div>
         <div class="fgrid" style="margin-bottom:12px"><div><label for="dptab-ver">Version du crédit</label><select id="dptab-ver" class="field"></select></div><div><label>État du compte administratif</label><div id="dptab-state" style="padding-top:6px"></div></div></div>
         <div id="dptab-k"></div>
-        <div class="card"><div class="scroll"><table style="min-width:1300px"><thead id="dptab-h"></thead><tbody id="dptab-b"></tbody><tfoot><tr id="dptab-f"></tr></tfoot></table></div><div class="pager"><span>Taux = montant ÷ crédit validé · alerte au-delà de 90 % engagé</span><span>Montants en MGA</span></div></div>
+        <div class="card"><div class="scroll"><table style="min-width:1000px"><thead id="dptab-h"></thead><tbody id="dptab-b"></tbody><tfoot><tr id="dptab-f"></tr></tfoot></table></div><div class="pager"><span>Taux = montant ÷ crédit validé · alerte au-delà de 90 % engagé</span><span>Montants en MGA</span></div></div>
+        <div class="panel" id="dp-tab-form" hidden><h2><span id="dp-tab-title">Ligne</span></h2><div class="body" id="dp-tab-body"></div></div>
       </section>
       <section class="view" id="v-dpclot">
         <div class="head"><div><h1>Clôture de l’exercice</h1><p>Opérations de clôture du compte administratif, validation par le RAF, adoption par le Directeur de projet et verrouillage de l’exercice.</p></div></div>
@@ -19900,7 +19901,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20481,24 +20482,61 @@ var EXEC_REC = [
   function dpPct(a, b) { return b ? (Math.round(1000 * a / b) / 10).toString().replace('.', ',') + ' %' : '—'; }
   var DP_TABH = ['Ligne du PTBA', 'Crédit validé (A)', 'Engagements (B)', 'Liquidations (C)', 'Mandats émis', 'Paiements (D)', 'Disponible (A − B − réservations)', 'Restes à payer (mandats − paiements)', 'Taux d’engagement', 'Taux de paiement', 'Alerte'];
   function dpTabCells(x) { var al = x.cred && x.e / x.cred >= 0.9; return [x.cred, x.e, x.l, x.o, x.p, x.cred - x.e - x.r, x.o - x.p, dpPct(x.e, x.cred), dpPct(x.p, x.cred), al ? 'Engagé à plus de 90 %' : '—']; }
-  function dpTabRender() {
-    var D = dpTabData(), lock = DP.frozen, ls = dpLines(), r0 = ls[0] && ls[0].r, vs = r0 ? bvVers(r0) : [];
-    var sel = document.getElementById('dptab-ver'); sel.innerHTML = ''; var o0 = cvEl('option', null, 'Version courante (V' + (vs.length || 1) + ')'); o0.value = '0'; sel.appendChild(o0);
-    vs.forEach(function (v) { var o = cvEl('option', null, 'V' + v.v + (v.v === 1 ? ' — budget initial' : '') + ' · ' + v.on.slice(0, 10)); o.value = String(v.v); sel.appendChild(o); }); sel.value = String(DP.tabVer);
-    sel.onchange = function () { DP.tabVer = +sel.value; dpTabRender(); };
-    var st = document.getElementById('dptab-state'); st.innerHTML = ''; st.appendChild(badge(lock ? 'Figé · version ' + lock.v : 'Projet · non figé', lock ? 'b-ok' : 'b-warn'));
-    dpKpis('dptab-k', [['Crédit validé', fmt(D.tot.cred) + ' MGA'], ['Engagements', fmt(D.tot.e) + ' MGA · ' + dpPct(D.tot.e, D.tot.cred)], ['Mandats émis', fmt(D.tot.o) + ' MGA'], ['Paiements', fmt(D.tot.p) + ' MGA · ' + dpPct(D.tot.p, D.tot.cred)]]);
-    dpBar('dptab-bar', [['Exporter Excel', false, true, dpTabXlsx], ['Exporter PDF', false, true, dpTabPdf]]);
-    var th = document.getElementById('dptab-h'); th.innerHTML = '<tr>' + DP_TABH.map(function (h, i) { return '<th' + (i && i < 10 ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr>';
-    var tb = document.getElementById('dptab-b'); tb.innerHTML = '';
-    Object.keys(D.groups).forEach(function (g) {
-      var rows = D.groups[g], s = { cred: 0, e: 0, l: 0, o: 0, p: 0, r: 0 }; rows.forEach(function (x) { Object.keys(s).forEach(function (k) { s[k] += x[k]; }); });
-      var tr = cvEl('tr'); tr.style.fontWeight = '600'; tr.style.background = 'var(--surface-2, #F1F5F9)'; cell(tr, g, 'name'); dpTabCells(s).forEach(function (v, i) { cell(tr, typeof v === 'number' ? fmt(v) : (v === '—' ? '' : v), i < 9 ? 'num' : ''); }); tb.appendChild(tr);
-      rows.forEach(function (x) { var t2 = cvEl('tr'); cell(t2, x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l), 'name').style.paddingLeft = '26px'; dpTabCells(x).forEach(function (v, i) { var c = cell(t2, typeof v === 'number' ? fmt(v) : v, i < 9 ? 'num' : ''); if (i === 9 && v !== '—') c.appendChild(document.createTextNode('')); }); tb.appendChild(t2); });
-    });
-    var tf = document.getElementById('dptab-f'); tf.innerHTML = '<td><b>Total du projet</b></td>' + dpTabCells(D.tot).map(function (v, i) { return '<td' + (i < 9 ? ' class="num"' : '') + '><b>' + (typeof v === 'number' ? fmt(v) : (v === '—' ? '' : escH(v))) + '</b></td>'; }).join('');
+  function dpTabLines() {
+    dpSeed(); var ver = DP.tabVer, out = [], tot = { cred: 0, e: 0, l: 0, o: 0, p: 0, r: 0 };
+    dpLines().forEach(function (z) { var s = dpStat(z.key), row = { id: z.key, z: z, cred: dpCred(z, ver), e: s.e, l: s.l, o: s.o, p: s.p, r: s.r }; out.push(row); ['cred', 'e', 'l', 'o', 'p', 'r'].forEach(function (k) { tot[k] += row[k]; }); });
+    return { rows: out, tot: tot };
   }
-  function dpTabRowsOut() { var D = dpTabData(), out = []; Object.keys(D.groups).forEach(function (g) { out.push([g].concat(dpTabCells(D.groups[g].reduce(function (s, x) { Object.keys(s).forEach(function (k) { s[k] += x[k]; }); return s; }, { cred: 0, e: 0, l: 0, o: 0, p: 0, r: 0 })))); D.groups[g].forEach(function (x) { out.push(['   ' + x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l)].concat(dpTabCells(x))); }); }); out.push(['Total du projet'].concat(dpTabCells(D.tot))); return out; }
+  function dpTabRender() {
+    var D = dpTabLines(), lock = DP.frozen, ls = dpLines(), r0 = ls[0] && ls[0].r, vs = r0 ? bvVers(r0) : [], sel = D.rows.filter(function (x) { return x.id === DP.sel.dptab; })[0];
+    var vsel = document.getElementById('dptab-ver'); vsel.innerHTML = ''; var o0 = cvEl('option', null, 'Version courante (V' + (vs.length || 1) + ')'); o0.value = '0'; vsel.appendChild(o0);
+    vs.forEach(function (v) { var o = cvEl('option', null, 'V' + v.v + (v.v === 1 ? ' — budget initial' : '') + ' · ' + v.on.slice(0, 10)); o.value = String(v.v); vsel.appendChild(o); }); vsel.value = String(DP.tabVer);
+    vsel.onchange = function () { DP.tabVer = +vsel.value; dpTabRender(); };
+    var st = document.getElementById('dptab-state'); st.innerHTML = ''; st.appendChild(badge(lock ? 'Figé · version ' + lock.v : 'Projet · non figé', lock ? 'b-ok' : 'b-warn'));
+    var k = document.getElementById('dptab-k'); k.innerHTML = ''; k.appendChild(dpTiles([['Crédit validé', fmt(D.tot.cred) + ' MGA', 'brand'], ['Engagements', fmt(D.tot.e) + ' MGA · ' + dpPct(D.tot.e, D.tot.cred), 'info'], ['Mandats émis', fmt(D.tot.o) + ' MGA', 'n'], ['Paiements', fmt(D.tot.p) + ' MGA · ' + dpPct(D.tot.p, D.tot.cred), 'ok']]));
+    dpBar('dptab-bar', [['Ouvrir la ligne', true, !!sel, function () { dpTabOpen(sel); }], ['Exporter Excel', false, true, dpTabXlsx], ['Exporter PDF', false, true, dpTabPdf]]);
+    dpTable({ id: 'dptab', head: ['Ligne du PTBA', 'Composante', 'Crédit validé', 'Engagé', 'Payé', 'Disponible', 'Taux d’engagement', 'Taux de paiement', 'Alerte'], num: [2, 3, 4, 5, 6, 7], rows: D.rows, empty: 'Aucune ligne : aucun budget validé.', redraw: dpTabRender,
+      cells: function (x) { var al = x.cred && x.e / x.cred >= 0.9; return [x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l), x.z.perim, fmt(x.cred), fmt(x.e), fmt(x.p), fmt(x.cred - x.e - x.r), dpPct(x.e, x.cred), dpPct(x.p, x.cred), al ? badge('Engagé à plus de 90 %', 'b-warn') : '—']; } });
+    var tf = document.getElementById('dptab-f'); tf.innerHTML = '<td><b>Total du projet</b></td><td></td>' + [D.tot.cred, D.tot.e, D.tot.p, D.tot.cred - D.tot.e - D.tot.r].map(function (v) { return '<td class="num"><b>' + fmt(v) + '</b></td>'; }).join('') + '<td class="num"><b>' + dpPct(D.tot.e, D.tot.cred) + '</b></td><td class="num"><b>' + dpPct(D.tot.p, D.tot.cred) + '</b></td><td></td>';
+  }
+  function dpTabRowsOut() { var D = dpTabLines(), out = D.rows.map(function (x) { return [x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l)].concat(dpTabCells(x)); }); out.push(['Total du projet'].concat(dpTabCells(D.tot))); return out; }
+  /* Détail d'une ligne : onglets Synthèse, Engagements, Liquidations, Mandats, Paiements, Répartition mensuelle */
+  var DP_TABS = [['syn', 'Synthèse'], ['eng', 'Engagements'], ['liq', 'Liquidations'], ['ord', 'Mandats'], ['pay', 'Paiements'], ['mois', 'Répartition mensuelle']];
+  function dpMini(head, rows, num, empty) {
+    var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = '640px'; tb.innerHTML = '<thead><tr>' + head.map(function (h, i) { return '<th' + (num.indexOf(i) >= 0 ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr></thead>';
+    var b = cvEl('tbody'); if (!rows.length) { var t0 = cvEl('tr'), c0 = cell(t0, empty); c0.colSpan = head.length; c0.style.textAlign = 'left'; b.appendChild(t0); }
+    rows.forEach(function (r) { var tr = cvEl('tr'); r.forEach(function (v, i) { var td = cell(tr, typeof v === 'string' ? v : '', num.indexOf(i) >= 0 ? 'num' : (i === 0 ? 'name' : '')); if (typeof v !== 'string') td.appendChild(v); }); b.appendChild(tr); });
+    tb.appendChild(b); sc.appendChild(tb); var card = cvEl('div', 'card'); card.appendChild(sc); return card;
+  }
+  function dpTabOpen(x) { DP.tabSel = 'syn'; DP.tabLine = x.id; dpTabPaint(); document.getElementById('dp-tab-form').hidden = false; }
+  function dpTabPaint() {
+    var z = dpLine(DP.tabLine), body = document.getElementById('dp-tab-body'); body.innerHTML = ''; if (!z) return;
+    document.getElementById('dp-tab-title').textContent = 'Ligne ' + z.l.c + ' — ' + (z.l.lib || z.l.l);
+    var docs = (DP.docs || []).filter(function (d) { return d.key === z.key; }), s = dpStat(z.key), cr = dpCred(z, DP.tabVer), dt = function (iso) { return iso ? isoToFr(iso) : '—'; };
+    var tabs = cvEl('div', 'seg'); tabs.style.marginBottom = '14px'; DP_TABS.forEach(function (t) { var b = cvEl('button', DP.tabSel === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { DP.tabSel = t[0]; dpTabPaint(); }); tabs.appendChild(b); }); body.appendChild(tabs);
+    var T = DP.tabSel;
+    if (T === 'syn') {
+      body.appendChild(dpTiles([['Crédit validé', fmt(cr) + ' MGA', 'brand'], ['Engagé (visé)', fmt(s.e) + ' MGA', 'info'], ['Liquidé', fmt(s.l) + ' MGA', 'n'], ['Mandaté', fmt(s.o) + ' MGA', 'n'], ['Payé', fmt(s.p) + ' MGA', 'ok'], ['Disponible', fmt(cr - s.e - s.r) + ' MGA', cr - s.e - s.r >= 0 ? 'ok' : 'ko']], { cols: 3 }));
+      body.appendChild(dpWork(z));
+      var nat = z.l.nat && PUB_NAT[z.l.nat] ? PUB_NAT[z.l.nat] + ' · ' + (NATL[z.l.nat] || '').replace(/^\d+ — /, '') : 'Non rattaché';
+      var sc = cvEl('section', 'co-blk'); sc.appendChild(cvEl('div', 'kb-h', 'Imputation budgétaire')); sc.appendChild(dpTiles([['Composante', z.perim], ['Compte', nat], ['Source de financement', (z.l.axv && z.l.axv.Financier) || '—'], ['Taux de paiement', dpPct(s.p, cr)]], { small: true })); body.appendChild(sc);
+    } else if (T === 'eng') {
+      body.appendChild(dpMini(['N°', 'Tiers · objet', 'Acte', 'Date', 'Montant (MGA)', 'Statut'], docs.map(function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, d.acte + ' ' + d.ref, dt((d.dt || {}).eng), fmt(d.mt), dpStatBadge(d)]; }), [4], 'Aucun engagement sur cette ligne.'));
+    } else if (T === 'liq') {
+      body.appendChild(dpMini(['Engagement', 'Tiers', 'Facture', 'Date de liquidation', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 3; }).map(function (d) { return [d.id, d.tiers, d.fac || '—', dt((d.dt || {}).liq), fmt(d.mt)]; }), [4], 'Aucune liquidation sur cette ligne.'));
+    } else if (T === 'ord') {
+      body.appendChild(dpMini(['Mandat', 'Bénéficiaire', 'Engagement', 'Date d’émission', 'Montant (MGA)', 'Statut'], docs.filter(function (d) { return DP_RANK[d.st] >= 4; }).map(function (d) { return [d.mandat, d.tiers, d.id, dt((d.dt || {}).ord), fmt(d.mt), dpStatBadge(d)]; }), [4], 'Aucun mandat sur cette ligne.'));
+    } else if (T === 'pay') {
+      body.appendChild(dpMini(['Mandat', 'Bénéficiaire', 'Mode de paiement', 'Date de paiement', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 6; }).map(function (d) { return [d.mandat, d.tiers, d.mode || '—', dt((d.dt || {}).pay), fmt(d.mt)]; }), [4], 'Aucun paiement sur cette ligne.'));
+    } else {
+      var ex = z.r.ex || '2026', prev = bvSpread(cr, z.l, ex), E = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], Li = E.slice(), P = E.slice();
+      docs.forEach(function (d) { var q = d.dt || {}; function put(a, iso, v) { if (iso && iso.slice(0, 4) === ex) a[+iso.slice(5, 7) - 1] += v; } if (DP_RANK[d.st] >= 2) put(E, q.eng, d.mt); if (DP_RANK[d.st] >= 3) put(Li, q.liq, d.mt); if (DP_RANK[d.st] >= 6) put(P, q.pay, d.mt); });
+      var head = ['Mois'].concat(BVMOIS, ['Total']); function line(lbl, a) { return [lbl].concat(a.map(function (v) { return v ? fmt(v) : '—'; }), [fmt(bvSum(a))]); }
+      var cum = []; var c = 0; prev.forEach(function (v) { c += v; cum.push(c); });
+      var pc = cvEl('div', 'hint', 'Le crédit est réparti sur les mois du travail prévu ; les engagements et paiements sont placés à leur date réelle.'); pc.style.marginBottom = '8px'; body.appendChild(pc);
+      body.appendChild(dpMini(head, [line('Prévu (PTBA)', prev), line('Engagé', E), line('Liquidé', Li), line('Payé', P)], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
+    }
+  }
   function dpTabTitle() { return 'Compte administratif — ' + (DP.tabVer ? 'version V' + DP.tabVer + ' du crédit' : 'version courante du crédit') + (DP.frozen ? ' · figé' : ' · projet non figé'); }
   function dpTabXlsx() { sbDl('compte-administratif-' + sbStamp() + '.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', sbXlsx([{ name: 'Compte administratif', rows: [[dpTabTitle()], [], DP_TABH].concat(dpTabRowsOut()), head: 1, boldRows: [0, 2] }])); dpMsg('dptab-msg', 'Export Excel généré.'); }
   function dpTabPdf() {
