@@ -1122,7 +1122,33 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 #softappli-portal .pc-task{ padding:16px 24px; }
 #softappli-portal .pc-task-ic{ width:44px; height:44px; }
 #softappli-portal .pc-btn.primary{ background:var(--navy-700); }
-@media (max-width:768px){
+#softappli-portal .pc-ins{ padding:20px 22px; background:linear-gradient(135deg,#F4F7FE 0%,#fff 60%); border-color:var(--navy-200); }
+#softappli-portal .pc-ins-h{ display:flex; align-items:center; gap:14px; }
+#softappli-portal .pc-ins-h > div{ flex:1; min-width:0; } #softappli-portal .pc-ins-h strong{ display:block; font:600 17px var(--font-heading); color:var(--navy-950); } #softappli-portal .pc-ins-h small{ display:block; color:var(--n-600); font-size:13.5px; margin-top:2px; }
+#softappli-portal .pc-ins-ic{ width:44px; height:44px; border-radius:12px; background:var(--navy-700); color:#fff; display:grid; place-items:center; flex:none; }
+#softappli-portal .pc-ins-ic svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+#softappli-portal .pc-ins-ic.t{ background:var(--gold-300); color:var(--navy-950); width:38px; height:38px; border-radius:10px; }
+#softappli-portal .pc-ins-tg{ border:1px solid var(--n-200); background:#fff; border-radius:8px; min-height:36px; padding:0 14px; font-weight:600; font-size:13px; color:var(--navy-700); }
+#softappli-portal .pc-ins-steps{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:18px 0 14px; }
+#softappli-portal .pc-ins-step{ display:flex; gap:10px; align-items:flex-start; background:#fff; border:1px solid var(--n-200); border-radius:12px; padding:12px; }
+#softappli-portal .pc-ins-step i{ font:700 14px var(--font-heading); font-style:normal; width:28px; height:28px; border-radius:50%; background:var(--navy-100); color:var(--navy-700); display:grid; place-items:center; flex:none; }
+#softappli-portal .pc-ins-step b{ display:block; font-size:14px; color:var(--navy-950); } #softappli-portal .pc-ins-step span{ display:block; font-size:12.5px; color:var(--n-600); line-height:1.35; margin-top:2px; }
+#softappli-portal .pc-ins-obj{ display:flex; gap:12px; align-items:center; background:var(--gold-50); border:1px solid var(--gold-200); border-radius:12px; padding:12px 14px; margin-bottom:14px; }
+#softappli-portal .pc-ins-obj small{ display:block; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--gold-600); font-weight:700; } #softappli-portal .pc-ins-obj b{ font-size:15px; color:var(--navy-950); font-weight:600; }
+#softappli-portal .pc-ins-k{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:14px; }
+#softappli-portal .pc-ins-kpi{ background:#fff; border:1px solid var(--n-200); border-radius:12px; padding:12px 14px; position:relative; overflow:hidden; }
+#softappli-portal .pc-ins-kpi::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--navy-700); }
+#softappli-portal .pc-ins-kpi em{ font:600 28px/1.1 var(--font-heading); font-style:normal; color:var(--navy-700); font-variant-numeric:tabular-nums; } #softappli-portal .pc-ins-kpi span{ font-size:12.5px; color:var(--n-600); margin-left:6px; } #softappli-portal .pc-ins-kpi b{ display:block; font-size:13.5px; font-weight:600; color:var(--navy-950); margin-top:4px; }
+#softappli-portal .pc-ins-f{ display:flex; flex-wrap:wrap; gap:8px; }
+@media (max-width:900px){ #softappli-portal .pc-ins-steps{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:560px){ #softappli-portal .pc-ins-steps{ grid-template-columns:1fr; } #softappli-portal .pc-ins-h{ flex-wrap:wrap; } }#softappli-portal .pc-inv{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:16px 20px; border-left:4px solid var(--n-300); }
+#softappli-portal .pc-inv.info{ border-left-color:var(--navy-700); background:var(--navy-50); } #softappli-portal .pc-inv.warn{ border-left-color:#D97706; background:#FFFBEB; } #softappli-portal .pc-inv.ok{ border-left-color:#059669; background:#ECFDF5; } #softappli-portal .pc-inv.ko{ border-left-color:#BE123C; background:#FFF1F2; }
+#softappli-portal .pc-inv-t{ flex:1; min-width:260px; } #softappli-portal .pc-inv-t strong{ display:block; font-size:15px; color:var(--navy-950); } #softappli-portal .pc-inv-t span{ display:block; font-size:13.5px; color:var(--n-700); margin-top:2px; }
+#softappli-portal .pc-inv-t .pc-inv-mot{ color:#92400E; font-weight:600; }
+#softappli-portal .pc-inv-a{ display:flex; gap:8px; flex-wrap:wrap; }
+#softappli-portal .pc-inv-hist{ flex-basis:100%; display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12px; color:var(--n-600); border-top:1px solid rgba(0,0,0,.06); padding-top:8px; }
+#softappli-portal.pc-guest #pc-tabs .pc-tab:not([data-pc="bud"]), #softappli-portal .pc-guest #pc-tabs .pc-tab:not([data-pc="bud"]){ display:none; }
+#softappli-portal .pc-guest .pc-back{ display:none; }@media (max-width:768px){
   #softappli-portal .pc-top-in{ height:60px; padding:0 16px; gap:8px; }
   #softappli-portal .pc-brand small{ display:none; }
   #softappli-portal .pc-tabs{ position:fixed; left:0; right:0; bottom:0; z-index:30; border-top:1px solid var(--n-200); height:64px; }
@@ -1869,6 +1895,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div id="pc-s-chip"></div>
         </div>
         <div class="pc-note ko" id="pc-s-ret" hidden></div>
+        <div class="pc-card pc-inv" id="pc-s-inv"></div>
         <div class="pc-card pc-env" id="pc-s-instr"></div>
         <div class="pc-card pc-env" id="pc-s-env"></div>
         <div class="pc-card pc-scroll">
@@ -4354,7 +4381,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           </div>
         </div>
         <div id="bv-wrap" hidden style="margin-bottom:16px">
-          <div class="head" style="margin-bottom:12px"><div><h1 id="bv-h1">PTBA</h1><p id="bv-h1p">Lots de collecte validés. Sélectionnez un lot pour consulter le détail de ses lignes.</p></div></div>
+          <div class="head" style="margin-bottom:12px"><div><h1 id="bv-h1">PTBA</h1><p id="bv-h1p">Lots de collecte validés. Sélectionnez un lot pour consulter le détail de ses lignes.</p></div><div class="actions" id="bv-exa"></div></div>
           <div class="card">
             <div class="scroll">
               <table style="min-width:860px">
@@ -5384,7 +5411,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       
 <!-- ===== Projet : plan de passation des marchés ===== -->
       <section class="view" id="v-ppm">
-        <div class="head"><div><h1>PPM — Plan de passation des marchés</h1><p>Un plan par exercice, construit à partir des lignes du PTBA validé : le système propose ce qu’il faut acquérir et la méthode de passation.</p></div></div>
+        <div class="head"><div><h1>PPM — Plan de passation des marchés</h1><p>Un plan par exercice, construit à partir des lignes du PTBA validé : le système propose ce qu’il faut acquérir et la méthode de passation.</p></div><div class="actions" id="ppm-exa"></div></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead><tr><th>Lot de collecte</th><th>Cadre budgétaire</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du PPM</th><th>Actions</th></tr></thead><tbody id="ppm-lots"></tbody></table></div></div>
         <div class="panel" id="ppm-det" hidden><h2><span id="ppm-det-title">PPM</span></h2><div class="body" id="ppm-det-body"></div></div>
         <div class="panel" id="ppm-guide" hidden><h2><span id="ppm-guide-title">Planifier la passation</span></h2><div class="body" id="ppm-guide-body"></div></div>
@@ -5432,7 +5459,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       <!-- ===== Projet : plan de décaissement prévisionnel ===== -->
       <section class="view" id="v-pdec">
-        <div class="head"><div><h1>Plan de décaissement</h1><p>Un plan par exercice : les demandes de réapprovisionnement à prévoir, à partir de l’avance initiale, du PTBA et du PPM.</p></div></div>
+        <div class="head"><div><h1>Plan de décaissement</h1><p>Un plan par exercice : les demandes de réapprovisionnement à prévoir, à partir de l’avance initiale, du PTBA et du PPM.</p></div><div class="actions" id="pdc-exa"></div></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead><tr><th>Plan</th><th>Cadre budgétaire</th><th>Exercice</th><th class="num">Montant validé</th><th>Validé le</th><th>Statut du plan</th><th>Actions</th></tr></thead><tbody id="pdc-lots"></tbody></table></div></div>
         <div class="panel" id="pdc-det" hidden><h2><span id="pdc-det-title">Plan de décaissement</span></h2><div class="body" id="pdc-det-body"></div></div>
       </section>
@@ -11814,7 +11841,7 @@ function fmAxes() {
       { t: 'Consolidation transmise à la validation', by: 'Super Administrateur', on: '03/04/2026 09:00' }] }
   ];
   function cvById(id) { return CVAL.filter(function (r) { return r.id === id; })[0]; }
-  function cvCamp(r) { return camps.filter(function (c) { return c.code === r.camp; })[0]; }
+  function cvCamp(r) { return camps.filter(function (c) { return c.code === r.camp; })[0] || dirCampOf(r); }
   function cvSum(a, k) { return a.reduce(function (s, x) { return s + (x[k] || 0); }, 0); }
   function cvPerims(r) {
     var c = cvCamp(r); if (!c) return [];
@@ -11963,7 +11990,12 @@ function fmAxes() {
      uniquement le détail des lignes (axes, nature, quantité, coût, montant, répartition), sans enveloppes min/max ni pièces jointes. */
   var VLINES = {};
   Object.keys(COL).forEach(function (k) { COL[k].forEach(function (l) { if (!l.axv) l.axv = { Analytique: 'Programme ' + l.c.split('.')[0], Financier: 'Budget de l’État' }; }); });
-  function bvList() { return CVAL.filter(function (r) { return r.st === 'Validée' && cvCamp(r); }); }
+  function bvList() {
+    var yrs = exYears(); if (!PLAN_EX_USER) { var pick = yrs.indexOf('2027') >= 0 ? '2027' : yrs[yrs.length - 1]; if (pick) PLAN_EX = pick; } else if (yrs.indexOf(PLAN_EX) < 0 && yrs.length) PLAN_EX = yrs[yrs.length - 1];
+    if (directMode()) return [directLot(PLAN_EX).cv];
+    var all = CVAL.filter(function (r) { return r.st === 'Validée' && cvCamp(r); });
+    return yrs.length > 1 ? all.filter(function (r) { return cvCamp(r).ex === PLAN_EX; }) : all;
+  }
   function bvData(r) {
     var c = cvCamp(r), pid = c.par || (CAMPPAR[c.code] || [])[0], pa = parById(pid), out = [];
     cvPerims(r).forEach(function (x) {
@@ -11971,6 +12003,126 @@ function fmAxes() {
       ls.forEach(function (l) { out.push({ perim: x.p.p, l: l }); });
     });
     return { c: c, pa: pa, lines: out };
+  }
+  /* ----- Mode Simple (projet) : pas d'élaboration ni de collecte, le PTBA et le PTA se saisissent directement ----- */
+  function directMode() { return activeCode() === 'prj' && modes.prj === 'Simple'; }
+  function directLot(ex) {
+    ex = String(ex || PLAN_EX); if (DIRECTS[ex]) return DIRECTS[ex];
+    var src = CVAL.filter(function (r) { return r.st === 'Validée' && cvCamp(r); })[0], par = src ? (cvCamp(src).par || (CAMPPAR[src.camp] || [])[0]) : null;
+    DIRECTS[ex] = { camp: { code: 'PTBA-' + ex, lib: 'PTBA ' + ex + ' du projet (saisie directe)', prof: 'Projet / Programme', ex: ex, par: par, st: 'Validée', hist: [], perims: [{ p: 'Projet', who: ME, st: 'Soumise', amt: 0, lines: [], inds: [] }] },
+      cv: { id: 'CV-DIRECT-' + ex, camp: 'PTBA-' + ex, st: 'Validée', step: 'Terminée', validator: ME, hist: [{ t: 'Validée — saisie directe du PTBA ' + ex + ' (mode Simple)', by: ME, on: nowStr() }] } };
+    return DIRECTS[ex];
+  }
+  function dirCampOf(r) { var k = Object.keys(DIRECTS).filter(function (e) { return DIRECTS[e].camp.code === r.camp; })[0]; return k ? DIRECTS[k].camp : undefined; }
+  function dirPerim() { return directLot(PLAN_EX).camp.perims[0]; }
+  function dirFind(c) { return dirPerim().lines.filter(function (x) { return x.c === c; })[0]; }  function dirConfirm(title, msg, okLbl, cb) {
+    var f = cvEl('div'); f.appendChild(cvEl('p', null, msg)); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', okLbl); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+    bc.addEventListener('click', guModalClose); bo.addEventListener('click', function () { guModalClose(); cb(); }); guModal(title, f, 460);
+  }
+  function dirLineOpen(r, ln) {
+    var P = dirPerim(), isNew = !ln, ix = ln && ln.wk && ln.wk.inds && ln.wk.inds[0] ? ln.wk.inds[0] : null;
+    var W = { act: '', lib: ln ? (ln.lib || ln.l) : '', nat: ln ? (ln.nat || '') : '', dem: ln && ln.dem != null ? String(ln.dem).replace('.', ',') : '', d1: ln && ln.wk ? (ln.wk.d1 || '') : '', d2: ln && ln.wk ? (ln.wk.d2 || '') : '', ind: ix ? ix.id : '', iLib: '', iUnit: '', vol: ix ? String(ix.contrib).replace('.', ',') : '', sites: ln && ln.sites ? JSON.parse(JSON.stringify(ln.sites)) : null, spread: ln && ln.spread ? ln.spread.slice() : null };
+    var f = cvEl('div'), g = cvEl('div', 'fgrid');
+    function fld(lab, el, full) { var d = cvEl('div', full ? 'full' : ''); d.appendChild(cvEl('label', null, lab)); d.appendChild(el); g.appendChild(d); return d; }
+    var acts = []; Object.keys(PLAN).forEach(function (k) { PLAN[k].forEach(function (a) { acts.push(a); }); });
+    var sa = cvEl('select', 'field'); sa.style.width = '100%'; var o0 = cvEl('option', null, '— Activité libre (hors plan analytique) —'); o0.value = ''; sa.appendChild(o0); acts.forEach(function (a) { var o = cvEl('option', null, a.c + ' — ' + a.l); o.value = a.c; sa.appendChild(o); });
+    if (!isNew) { var cur = acts.filter(function (a) { return a.c === ln.c; })[0]; if (cur) { sa.value = cur.c; W.act = cur.c; } sa.disabled = true; }
+    var li = cvEl('input', 'field'); li.type = 'text'; li.value = W.lib; li.style.width = '100%'; li.addEventListener('input', function () { W.lib = li.value; });
+    sa.addEventListener('change', function () { var a = acts.filter(function (x) { return x.c === sa.value; })[0]; W.act = sa.value; if (a) { li.value = a.l; W.lib = a.l; if (!W.nat) { W.nat = a.nat || ''; ns.value = W.nat; } } });
+    fld('Activité du plan analytique', sa, true); fld('Libellé de la ligne *', li, true);
+    var ns = cvEl('select', 'field'); ns.style.width = '100%'; var on0 = cvEl('option', null, '— Nature de dépense —'); on0.value = ''; ns.appendChild(on0); Object.keys(NATL).forEach(function (k) { var o = cvEl('option', null, k + ' — ' + NATL[k]); o.value = k; ns.appendChild(o); }); ns.value = W.nat; ns.addEventListener('change', function () { W.nat = ns.value; }); fld('Nature de la dépense', ns);
+    var mi = cvEl('input', 'field'); mi.type = 'text'; mi.setAttribute('inputmode', 'decimal'); mi.value = W.dem; mi.style.width = '100%'; mi.placeholder = '0'; mi.addEventListener('input', function () { W.dem = mi.value; }); fld('Montant annuel (MGA) *', mi);
+    var d1 = cvEl('input', 'field'); d1.type = 'date'; d1.value = W.d1; d1.style.width = '100%'; d1.addEventListener('change', function () { W.d1 = d1.value; }); fld('Début du travail', d1);
+    var d2 = cvEl('input', 'field'); d2.type = 'date'; d2.value = W.d2; d2.style.width = '100%'; d2.addEventListener('change', function () { W.d2 = d2.value; }); fld('Fin du travail', d2);
+    var bmo = cvEl('button', 'btn small', W.spread ? 'Répartition mensuelle définie' : 'Répartition mensuelle (par défaut : équitable sur la période)'); bmo.type = 'button';
+    bmo.addEventListener('click', function () { var tot = parseFloat(String(W.dem).replace(/[\s\u00A0]/g, '').replace(',', '.')); if (isNaN(tot) || tot <= 0) { err.textContent = 'Saisissez d’abord le montant annuel.'; return; } err.textContent = ''; monthsAsk(tot, W.spread || bvSpread(tot, { wk: { d1: W.d1, d2: W.d2 } }, PLAN_EX), 'Répartition mensuelle de la ligne', function (v) { W.spread = v; bmo.textContent = 'Répartition mensuelle définie'; }); });
+    fld('Répartition dans l’année', bmo, true);
+    var si = cvEl('select', 'field'); si.style.width = '100%'; var oi0 = cvEl('option', null, '— Aucun indicateur —'); oi0.value = ''; si.appendChild(oi0); (P.inds || []).forEach(function (x) { var o = cvEl('option', null, x.lib + ' (' + x.unit + ')'); o.value = x.id; si.appendChild(o); }); var on = cvEl('option', null, '+ Nouvel indicateur…'); on.value = 'new'; si.appendChild(on); si.value = W.ind;
+    var nw = cvEl('div', 'fgrid'); nw.hidden = true; var il = cvEl('input', 'field'); il.type = 'text'; il.placeholder = 'Libellé de l’indicateur'; il.style.width = '100%'; il.addEventListener('input', function () { W.iLib = il.value; }); var iu = cvEl('input', 'field'); iu.type = 'text'; iu.placeholder = 'Unité (ex. salles)'; iu.style.width = '100%'; iu.addEventListener('input', function () { W.iUnit = iu.value; });
+    var d3 = cvEl('div'); d3.appendChild(il); nw.appendChild(d3); var d4 = cvEl('div'); d4.appendChild(iu); nw.appendChild(d4);
+    var vo = cvEl('input', 'field'); vo.type = 'text'; vo.setAttribute('inputmode', 'decimal'); vo.value = W.vol; vo.style.width = '100%'; vo.addEventListener('input', function () { W.vol = vo.value; });
+    si.addEventListener('change', function () { W.ind = si.value; nw.hidden = si.value !== 'new'; vv.hidden = !si.value; });
+    fld('Indicateur servi (PTA)', si, true); var dn = cvEl('div', 'full'); dn.appendChild(nw); g.appendChild(dn); var vv = fld('Volume prévu sur l’année', vo, true); nw.hidden = si.value !== 'new'; vv.hidden = !si.value;
+    var bs = cvEl('button', 'btn small', W.sites ? 'Sites : ' + sitesSummary(W.sites) : 'Répartir entre les sites'); bs.type = 'button'; bs.addEventListener('click', function () { sitesAsk(sitesList().filter(function (s) { return s.on; }).map(function (s) { return s.code; }), W.sites, 'Répartir la ligne entre les sites', function (m) { W.sites = m; bs.textContent = 'Sites : ' + sitesSummary(m); }); }); fld('Sites', bs, true);
+    f.appendChild(g); var err = cvEl('div', 'err'); f.appendChild(err);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', isNew ? 'Ajouter la ligne' : 'Enregistrer'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () {
+      var lib = W.lib.trim(), dem = parseFloat(String(W.dem).replace(/[\s ]/g, '').replace(',', '.')), vol = W.vol === '' ? 0 : parseFloat(String(W.vol).replace(/[\s ]/g, '').replace(',', '.'));
+      if (!lib) { err.textContent = 'Le libellé est obligatoire.'; return; } if (isNaN(dem) || dem <= 0) { err.textContent = 'Indiquez un montant annuel supérieur à zéro.'; return; }
+      if (W.d1 && W.d2 && W.d2 < W.d1) { err.textContent = 'La fin du travail doit suivre son début.'; return; }
+      if (W.ind === 'new' && (!W.iLib.trim() || !W.iUnit.trim())) { err.textContent = 'Indiquez le libellé et l’unité du nouvel indicateur.'; return; }
+      if (W.ind && (isNaN(vol) || vol <= 0)) { err.textContent = 'Indiquez le volume prévu de l’indicateur.'; return; }
+      var L = ln;
+      if (isNew) { var code = W.act || 'D' + (P.lines.length + 1); while (P.lines.some(function (x) { return x.c === code; })) code += 'b'; L = { c: code, ref: 0, per: null }; }
+      L.l = lib; L.lib = lib; L.nat = W.nat || ''; L.dem = dem; if (W.spread) L.spread = W.spread; else delete L.spread; L.wk = L.wk || {}; L.wk.task = lib; L.wk.d1 = W.d1; L.wk.d2 = W.d2; if (W.sites) L.sites = W.sites;
+      var iid = W.ind; if (iid === 'new') { iid = 'IF-D' + ((P.inds || []).length + 1); (P.inds = P.inds || []).push({ id: iid, lib: W.iLib.trim(), unit: W.iUnit.trim(), base: 0, cible: 0, fixed: true }); }
+      L.wk.inds = iid ? [{ id: iid, contrib: vol }] : []; L.wk.vol = iid ? vol : 0;
+      if (iid) { var ind = (P.inds || []).filter(function (z) { return z.id === iid; })[0]; if (ind) ind.cible = P.lines.concat(isNew ? [L] : []).reduce(function (s, x) { var k = x.wk && x.wk.inds && x.wk.inds.filter(function (q) { return q.id === iid; })[0]; return s + (k ? k.contrib : 0); }, 0); }
+      if (isNew) P.lines.push(L);
+      auditAdd(isNew ? 'Création' : 'Modification', 'PTBA ' + L.c, 'Ligne ' + L.c + ' — ' + lib + ' : ' + fmt(dem) + ' MGA (saisie directe)', 'Projet / Programme');
+      guModalClose(); bvAfter(r, isNew ? 'Ligne ' + L.c + ' ajoutée au PTBA.' : 'Ligne ' + L.c + ' modifiée.');
+    });
+    guModal(isNew ? 'Ajouter une ligne au PTBA' : 'Modifier la ligne ' + ln.c, f, 640);
+  }
+  function dirLineDel(r, ln) { dirConfirm('Supprimer la ligne ' + ln.c + ' ?', 'La ligne « ' + (ln.lib || ln.l) + ' » (' + fmt(ln.dem || 0) + ' MGA) sera retirée du PTBA et du PTA.', 'Supprimer', function () { var P = dirPerim(); P.lines.splice(P.lines.indexOf(ln), 1); bvSel = null; auditAdd('Suppression', 'PTBA ' + ln.c, 'Ligne supprimée (saisie directe)', 'Projet / Programme'); bvAfter(r, 'Ligne ' + ln.c + ' supprimée.'); }); }
+  /* ----- Exercice : un PTBA (et ses plans) par exercice ----- */
+  var PLAN_EX = '2027', PLAN_EX_USER = false, DIRECTS = {};
+  function exYears() {
+    if (directMode()) { var ys = []; for (var y0 = 2024; y0 <= 2030; y0++) ys.push(String(y0)); return ys; }
+    var a = []; CVAL.forEach(function (r) { var c = r.st === 'Validée' && cvCamp(r); if (c && a.indexOf(c.ex) < 0) a.push(c.ex); }); return a.sort();
+  }
+  function exSel() {
+    var w = cvEl('div', 'ex-sel'), l = cvEl('label', null, 'Exercice'), s = cvEl('select', 'field'); s.style.width = 'auto'; s.setAttribute('aria-label', 'Exercice'); l.style.marginRight = '8px'; l.style.fontWeight = '600';
+    exYears().forEach(function (y) { var o = cvEl('option', null, y); o.value = y; s.appendChild(o); }); s.value = PLAN_EX;
+    s.addEventListener('change', function () { PLAN_EX = s.value; PLAN_EX_USER = true; show(window.__curView || 'ptba'); }); w.appendChild(l); w.appendChild(s); return w;
+  }
+  window.sbExSel = function () { return exSel(); }; window.sbOneLot = function () { return bvList().length < 2; };
+  function exFill(id) { var e = document.getElementById(id); if (!e) return; e.innerHTML = ''; if (activeCode() === 'prj') e.appendChild(exSel()); }
+  /* Import d'un fichier CSV (enregistrement Excel au format CSV) : une ligne du plan par ligne du fichier */
+  function dirCsv(txt) {
+    var lines = String(txt).replace(/^﻿/, '').split(/\r?\n/).filter(function (x) { return x.trim(); }); if (!lines.length) return [];
+    var sep = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
+    function split(l) { var out = [], cur = '', q = false; for (var i = 0; i < l.length; i++) { var ch = l[i]; if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; } else if (ch === sep && !q) { out.push(cur); cur = ''; } else cur += ch; } out.push(cur); return out.map(function (x) { return x.trim(); }); }
+    return lines.slice(1).map(split);
+  }
+  function dirDate(v) { v = String(v || '').trim(); var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v); if (m) return m[3] + '-' + m[2] + '-' + m[1]; return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : ''; }
+  function dirImport(r) {
+    var f = cvEl('div'), inf = cvEl('div', 'pm-info'); inf.textContent = 'Enregistrez votre fichier Excel au format CSV (séparateur point-virgule). Colonnes : Code, Libellé, Nature, Montant, Début, Fin. Les montants peuvent avoir une virgule, les dates s’écrivent jj/mm/aaaa.'; f.appendChild(inf);
+    var dl = cvEl('button', 'btn small', 'Télécharger le modèle'); dl.type = 'button'; dl.addEventListener('click', function () { var csv = '﻿Code;Libellé;Nature;Montant;Début;Fin\n1.1;Construire des salles de classe;21;150000000,50;01/02/' + PLAN_EX + ';30/09/' + PLAN_EX + '\n1.2;Former des enseignants;62;12500000;01/03/' + PLAN_EX + ';31/05/' + PLAN_EX + '\n'; var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'modele-import-ptba.csv'; document.body.appendChild(a); a.click(); a.remove(); }); f.appendChild(dl);
+    var fi = cvEl('input', 'field'); fi.type = 'file'; fi.accept = '.csv,text/csv'; fi.style.cssText = 'width:100%;margin:12px 0'; f.appendChild(fi); var res = cvEl('div'); res.style.margin = '6px 0'; f.appendChild(res); var err = cvEl('div', 'err'); f.appendChild(err);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:10px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Importer'); bc.type = bo.type = 'button'; bo.disabled = true; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    var rows = [];
+    fi.addEventListener('change', function () {
+      err.textContent = ''; bo.disabled = true; rows = []; res.textContent = ''; if (!fi.files || !fi.files[0]) return; var rd = new FileReader();
+      rd.onload = function () {
+        var ok = [], bad = 0; dirCsv(rd.result).forEach(function (c) { var dem = parseFloat(String(c[3] || '').replace(/[\s ]/g, '').replace(',', '.')); if (c[1] && !isNaN(dem) && dem > 0) ok.push({ c: c[0], lib: c[1], nat: NATL[c[2]] ? c[2] : '', dem: dem, d1: dirDate(c[4]), d2: dirDate(c[5]) }); else bad++; });
+        rows = ok; res.textContent = ok.length + ' ligne' + (ok.length > 1 ? 's' : '') + ' reconnue' + (ok.length > 1 ? 's' : '') + (bad ? ', ' + bad + ' ignorée' + (bad > 1 ? 's' : '') + ' (libellé ou montant manquant)' : '') + ' — total ' + fmt(ok.reduce(function (s, x) { return s + x.dem; }, 0)) + ' MGA.'; bo.disabled = !ok.length;
+      }; rd.readAsText(fi.files[0], 'utf-8');
+    });
+    bo.addEventListener('click', function () {
+      var P = dirPerim(); rows.forEach(function (x) { var code = x.c || 'D' + (P.lines.length + 1); while (P.lines.some(function (y) { return y.c === code; })) code += 'b'; P.lines.push({ c: code, l: x.lib, lib: x.lib, nat: x.nat, dem: x.dem, ref: 0, per: null, wk: { task: x.lib, d1: x.d1, d2: x.d2, inds: [], vol: 0 } }); });
+      auditAdd('Import', 'PTBA ' + PLAN_EX, rows.length + ' ligne(s) importée(s) depuis un fichier CSV', 'Projet / Programme'); guModalClose(); bvAfter(r, rows.length + ' ligne' + (rows.length > 1 ? 's importées' : ' importée') + ' dans le PTBA ' + PLAN_EX + '.');
+    });
+    guModal('Importer des lignes dans le PTBA ' + PLAN_EX, f, 600);
+  }
+  /* Répartition mensuelle d'un montant : quatre trimestres, un champ par mois */
+  function monthsAsk(total, cur, title, cb) {
+    var a = cur && cur.length === 12 ? cur.slice() : null, ins = [], subs = [], MO = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
+    if (!a) { var q = Math.round(total / 12 * 100) / 100; a = []; for (var k = 0; k < 12; k++) a.push(q); a[11] = Math.round((total - q * 11) * 100) / 100; }
+    function num(s) { var n = parseFloat(String(s).replace(/[\s ]/g, '').replace(',', '.')); return isNaN(n) ? 0 : n; }
+    var f = cvEl('div'), info = cvEl('div', 'pm-info'); info.innerHTML = 'Montant à répartir : <strong>' + fmt(total) + ' MGA</strong>. Indiquez quel montant tombe sur quel mois ; le total doit être égal à ce montant.'; f.appendChild(info);
+    var qs = cvEl('div', 'pm-quick'), g = cvEl('div', 'pm-quarters');
+    [['Équitable sur 12 mois', function () { var q2 = Math.round(total / 12 * 100) / 100, r2 = []; for (var k2 = 0; k2 < 12; k2++) r2.push(q2); r2[11] = Math.round((total - q2 * 11) * 100) / 100; return r2; }], ['Par trimestre', function () { var r3 = new Array(12).fill(0), q3 = Math.round(total / 4 * 100) / 100; r3[0] = q3; r3[3] = q3; r3[6] = q3; r3[9] = Math.round((total - 3 * q3) * 100) / 100; return r3; }], ['Début d’année', function () { var r4 = new Array(12).fill(0); r4[0] = total; return r4; }], ['Fin d’année', function () { var r5 = new Array(12).fill(0); r5[11] = total; return r5; }]].forEach(function (x) { var b = cvEl('button', 'btn small', x[0]); b.type = 'button'; b.addEventListener('click', function () { x[1]().forEach(function (v, i) { ins[i].value = v ? fmt(v) : ''; }); upd(); }); qs.appendChild(b); });
+    f.appendChild(qs);
+    for (var qi = 0; qi < 4; qi++) { (function (qi) { var c = cvEl('div', 'pm-q'), h = cvEl('div', 'pm-qh'), sb = cvEl('span'); h.appendChild(cvEl('b', null, 'Trimestre ' + (qi + 1))); h.appendChild(sb); subs.push(sb); c.appendChild(h);
+      for (var m = qi * 3; m < qi * 3 + 3; m++) { (function (m) { var row = cvEl('div', 'pm-row'), w = cvEl('div', 'pm-w'), inp = cvEl('input', 'field pm-in'); inp.type = 'text'; inp.setAttribute('inputmode', 'decimal'); inp.value = a[m] ? fmt(a[m]) : ''; inp.placeholder = '0'; inp.addEventListener('input', upd); inp.addEventListener('blur', function () { var n = num(inp.value); inp.value = n ? fmt(n) : ''; upd(); }); ins[m] = inp; w.appendChild(inp); w.appendChild(cvEl('span', 'pm-u', 'MGA')); row.appendChild(cvEl('span', 'pm-lab', MO[m])); row.appendChild(w); c.appendChild(row); })(m); }
+      g.appendChild(c); })(qi); }
+    f.appendChild(g); var bar = cvEl('div', 'pm-bar'), fill = cvEl('i'); bar.appendChild(fill); f.appendChild(bar); var sum = cvEl('div', 'pm-sum'); f.appendChild(sum); var err = cvEl('div', 'err'); f.appendChild(err);
+    function vals() { return ins.map(function (x) { return num(x.value); }); }
+    function upd() { var v = vals(), s = v.reduce(function (x, y) { return x + y; }, 0), ok = Math.abs(s - total) < 0.5; for (var q4 = 0; q4 < 4; q4++) subs[q4].textContent = fmt(v[q4 * 3] + v[q4 * 3 + 1] + v[q4 * 3 + 2]) + ' MGA'; fill.style.width = Math.min(100, total ? s / total * 100 : 0) + '%'; fill.className = ok ? 'ok' : (s > total ? 'ko' : ''); sum.className = 'pm-sum ' + (ok ? 'ok' : 'ko'); sum.textContent = ok ? 'Total atteint : ' + fmt(s) + ' MGA' : (s > total ? 'Dépassement de ' + fmt(s - total) + ' MGA' : 'Reste à répartir : ' + fmt(total - s) + ' MGA'); } upd();
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:10px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Valider la répartition'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () { var v = vals(), s = v.reduce(function (x, y) { return x + y; }, 0); if (Math.abs(s - total) >= 0.5) { err.textContent = 'Le total réparti doit être égal au montant (' + fmt(total) + ' MGA).'; return; } guModalClose(); cb(v); });
+    guModal(title, f, 680, true);
   }
   /* Suivi du PTBA : à envoyer → envoyé au bailleur → retour notifié → clôturé */
   var PTST = { 'À envoyer': 'b-warn', 'Envoyé au bailleur': 'b-info', 'Retour notifié : approuvé': 'b-ok', 'Correction demandée par le bailleur': 'b-ko', 'Clôturé': 'b-neutral' };
@@ -12070,8 +12222,8 @@ function fmAxes() {
   }
   /* Répartition en % d'un axe (financement, géographie…) : une ligne du PTBA devient plusieurs lignes, une par valeur de l'axe */
   function pctAsk(items, cur, title, cb) {
-    var f = cvEl('div'), g = cvEl('div', 'fgrid'), ins = {}; cur = cur || {};
-    items.forEach(function (it) { var d = cvEl('div'), i = cvEl('input', 'field'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = cur[it[0]] != null ? String(cur[it[0]]).replace('.', ',') : ''; i.placeholder = '0'; ins[it[0]] = i; d.appendChild(cvEl('label', null, it[1] + ' (part en %)')); d.appendChild(i); g.appendChild(d); }); f.appendChild(g);
+    var f = cvEl('div'), g = cvEl('div', 'pm-rows'), ins = {}; cur = cur || {};
+    items.forEach(function (it) { var d = cvEl('div', 'pm-row'), i = cvEl('input', 'field pm-in'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = cur[it[0]] != null ? String(cur[it[0]]).replace('.', ',') : ''; i.placeholder = '0'; ins[it[0]] = i; d.appendChild(cvEl('span', 'pm-lab', it[1])); var w = cvEl('div', 'pm-w'); w.appendChild(i); w.appendChild(cvEl('span', 'pm-u', '%')); d.appendChild(w); g.appendChild(d); }); f.appendChild(g);
     var sum = cvEl('div'); sum.style.margin = '10px 0'; f.appendChild(sum);
     function tot() { var t = 0; items.forEach(function (it) { t += parseFloat(String(ins[it[0]].value).replace(',', '.')) || 0; }); return Math.round(t * 10) / 10; }
     function upd() { var t = tot(); sum.innerHTML = ''; sum.appendChild(badge('Total : ' + String(t).replace('.', ',') + ' %', Math.abs(t - 100) < 0.05 ? 'b-ok' : 'b-ko')); } items.forEach(function (it) { ins[it[0]].addEventListener('input', upd); }); upd();
@@ -12079,7 +12231,7 @@ function fmAxes() {
     var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:8px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Valider'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
     bc.addEventListener('click', guModalClose);
     bo.addEventListener('click', function () { if (Math.abs(tot() - 100) > 0.05) { err.textContent = 'Le total doit être égal à 100 % (actuellement ' + String(tot()).replace('.', ',') + ' %).'; return; } var m = {}; items.forEach(function (it) { var v = Math.round((parseFloat(String(ins[it[0]].value).replace(',', '.')) || 0) * 10) / 10; if (v) m[it[0]] = v; }); guModalClose(); cb(m); });
-    guModal(title, f, 520);
+    guModal(title, f, 520, true);
   }
   function bvLinkOpen(r) {
     var d = bvData(r), plans = bvPlans(r), draft = {}, body = document.getElementById('bv-link-body');
@@ -12143,7 +12295,7 @@ function fmAxes() {
   }
   function bvOpen(r) {
     bvSel = null; bvVers(r);
-    document.getElementById('bv-view-title').textContent = (bvKind === 'pta' ? 'PTA' : 'PTBA') + ' — ' + r.camp;
+    document.getElementById('bv-view-title').textContent = (bvKind === 'pta' ? 'PTA ' : 'PTBA ') + (cvCamp(r) ? cvCamp(r).ex : '') + (directMode() ? ' — saisie directe' : ' — ' + r.camp);
     bvRender(document.getElementById('bv-view-body'), r);
     document.getElementById('bv-view').hidden = false;
   }
@@ -12208,30 +12360,53 @@ function fmAxes() {
     bvVers(r).slice().reverse().forEach(function (v) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'V' + v.v + (v.v === 1 ? ' — budget initial' : '') + (v.what ? ' · ' + v.what : ''))); l.appendChild(cvEl('div', 'hby', v.by + (v.v > 1 ? ' — « ' + v.why + ' »' : ''))); row.appendChild(l); row.appendChild(cvEl('span', 'when', v.on)); sec.appendChild(row); });
     return sec;
   }
-  function bvBar(root, r) {
-    var pt = bvPt(r), bar = cvEl('div', 'row-toolbar'); bar.style.marginBottom = '14px';
-    var canSend = pt.st === 'À envoyer' || pt.st === 'Correction demandée par le bailleur', canRet = pt.st === 'Envoyé au bailleur', canClose = pt.st === 'Retour notifié : approuvé';
-    var noInd = [];
-    var isPta = bvView() === 'pta';
-    [['Exporter en Excel', '', true, function () { bvExportXlsx(r); }],
-     ['Exporter en PDF', '', true, function () { bvExportPdf(r); }],
-     ['Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), '', pt.st !== 'Clôturé' && bvPlans(r).length > 0, function () { bvLinkOpen(r); }],
-     [pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', 'primary', canSend, function () {
-        if (bvLinkMissing(r)) { cvSay('bv-msg', 'Envoi impossible : ' + pl(bvLinkMissing(r), 'ligne') + ' à rattacher aux plans de la configuration (' + bvPlans(r).map(function (p) { return p.n; }).join(', ') + ').'); var m0 = document.getElementById('bv-msg'); m0.style.background = 'var(--ko-bg)'; m0.style.color = 'var(--ko)'; return; }
-        if (noInd.length) { cvSay('bv-msg', 'Envoi impossible : ' + pl(noInd.length, 'activité') + ' sans indicateur (' + noInd.map(function (x) { return x.l.c; }).join(', ') + '). Rattachez-' + (noInd.length > 1 ? 'les' : 'la') + ' dans le cadre de résultats.'); var mm = document.getElementById('bv-msg'); mm.style.background = 'var(--ko-bg)'; mm.style.color = 'var(--ko)'; return; }
-        cvAsk({ title: 'Marquer le PTBA comme envoyé au bailleur', ok: 'Marquer envoyé', required: false, placeholder: 'Mode d’envoi, référence du courrier…' }, function (com) {
-          pt.st = 'Envoyé au bailleur'; pt.hist.unshift({ t: 'PTBA envoyé au bailleur' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA marqué comme envoyé au bailleur.'); });
-      }],
-     ['Notifier le retour du bailleur', 'primary', canRet, function () {
-        cvAsk({ title: 'Notifier le retour du bailleur', ok: 'Enregistrer le retour', required: function (v) { return v !== 'Approuvé'; }, optLabel: 'Décision du bailleur *', options: ['Approuvé', 'Correction demandée'], placeholder: 'Avis du bailleur (obligatoire si correction demandée)' }, function (com, dec) {
-          if (dec === 'Approuvé') { pt.st = 'Retour notifié : approuvé'; pt.hist.unshift({ t: 'Retour du bailleur : approuvé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'Retour du bailleur enregistré : PTBA approuvé. Il peut être clôturé.'); }
-          else { pt.st = 'Correction demandée par le bailleur'; pt.hist.unshift({ t: 'Retour du bailleur : correction demandée — ' + com, by: ME, on: nowStr() }); bvAfter(r, 'Retour du bailleur enregistré : correction demandée. Corrigez puis renvoyez le PTBA.'); } });
-      }],
-     ['Clôturer', 'primary', canClose, function () {
-        cvAsk({ title: 'Clôturer le PTBA', ok: 'Clôturer', required: false, placeholder: 'Commentaire de clôture' }, function (com) {
-          pt.st = 'Clôturé'; pt.hist.unshift({ t: 'PTBA clôturé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA clôturé : il est verrouillé.'); });
-      }]].filter(function (a, i) { return !isPta || i < 2; }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] && a[2] ? ' primary' : ''), a[0]); b.type = 'button'; b.disabled = !a[2]; b.addEventListener('click', a[3]); bar.appendChild(b); });
-    root.appendChild(bar);
+  /* Menu déroulant de la barre d'actions : regroupe plusieurs actions sous un seul bouton */
+  function tbMenu(label, items, primary) {
+    var b = cvEl('button', 'btn' + (primary ? ' primary' : ''), label + ' ▾'); b.type = 'button'; b.setAttribute('aria-haspopup', 'true');
+    b.addEventListener('click', function (e) {
+      e.stopPropagation(); var old = document.getElementById('tb-pop'); if (old) { old.remove(); if (old._for === b) return; }
+      var m = cvEl('div', 'tb-menu'); m.id = 'tb-pop'; m._for = b; m.addEventListener('click', function (ev) { ev.stopPropagation(); });
+      items.forEach(function (it) {
+        if (it.h) { m.appendChild(cvEl('div', 'tb-h', it.h)); return; }
+        var x = cvEl('button', 'tb-item' + (it.danger ? ' gu-del' : ''), it.l); x.type = 'button'; x.disabled = !it.on; x.addEventListener('click', function () { m.remove(); it.fn(); }); m.appendChild(x);
+      });
+      document.body.appendChild(m); var r0 = b.getBoundingClientRect(); m.style.top = (r0.bottom + 6) + 'px'; m.style.left = Math.max(8, Math.min(r0.left, window.innerWidth - m.offsetWidth - 8)) + 'px';
+    });
+    return b;
+  }
+  document.addEventListener('click', function () { var o = document.getElementById('tb-pop'); if (o) o.remove(); });  function bvBar(root, r) {
+    var pt = bvPt(r), bar = cvEl('div', 'bv-bar');
+    var canSend = pt.st === 'À envoyer' || pt.st === 'Correction demandée par le bailleur', canRet = pt.st === 'Envoyé au bailleur', canClose = pt.st === 'Retour notifié : approuvé', locked = pt.st === 'Clôturé';
+    var noInd = [], isPta = bvView() === 'pta';
+    function fail(t) { cvSay('bv-msg', t); var m0 = document.getElementById('bv-msg'); m0.style.background = 'var(--ko-bg)'; m0.style.color = 'var(--ko)'; }
+    function send() {
+      if (bvLinkMissing(r)) { fail('Envoi impossible : ' + pl(bvLinkMissing(r), 'ligne') + ' à rattacher aux plans de la configuration (' + bvPlans(r).map(function (p) { return p.n; }).join(', ') + ').'); return; }
+      if (noInd.length) { fail('Envoi impossible : ' + pl(noInd.length, 'activité') + ' sans indicateur (' + noInd.map(function (x) { return x.l.c; }).join(', ') + '). Rattachez-' + (noInd.length > 1 ? 'les' : 'la') + ' dans le cadre de résultats.'); return; }
+      cvAsk({ title: 'Marquer le PTBA comme envoyé au bailleur', ok: 'Marquer envoyé', required: false, placeholder: 'Mode d’envoi, référence du courrier…' }, function (com) {
+        pt.st = 'Envoyé au bailleur'; pt.hist.unshift({ t: 'PTBA envoyé au bailleur' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA marqué comme envoyé au bailleur.'); });
+    }
+    function ret() {
+      cvAsk({ title: 'Notifier le retour du bailleur', ok: 'Enregistrer le retour', required: function (v) { return v !== 'Approuvé'; }, optLabel: 'Décision du bailleur *', options: ['Approuvé', 'Correction demandée'], placeholder: 'Avis du bailleur (obligatoire si correction demandée)' }, function (com, dec) {
+        if (dec === 'Approuvé') { pt.st = 'Retour notifié : approuvé'; pt.hist.unshift({ t: 'Retour du bailleur : approuvé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'Retour du bailleur enregistré : PTBA approuvé. Il peut être clôturé.'); }
+        else { pt.st = 'Correction demandée par le bailleur'; pt.hist.unshift({ t: 'Retour du bailleur : correction demandée — ' + com, by: ME, on: nowStr() }); bvAfter(r, 'Retour du bailleur enregistré : correction demandée. Corrigez puis renvoyez le PTBA.'); } });
+    }
+    function close() {
+      cvAsk({ title: 'Clôturer le PTBA', ok: 'Clôturer', required: false, placeholder: 'Commentaire de clôture' }, function (com) {
+        pt.st = 'Clôturé'; pt.hist.unshift({ t: 'PTBA clôturé' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); bvAfter(r, 'PTBA clôturé : il est verrouillé.'); });
+    }
+    var items = [];
+    if (directMode()) {
+      var dsel = bvSel ? dirFind(bvSel.c) : null;
+      items.push({ h: 'Lignes du plan' }, { l: 'Importer depuis Excel (CSV)', on: !locked, fn: function () { dirImport(r); } }, { l: dsel ? 'Modifier la ligne ' + dsel.c : 'Modifier la ligne (cliquez d’abord sur une ligne)', on: !!dsel && !locked, fn: function () { dirLineOpen(r, dsel); } }, { l: dsel ? 'Supprimer la ligne ' + dsel.c : 'Supprimer la ligne (cliquez d’abord sur une ligne)', on: !!dsel && !locked, danger: true, fn: function () { dirLineDel(r, dsel); } });
+    }
+    items.push({ h: 'Exporter' }, { l: 'Exporter en Excel', on: true, fn: function () { bvExportXlsx(r); } }, { l: 'Exporter en PDF', on: true, fn: function () { bvExportPdf(r); } });
+    if (!isPta) {
+      items.push({ h: 'Plans et bailleur' }, { l: 'Rattacher aux autres plans' + (bvLinkMissing(r) ? ' (' + bvLinkMissing(r) + ' à faire)' : ''), on: !locked && bvPlans(r).length > 0, fn: function () { bvLinkOpen(r); } },
+        { l: pt.st === 'Correction demandée par le bailleur' ? 'Marquer renvoyé au bailleur' : 'Marquer envoyé au bailleur', on: canSend, fn: send }, { l: 'Notifier le retour du bailleur', on: canRet, fn: ret }, { l: 'Clôturer le PTBA', on: canClose, fn: close });
+    }
+    if (directMode()) { var add = cvEl('button', 'btn primary', '+ Ajouter une ligne'); add.type = 'button'; add.disabled = locked; add.addEventListener('click', function () { dirLineOpen(r, null); }); bar.appendChild(add); }
+    else if (!isPta && canSend) { var sd = cvEl('button', 'btn primary', 'Envoyer au bailleur'); sd.type = 'button'; sd.addEventListener('click', send); bar.appendChild(sd); }
+    bar.appendChild(tbMenu('Actions', items));    root.appendChild(bar);
   }
   function bvRender(root, r) {
     var d = bvData(r), pa = d.pa, axes = pa && pa.axes ? pa.axes : [], labs = pa && VTS[pa.vt] ? VTS[pa.vt] : null;
@@ -12251,7 +12426,7 @@ function fmAxes() {
     var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (m.head.length * 90) + 'px';
     tb.innerHTML = '<thead><tr>' + m.head.map(function (h, i) { return '<th' + (i >= m.numFrom ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr></thead>';
     var tbd = cvEl('tbody');
-    if (!m.rows.length) { var t0 = cvEl('tr'); var c0 = cell(t0, 'Aucune ligne détaillée pour ce budget.'); c0.colSpan = m.head.length; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
+    if (!m.rows.length) { var t0 = cvEl('tr'); var c0 = cell(t0, directMode() ? 'Mode Simple : pas de collecte. Ajoutez directement les lignes du plan avec « + Ajouter une ligne », puis cliquez sur une ligne pour la modifier ou la supprimer.' : 'Aucune ligne détaillée pour ce budget.'); c0.colSpan = m.head.length; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
     m.rows.forEach(function (rw) {
       var tr = cvEl('tr'); if (rw.k) tr.style.fontWeight = '600'; if (rw.k === 'ind') tr.style.background = 'var(--surface-2, #F1F5F9)';
       rw.c.forEach(function (v, i) { cell(tr, typeof v === 'number' ? (v ? fmt(v) : '—') : (v === '' || v == null ? '—' : v), i >= m.numFrom ? 'num' : (i === 1 ? 'name' : '')); });
@@ -12270,7 +12445,10 @@ function fmAxes() {
     ph.forEach(function (h) { var row = cvEl('div', 'list-row'); var l = cvEl('div'); l.appendChild(cvEl('b', null, h.t)); l.appendChild(cvEl('div', 'hby', h.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', h.on)); hs.appendChild(row); });
     if (bvView() !== 'pta') root.appendChild(hs);
   }
-  function renderBv() {
+  function renderBv() { renderBv0(); bvDirect(); }
+  /* Projet : un seul PTBA (ou PTA) par projet, donc le détail s'ouvre directement, sans liste de lots */
+  function bvDirect() { var wrap = document.getElementById('bv-wrap'); if (!wrap || activeCode() !== 'prj' || typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return; exFill('bv-exa'); var rows = bvList(), one = rows.length === 1, lc = wrap.querySelector(':scope > .card'); if (lc) lc.hidden = one; document.getElementById('bv-view-close').hidden = one; if (one) { document.getElementById('bv-h1p').textContent = bvKind === 'pta' ? 'Indicateurs et travaux du projet, par site et par mois.' : 'Le PTBA du projet : une ligne par site, montants par mois, rattachement aux autres plans, envoi au bailleur.'; var pv = document.getElementById('bv-view'); if (pv.hidden || pv.dataset.kind !== bvKind || pv.dataset.lot !== rows[0].id) { pv.hidden = true; bvOpen(rows[0]); pv.dataset.kind = bvKind; pv.dataset.lot = rows[0].id; } var hh = document.querySelector('#v-ptba > .sb-fp-head h1'); if (hh) hh.textContent = document.getElementById('bv-view-title').textContent; } }
+  function renderBv0() {
     var body = document.getElementById('bv-body'), wrap = document.getElementById('bv-wrap'); if (!body) return;
     body.innerHTML = '';
     var h1 = document.getElementById('bv-h1'), h1p = document.getElementById('bv-h1p');
@@ -16487,7 +16665,9 @@ var EXEC_REC = [
     var du = PPM_DUR[mi], ex = a.ex || '2026', st = (a.wk && a.wk.d1) || (ex + '-04-01'), d3 = ppmAddDays(st, -7), d2 = ppmAddDays(d3, -du[1]), d1 = ppmAddDays(d2, -du[0]);
     if (d1 < ex + '-01-05') { d1 = ex + '-01-05'; d2 = ppmAddDays(d1, du[0]); d3 = ppmAddDays(d2, du[1]); } return [d1, d2, d3];
   }
-  function ppmRender() {
+  function ppmRender() { ppmRender0(); ppmDirect(); }
+  function ppmDirect() { exFill('ppm-exa'); var rows = bvList(), one = rows.length === 1, body = document.getElementById('ppm-lots'), lc = body && body.closest('.card'); if (lc) lc.hidden = one; if (one && (document.getElementById('ppm-det').hidden || PPMG.lot !== rows[0])) { document.getElementById('ppm-det').hidden = true; PPMG.lot = rows[0]; PPMG.g = null; PPMG.msg = null; ppmPaint(); document.getElementById('ppm-det').hidden = false; } }
+  function ppmRender0() {
     var body = document.getElementById('ppm-lots'); body.innerHTML = ''; var rows = bvList();
     if (!rows.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucun lot de collecte validé pour le moment.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); return; }
     rows.forEach(function (r) {
@@ -16598,7 +16778,9 @@ var EXEC_REC = [
     return { pay: pay, rec: rec };
   }
   /* Un plan de décaissement par exercice : même entrée que le PTBA, le détail s'ouvre sur le lot choisi */
-  function pdcRender() {
+  function pdcRender() { pdcRender0(); pdcDirect(); }
+  function pdcDirect() { exFill('pdc-exa'); var rows = bvList(), one = rows.length === 1, body = document.getElementById('pdc-lots'), lc = body && body.closest('.card'); if (lc) lc.hidden = one; if (one && (document.getElementById('pdc-det').hidden || PDCT.r !== rows[0])) { document.getElementById('pdc-det').hidden = true; pdcOpen(rows[0]); } }
+  function pdcRender0() {
     var body = document.getElementById('pdc-lots'); body.innerHTML = ''; var rows = bvList();
     if (!rows.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucun lot de collecte validé pour le moment.'); c0.colSpan = 7; c0.style.textAlign = 'left'; body.appendChild(t0); return; }
     rows.forEach(function (r) {
@@ -18472,12 +18654,12 @@ var EXEC_REC = [
   function guColor(u) { var x = 0; String(u.login).split('').forEach(function (c) { x += c.charCodeAt(0); }); return GU_COLORS[x % GU_COLORS.length]; }
   function guAvatar(u, sz) { var a = cvEl('span', 'gu-av', guInit2(u)); a.style.cssText = 'width:' + sz + 'px;height:' + sz + 'px;font-size:' + Math.round(sz * .38) + 'px;background:' + guColor(u); return a; }
   function guToast(t) { var e = document.getElementById('gu-toast'); if (!e) { e = cvEl('div'); e.id = 'gu-toast'; e.className = 'gu-toast'; document.body.appendChild(e); } e.textContent = t; e.style.display = 'block'; clearTimeout(guToast._t); guToast._t = setTimeout(function () { e.style.display = 'none'; }, 3600); }
-  function guModal(title, bodyNode, w) {
-    guModalClose(); var bd = cvEl('div', 'gu-modal'); bd.id = 'gu-modal'; var box = cvEl('div', 'gu-modal-box'); box.style.width = (w || 560) + 'px';
+  function guModal(title, bodyNode, w, keep) {
+    var cur0 = document.getElementById('gu-modal'); if (keep && cur0) { cur0.style.display = 'none'; cur0.id = 'gu-modal-parent'; } else guModalClose(); var bd = cvEl('div', 'gu-modal'); bd.id = 'gu-modal'; var box = cvEl('div', 'gu-modal-box'); box.style.width = (w || 560) + 'px';
     var hd = cvEl('div', 'gu-modal-h'); hd.appendChild(cvEl('h3', null, title)); var x = cvEl('button', 'gu-x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Fermer'); x.addEventListener('click', guModalClose); hd.appendChild(x); box.appendChild(hd); box.appendChild(bodyNode); bd.appendChild(box);
     bd.addEventListener('click', function (e) { if (e.target === bd) guModalClose(); }); document.body.appendChild(bd);
   }
-  function guModalClose() { var m = document.getElementById('gu-modal'); if (m) m.remove(); }
+  function guModalClose() { var m = document.getElementById('gu-modal'); if (m) m.remove(); var p = document.getElementById('gu-modal-parent'); if (p) { p.id = 'gu-modal'; p.style.display = ''; } }
   function guRender() {
     guInit(); var b = document.getElementById('gu-body'); b.innerHTML = '';
     var titles = { users: ['Gestion des utilisateurs', 'Administration — SoftBudget Projet'], perm: ['Permissions', 'Définir les droits (voir, créer, modifier, supprimer, valider) pour chaque groupe et chaque menu.'], priv: ['Privilèges', 'Activer, pour chaque utilisateur individuellement, les droits et privilèges dont il dispose dans SoftBudget.'] }[GU.tab];
@@ -18814,8 +18996,8 @@ var EXEC_REC = [
   function campSitesOf(c) { var a = c && c.sites && c.sites.length ? c.sites : sitesList().filter(function (s) { return s.on; }).map(function (s) { return s.code; }); return a; }
   function sitesSummary(m) { var k = Object.keys(m || {}).filter(function (c) { return m[c]; }); return k.length ? k.map(function (c) { return c + ' ' + String(m[c]).replace('.', ',') + ' %'; }).join(' · ') : 'À répartir'; }
   function sitesAsk(codes, cur, title, cb) {
-    var f = cvEl('div'), g = cvEl('div', 'fgrid'), ins = {}; cur = cur || {};
-    codes.forEach(function (c) { var d = cvEl('div'), i = cvEl('input', 'field'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = cur[c] != null ? String(cur[c]).replace('.', ',') : ''; i.placeholder = '0'; ins[c] = i; d.appendChild(cvEl('label', null, siteLbl(c) + ' (part en %)')); d.appendChild(i); g.appendChild(d); }); f.appendChild(g);
+    var f = cvEl('div'), g = cvEl('div', 'pm-rows'), ins = {}; cur = cur || {};
+    codes.forEach(function (c) { var d = cvEl('div', 'pm-row'), i = cvEl('input', 'field pm-in'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = cur[c] != null ? String(cur[c]).replace('.', ',') : ''; i.placeholder = '0'; ins[c] = i; d.appendChild(cvEl('span', 'pm-lab', siteLbl(c))); var w = cvEl('div', 'pm-w'); w.appendChild(i); w.appendChild(cvEl('span', 'pm-u', '%')); d.appendChild(w); g.appendChild(d); }); f.appendChild(g);
     var sum = cvEl('div'); sum.style.margin = '10px 0'; f.appendChild(sum);
     function tot() { var t = 0; codes.forEach(function (c) { t += parseFloat(String(ins[c].value).replace(',', '.')) || 0; }); return Math.round(t * 10) / 10; }
     function upd() { var t = tot(); sum.innerHTML = ''; sum.appendChild(badge('Total : ' + String(t).replace('.', ',') + ' %', Math.abs(t - 100) < 0.05 ? 'b-ok' : 'b-ko')); } codes.forEach(function (c) { ins[c].addEventListener('input', upd); }); upd();
@@ -18824,7 +19006,7 @@ var EXEC_REC = [
     be.addEventListener('click', function () { var n = codes.length, base = Math.floor(1000 / n) / 10, rest = Math.round((100 - base * n) * 10) / 10; codes.forEach(function (c, i) { ins[c].value = String(i === 0 ? Math.round((base + rest) * 10) / 10 : base).replace('.', ','); }); upd(); });
     bc.addEventListener('click', guModalClose);
     bo.addEventListener('click', function () { if (Math.abs(tot() - 100) > 0.05) { err.textContent = 'Le total doit être égal à 100 % (actuellement ' + String(tot()).replace('.', ',') + ' %).'; return; } var m = {}; codes.forEach(function (c) { var v = Math.round((parseFloat(String(ins[c].value).replace(',', '.')) || 0) * 10) / 10; if (v) m[c] = v; }); guModalClose(); cb(m); });
-    guModal(title, f, 520);
+    guModal(title, f, 520, true);
   }
   window.sbSitesAsk = sitesAsk; window.sbSitesSummary = sitesSummary; window.sbModal = guModal; window.sbModalClose = guModalClose;
 
@@ -20988,6 +21170,7 @@ var EXEC_REC = [
     if (eb && eb.textContent.trim()) h.querySelector('.eyebrow').textContent = eb.textContent; else h.querySelector('.eyebrow').remove();
     var sub = sm ? sm.textContent.replace(/^[\s·]+/, '').trim() : ''; if (sub) h.querySelector('.sb-fp-sub').textContent = sub; else h.querySelector('.sb-fp-sub').remove();
     h.querySelector('.sb-fp-back').addEventListener('click', function () { fpBack(el); });
+    if ((el.id === 'bv-view' || el.id === 'ppm-det' || el.id === 'pdc-det') && typeof window.sbExSel === 'function' && document.querySelector('.pcard[data-profile="prj"] input:checked')) { var ac0 = h.querySelector('.actions'), bk0 = h.querySelector('.sb-fp-back'); ac0.insertBefore(window.sbExSel(), bk0); if (window.sbOneLot()) bk0.remove(); }
     view.insertBefore(h, top); rec.head = h;
     if (h2 && !h2.querySelector('button')) { h2.classList.add('sb-fp-noh2'); rec.noh2 = h2; }
     fpOpenEls.push(el); modalStack.push(el);
@@ -23537,7 +23720,7 @@ function sbLogout(){
 // ======================= Portail de collecte (5e espace) =======================
 var PC = {
   user:{ nom:'RAKOTO Hanta', prenom:'Hanta', init:'RH' },
-  camp:{ lib:'PTBA 2027 — Santé Communautaire', cloture:'30/11/2026', min:120000000, max:450000000, pj:'Obligatoire', sites:['COO','TOL','FIA'], niveau:'Activité (niveau 3 du plan analytique)', instr:'Chaque composante détaille les travaux à réaliser en 2027 pour atteindre l’objectif fixé, avec le budget correspondant. Choisissez l’activité dans le plan analytique, indiquez la quantité et le montant unitaire (les virgules sont acceptées), répartissez le montant dans l’année et joignez les pièces justificatives.' },
+  camp:{ lib:'PTBA 2027 — Santé Communautaire', cloture:'30/11/2026', min:120000000, max:450000000, pj:'Obligatoire', sites:['COO','TOL','FIA'], niveau:'Activité (niveau 3 du plan analytique)', instr:'Chaque composante détaille les travaux à réaliser en 2027 pour atteindre l’objectif fixé, avec le budget correspondant.' },
   plan:{
     p1:[ { c:'A1.1.1', lib:'Formation des agents communautaires', unite:'personne', cat:'Formations' }, { c:'A1.1.2', lib:'Kits nutritionnels pour enfants de 6 à 23 mois', unite:'kit', cat:'Biens' }, { c:'A1.1.3', lib:'Supervision trimestrielle des CSB', unite:'mission', cat:'Services' } ],
     p2:[ { c:'A2.1.1', lib:'Équipement de salles d’accouchement', unite:'lot', cat:'Biens' }, { c:'A2.1.2', lib:'Transport des référencements d’urgence', unite:'trajet', cat:'Services' }, { c:'A2.2.1', lib:'Distribution de kits maternels', unite:'kit', cat:'Biens' } ],
@@ -23546,15 +23729,8 @@ var PC = {
   cats:['Biens','Travaux','Services','Formations','Fonctionnement'],
   reps:['Équitable par trimestre','Début d’année','Fin d’année','Personnalisée'],
   perims:[
-    { id:'p1', nom:'Composante 1 — Nutrition communautaire', obj:'Réduire la malnutrition des enfants de moins de 2 ans dans les 6 communes d’intervention.', inds:[ { lib:'Enfants de 6 à 23 mois recevant un kit', unite:'enfants', cible:3000 }, { lib:'Agents communautaires formés', unite:'personnes', cible:240 } ], st:'Brouillon', retourne:false, pj:1, saved:'', lignes:[
-      { lib:'Kits nutritionnels pour enfants de 6 à 23 mois', cat:'Biens', unite:'kit', qte:3000, pu:45000, rep:'Équitable par trimestre', just:'Cible 2027 identique à 2026' },
-      { lib:'Formation des agents communautaires', cat:'Formations', unite:'personne', qte:240, pu:350000, rep:'Début d’année', just:'' },
-      { lib:'Supervision trimestrielle des CSB', cat:'Services', unite:'mission', qte:16, pu:2800000, rep:'Équitable par trimestre', just:'' } ] },
-    { id:'p2', nom:'Composante 2 — Santé maternelle et infantile', obj:'Améliorer la prise en charge des accouchements et des urgences.', inds:[ { lib:'Salles d’accouchement équipées', unite:'salles', cible:10 }, { lib:'Référencements d’urgence assurés', unite:'transports', cible:900 } ], st:'Brouillon', retourne:true, pj:0, saved:'',
-      retour:{ par:'Voahangy RASOARIMALALA, responsable de collecte', le:'10/11/2026', txt:'L’enveloppe maximale du périmètre est dépassée : réduisez d’au moins 6,5 M MGA et précisez l’unité de la ligne « Transport des référencements ».' },
-      lignes:[
-      { lib:'Équipement de salles d’accouchement', cat:'Biens', unite:'lot', qte:10, pu:38000000, rep:'Début d’année', just:'10 CSB prioritaires' },
-      { lib:'Transport des référencements d’urgence', cat:'Services', unite:'', qte:900, pu:85000, rep:'Équitable par trimestre', just:'' } ] },
+    { id:'p1', nom:'Composante 1 — Nutrition communautaire', obj:'Réduire la malnutrition des enfants de moins de 2 ans dans les 6 communes d’intervention.', inds:[ { lib:'Enfants de 6 à 23 mois recevant un kit', unite:'enfants', cible:3000 }, { lib:'Agents communautaires formés', unite:'personnes', cible:240 } ], st:'Brouillon', retourne:false, pj:0, saved:'', lignes:[] },
+    { id:'p2', nom:'Composante 2 — Santé maternelle et infantile', obj:'Améliorer la prise en charge des accouchements et des urgences.', inds:[ { lib:'Salles d’accouchement équipées', unite:'salles', cible:10 }, { lib:'Référencements d’urgence assurés', unite:'transports', cible:900 } ], st:'Brouillon', retourne:false, pj:0, saved:'', lignes:[] },
     { id:'p3', nom:'Composante 3 — Eau, hygiène et assainissement', obj:'Garantir l’accès à l’eau potable et à l’assainissement.', inds:[ { lib:'Points d’eau réhabilités', unite:'points d’eau', cible:12 }, { lib:'Ménages équipés en kits de chloration', unite:'ménages', cible:520 } ], st:'Clôturé', retourne:false, pj:2, saved:'', lignes:[
       { lib:'Réhabilitation de points d’eau', cat:'Travaux', unite:'point d’eau', qte:12, pu:11500000, rep:'Fin d’année', just:'' },
       { lib:'Kits de chloration communautaires', cat:'Biens', unite:'kit', qte:520, pu:100000, rep:'Équitable par trimestre', just:'' } ] }
@@ -23583,7 +23759,7 @@ function pcStChip(p){
   if(p.st==='Soumis pour validation') return '<span class="pc-chip info">Soumis pour validation</span>';
   return '<span class="pc-chip warn">Brouillon</span>'+(p.retourne?' <span class="pc-chip ko">Retourné</span>':'');
 }
-function pcEditable(p){ return p.st==='Brouillon'; }
+function pcEditable(p){ if(p.st!=='Brouillon') return false; var v=p.inv; if(PC.actor==='guest') return !!v&&(v.st==='saisie'||v.st==='retourne'); return !v||v.st==='validee'; }
 function pcNow(){ var d=new Date(); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
 function pcToday(){ return '12/11/2026'; }
 
@@ -23591,11 +23767,11 @@ function ouvrirPortailCollecte(){
   document.getElementById('pc-av').textContent=PC.user.init;
   document.getElementById('pc-nom').textContent=PC.user.nom;
   document.getElementById('pc-prenom').textContent=PC.user.prenom;
-  PC.cur=null;
+  PC.cur=null; PC.actor='owner'; document.getElementById('screen-portail-collecte').classList.remove('pc-guest');
   pcRenderAll(); pcTab('home');
   switchScreen('screen-espace-detail','screen-portail-collecte');
 }
-function pcLogout(){ switchScreen('screen-portail-collecte','screen-portail-services'); }
+function pcLogout(){ PC.actor='owner'; document.getElementById('screen-portail-collecte').classList.remove('pc-guest'); switchScreen('screen-portail-collecte','screen-portail-services'); }
 function pcTab(t){
   PC.tab=t;
   document.querySelectorAll('#pc-tabs .pc-tab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-pc')===t); });
@@ -23616,6 +23792,7 @@ function pcTasks(){
     if(p.st!=='Brouillon') return;
     t.push({ ic:'bud', titre:(p.retourne?'Corriger la contribution — ':'Compléter et soumettre — ')+p.nom, sub:PC.camp.lib+' · à soumettre avant le '+PC.camp.cloture, chip:p.retourne?'<span class="pc-chip ko">Retourné</span>':'<span class="pc-chip warn">Brouillon</span>', act:'pcOpenPerim(\''+p.id+'\')', lbl:p.retourne?'Corriger':'Ouvrir', ord:p.retourne?0:2 });
   });
+  PC.perims.forEach(function(p){ if(p.inv && p.inv.st==='termine' && p.st==='Brouillon') t.push({ ic:'bud', titre:'Valider la saisie de '+p.inv.nom+' — '+p.nom, sub:'Saisie terminée : relisez puis validez ou retournez avant de soumettre', chip:'<span class="pc-chip ko">À valider</span>', act:'pcOpenPerim(\''+p.id+'\')', lbl:'Relire', ord:0 }); });
   if(PC.avt.st==='Brouillon'){
     var n=PC.avt.acts.filter(function(a){ return a.reel!==''; }).length;
     t.push({ ic:'avt', titre:'Saisir l’avancement physique — '+PC.avt.periode, sub:PC.avt.acts.length+' activités affectées · '+n+' renseignée'+(n>1?'s':'')+' · à envoyer avant le '+PC.avt.echeance, chip:'<span class="pc-chip warn">Dans 3 jours</span>', act:'pcTab(\'avt\')', lbl:'Saisir', ord:1 });
@@ -23640,7 +23817,7 @@ function pcRenderPerims(){
   document.getElementById('pc-camp-sub').innerHTML='Campagne <strong>'+pcEsc(PC.camp.lib)+'</strong> · ouverte jusqu’au '+PC.camp.cloture+'. Pièce justificative : '+pcEsc(PC.camp.pj.toLowerCase())+'. Vous ne voyez que les périmètres qui vous sont affectés.';
   document.getElementById('pc-perims').innerHTML=PC.perims.map(function(p){
     var tot=pcTot(p);
-    return '<div class="pc-per"><div class="pc-per-h"><strong>'+pcEsc(p.nom)+'</strong><span>'+pcStChip(p)+'</span></div>'+
+    return '<div class="pc-per"><div class="pc-per-h"><strong>'+pcEsc(p.nom)+'</strong><span>'+pcStChip(p)+pcInvChip(p)+'</span></div>'+
       '<dl><dt>Montant saisi</dt><dd>'+pcFmt(tot)+' MGA</dd><dt>Enveloppe attendue</dt><dd>'+pcFmt(PC.camp.min)+' – '+pcFmt(PC.camp.max)+' MGA</dd><dt>Lignes</dt><dd>'+p.lignes.length+'</dd></dl>'+
       '<div><button type="button" class="pc-btn sm '+(pcEditable(p)?'primary':'')+'" onclick="pcOpenPerim(\''+p.id+'\')">'+(pcEditable(p)?(p.retourne?'Corriger':'Saisir'):'Consulter')+'</button></div></div>';
   }).join('');
@@ -23656,20 +23833,24 @@ function pcRenderSaisie(){
   var p=pcCur(); if(!p) return; var ed=pcEditable(p);
   document.getElementById('pc-s-nom').textContent=p.nom;
   document.getElementById('pc-s-sub').textContent=PC.camp.lib+' · exercice 2027';
-  document.getElementById('pc-s-chip').innerHTML=pcStChip(p);
-  var inst=document.getElementById('pc-s-instr');
-  inst.innerHTML='<div class="pc-env-top"><strong>Consignes de la campagne</strong><span class="pc-chip info">Niveau de collecte : '+pcEsc(PC.camp.niveau)+'</span></div>'+
-    '<p style="margin:0 0 10px;font-size:14px">'+pcEsc(PC.camp.instr)+'</p>'+
-    '<p style="margin:0 0 10px;font-size:13px;color:var(--n-600)">Pièce justificative : <strong>'+pcEsc(PC.camp.pj.toLowerCase())+'</strong> · Sites concernés : '+PC.camp.sites.map(function(c){ return pcEsc(c); }).join(', ')+'</p>'+
-    (p.obj?'<div style="font-size:14px;margin-bottom:8px"><strong>Objectif du périmètre :</strong> '+pcEsc(p.obj)+'</div>':'')+
-    ((p.inds&&p.inds.length)?'<div style="font-size:13px"><strong>Indicateurs à atteindre :</strong><ul style="margin:6px 0 0 18px;padding:0">'+p.inds.map(function(x){ return '<li>'+pcEsc(x.lib)+' — cible '+pcFmt(x.cible)+' '+pcEsc(x.unite)+'</li>'; }).join('')+'</ul></div>':'');
+  document.getElementById('pc-s-chip').innerHTML=pcStChip(p)+pcInvChip(p); pcInvRender(p); pcActorSync(); document.getElementById('pc-s-submit').textContent=PC.actor==='guest'?'Terminer et envoyer pour validation':'Soumettre ma contribution';
+  var inst=document.getElementById('pc-s-instr'), open=PC.insOpen!==false;
+  var steps=[['1','Choisissez','l’activité dans le plan analytique'],['2','Chiffrez','quantité × montant unitaire, virgules acceptées'],['3','Répartissez','par période de l’année et par site'],['4','Joignez','vos pièces justificatives']];
+  inst.className='pc-card pc-ins';
+  inst.innerHTML='<div class="pc-ins-h"><span class="pc-ins-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span><div><strong>Avant de saisir : les consignes</strong><small>'+pcEsc(PC.camp.instr)+'</small></div><button type="button" class="pc-ins-tg" onclick="PC.insOpen=!(PC.insOpen!==false);pcRenderSaisie()" aria-expanded="'+open+'">'+(open?'Masquer':'Afficher')+'</button></div>'+
+  (open?
+   '<div class="pc-ins-steps">'+steps.map(function(x){ return '<div class="pc-ins-step"><i>'+x[0]+'</i><div><b>'+x[1]+'</b><span>'+x[2]+'</span></div></div>'; }).join('')+'</div>'+
+   (p.obj?'<div class="pc-ins-obj"><span class="pc-ins-ic t" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></span><div><small>Objectif du périmètre</small><b>'+pcEsc(p.obj)+'</b></div></div>':'')+
+   ((p.inds&&p.inds.length)?'<div class="pc-ins-k">'+p.inds.map(function(x){ return '<div class="pc-ins-kpi"><em>'+pcFmt(x.cible)+'</em><span>'+pcEsc(x.unite)+'</span><b>'+pcEsc(x.lib)+'</b></div>'; }).join('')+'</div>':'')+
+   '<div class="pc-ins-f"><span class="pc-chip info">Niveau de collecte : '+pcEsc(PC.camp.niveau)+'</span><span class="pc-chip warn">Pièce justificative : '+pcEsc(PC.camp.pj.toLowerCase())+'</span><span class="pc-chip">Sites : '+PC.camp.sites.map(function(c){ return pcEsc(c); }).join(', ')+'</span><span class="pc-chip">Clôture le '+pcEsc(PC.camp.cloture)+'</span></div>'
+  :'');
   var r=document.getElementById('pc-s-ret');
   if(p.retourne && p.retour){ r.hidden=false; r.innerHTML='<strong>Retourné par '+pcEsc(p.retour.par)+' le '+p.retour.le+'</strong><br>'+pcEsc(p.retour.txt); } else { r.hidden=true; }
   document.getElementById('pc-s-body').innerHTML=p.lignes.map(function(l,i){ return pcLigneRow(l,i,ed); }).join('')||'<tr><td colspan="12" class="pc-empty">Aucune ligne — ajoutez votre première ligne budgétaire.</td></tr>';
   ['pc-s-add','pc-s-imp','pc-s-save','pc-s-submit'].forEach(function(b){ document.getElementById(b).disabled=!ed; });
   document.getElementById('pc-s-pjn').textContent=p.pj;
   document.getElementById('pc-s-pj').disabled=!ed;
-  document.getElementById('pc-s-saved').textContent = ed ? (p.saved?('Brouillon enregistré à '+p.saved):'') : (p.st==='Clôturé'?'Contribution clôturée — lecture seule':'Contribution soumise — en attente de validation');
+  document.getElementById('pc-s-saved').textContent = ed ? (p.saved?('Brouillon enregistré à '+p.saved):'') : (p.st==='Clôturé'?'Contribution clôturée — lecture seule':(p.st==='Brouillon'&&p.inv?(PC.actor==='guest'?'Saisie envoyée pour validation — lecture seule':'Périmètre verrouillé : en cours de saisie ou de validation par '+p.inv.nom):'Contribution soumise — en attente de validation'));
   pcRecalcBud();
 }
 function pcNum(s){ var t=String(s==null?'':s).replace(/[\s ]/g,'').replace(',','.'); if(t==='') return ''; var n=parseFloat(t); return isNaN(n)?null:n; }
@@ -23684,28 +23865,34 @@ function pcRepArr(l){
 }
 function pcRepOk(l){ if(!Array.isArray(l.repm)) return true; return Math.abs(l.repm.reduce(function(s,v){ return s+(Number(v)||0); },0)-pcLTot(l))<0.5; }
 function pcRepTxt(l){
-  var a=pcRepArr(l), k=[]; a.forEach(function(v,i){ if(Number(v)) k.push(PCM[i]+' '+pcFmt(v)); });
-  if(!k.length) return 'Répartir'; return k.slice(0,2).join(' · ')+(k.length>2?' · +'+(k.length-2):'');
+  var a=pcRepArr(l), n=a.filter(function(v){ return Number(v); }).length;
+  if(!n) return 'Répartir'; return n===1 ? PCM[a.findIndex(function(v){ return Number(v); })] : n+' périodes';
 }
+function pcSitesTxt(m){ var k=Object.keys(m||{}).filter(function(c){ return m[c]; }); return k.length===1 ? k[0]+' 100 %' : k.length+' sites'; }
 function pcRepAsk(i){
-  var p=pcCur(); if(!p||!pcEditable(p)||!window.sbModal) return; var l=p.lignes[i], t=pcLTot(l), a=pcRepArr(l), ins=[];
-  var f=document.createElement('div'), info=document.createElement('div'); info.className='hint'; info.style.marginBottom='10px'; info.textContent='Indiquez quel montant tombe sur quelle période. Le total doit être égal au montant de la ligne : '+pcFmt(t)+' MGA.'; f.appendChild(info);
-  var g=document.createElement('div'); g.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:10px';
-  PCM.forEach(function(m,k){ var d=document.createElement('div'), lb=document.createElement('label'), inp=document.createElement('input'); lb.textContent=m; inp.type='text'; inp.className='field'; inp.setAttribute('inputmode','decimal'); inp.value=a[k]?pcDec(a[k]):''; inp.placeholder='0'; inp.addEventListener('input',upd); ins.push(inp); d.appendChild(lb); d.appendChild(inp); g.appendChild(d); }); f.appendChild(g);
-  var sum=document.createElement('div'); sum.style.cssText='margin:12px 0;font-weight:600'; f.appendChild(sum);
-  function vals(){ return ins.map(function(x){ var n=pcNum(x.value); return n===''||n===null?0:n; }); }
-  function upd(){ var s=vals().reduce(function(x,y){ return x+y; },0), ok=Math.abs(s-t)<0.5; sum.style.color=ok?'#047857':'#BE123C'; sum.textContent='Réparti : '+pcFmt(s)+' MGA sur '+pcFmt(t)+' MGA'+(ok?' — total atteint':' — reste '+pcFmt(t-s)+' MGA'); } upd();
-  function setAll(arr){ arr.forEach(function(v,k){ ins[k].value=v?pcDec(v):''; }); upd(); }
-  var qs=document.createElement('div'); qs.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px';
+  var p=pcCur(); if(!p||!pcEditable(p)||!window.sbModal) return; var l=p.lignes[i], t=pcLTot(l), a=pcRepArr(l), ins=[], subs=[];
+  var f=document.createElement('div');
+  var info=document.createElement('div'); info.className='pm-info'; info.innerHTML='Montant de la ligne : <strong>'+pcFmt(t)+' MGA</strong>. Indiquez quel montant tombe sur quelle période ; le total doit être égal à ce montant.'; f.appendChild(info);
+  var qs=document.createElement('div'); qs.className='pm-quick';
   [['Équitable sur 12 mois',function(){ var q=Math.round(t/12*100)/100, r=[]; for(var k=0;k<12;k++) r.push(q); r[11]=Math.round((t-q*11)*100)/100; return r; }],['Par trimestre',function(){ return pcRepArr({qte:l.qte,pu:l.pu,rep:'Équitable par trimestre'}); }],['Début d’année',function(){ var r=new Array(12).fill(0); r[0]=t; return r; }],['Fin d’année',function(){ var r=new Array(12).fill(0); r[11]=t; return r; }]].forEach(function(q){ var b=document.createElement('button'); b.type='button'; b.className='btn small'; b.textContent=q[0]; b.addEventListener('click',function(){ setAll(q[1]()); }); qs.appendChild(b); });
-  f.insertBefore(qs,g);
+  f.appendChild(qs);
+  var g=document.createElement('div'); g.className='pm-quarters';
+  for(var q=0;q<4;q++){ (function(q){
+    var c=document.createElement('div'), h=document.createElement('div'); c.className='pm-q'; h.className='pm-qh'; var tt=document.createElement('b'); tt.textContent='Trimestre '+(q+1); var sb=document.createElement('span'); subs.push(sb); h.appendChild(tt); h.appendChild(sb); c.appendChild(h);
+    for(var k=q*3;k<q*3+3;k++){ (function(k){ var r=document.createElement('div'); r.className='pm-row'; var lb=document.createElement('span'); lb.className='pm-lab'; lb.textContent=PCM[k]; var w=document.createElement('div'); w.className='pm-w'; var inp=document.createElement('input'); inp.type='text'; inp.className='field pm-in'; inp.setAttribute('inputmode','decimal'); inp.value=a[k]?pcFmt(a[k]):''; inp.placeholder='0'; inp.addEventListener('input',upd); inp.addEventListener('blur',function(){ var n=pcNum(inp.value); if(n!==''&&n!==null) inp.value=n?pcFmt(n):''; upd(); }); ins[k]=inp; w.appendChild(inp); var u=document.createElement('span'); u.className='pm-u'; u.textContent='MGA'; w.appendChild(u); r.appendChild(lb); r.appendChild(w); c.appendChild(r); })(k); }
+    g.appendChild(c); })(q); }
+  f.appendChild(g);
+  var bar=document.createElement('div'); bar.className='pm-bar'; var fill=document.createElement('i'); bar.appendChild(fill); f.appendChild(bar);
+  var sum=document.createElement('div'); sum.className='pm-sum'; f.appendChild(sum);
+  function vals(){ return ins.map(function(x){ var n=pcNum(x.value); return n===''||n===null?0:n; }); }
+  function upd(){ var v=vals(), s=v.reduce(function(x,y){ return x+y; },0), ok=Math.abs(s-t)<0.5; for(var q=0;q<4;q++){ subs[q].textContent=pcFmt(v[q*3]+v[q*3+1]+v[q*3+2])+' MGA'; } fill.style.width=Math.min(100,t?s/t*100:0)+'%'; fill.className=ok?'ok':(s>t?'ko':''); sum.className='pm-sum '+(ok?'ok':'ko'); sum.textContent=ok?'Total atteint : '+pcFmt(s)+' MGA':(s>t?'Dépassement de '+pcFmt(s-t)+' MGA':'Reste à répartir : '+pcFmt(t-s)+' MGA'); }
+  function setAll(arr){ arr.forEach(function(v,k){ ins[k].value=v?pcFmt(v):''; }); upd(); } upd();
   var err=document.createElement('div'); err.className='err'; f.appendChild(err);
   var ft=document.createElement('div'); ft.className='form-foot'; ft.style.cssText='margin-top:10px;padding-top:12px'; var bc=document.createElement('button'), bo=document.createElement('button'); bc.type=bo.type='button'; bc.className='btn'; bo.className='btn primary'; bc.textContent='Annuler'; bo.textContent='Valider la répartition'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
   bc.addEventListener('click',window.sbModalClose);
   bo.addEventListener('click',function(){ var v=vals(), s=v.reduce(function(x,y){ return x+y; },0); if(Math.abs(s-t)>=0.5){ err.textContent='Le total réparti doit être égal au montant de la ligne ('+pcFmt(t)+' MGA).'; return; } l.repm=v; l.rep='Personnalisée'; p.saved=''; window.sbModalClose(); pcRenderSaisie(); });
-  window.sbModal('Répartir la ligne dans l’année',f,620);
-}
-function pcPjAdd(i,inp){ var p=pcCur(); if(!p||!pcEditable(p)||!inp.files||!inp.files[0]) return; var l=p.lignes[i]; (l.pjs=l.pjs||[]).push(inp.files[0].name); p.saved=''; pcRenderSaisie(); }
+  window.sbModal('Répartir la ligne dans l’année',f,680);
+}function pcPjAdd(i,inp){ var p=pcCur(); if(!p||!pcEditable(p)||!inp.files||!inp.files[0]) return; var l=p.lignes[i]; (l.pjs=l.pjs||[]).push(inp.files[0].name); p.saved=''; pcRenderSaisie(); }
 function pcPjDel(i){ var p=pcCur(); if(!p||!pcEditable(p)) return; var l=p.lignes[i]; if(l.pjs&&l.pjs.length){ l.pjs.pop(); p.saved=''; pcRenderSaisie(); } }
 function pcPlanOf(p){ return (PC.plan&&PC.plan[p.id])||[]; }
 function pcActSet(i,code){
@@ -23728,7 +23915,7 @@ function pcLigneRow(l,i,ed){
    '<td class="r"><input type="text" inputmode="decimal" value="'+pcDec(l.pu)+'"'+d+' oninput="pcSetL('+i+',\'pu\',this.value)" style="min-width:130px" aria-label="Montant unitaire (virgule acceptée)"></td>'+
    '<td class="r" id="pc-lt-'+i+'"></td>'+
    '<td><button type="button" class="pc-btn sm"'+d+' onclick="pcRepAsk('+i+')" title="Répartir le montant par période" style="min-width:150px">'+pcEsc(pcRepTxt(l))+'</button></td>'+
-   '<td><button type="button" class="pc-btn sm"'+d+' onclick="pcSites('+i+')" title="Répartir la ligne entre les sites">'+(l.sites?window.sbSitesSummary(l.sites):'Répartir')+'</button></td>'+
+   '<td><button type="button" class="pc-btn sm"'+d+' onclick="pcSites('+i+')" title="Répartir la ligne entre les sites">'+(l.sites?pcSitesTxt(l.sites):'Répartir')+'</button></td>'+
    '<td style="white-space:nowrap">'+pjCell+'</td>'+
    '<td><input type="text" value="'+pcEsc(l.just)+'" placeholder="Facultatif"'+d+' oninput="pcSetL('+i+',\'just\',this.value)" style="min-width:160px" aria-label="Justification"></td>'+
    '<td id="pc-lc-'+i+'"></td>'+
@@ -23758,18 +23945,118 @@ function pcSaveBud(){ var p=pcCur(); p.saved=pcNow(); document.getElementById('p
 function pcPjBud(){ var p=pcCur(); p.pj++; document.getElementById('pc-s-pjn').textContent=p.pj; sbPortalNotice('Pièce jointe ajoutée (simulation).'); }
 function pcSubmitBud(){
   var p=pcCur(); if(!p) return;
-  if(!p.lignes.length){ sbPortalNotice('Ajoutez au moins une ligne avant de soumettre.'); return; }
-  var inc=p.lignes.filter(function(l){ return !pcLigneOk(l); }).length;
-  if(inc){ sbPortalNotice(inc+' ligne'+(inc>1?'s sont incomplètes':' est incomplète')+' : libellé, unité, quantité et montant unitaire sont obligatoires.'); return; }
+  if(PC.actor==='guest'){ pcGuestDone(p); return; }
+  var m=pcCheckBud(p); if(m){ sbPortalNotice(m); return; }
   var tot=pcTot(p);
-  var rv=p.lignes.filter(function(l){ return !pcRepOk(l); }).length; if(rv){ sbPortalNotice(rv+' ligne'+(rv>1?'s ont':' a')+' une répartition dans l’année qui ne correspond plus au montant : ouvrez « Répartition dans l’année » pour la corriger.'); return; }
-  if(PC.camp.pj==='Obligatoire' && !(p.pj||p.lignes.some(function(l){ return l.pjs&&l.pjs.length; }))){ sbPortalNotice('Envoi bloqué : une pièce justificative est obligatoire pour cette campagne. Ajoutez une pièce jointe.'); return; }
-  var nos=p.lignes.filter(function(l){ return PC.camp.sites.length>1 && !l.sites; }).length; if(nos){ sbPortalNotice(nos+' ligne'+(nos>1?'s ne sont pas réparties':' n’est pas répartie')+' entre les sites : indiquez la part de chaque site.'); return; }
-  if(tot>PC.camp.max){ sbPortalNotice('Envoi bloqué : le maximum du périmètre est dépassé de '+pcFmt(tot-PC.camp.max)+' MGA.'); return; }
   p.st='Soumis pour validation'; p.retourne=false;
   PC.envois.unshift({ date:pcToday(), type:'Budget', obj:p.nom, ref:PC.camp.lib, st:'Soumis' });
   pcRenderAll();
   sbPortalNotice(tot<PC.camp.min?'Contribution soumise — sous le minimum, le responsable est alerté.':'Contribution soumise pour validation.');
+}
+// ---------- Invitation d'un collaborateur : saisie par l'invité, validation par l'invitant avant soumission ----------
+PC.actor='owner';
+function pcInvChip(p){
+  var v=p.inv; if(!v) return '';
+  var m={ invite:['info','Invitation envoyée'], saisie:['warn','Saisie par '+v.nom], termine:['ko','À valider'], retourne:['warn','Retourné à '+v.nom], validee:['ok','Saisie validée'] }[v.st]||['info',v.st];
+  return ' <span class="pc-chip '+m[0]+'">'+pcEsc(m[1])+'</span>';
+}
+function pcActorSync(){
+  var g=PC.actor==='guest', p=pcCur(), v=p&&p.inv;
+  var nom=g&&v?v.nom:PC.user.nom, init=nom.split(/[\s@.]+/).filter(Boolean).slice(0,2).map(function(x){ return x[0].toUpperCase(); }).join('');
+  document.getElementById('pc-av').textContent=g?init:PC.user.init;
+  document.getElementById('pc-nom').textContent=nom;
+  document.getElementById('pc-roles').textContent=g?'Invité · contributeur':'Contributeur budgétaire · Agent de terrain';
+  document.getElementById('screen-portail-collecte').classList.toggle('pc-guest',g);
+}
+function pcInvRender(p){
+  var box=document.getElementById('pc-s-inv'), v=p.inv, g=PC.actor==='guest', h='', cls='';
+  var hist=v&&v.hist&&v.hist.length?'<div class="pc-inv-hist">'+v.hist.slice(0,4).map(function(x){ return '<span>'+pcEsc(x)+'</span>'; }).join('')+'</div>':'';
+  if(g&&v){
+    cls=v.st==='termine'?'info':(v.st==='retourne'?'warn':'');
+    h='<div class="pc-inv-t"><strong>Vous renseignez ce périmètre à l’invitation de '+pcEsc(PC.user.nom)+'</strong><span>'+(v.st==='termine'?'Votre saisie a été envoyée pour validation. Vous ne pouvez plus la modifier.':'Complétez les lignes puis cliquez sur « Terminer et envoyer pour validation » : '+pcEsc(PC.user.prenom)+' relira votre saisie avant de la soumettre.')+'</span>'+(v.st==='retourne'&&v.motif?'<span class="pc-inv-mot">Retourné par '+pcEsc(PC.user.prenom)+' : '+pcEsc(v.motif)+'</span>':'')+'</div><div class="pc-inv-a"><button type="button" class="pc-btn sm" onclick="pcInvBack()">Revenir à mon espace (démo)</button></div>'+hist;
+  } else if(!v){
+    h='<div class="pc-inv-t"><strong>Besoin d’aide pour renseigner ce périmètre ?</strong><span>Invitez un collègue par e-mail : il crée son compte, renseigne les lignes, puis vous validez sa saisie avant de soumettre.</span></div><div class="pc-inv-a"><button type="button" class="pc-btn primary sm" onclick="pcInvAsk()">Inviter une personne</button></div>';
+  } else if(v.st==='invite'){
+    cls='info'; h='<div class="pc-inv-t"><strong>Invitation envoyée à '+pcEsc(v.email)+'</strong><span>En attente de la création de son compte. Le périmètre est verrouillé pendant que la personne invitée le renseigne.</span></div><div class="pc-inv-a"><button type="button" class="pc-btn sm" onclick="pcInvResend()">Renvoyer</button><button type="button" class="pc-btn sm" onclick="pcInvCancel()">Annuler l’invitation</button><button type="button" class="pc-btn sm" onclick="pcInvPreview()">Aperçu côté invité (démo)</button></div>'+hist;
+  } else if(v.st==='saisie'||v.st==='retourne'){
+    cls='warn'; h='<div class="pc-inv-t"><strong>'+pcEsc(v.nom)+' renseigne ce périmètre</strong><span>'+(v.st==='retourne'?'Saisie retournée avec le motif : « '+pcEsc(v.motif||'')+' ». En attente de la correction.':'Compte créé. Vous verrez sa saisie ici dès qu’elle sera envoyée pour validation. Le périmètre reste verrouillé.')+'</span></div><div class="pc-inv-a"><button type="button" class="pc-btn sm" onclick="pcInvResend()">Relancer</button><button type="button" class="pc-btn sm" onclick="pcInvCancel()">Annuler l’invitation</button><button type="button" class="pc-btn sm" onclick="pcInvPreview()">Aperçu côté invité (démo)</button></div>'+hist;
+  } else if(v.st==='termine'){
+    cls='ko'; h='<div class="pc-inv-t"><strong>'+pcEsc(v.nom)+' a terminé sa saisie : à vous de la valider</strong><span>Relisez les lignes ci-dessous. Validez pour pouvoir soumettre la contribution, ou retournez-la avec un motif.</span></div><div class="pc-inv-a"><button type="button" class="pc-btn sm" onclick="pcInvReturn()">Retourner avec un motif</button><button type="button" class="pc-btn primary sm" onclick="pcInvValidate()">Valider la saisie</button></div>'+hist;
+  } else if(v.st==='validee'){
+    cls='ok'; h='<div class="pc-inv-t"><strong>Saisie de '+pcEsc(v.nom)+' validée</strong><span>Vous pouvez compléter les lignes puis soumettre la contribution.</span></div>'+hist;
+  }
+  box.className='pc-card pc-inv '+cls; box.innerHTML=h;
+}
+function pcInvLog(p,t){ p.inv.hist=p.inv.hist||[]; p.inv.hist.unshift(pcToday()+' '+pcNow()+' — '+t); }
+function pcInvAsk(){
+  var p=pcCur(); if(!p||!pcEditable(p)||!window.sbModal) return;
+  var f=document.createElement('div');
+  function fld(lab,el){ var d=document.createElement('div'); d.style.marginBottom='12px'; var l=document.createElement('label'); l.textContent=lab; l.style.cssText='display:block;font-size:13px;font-weight:600;margin-bottom:4px'; d.appendChild(l); d.appendChild(el); f.appendChild(d); return el; }
+  var em=document.createElement('input'); em.type='email'; em.className='field'; em.placeholder='prenom.nom@exemple.org'; em.style.width='100%';
+  var nm=document.createElement('input'); nm.type='text'; nm.className='field'; nm.placeholder='Facultatif'; nm.style.width='100%';
+  var ms=document.createElement('textarea'); ms.className='field'; ms.rows=3; ms.style.width='100%'; ms.value='Bonjour, je vous invite à renseigner le périmètre « '+p.nom+' » de la campagne '+PC.camp.lib+'. Vous créez votre compte, vous saisissez les lignes, puis je valide avant la soumission. Clôture de la collecte : '+PC.camp.cloture+'.';
+  var inf=document.createElement('div'); inf.className='pm-info'; inf.textContent='La personne reçoit un e-mail avec un lien pour créer son compte. Elle ne voit que ce périmètre.'; f.appendChild(inf);
+  fld('Adresse e-mail de la personne invitée *',em); fld('Nom (facultatif)',nm); fld('Message',ms);
+  var err=document.createElement('div'); err.className='err'; f.appendChild(err);
+  var ft=document.createElement('div'); ft.className='form-foot'; ft.style.cssText='margin-top:6px;padding-top:12px'; var bc=document.createElement('button'), bo=document.createElement('button'); bc.type=bo.type='button'; bc.className='btn'; bo.className='btn primary'; bc.textContent='Annuler'; bo.textContent='Envoyer l’invitation'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+  bc.addEventListener('click',window.sbModalClose);
+  bo.addEventListener('click',function(){
+    var e=em.value.trim(); if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ err.textContent='Saisissez une adresse e-mail valide.'; return; }
+    var nom=nm.value.trim()||e.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
+    p.inv={ email:e, nom:nom, msg:ms.value, st:'invite', on:pcToday(), hist:[] }; pcInvLog(p,'Invitation envoyée à '+e);
+    PC.envois.unshift({ date:pcToday(), type:'Invitation', obj:p.nom, ref:e, st:'Envoyée' });
+    window.sbModalClose(); pcRenderAll(); sbPortalNotice('Invitation envoyée à '+e+'.');
+  });
+  window.sbModal('Inviter une personne à renseigner ce périmètre',f,560);
+}
+function pcInvResend(){ var p=pcCur(); if(!p||!p.inv) return; pcInvLog(p,p.inv.st==='invite'?'Invitation renvoyée':'Relance envoyée'); pcRenderSaisie(); sbPortalNotice((p.inv.st==='invite'?'Invitation renvoyée à ':'Relance envoyée à ')+p.inv.email+'.'); }
+function pcInvCancel(){ var p=pcCur(); if(!p||!p.inv) return; var e=p.inv.email; p.inv=null; PC.envois.unshift({ date:pcToday(), type:'Invitation', obj:p.nom, ref:e, st:'Annulée' }); pcRenderAll(); sbPortalNotice('Invitation annulée : vous pouvez de nouveau renseigner le périmètre.'); }
+function pcInvPreview(){
+  var p=pcCur(); if(!p||!p.inv||!window.sbModal) return; var v=p.inv;
+  if(v.st!=='invite'){ PC.actor='guest'; pcRenderAll(); pcActorSync(); return; }
+  var f=document.createElement('div'), inf=document.createElement('div'); inf.className='pm-info'; inf.innerHTML='<strong>'+pcEsc(PC.user.nom)+'</strong> vous invite à renseigner le périmètre « '+pcEsc(p.nom)+' » de la campagne '+pcEsc(PC.camp.lib)+'. Créez votre compte pour commencer.'; f.appendChild(inf);
+  function fld(lab,el){ var d=document.createElement('div'); d.style.marginBottom='12px'; var l=document.createElement('label'); l.textContent=lab; l.style.cssText='display:block;font-size:13px;font-weight:600;margin-bottom:4px'; d.appendChild(l); d.appendChild(el); f.appendChild(d); return el; }
+  var nm=document.createElement('input'); nm.type='text'; nm.className='field'; nm.value=v.nom; nm.style.width='100%';
+  var em=document.createElement('input'); em.type='email'; em.className='field'; em.value=v.email; em.readOnly=true; em.style.width='100%';
+  var pw=document.createElement('input'); pw.type='password'; pw.className='field'; pw.autocomplete='new-password'; pw.style.width='100%'; pw.placeholder='8 caractères minimum';
+  var pw2=document.createElement('input'); pw2.type='password'; pw2.className='field'; pw2.autocomplete='new-password'; pw2.style.width='100%';
+  fld('Nom complet',nm); fld('Adresse e-mail (celle de l’invitation)',em); fld('Mot de passe',pw); fld('Confirmer le mot de passe',pw2);
+  var err=document.createElement('div'); err.className='err'; f.appendChild(err);
+  var ft=document.createElement('div'); ft.className='form-foot'; ft.style.cssText='margin-top:6px;padding-top:12px'; var bc=document.createElement('button'), bo=document.createElement('button'); bc.type=bo.type='button'; bc.className='btn'; bo.className='btn primary'; bc.textContent='Fermer'; bo.textContent='Créer mon compte et commencer'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+  bc.addEventListener('click',window.sbModalClose);
+  bo.addEventListener('click',function(){
+    if(!nm.value.trim()){ err.textContent='Indiquez votre nom.'; return; }
+    if(pw.value.length<8){ err.textContent='Le mot de passe doit comporter au moins 8 caractères.'; return; }
+    if(pw.value!==pw2.value){ err.textContent='Les deux mots de passe ne correspondent pas.'; return; }
+    v.nom=nm.value.trim(); v.st='saisie'; pcInvLog(p,'Compte créé par '+v.nom); PC.actor='guest'; window.sbModalClose(); pcRenderAll(); pcActorSync(); sbPortalNotice('Compte créé. Vous pouvez renseigner le périmètre.');
+  });
+  window.sbModal('Invitation — créer mon compte',f,520);
+}
+function pcInvBack(){ PC.actor='owner'; pcRenderAll(); pcActorSync(); }
+function pcInvValidate(){ var p=pcCur(); if(!p||!p.inv) return; p.inv.st='validee'; pcInvLog(p,'Saisie validée par '+PC.user.nom); pcRenderAll(); sbPortalNotice('Saisie validée : vous pouvez maintenant soumettre la contribution.'); }
+function pcInvReturn(){
+  var p=pcCur(); if(!p||!p.inv||!window.sbModal) return;
+  var f=document.createElement('div'), l=document.createElement('label'), ta=document.createElement('textarea'), err=document.createElement('div');
+  l.textContent='Motif du retour *'; l.style.cssText='display:block;font-size:13px;font-weight:600;margin-bottom:4px'; ta.className='field'; ta.rows=4; ta.style.width='100%'; ta.placeholder='Que faut-il corriger ?'; err.className='err'; f.appendChild(l); f.appendChild(ta); f.appendChild(err);
+  var ft=document.createElement('div'); ft.className='form-foot'; ft.style.cssText='margin-top:10px;padding-top:12px'; var bc=document.createElement('button'), bo=document.createElement('button'); bc.type=bo.type='button'; bc.className='btn'; bo.className='btn primary'; bc.textContent='Annuler'; bo.textContent='Retourner à '+p.inv.nom; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+  bc.addEventListener('click',window.sbModalClose);
+  bo.addEventListener('click',function(){ if(!ta.value.trim()){ err.textContent='Le motif est obligatoire.'; return; } p.inv.st='retourne'; p.inv.motif=ta.value.trim(); pcInvLog(p,'Retourné : '+p.inv.motif); window.sbModalClose(); pcRenderAll(); sbPortalNotice('Saisie retournée à '+p.inv.nom+'.'); });
+  window.sbModal('Retourner la saisie',f,520);
+}
+function pcGuestDone(p){
+  var m=pcCheckBud(p); if(m){ sbPortalNotice(m); return; }
+  p.inv.st='termine'; pcInvLog(p,'Saisie terminée par '+p.inv.nom+', envoyée pour validation'); PC.envois.unshift({ date:pcToday(), type:'Budget', obj:p.nom, ref:'Saisie de '+p.inv.nom, st:'À valider' });
+  pcRenderAll(); pcActorSync(); sbPortalNotice('Saisie envoyée à '+PC.user.nom+' pour validation.');
+}
+function pcCheckBud(p){
+  if(!p.lignes.length) return 'Ajoutez au moins une ligne avant de soumettre.';
+  var inc=p.lignes.filter(function(l){ return !pcLigneOk(l); }).length;
+  if(inc) return inc+' ligne'+(inc>1?'s sont incomplètes':' est incomplète')+' : activité, unité, quantité et montant unitaire sont obligatoires.';
+  var rv=p.lignes.filter(function(l){ return !pcRepOk(l); }).length; if(rv) return rv+' ligne'+(rv>1?'s ont':' a')+' une répartition dans l’année qui ne correspond plus au montant : ouvrez « Répartition dans l’année » pour la corriger.';
+  if(PC.camp.pj==='Obligatoire' && !(p.pj||p.lignes.some(function(l){ return l.pjs&&l.pjs.length; }))) return 'Envoi bloqué : une pièce justificative est obligatoire pour cette campagne. Ajoutez une pièce jointe.';
+  var nos=p.lignes.filter(function(l){ return PC.camp.sites.length>1 && !l.sites; }).length; if(nos) return nos+' ligne'+(nos>1?'s ne sont pas réparties':' n’est pas répartie')+' entre les sites : indiquez la part de chaque site.';
+  var tot=pcTot(p); if(tot>PC.camp.max) return 'Envoi bloqué : le maximum du périmètre est dépassé de '+pcFmt(tot-PC.camp.max)+' MGA.';
+  return '';
 }
 
 // ---------- Avancement physique ----------
@@ -23896,6 +24183,37 @@ function pcRenderEnv(){
   .gu-modal-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .gu-modal-h h3 { margin: 0; font-size: 15px; }
   .gu-x { font-size: 22px; line-height: 1; color: var(--muted); background: none; border: 0; cursor: pointer; }
+  /* Fenêtres de répartition (sites, axes, périodes) */
+  .gu-modal-box { overflow-x: hidden; }
+  .gu-modal-box *, .gu-modal-box *::before, .gu-modal-box *::after { box-sizing: border-box; }
+  .pm-info { font-size: 13.5px; color: var(--muted); margin-bottom: 12px; line-height: 1.45; }
+  .pm-info strong { color: var(--text, #1f2430); }
+  .pm-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .pm-quarters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 640px) { .pm-quarters { grid-template-columns: 1fr; } }
+  .pm-q { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface-2, #F8F9FB); }
+  .pm-qh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+  .pm-qh span { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .pm-rows { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; padding: 4px 14px; }
+  .pm-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 150px); align-items: center; gap: 12px; padding: 7px 0; }
+  .pm-rows .pm-row + .pm-row { border-top: 1px solid #E9EBF0; }
+  .pm-q .pm-row { grid-template-columns: 52px minmax(0, 1fr); padding: 4px 0; }
+  .pm-lab { font-size: 13.5px; }
+  .pm-w { position: relative; }
+  .pm-in { width: 100%; text-align: right; padding-right: 46px !important; font-variant-numeric: tabular-nums; }
+  .pm-rows .pm-in { padding-right: 30px !important; }
+  .pm-u { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11.5px; color: var(--muted); pointer-events: none; }
+  .pm-bar { height: 8px; border-radius: 5px; background: #E9EBF0; overflow: hidden; margin: 14px 0 8px; }
+  .pm-bar i { display: block; height: 100%; width: 0; background: var(--brand, #2E427B); border-radius: 5px; transition: width .15s; }
+  .pm-bar i.ok { background: #059669; } .pm-bar i.ko { background: #BE123C; }
+  .pm-sum { font-size: 13.5px; font-weight: 600; margin-bottom: 6px; } .pm-sum.ok { color: #047857; } .pm-sum.ko { color: #BE123C; }
+  .tb-menu { position: fixed; z-index: 10000; background: #fff; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 28px rgba(15, 23, 42, .16); min-width: 270px; padding: 6px; display: flex; flex-direction: column; }
+  .tb-h { padding: 8px 12px 4px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .bv-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tb-menu[hidden] { display: none; }
+  .tb-item { text-align: left; padding: 9px 12px; border: 0; background: none; border-radius: 6px; cursor: pointer; font-size: 13.5px; white-space: nowrap; }
+  .tb-item:hover:not(:disabled) { background: #EAEDF4; } .tb-item:disabled { opacity: .45; cursor: not-allowed; }
+  .ex-sel { display: inline-flex; align-items: center; }
   .gu-toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 10001; background: #0B1332; color: #fff; padding: 11px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); display: none; max-width: 90vw; }
 
   .dp-chart { padding: 4px 0; }  .dp-ck { display: flex; gap: 14px; padding: 14px 16px; border-top: 1px solid var(--border); cursor: pointer; border-left: 4px solid transparent; align-items: flex-start; }
