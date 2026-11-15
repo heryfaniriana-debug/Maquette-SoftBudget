@@ -1994,6 +1994,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="sub">
           <button data-go="bkacc">Comptes bancaires</button>
           <button data-go="bkdec" title="Plan de trésorerie prévisionnel">Plan de trésorerie</button>
+                    <button data-go="rep" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
           <button data-go="pdec" title="Plan de décaissement du projet">Plan de décaissement</button>
           <button data-go="dfon" title="Demandes de fonds DRF et DPD">Demandes de fonds</button>
           <button data-go="bkrel" title="Relevés bancaires">Relevés bancaires</button>
@@ -5397,6 +5398,15 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         </div></div>
       </section>
 
+      <!-- ===== Projet : report et clôture de l'exercice ===== -->
+      <section class="view" id="v-rep">
+        <div class="head"><div><h1>Report et clôture</h1><p></p></div>
+          <div class="actions"><button class="btn primary" id="rep-close">Clôturer l’exercice</button></div></div>
+        <div class="callout" id="rep-msg" hidden style="margin-bottom:12px"></div>
+        <div id="rep-body"></div>
+        <div class="panel" id="rep-prev" hidden><h2><span>Aperçu de la clôture</span></h2><div class="body" id="rep-prev-body"></div></div>
+      </section>
+
       <!-- ===== Projet : suivi de l'exécution (engagements, réalisations, paiements, encaissements) ===== -->
       <section class="view" id="v-sx">
         <div class="head"><div><h1>Engagements</h1><p></p></div>
@@ -6502,7 +6512,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6577,6 +6587,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     anfin: ['Analyses', 'Financement et exécution'], aneng: ['Analyses', 'Engagements et PPM'], anrea: ['Analyses', 'Réalisations et PTBA'], andec: ['Analyses', 'Décaissements et plan de décaissement'], anphy: ['Analyses', 'Avancement physique et PTA'], anfp: ['Analyses', 'Réalisations et avancement physique'], anplu: ['Analyses', 'Suivi pluriannuel'], anale: ['Analyses', 'Alertes'], anver: ['Analyses', 'Versions des plans'],
     avanc: ['Exécution', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
+    rep: ['Plans annuels', 'Report et cl\u00f4ture de l\u2019exercice'],
     pdec: ['Plans annuels', 'Plan de décaissement'],
     dfon: ['Trésorerie', 'Demandes de fonds'],
     pubrect: ['Élaboration', 'Budget rectificatif'],
@@ -6596,7 +6607,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss', 'sxeng', 'sxliq', 'sxpay', 'sxenc', 'sxphy', 'trpos'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
-    'nav-plan': ['ptba', 'pta', 'ppm', 'pdec'],
+    'nav-plan': ['ptba', 'pta', 'ppm', 'pdec', 'rep'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
     'nav-rapports': ['anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
@@ -6642,6 +6653,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'avini' && typeof aviniRender === 'function') aviniRender();
     if (/^sx(eng|liq|pay|enc|phy)$/.test(name) && typeof sxRender === 'function') { SX.kind = name.slice(2); sxRender(); }
     if (/^an(fin|eng|rea|dec|phy|fp|plu|ale|ver)$/.test(name) && typeof anaRender === 'function') { ANA.kind = name.slice(2); anaRender(); }
+    if (name === 'rep' && typeof repRender === 'function') repRender();
     if (name === 'trpos' && typeof trpRender === 'function') trpRender();
     if (name === 'avanc' && typeof avancRender === 'function') avancRender();
     if (name === 'synth' && typeof renderSynth === 'function') renderSynth();
@@ -14504,7 +14516,7 @@ var EXEC_REC = [
     return [
       { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Cadre budgétaire', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
       { g: 'Élaboration', items: [['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
-      { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso]] },
+      { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso], ['Report et clôture', rAlways]] },
       { g: 'Compte administratif', items: ca },
       { g: 'Exécution', items: [[rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Avancement physique', rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
       { g: 'Analyses', items: [['Vue d’ensemble', rAlways], ['Engagements et PPM', rAlways], ['Réalisations et PTBA', rAlways], ['Décaissements et plan', treso], ['Physique et PTA', rAlways], ['Finances et physique', rAlways], ['Pluriannuel', rAlways], ['Alertes', rAlways], ['Versions des plans', rAlways]] },
@@ -14561,6 +14573,7 @@ var EXEC_REC = [
     put('g-budgets', [['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
+    put('g-plan', [['rep', 'Report et cl\u00f4ture', 'Report et cl\u00f4ture de l\u2019exercice']]);
     gT.style.display = 'none';
     put('g-suivi', [['sxeng'], ['sxliq'], ['sxpay'], ['sxenc'], ['sxphy'], ['avanc'], ['trpos'], ['dfon'], ['dprap'], ['bkacc'], ['bkrel'], ['bkrap']]);
     var avb = document.querySelector('.sub button[data-go="avanc"]'); if (avb) avb.style.display = 'none';
@@ -14597,7 +14610,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso);
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
   }
   var CAD_SOON = {
@@ -20145,7 +20158,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20992,7 +21005,7 @@ var EXEC_REC = [
       var ys = String(y), pad = CPAD.comps.reduce(function (a, cp) { return a + (padComp(cp.code)[yi] || 0); }, 0), h = ANA_HIST[ys], ptba = 0, eng = 0, liq = 0, pay = 0, enc = 0, st;
       if (h) { ptba = h.ptba; eng = h.eng; liq = h.liq; pay = h.pay; enc = h.enc; st = ['Clôturé', 'b-neutral']; }
       else if (anaExs().indexOf(ys) >= 0) { ptba = anaLines(ys).reduce(function (a, z) { return a + anaCred(z); }, 0); eng = anaSx('eng', null, ys); liq = anaSx('liq', null, ys); pay = anaSx('pay', null, ys); enc = anaSx('enc', null, ys); st = ['En cours', 'b-ok']; }
-      else st = ['À venir', 'b-info'];
+      else { ptba = RPT.lines.filter(function (x) { return x.to === ys; }).reduce(function (a, x) { return a + x.amt; }, 0); eng = anaSx('eng', null, ys); st = ['À venir', 'b-info']; }
       cumP += pad; cumD += pay; tot += pad; rows.push({ y: ys, pad: pad, ptba: ptba, eng: eng, liq: liq, pay: pay, enc: enc, st: st, cumP: cumP, cumD: cumD });
     });
     var tp = rows.reduce(function (a, x) { return a + x.pay; }, 0), te = rows.reduce(function (a, x) { return a + x.enc; }, 0);
@@ -21407,6 +21420,91 @@ var EXEC_REC = [
     dpTable({ id: 'dpeng', head: ['N°', 'Tiers · objet', 'Ligne du PTBA', 'Acte', 'Montant (MGA)', 'Fin prévue', 'Reste (MGA)', 'Statut'], num: [4, 6], rows: rows, empty: 'Aucun engagement visé.', redraw: dpEngRender,
       cells: function (d) { var x = by[d.id], a = cvEl('div'), st = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); st.appendChild(badge(x.L.lbl, x.L.cls)); if (x.L.why) st.appendChild(cvEl('div', 'hby', x.L.why)); return [d.id, a, dpShort(d), d.acte + ' ' + d.ref, fmt(d.mt), isoToFr(sxDefPer(d).d2), fmt(x.r), st]; } });
   }
+  /* ----- Report et clôture de l'exercice : ce qui n'est pas réalisé est reporté, révisé ou abandonné ----- */
+  var RPT = { dec: {}, closed: {}, lines: [], ppm: [], engs: [] };
+  var REP_OPT = ['Reporter', 'Reporter en partie', 'Abandonner', 'Réviser'];
+  var REP_CLS = { 'Reporter': 'b-ok', 'Reporter en partie': 'b-info', 'Abandonner': 'b-neutral', 'Réviser': 'b-warn' };
+  function repNext(ex) { return String(+ex + 1); }
+  function repShift(d) { return d ? String(+d.slice(0, 4) + 1) + d.slice(4) : d; }
+  function repData(ex) {
+    var today = cadToday(), A = [], B = [], C = [];
+    anaLines(ex).forEach(function (z) {
+      var plan = anaCred(z), real = anaSx('liq', z.key, ex, today), reste = Math.max(0, plan - real), w = z.l.wk, vol = anaVol(z); if (!reste) return;
+      A.push({ id: 'L|' + z.key, key: z.key, z: z, label: z.l.c + ' — ' + (z.l.lib || z.l.l), sub: z.perim, plan: plan, real: real, reste: reste, qty: w && vol ? Math.max(0, vol - (wkReal(z.l) || 0)) : 0, unit: w ? w.unit : '' });
+    });
+    anaLots(ex).forEach(function (r) { ppmLotItems(r).forEach(function (x) { var d = x.d3 || x.d2 || x.d1; if (!d || d.slice(0, 4) !== ex) return; var eg = ppmEngDp(x.ref), reste = Math.max(0, x.est - eg); if (reste) B.push({ id: 'P|' + x.ref, x: x, label: x.ref + ' — ' + x.des, sub: x.cat, plan: x.est, real: eg, reste: reste }); }); });
+    sxEngs().forEach(function (i) {
+      if (i.clot) return; var reste = sxReste(i); if (!reste) return; var part = sxPart(i, ex), rz = sxRealz(i.ref, ex + '-01-01', ex + '-12-31'), ech = sxEch(i);
+      C.push({ i: i, reste: reste, part: part, rz: rz, move: Math.max(0, Math.min(part - rz, reste)), later: Object.keys(ech).filter(function (y) { return y > ex; }).reduce(function (a, y) { return a + ech[y]; }, 0) });
+    });
+    return { A: A, B: B, C: C };
+  }
+  /* Décision déjà prise en cours d'année (glissement) reprise par défaut */
+  function repDecOf(r) {
+    if (RPT.dec[r.id]) return RPT.dec[r.id];
+    var d = ANA.dec.filter(function (q) { return q.key === (r.id.charAt(0) === 'L' ? 'rea|' + r.key : 'eng|' + r.x.ref); })[0]; if (!d) return null;
+    if (d.opt === 'Reporter à l’exercice suivant') return { opt: 'Reporter', amt: r.reste, motif: d.motif, auto: true };
+    if (d.opt === 'Annuler le reliquat') return { opt: 'Abandonner', amt: 0, motif: d.motif, auto: true };
+    return null;
+  }
+  function repDecCell(r) {
+    var d = repDecOf(r), n = cvEl('div'); if (!d) { n.appendChild(badge('À décider', 'b-ko')); return n; }
+    n.appendChild(badge(d.opt, REP_CLS[d.opt])); if (d.auto) n.appendChild(cvEl('div', 'hby', 'Repris du glissement')); else if (d.motif) n.appendChild(cvEl('div', 'hby', d.motif)); return n;
+  }
+  function repAsk(r) {
+    cvAsk({ title: 'Décision — ' + r.label, ok: 'Enregistrer la décision', required: true, cLabel: 'Motif', optLabel: 'Reste de ' + fmt(r.reste) + ' MGA : que décidez-vous ?', options: REP_OPT, num: 'Montant à reporter (MGA) — pour « Reporter en partie » ou « Réviser »', numOpt: true, placeholder: 'Pourquoi cette décision ?' }, function (m, opt, nv) {
+      var n = parseInt0(nv), amt;
+      if (opt === 'Reporter') amt = r.reste; else if (opt === 'Abandonner') amt = 0;
+      else { if (!n || n <= 0 || (opt === 'Reporter en partie' && n > r.reste)) { bkMsg('rep-msg', 'Décision non enregistrée : indiquez un montant valide' + (opt === 'Reporter en partie' ? ' (au plus ' + fmt(r.reste) + ' MGA).' : '.'), 'ko'); return; } amt = n; }
+      RPT.dec[r.id] = { opt: opt, amt: amt, motif: m, by: ME, on: nowStr() }; document.getElementById('rep-msg').hidden = true; repRender();
+    });
+  }
+  function repEffects(ex) {
+    var D = repData(ex), E = { lines: [], ppm: [], engs: [], und: 0, totL: 0, totP: 0, aband: 0 };
+    D.A.concat(D.B).forEach(function (r) {
+      var d = repDecOf(r); if (!d) { E.und++; return; } var isL = r.id.charAt(0) === 'L';
+      if (d.amt > 0) { (isL ? E.lines : E.ppm).push({ r: r, d: d }); if (isL) E.totL += d.amt; else E.totP += d.amt; } E.aband += Math.max(0, r.reste - d.amt);
+    });
+    D.C.forEach(function (c) { if (c.move > 0) E.engs.push(c); });
+    return E;
+  }
+  function repRender() {
+    var ex = anaEx(), nx = repNext(ex), D = repData(ex), cl = RPT.closed[ex], b = document.getElementById('rep-body'), E = repEffects(ex); b.innerHTML = '';
+    document.querySelector('#v-rep > .head h1').textContent = 'Report et clôture de l’exercice ' + ex; document.querySelector('#v-rep > .head p').textContent = 'Ce qui n’est pas réalisé en ' + ex + ' : à reporter sur ' + nx + ', à réviser ou à abandonner.';
+    var cb = document.getElementById('rep-close'); cb.textContent = cl ? 'Exercice clôturé' : 'Clôturer l’exercice ' + ex; cb.disabled = !!cl;
+    var sa = D.A.reduce(function (a, r) { return a + r.reste; }, 0), sb = D.B.reduce(function (a, r) { return a + r.reste; }, 0);
+    b.appendChild(dpTiles([['Reste sur le PTBA', fmt(sa) + ' MGA', 'brand'], ['Marchés du PPM non engagés', fmt(sb) + ' MGA', 'info'], ['À décider', String(E.und), E.und ? 'ko' : 'ok'], ['À reporter sur ' + nx, fmt(E.totL) + ' MGA', 'warn']], { cols: 4 }));
+    if (cl) { var ok = cvEl('div', 'callout', 'Exercice ' + ex + ' clôturé le ' + cl.on + ' par ' + cl.by + '. Les reports sont enregistrés pour l’exercice ' + nx + '.'); ok.style.cssText = 'margin-bottom:14px;background:var(--ok-bg);color:var(--ok)'; b.appendChild(ok); }
+    function act(r) { var n = cvEl('div'); if (!cl) { var bt = cvEl('button', 'btn small', 'Décider'); bt.type = 'button'; bt.addEventListener('click', function () { repAsk(r); }); n.appendChild(bt); } return n; }
+    function nm(r) { var n = cvEl('div'); n.appendChild(cvEl('b', null, r.label)); if (r.sub) n.appendChild(cvEl('div', 'hby', r.sub)); return n; }
+    function rep(r) { var d = repDecOf(r); return d ? fmt(d.amt) : '—'; }
+    anaBlock(b, 'Lignes du PTBA non réalisées', dpMini(['Ligne du PTBA', 'PTBA', 'Réalisé', 'Reste', 'Cible physique restante', 'Décision', 'Reporté (MGA)', ''], D.A.map(function (r) { return [nm(r), fmt(r.plan), fmt(r.real), fmt(r.reste), r.qty ? fmt(r.qty) + ' ' + r.unit : '—', repDecCell(r), rep(r), act(r)]; }), [1, 2, 3, 6], 'Toutes les lignes du PTBA sont réalisées.'));
+    anaBlock(b, 'Marchés du PPM non engagés', dpMini(['Marché', 'Estimatif', 'Engagé', 'Reste', 'Décision', 'Reporté (MGA)', ''], D.B.map(function (r) { return [nm(r), fmt(r.plan), fmt(r.real), fmt(r.reste), repDecCell(r), rep(r), act(r)]; }), [1, 2, 3, 5], 'Tous les marchés du PPM sont engagés.'));
+    anaBlock(b, 'Engagements ouverts : reportés automatiquement par l’échéancier', dpMini(['Engagement', 'Reste à réaliser', 'Prévu en ' + ex, 'Réalisé en ' + ex, 'Reporté sur ' + nx + ' à la clôture', 'Déjà prévu après ' + ex], D.C.map(function (c) { var n = cvEl('div'); n.appendChild(cvEl('b', null, c.i.ref)); n.appendChild(cvEl('div', 'hby', c.i.tiers || '—')); return [n, fmt(c.reste), fmt(c.part), fmt(c.rz), fmt(c.move), fmt(c.later)]; }), [1, 2, 3, 4, 5], 'Aucun engagement ouvert.'));
+    if (cl) {
+      var rows = RPT.lines.filter(function (x) { return x.from === ex; }).map(function (x) { return ['Ligne ' + x.label, 'PTBA ' + x.to, fmt(x.amt), x.opt + (x.motif ? ' — ' + x.motif : '')]; }).concat(RPT.ppm.filter(function (x) { return x.from === ex; }).map(function (x) { return [x.ref + ' — ' + x.des, 'PPM ' + x.to + ' (signature prévue le ' + isoToFr(x.d3) + ')', fmt(x.est), x.opt]; }), RPT.engs.filter(function (x) { return x.from === ex; }).map(function (x) { return ['Engagement ' + x.ref, 'Échéancier ' + x.to, fmt(x.move), 'Reste non réalisé reporté']; }));
+      anaBlock(b, 'Reports enregistrés vers ' + nx, dpMini(['Origine', 'Destination', 'Montant (MGA)', 'Décision'], rows, [2], 'Aucun report.'));
+    }
+  }
+  function repPrev() {
+    var ex = anaEx(), nx = repNext(ex), E = repEffects(ex), body = document.getElementById('rep-prev-body'), yi = CPAD.years.indexOf(+nx), env = yi >= 0 ? CPAD.comps.reduce(function (a, cp) { return a + (padComp(cp.code)[yi] || 0); }, 0) : 0; body.innerHTML = '';
+    body.appendChild(dpTiles([['Lignes reportées', E.lines.length + ' · ' + fmt(E.totL) + ' MGA', 'ok'], ['Marchés reportés', E.ppm.length + ' · ' + fmt(E.totP) + ' MGA', 'info'], ['Engagements ajustés', E.engs.length + ' · ' + fmt(E.engs.reduce(function (a, c) { return a + c.move; }, 0)) + ' MGA', 'brand'], ['Abandonné', fmt(E.aband) + ' MGA', 'n']], { cols: 4 }));
+    var ratio = env ? E.totL / env : 0, fin = cvEl('div'); fin.appendChild(dpDl([['Financement prévu en ' + nx, fmt(env) + ' MGA'], ['Reports sur le PTBA ' + nx, fmt(E.totL) + ' MGA'], ['Part du financement', env ? pctf(ratio) : '—']])); if (ratio > 1) { var al = badge('Les reports dépassent le financement prévu en ' + nx, 'b-ko'); al.style.marginTop = '8px'; al.style.display = 'inline-block'; fin.appendChild(al); }
+    anaBlock(body, 'Cohérence avec le plan de financement', fin);
+    anaBlock(body, 'Lignes du PTBA reportées sur ' + nx, dpMini(['Ligne', 'Montant reporté (MGA)', 'Décision', 'Cible physique reportée'], E.lines.map(function (x) { var q = x.r.reste ? Math.round(x.r.qty * x.d.amt / x.r.reste) : 0; return [x.r.label, fmt(x.d.amt), x.d.opt, q ? fmt(q) + ' ' + x.r.unit : '—']; }), [1], 'Aucune ligne reportée.'));
+    anaBlock(body, 'Marchés du PPM reportés sur ' + nx, dpMini(['Marché', 'Estimatif reporté (MGA)', 'Décision', 'Nouvelle signature prévue'], E.ppm.map(function (x) { return [x.r.label, fmt(x.d.amt), x.d.opt, isoToFr(repShift(x.r.x.d3 || x.r.x.d2 || x.r.x.d1))]; }), [1], 'Aucun marché reporté.'));
+    anaBlock(body, 'Engagements : parts reportées sur l’échéancier ' + nx, dpMini(['Engagement', 'Part ' + ex + ' non réalisée (MGA)', 'Nouvel échéancier'], E.engs.map(function (c) { var e = sxEch(c.i); return [c.i.ref + ' — ' + (c.i.tiers || ''), fmt(c.move), ex + ' : ' + fmt((e[ex] || 0) - c.move) + ' · ' + nx + ' : ' + fmt((e[nx] || 0) + c.move)]; }), [1], 'Aucun ajustement.'));
+    var err = cvEl('div', 'err'); if (E.und) err.textContent = E.und + ' élément' + (E.und > 1 ? 's' : '') + ' à décider avant de clôturer l’exercice.'; body.appendChild(err);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Confirmer la clôture de ' + ex); bc.type = bo.type = 'button'; bo.disabled = !!E.und; ft.appendChild(bc); ft.appendChild(bo); body.appendChild(ft);
+    bc.addEventListener('click', function () { document.getElementById('rep-prev').hidden = true; });
+    bo.addEventListener('click', function () {
+      E.lines.forEach(function (x) { var q = x.r.reste ? Math.round(x.r.qty * x.d.amt / x.r.reste) : 0; RPT.lines.push({ from: ex, to: nx, key: x.r.key, label: x.r.label, perim: x.r.sub, amt: x.d.amt, qty: q, unit: x.r.unit, opt: x.d.opt, motif: x.d.motif }); });
+      E.ppm.forEach(function (x) { var p = x.r.x; RPT.ppm.push({ from: ex, to: nx, ref: p.ref, des: p.des, cat: p.cat, est: x.d.amt, d1: repShift(p.d1), d2: repShift(p.d2), d3: repShift(p.d3 || p.d2 || p.d1), opt: x.d.opt }); });
+      E.engs.forEach(function (c) { var e = JSON.parse(JSON.stringify(sxEch(c.i))); e[ex] = (e[ex] || 0) - c.move; e[nx] = (e[nx] || 0) + c.move; c.i.ech = e; if (sxPer(c.i).d2.slice(0, 4) < nx) c.i.d2 = nx + '-12-31'; RPT.engs.push({ from: ex, to: nx, ref: c.i.ref, move: c.move }); });
+      RPT.closed[ex] = { on: nowStr(), by: ME }; document.getElementById('rep-prev').hidden = true; bkMsg('rep-msg', 'Exercice ' + ex + ' clôturé : ' + pl(E.lines.length, 'ligne') + ', ' + pl(E.ppm.length, 'marché') + ' et ' + pl(E.engs.length, 'engagement') + ' reportés sur ' + nx + '.', 'ok'); repRender();
+    });
+  }
+  document.getElementById('rep-close').addEventListener('click', function () { repPrev(); document.getElementById('rep-prev').hidden = false; });
   function sxFormSetup() {
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
     document.getElementById('sxf-d1').value = cadToday(); document.getElementById('sxf-d2').value = cadToday().slice(0, 4) + '-12-31';
