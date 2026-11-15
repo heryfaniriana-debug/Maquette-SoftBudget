@@ -20246,7 +20246,7 @@ var EXEC_REC = [
   });
 
   /* ===== Chaîne de la dépense du projet (menu Compte administratif) : engagements, liquidations, ordonnancement, paiements — chaque dépense est rattachée à une ligne du PTBA validé ===== */
-  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 7, seqM: 3, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '' } };
+  var DP = { docs: null, sel: {}, ordSel: {}, seqE: 7, seqM: 3, model: 'std', opt: { logo: true, imp: true, bank: true, lettres: true, pj: true, sign: true, qr: true }, f: null, lf: { sf: false, fac: '', vol: '' } };
   var DP_ST = { soumis: ['En attente de visa CF', 'b-warn'], vise: ['Visé · à liquider', 'b-info'], liquide: ['Liquidé · à ordonnancer', 'b-info'], ordonnance: ['Mandaté · chez le comptable', 'b-warn'], paye: ['Payé', 'b-ok'] };
   var DP_RANK = { soumis: 1, vise: 2, liquide: 3, ordonnance: 4, paye: 6 };
   var DP_TIERS = ['BTP Andriana', 'Entreprise Sud Bâtiment', 'Centre de formation Vatsy', 'Hôtel Les Flamboyants', 'MEDIFROID SARL', 'FOURNITEC SARL', 'Cabinet RAKOTO Conseil', 'Imprimerie nationale'];
@@ -20364,9 +20364,13 @@ var EXEC_REC = [
   function dpLiqRender() {
     dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'vise'; }).sort(function (a, b) { return a.id < b.id ? 1 : -1; }), sel = rows.filter(function (d) { return d.id === DP.sel.dpliq; })[0], t = dpTot();
     dpKpis('dpliq-k', [['Engagé (visé)', fmt(t.e) + ' MGA'], ['À liquider', fmt(rows.filter(function (d) { return d.st === 'vise'; }).reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA'], ['Liquidé', fmt(t.l) + ' MGA'], ['Reste à liquider', fmt(t.e - t.l) + ' MGA']]);
-    dpBar('dpliq-bar', [['Liquider l’avance', false, !!sel && sel.st === 'vise' && !!sel.av && sel.av.st === 'prevue', function () { dpAvLiquider(sel); }], ['Liquider', true, !!sel && sel.st === 'vise', function () { DP.lf = { sf: false, fac: '' }; dpLiqPaint(sel); document.getElementById('dp-liq-form').hidden = false; }]]);
+    dpBar('dpliq-bar', [['Liquider l’avance', false, !!sel && sel.st === 'vise' && !!sel.av && sel.av.st === 'prevue', function () { dpAvLiquider(sel); }], ['Liquider', true, !!sel && sel.st === 'vise', function () { DP.lf = { sf: false, fac: '', vol: '' }; dpLiqPaint(sel); document.getElementById('dp-liq-form').hidden = false; }]]);
     dpTable({ id: 'dpliq', head: ['Engagement', 'Tiers · objet', 'Ligne du PTBA', 'Acte', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun engagement à liquider. Visez d’abord un engagement dans « Engagements ».', redraw: dpLiqRender,
       cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, dpShort(d), d.acte + ' ' + d.ref, fmt(d.mt), dpStatBadge(d)]; } });
+  }
+  function dpApplyReal(d, z, raw) {
+    var n = parseFloat(String(raw || '').replace(/\s/g, '').replace(',', '.')); if (isNaN(n) || n <= 0 || !z || !z.l.wk || !z.l.wk.vol) return;
+    var w = z.l.wk, q = Math.floor((new Date().getMonth()) / 3), cur = wkReal(z.l) || 0; w.real = w.real || [null, null, null, null]; w.real[q] = cur + n; d.volReal = n; d.volUnit = w.unit;
   }
   function dpAvLiquider(d) {
     cvAsk({ title: 'Liquider l’avance de démarrage — ' + d.id, ok: 'Liquider l’avance', required: false, placeholder: 'Observation (garantie ' + d.av.garantie + ' vérifiée)' }, function () {
@@ -20376,7 +20380,7 @@ var EXEC_REC = [
   function dpLiqPaint(d) {
     var body = document.getElementById('dp-liq-body'), z = dpLine(d.key), lf = DP.lf; body.innerHTML = '';
     var rc = dpRecoup(d), bar = cvEl('div', 'row-toolbar'), sv = cvEl('button', 'btn primary', 'Valider la liquidation'); sv.type = 'button'; sv.disabled = !(lf.sf && lf.fac.trim());
-    sv.addEventListener('click', function () { d.st = 'liquide'; d.fac = lf.fac.trim(); d.rejet = ''; (d.dt = d.dt || {}).liq = cadToday(); d.net = d.mt - rc; if (d.av) { if (rc) d.av.recoupe = rc; else d.av.st = 'annulee'; } document.getElementById('dp-liq-form').hidden = true; dpMsg('dpliq-msg', d.id + ' liquidé : le net à payer est arrêté, il passe en ordonnancement.'); dpLiqRender(); });
+    sv.addEventListener('click', function () { d.st = 'liquide'; d.fac = lf.fac.trim(); d.rejet = ''; (d.dt = d.dt || {}).liq = cadToday(); dpApplyReal(d, z, lf.vol); d.net = d.mt - rc; if (d.av) { if (rc) d.av.recoupe = rc; else d.av.st = 'annulee'; } document.getElementById('dp-liq-form').hidden = true; dpMsg('dpliq-msg', d.id + ' liquidé : le net à payer est arrêté, il passe en ordonnancement.'); dpLiqRender(); });
     bar.appendChild(sv); body.appendChild(bar);
     var h = cvEl('div', 'kb-h', d.id + ' · ' + d.tiers); body.appendChild(h);
     body.appendChild(dpTiles([['Imputation', dpShort(d)], ['Acte', d.acte + ' ' + d.ref], ['Montant engagé', fmt(d.mt) + ' MGA'], ['Objet', d.objet]]));
@@ -20387,6 +20391,14 @@ var EXEC_REC = [
     var g = cvEl('div', 'fgrid');
     var a = cvEl('div'); a.appendChild(cvEl('label', null, 'Facture n°')); var fi = cvEl('input', 'field'); fi.type = 'text'; fi.placeholder = 'FAC-…'; fi.value = lf.fac; fi.addEventListener('input', function () { lf.fac = fi.value; sv.disabled = !(lf.sf && lf.fac.trim()); }); a.appendChild(fi); g.appendChild(a);
     var b = cvEl('div'); b.appendChild(cvEl('label', null, 'Net à liquider (MGA)')); var ni = cvEl('input', 'field'); ni.type = 'text'; ni.readOnly = true; ni.value = fmt(d.mt - rc); b.appendChild(ni); g.appendChild(b); sec.appendChild(g);
+    var w0 = z && z.l.wk; if (w0 && w0.vol) {
+      var cur = wkReal(z.l) || 0, g3 = cvEl('div', 'fgrid'); g3.style.marginTop = '12px';
+      var v1 = cvEl('div'); v1.appendChild(cvEl('label', null, 'Volume réalisé avec ce service fait (' + w0.unit + ', facultatif)')); var vi = cvEl('input', 'field'); vi.type = 'text'; vi.setAttribute('inputmode', 'decimal'); vi.placeholder = 'Ex. 3'; vi.value = lf.vol;
+      var v2 = cvEl('div'); v2.appendChild(cvEl('label', null, 'Cumul réalisé après ce service fait')); var vo = cvEl('input', 'field'); vo.type = 'text'; vo.readOnly = true;
+      function upd() { var n = parseFloat(String(vi.value).replace(/\s/g, '').replace(',', '.')); vo.value = fmt(cur + (isNaN(n) ? 0 : Math.max(0, n))) + ' / ' + fmt(w0.vol) + ' ' + w0.unit; }
+      vi.addEventListener('input', function () { lf.vol = vi.value; upd(); }); upd(); v1.appendChild(vi); v2.appendChild(vo); g3.appendChild(v1); g3.appendChild(v2); sec.appendChild(g3);
+      var hn = cvEl('div', 'hint', 'Ce volume alimente automatiquement Suivi › Avancement physique (trimestre en cours) et le tableau de restitution.'); hn.style.marginTop = '6px'; sec.appendChild(hn);
+    }
     var lb = cvEl('label', 'chk'); lb.style.marginTop = '12px'; var ck = cvEl('input'); ck.type = 'checkbox'; ck.checked = lf.sf; ck.addEventListener('change', function () { lf.sf = ck.checked; sv.disabled = !(lf.sf && lf.fac.trim()); }); lb.appendChild(ck); lb.appendChild(document.createTextNode(' Je certifie le service fait (PV de réception joint)')); sec.appendChild(lb);
     body.appendChild(sec);
   }
@@ -20528,9 +20540,9 @@ var EXEC_REC = [
   function dpTabOpen(x) { DP.tabSel = 'syn'; DP.tabLine = x.id; dpTabPaint(); document.getElementById('dp-tab-form').hidden = false; }
   /* Petits graphes de lecture (barres de progression, barre empilée, courbes cumulées) */
   var DPC = { brand: '#2E427B', info: '#5F77B9', ok: '#047857', warn: '#B45309', ko: '#BE123C', grey: '#B9BEC8' };
-  function dpMeter(label, val, total, color, note) {
+  function dpMeter(label, val, total, color, note, unit) {
     var p = total ? Math.max(0, Math.min(100, Math.round(100 * val / total))) : 0, d = cvEl('div', 'dp-meter'), t = cvEl('div', 't');
-    t.appendChild(cvEl('span', null, label)); t.appendChild(cvEl('b', null, fmt(val) + ' MGA · ' + (total ? p + ' %' : '—') + (note ? ' ' + note : ''))); d.appendChild(t);
+    t.appendChild(cvEl('span', null, label)); t.appendChild(cvEl('b', null, fmt(val) + (total && unit ? ' / ' + fmt(total) : '') + ' ' + (unit || 'MGA') + ' · ' + (total ? p + ' %' : '—') + (note ? ' ' + note : ''))); d.appendChild(t);
     var tr = cvEl('div', 'tr'), i = cvEl('i'); i.style.width = p + '%'; i.style.background = color; tr.appendChild(i); d.appendChild(tr); return d;
   }
   function dpStackBar(segs) {
@@ -20558,6 +20570,8 @@ var EXEC_REC = [
     function block(title, node) { var x = cvEl('section', 'co-blk'); if (title) x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); return x; }
     if (T === 'syn') {
       var f = cvEl('div'); f.appendChild(dpMeter('Crédit validé', cr, cr, DPC.brand)); f.appendChild(dpMeter('Engagé (visé)', s.e, cr, DPC.info)); f.appendChild(dpMeter('Liquidé', s.l, cr, DPC.info)); f.appendChild(dpMeter('Mandaté', s.o, cr, DPC.warn)); f.appendChild(dpMeter('Payé', s.p, cr, DPC.ok));
+      var w1 = z.l.wk, rl = wkReal(z.l);
+      if (w1 && w1.vol) { var sepr = cvEl('div'); sepr.style.cssText = 'border-top:1px dashed var(--border);margin:6px 0 12px'; f.appendChild(sepr); f.appendChild(dpMeter('Réalisé physique', rl || 0, w1.vol, DPC.brand, '', w1.unit)); var pp = cr ? s.p / cr : 0, ph = rl ? rl / w1.vol : 0, gap = pp - ph, cb = cvEl('div', 'dp-dispo'); cb.appendChild(cvEl('span', null, 'Cohérence entre le payé et le réalisé')); cb.appendChild(badge(gap > 0.2 ? 'Payé en avance sur le réalisé : ' + Math.round(100 * pp) + ' % payé pour ' + Math.round(100 * ph) + ' % réalisé' : (gap < -0.2 ? 'Réalisé en avance sur le payé' : 'Cohérent'), gap > 0.2 ? 'b-warn' : (gap < -0.2 ? 'b-info' : 'b-ok'))); f.appendChild(cb); }
       var dispo = cr - s.e - s.r, dl = cvEl('div', 'dp-dispo'); dl.appendChild(cvEl('span', null, 'Disponible sur la ligne')); dl.appendChild(badge(fmt(dispo) + ' MGA', dispo >= 0 ? 'b-ok' : 'b-ko')); f.appendChild(dl);
       block('Avancement financier de la ligne', f);
       var w = z.l.wk, pr = bvData(z.r).c.perims.filter(function (p) { return p.p === z.perim; })[0] || {}, inds = ((w && w.inds) || []).map(function (k) { var i = (pr.inds || []).filter(function (q) { return q.id === k.id; })[0]; return i ? i.lib + ' (' + fmt(k.contrib) + ' ' + i.unit + ')' : null; }).filter(Boolean);
@@ -20570,7 +20584,7 @@ var EXEC_REC = [
       block('Détail', dpMini(['N°', 'Tiers · objet', 'Acte', 'Date', 'Montant (MGA)', 'Statut'], main.map(function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, d.acte + ' ' + d.ref, dt((d.dt || {}).eng), fmt(d.mt), dpStatBadge(d)]; }), [4], 'Aucun engagement sur cette ligne.'));
     } else if (T === 'liq') {
       block('Liquidé par rapport à l’engagé', dpMeter('Liquidé', s.l, s.e, DPC.info, 'de l’engagé'));
-      block('Détail', dpMini(['Engagement', 'Tiers', 'Facture', 'Date de liquidation', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 3; }).map(function (d) { return [d.id, d.tiers, d.fac || '—', dt((d.dt || {}).liq), fmt(d.kind === 'avance' ? d.mt : d.mt)]; }), [4], 'Aucune liquidation sur cette ligne.'));
+      block('Détail', dpMini(['Engagement', 'Tiers', 'Facture', 'Date de liquidation', 'Volume réalisé', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 3; }).map(function (d) { return [d.id, d.tiers, d.fac || '—', dt((d.dt || {}).liq), d.volReal ? fmt(d.volReal) + ' ' + d.volUnit : (d.kind === 'avance' ? 'Sans objet' : '—'), fmt(d.mt)]; }), [4, 5], 'Aucune liquidation sur cette ligne.'));
     } else if (T === 'ord') {
       block('Mandaté par rapport au liquidé', dpMeter('Mandaté', s.o, s.l, DPC.warn, 'du liquidé'));
       block('Détail', dpMini(['Mandat', 'Bénéficiaire', 'Engagement', 'Date d’émission', 'Montant (MGA)', 'Statut'], docs.filter(function (d) { return DP_RANK[d.st] >= 4; }).map(function (d) { return [d.mandat, d.tiers, d.id, dt((d.dt || {}).ord), fmt(dpNet(d)), dpStatBadge(d)]; }), [4], 'Aucun mandat sur cette ligne.'));
@@ -20593,6 +20607,7 @@ var EXEC_REC = [
     var E = sbXml; sbPrint('Compte administratif', '<h1>' + E(dpTabTitle()) + '</h1><table><thead><tr>' + DP_TABH.map(function (h, i) { return '<th' + (i && i < 10 ? ' class="num"' : '') + '>' + E(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + dpTabRowsOut().map(function (rw) { return '<tr>' + rw.map(function (c, i) { return '<td' + (i && i < 10 ? ' class="num"' : '') + '>' + E(typeof c === 'number' ? fmt(c) : c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>'); dpMsg('dptab-msg', 'Version imprimable ouverte.');
   }
   /* ----- Clôture de l'exercice ----- */
+  function dpNoPhys() { var out = []; dpLines().forEach(function (z) { var s = dpStat(z.key); if (s.p > 0 && z.l.wk && z.l.wk.vol && !wkReal(z.l)) out.push(z.l.c); }); return out; }
   function dpClotItems() {
     dpSeed(); var O = DP.ops, docs = DP.docs || [], fr = DP.frozen, t = dpTot();
     var soumis = docs.filter(function (d) { return d.st === 'soumis'; }), chez = docs.filter(function (d) { return d.st === 'ordonnance'; }), nonSolde = t.e - t.p, avs = docs.filter(function (d) { return d.av && d.av.st === 'versee' && !d.av.recoupe; });
@@ -20603,6 +20618,7 @@ var EXEC_REC = [
       { id: 'rep', t: 'Engagements non soldés', sub: fmt(nonSolde) + ' MGA engagés et non encore payés à reporter ou à annuler.' + (O.rep ? ' Décision : ' + (O.rep === 'annule' ? 'annulation' : 'report sur l’exercice suivant') + '.' : ''), st: O.rep ? 'done' : (O.stop ? 'todo' : 'wait'), who: 'Ordonnateur', bl: true },
       { id: 'chez', t: 'Mandats chez le comptable', sub: chez.length ? pl(chez.length, 'mandat') + ' non payé(s) : ' + chez.map(function (d) { return d.mandat; }).join(', ') + '.' : 'Tous les mandats sont payés ou rejetés.', st: chez.length ? 'warn' : 'done', who: 'Agent comptable', bl: false, n: chez.length },
       { id: 'av', t: 'Avances non recoupées', sub: avs.length ? pl(avs.length, 'avance') + ' versée(s) non encore recoupée(s) : ' + avs.map(function (d) { return d.id + ' (' + fmt(d.av.amt) + ' MGA)'; }).join(', ') + '.' : 'Toutes les avances versées sont recoupées.', st: avs.length ? 'warn' : 'done', who: 'Ordonnateur', bl: false, n: avs.length },
+      { id: 'phys', t: 'Lignes payées sans avancement physique', sub: dpNoPhys().length ? pl(dpNoPhys().length, 'ligne') + ' avec des paiements et aucun volume réalisé renseigné : ' + dpNoPhys().join(', ') + '.' : 'Toutes les lignes payées ont un avancement physique renseigné.', st: dpNoPhys().length ? 'warn' : 'done', who: 'Technicien (chef de service)', bl: false, n: dpNoPhys().length },
       { id: 'raf', t: 'Validation par le Responsable administratif et financier', sub: O.raf ? 'Validé le ' + O.raf + ' : « VU ET VÉRIFIÉ ».' : (blockOk ? 'Les opérations bloquantes sont faites : le RAF peut valider.' : 'Disponible quand les opérations bloquantes 1 à 3 sont faites.'), st: O.raf ? 'done' : (blockOk ? 'todo' : 'wait'), who: 'RAF', bl: true },
       { id: 'adopt', t: 'Adoption par le Directeur de projet et verrouillage', sub: fr ? 'Version ' + fr.v + ' figée le ' + fr.on + ' : exercice verrouillé.' : 'Fige la version, avec ses réserves, et verrouille les écritures de l’exercice.', st: fr ? 'done' : (O.raf ? 'todo' : 'wait'), who: 'Directeur de projet', bl: true }
     ];
@@ -20614,7 +20630,7 @@ var EXEC_REC = [
   }
   function dpClotRender() {
     var items = dpClotItems(), O = DP.ops, fr = DP.frozen, docs = DP.docs || [], sel = items.filter(function (x) { return x.id === DP.sel.dpclot; })[0], done = items.filter(function (x) { return x.st === 'done'; }).length;
-    var res = items.filter(function (x) { return x.id === 'chez' || x.id === 'av'; }).reduce(function (a, x) { return a + (x.n || 0); }, 0);
+    var res = items.filter(function (x) { return x.id === 'chez' || x.id === 'av' || x.id === 'phys'; }).reduce(function (a, x) { return a + (x.n || 0); }, 0);
     var box = document.getElementById('dpclot-ops'); box.innerHTML = '';
     var head = cvEl('div'); head.style.cssText = 'padding:14px 16px 4px'; var pg = cvEl('div', 'dp-meter'), tt = cvEl('div', 't'); tt.appendChild(cvEl('span', null, 'Avancement de la clôture')); tt.appendChild(cvEl('b', null, done + ' étape(s) sur ' + items.length + ' faite(s)')); pg.appendChild(tt); var tr = cvEl('div', 'tr'), bar = cvEl('i'); bar.style.width = Math.round(100 * done / items.length) + '%'; bar.style.background = done === items.length ? DPC.ok : DPC.brand; tr.appendChild(bar); pg.appendChild(tr); head.appendChild(pg); box.appendChild(head);
     var ICON = { done: '✓', todo: '●', warn: '!', wait: '○' }, LBL = { done: 'Fait', todo: 'À faire', warn: 'Réserve', wait: 'En attente' }, TONE = { done: 'b-ok', todo: 'b-warn', warn: 'b-warn', wait: 'b-neutral' };
@@ -20635,6 +20651,7 @@ var EXEC_REC = [
       if (id === 'visa') { b.push(['Relancer le Contrôle financier', true, sel.st === 'todo', function () { dpNotify(sel, 'Relancer', 'Contrôle financier'); }]); }
       if (id === 'rep') b.push(['Traiter les engagements non soldés', true, !!O.stop && !O.rep && !fr, function () { var ns = dpTot(); cvAsk({ title: 'Engagements non soldés — ' + fmt(ns.e - ns.p) + ' MGA', ok: 'Appliquer', required: false, optLabel: 'Décision *', options: ['Reporter sur l’exercice suivant', 'Annuler'], placeholder: 'Commentaire' }, function (c, d) { O.rep = d === 'Annuler' ? 'annule' : 'reporte'; dpMsg('dpclot-msg', 'Engagements non soldés : ' + (O.rep === 'annule' ? 'annulation' : 'report') + ' enregistré.'); dpClotRender(); }); }]);
       if (id === 'chez') b.push(['Relancer le comptable', true, sel.st === 'warn', function () { dpNotify(sel, 'Relancer', 'Agent comptable'); }]);
+      if (id === 'phys') { b.push(['Relancer les techniciens', true, sel.st === 'warn', function () { dpNotify(sel, 'Relancer', 'Techniciens (chefs de service)'); }]); b.push(['Aller à l’avancement physique', false, true, function () { show('avanc'); }]); }
       if (id === 'av') b.push(['Notifier l’ordonnateur', true, sel.st === 'warn', function () { dpNotify(sel, 'Notifier', 'Ordonnateur'); }]);
       if (id === 'raf') { b.push(['Valider (RAF)', true, sel.st === 'todo' && !fr, function () { O.raf = nowStr().split(' ')[0]; dpMsg('dpclot-msg', 'Compte administratif validé par le RAF (« VU ET VÉRIFIÉ »).'); dpClotRender(); }]); b.push(['Notifier le RAF', false, sel.st === 'todo', function () { dpNotify(sel, 'Notifier', 'Responsable administratif et financier'); }]); }
       if (id === 'adopt') {
