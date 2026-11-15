@@ -20525,33 +20525,65 @@ var EXEC_REC = [
     tb.appendChild(b); sc.appendChild(tb); var card = cvEl('div', 'card'); card.appendChild(sc); return card;
   }
   function dpTabOpen(x) { DP.tabSel = 'syn'; DP.tabLine = x.id; dpTabPaint(); document.getElementById('dp-tab-form').hidden = false; }
+  /* Petits graphes de lecture (barres de progression, barre empilée, courbes cumulées) */
+  var DPC = { brand: '#2E427B', info: '#5F77B9', ok: '#047857', warn: '#B45309', ko: '#BE123C', grey: '#B9BEC8' };
+  function dpMeter(label, val, total, color, note) {
+    var p = total ? Math.max(0, Math.min(100, Math.round(100 * val / total))) : 0, d = cvEl('div', 'dp-meter'), t = cvEl('div', 't');
+    t.appendChild(cvEl('span', null, label)); t.appendChild(cvEl('b', null, fmt(val) + ' MGA · ' + (total ? p + ' %' : '—') + (note ? ' ' + note : ''))); d.appendChild(t);
+    var tr = cvEl('div', 'tr'), i = cvEl('i'); i.style.width = p + '%'; i.style.background = color; tr.appendChild(i); d.appendChild(tr); return d;
+  }
+  function dpStackBar(segs) {
+    var tot = segs.reduce(function (a, s) { return a + s.val; }, 0), box = cvEl('div', 'dp-stack'), bar = cvEl('div', 'tr'), lg = cvEl('div', 'lg');
+    segs.forEach(function (s) { if (!s.val) return; var i = cvEl('i'); i.style.width = (100 * s.val / (tot || 1)) + '%'; i.style.background = s.color; i.title = s.label + ' : ' + fmt(s.val) + ' MGA'; bar.appendChild(i); });
+    segs.forEach(function (s) { var l = cvEl('span'), sw = cvEl('i'); sw.style.background = s.color; l.appendChild(sw); l.appendChild(document.createTextNode(s.label + ' · ' + fmt(s.val) + ' MGA')); lg.appendChild(l); });
+    box.appendChild(bar); box.appendChild(lg); return box;
+  }
+  function dpLineChart(series, labels) {
+    var W = 720, H = 240, L = 62, R = 14, T = 14, B = 30, max = 0; series.forEach(function (s) { s.data.forEach(function (v) { if (v > max) max = v; }); }); if (!max) max = 1;
+    var steps = 4, svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Courbes cumulées par mois" style="max-width:100%;display:block">';
+    for (var g = 0; g <= steps; g++) { var y = T + (H - T - B) * (1 - g / steps), v = max * g / steps; svg += '<line x1="' + L + '" y1="' + y + '" x2="' + (W - R) + '" y2="' + y + '" stroke="#E9EBF0"/><text x="' + (L - 8) + '" y="' + (y + 4) + '" font-size="11" text-anchor="end" fill="#5B606D">' + Math.round(v / 1e6) + ' M</text>'; }
+    labels.forEach(function (m, i) { var x = L + (W - L - R) * i / 11; svg += '<text x="' + x + '" y="' + (H - 10) + '" font-size="10.5" text-anchor="middle" fill="#5B606D">' + m.replace('.', '') + '</text>'; });
+    series.forEach(function (s) { var pts = s.data.map(function (v, i) { return (L + (W - L - R) * i / 11).toFixed(1) + ',' + (T + (H - T - B) * (1 - v / max)).toFixed(1); }).join(' '); svg += '<polyline points="' + pts + '" fill="none" stroke="' + s.color + '" stroke-width="2.5"' + (s.dash ? ' stroke-dasharray="6 4"' : '') + ' stroke-linejoin="round"/>'; });
+    svg += '</svg>';
+    var box = cvEl('div', 'dp-chart'); box.innerHTML = svg; var lg = cvEl('div', 'dp-stack'); var l2 = cvEl('div', 'lg');
+    series.forEach(function (s) { var l = cvEl('span'), sw = cvEl('i'); sw.style.background = s.color; l.appendChild(sw); l.appendChild(document.createTextNode(s.name)); l2.appendChild(l); }); lg.appendChild(l2); box.appendChild(lg); return box;
+  }
   function dpTabPaint() {
     var z = dpLine(DP.tabLine), body = document.getElementById('dp-tab-body'); body.innerHTML = ''; if (!z) return;
     document.getElementById('dp-tab-title').textContent = 'Ligne ' + z.l.c + ' — ' + (z.l.lib || z.l.l);
     var docs = (DP.docs || []).filter(function (d) { return d.key === z.key; }), s = dpStat(z.key), cr = dpCred(z, DP.tabVer), dt = function (iso) { return iso ? isoToFr(iso) : '—'; };
-    var tabs = cvEl('div', 'seg'); tabs.style.marginBottom = '14px'; DP_TABS.forEach(function (t) { var b = cvEl('button', DP.tabSel === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { DP.tabSel = t[0]; dpTabPaint(); }); tabs.appendChild(b); }); body.appendChild(tabs);
-    var T = DP.tabSel;
+    var tabs = cvEl('div', 'seg dp-tabs'); DP_TABS.forEach(function (t) { var b = cvEl('button', DP.tabSel === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.addEventListener('click', function () { DP.tabSel = t[0]; dpTabPaint(); }); tabs.appendChild(b); }); body.appendChild(tabs);
+    var T = DP.tabSel, main = docs.filter(function (d) { return d.kind !== 'avance'; });
+    function block(title, node) { var x = cvEl('section', 'co-blk'); if (title) x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); return x; }
     if (T === 'syn') {
-      body.appendChild(dpTiles([['Crédit validé', fmt(cr) + ' MGA', 'brand'], ['Engagé (visé)', fmt(s.e) + ' MGA', 'info'], ['Liquidé', fmt(s.l) + ' MGA', 'n'], ['Mandaté', fmt(s.o) + ' MGA', 'n'], ['Payé', fmt(s.p) + ' MGA', 'ok'], ['Disponible', fmt(cr - s.e - s.r) + ' MGA', cr - s.e - s.r >= 0 ? 'ok' : 'ko']], { cols: 3 }));
-      body.appendChild(dpWork(z));
-      var av = dpAvStats(z.key); if (av.versee || docs.some(function (d) { return d.av; })) { var sv2 = cvEl('section', 'co-blk'); sv2.appendChild(cvEl('div', 'kb-h', 'Avances de démarrage')); sv2.appendChild(dpTiles([['Avance versée', fmt(av.versee) + ' MGA', 'info'], ['Avance recoupée', fmt(av.recoupee) + ' MGA', 'ok'], ['Reste à recouper', fmt(av.reste) + ' MGA', av.reste ? 'warn' : 'n']], { cols: 3 })); body.appendChild(sv2); }
+      var f = cvEl('div'); f.appendChild(dpMeter('Crédit validé', cr, cr, DPC.brand)); f.appendChild(dpMeter('Engagé (visé)', s.e, cr, DPC.info)); f.appendChild(dpMeter('Liquidé', s.l, cr, DPC.info)); f.appendChild(dpMeter('Mandaté', s.o, cr, DPC.warn)); f.appendChild(dpMeter('Payé', s.p, cr, DPC.ok));
+      var dispo = cr - s.e - s.r, dl = cvEl('div', 'dp-dispo'); dl.appendChild(cvEl('span', null, 'Disponible sur la ligne')); dl.appendChild(badge(fmt(dispo) + ' MGA', dispo >= 0 ? 'b-ok' : 'b-ko')); f.appendChild(dl);
+      block('Avancement financier de la ligne', f);
+      var w = z.l.wk, pr = bvData(z.r).c.perims.filter(function (p) { return p.p === z.perim; })[0] || {}, inds = ((w && w.inds) || []).map(function (k) { var i = (pr.inds || []).filter(function (q) { return q.id === k.id; })[0]; return i ? i.lib + ' (' + fmt(k.contrib) + ' ' + i.unit + ')' : null; }).filter(Boolean);
       var nat = z.l.nat && PUB_NAT[z.l.nat] ? PUB_NAT[z.l.nat] + ' · ' + (NATL[z.l.nat] || '').replace(/^\d+ — /, '') : 'Non rattaché';
-      var sc = cvEl('section', 'co-blk'); sc.appendChild(cvEl('div', 'kb-h', 'Imputation budgétaire')); sc.appendChild(dpTiles([['Composante', z.perim], ['Compte', nat], ['Source de financement', (z.l.axv && z.l.axv.Financier) || '—'], ['Taux de paiement', dpPct(s.p, cr)]], { small: true })); body.appendChild(sc);
+      block('Programmation et imputation', dpDl([['Composante', z.perim], ['Compte', nat], ['Travail prévu', w ? w.task : '—'], ['Période', w ? isoToFr(w.d1) + ' → ' + isoToFr(w.d2) : '—'], ['Source de financement', (z.l.axv && z.l.axv.Financier) || '—'], ['Indicateurs servis', inds.length ? inds.join(' · ') : '—', true]]));
+      var av = dpAvStats(z.key); if (av.versee || docs.some(function (d) { return d.av; })) { var a = cvEl('div'); a.appendChild(dpMeter('Avance versée', av.versee, av.versee, DPC.info)); a.appendChild(dpMeter('Avance recoupée', av.recoupee, av.versee, DPC.ok)); block('Avances de démarrage', a); }
     } else if (T === 'eng') {
-      body.appendChild(dpMini(['N°', 'Tiers · objet', 'Acte', 'Date', 'Montant (MGA)', 'Statut'], docs.filter(function (d) { return d.kind !== 'avance'; }).map(function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, d.acte + ' ' + d.ref, dt((d.dt || {}).eng), fmt(d.mt), dpStatBadge(d)]; }), [4], 'Aucun engagement sur cette ligne.'));
+      var st = { paye: 0, ordonnance: 0, liquide: 0, vise: 0, soumis: 0 }; main.forEach(function (d) { st[d.st] += d.mt; });
+      block('Engagements par étape', dpStackBar([{ label: 'Payé', val: st.paye, color: DPC.ok }, { label: 'Mandaté', val: st.ordonnance, color: DPC.warn }, { label: 'Liquidé', val: st.liquide, color: DPC.info }, { label: 'Visé', val: st.vise, color: DPC.brand }, { label: 'En attente de visa', val: st.soumis, color: DPC.grey }]));
+      block('Détail', dpMini(['N°', 'Tiers · objet', 'Acte', 'Date', 'Montant (MGA)', 'Statut'], main.map(function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, d.acte + ' ' + d.ref, dt((d.dt || {}).eng), fmt(d.mt), dpStatBadge(d)]; }), [4], 'Aucun engagement sur cette ligne.'));
     } else if (T === 'liq') {
-      body.appendChild(dpMini(['Engagement', 'Tiers', 'Facture', 'Date de liquidation', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 3; }).map(function (d) { return [d.id, d.tiers, d.fac || '—', dt((d.dt || {}).liq), fmt(d.mt)]; }), [4], 'Aucune liquidation sur cette ligne.'));
+      block('Liquidé par rapport à l’engagé', dpMeter('Liquidé', s.l, s.e, DPC.info, 'de l’engagé'));
+      block('Détail', dpMini(['Engagement', 'Tiers', 'Facture', 'Date de liquidation', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 3; }).map(function (d) { return [d.id, d.tiers, d.fac || '—', dt((d.dt || {}).liq), fmt(d.kind === 'avance' ? d.mt : d.mt)]; }), [4], 'Aucune liquidation sur cette ligne.'));
     } else if (T === 'ord') {
-      body.appendChild(dpMini(['Mandat', 'Bénéficiaire', 'Engagement', 'Date d’émission', 'Montant (MGA)', 'Statut'], docs.filter(function (d) { return DP_RANK[d.st] >= 4; }).map(function (d) { return [d.mandat, d.tiers, d.id, dt((d.dt || {}).ord), fmt(dpNet(d)), dpStatBadge(d)]; }), [4], 'Aucun mandat sur cette ligne.'));
+      block('Mandaté par rapport au liquidé', dpMeter('Mandaté', s.o, s.l, DPC.warn, 'du liquidé'));
+      block('Détail', dpMini(['Mandat', 'Bénéficiaire', 'Engagement', 'Date d’émission', 'Montant (MGA)', 'Statut'], docs.filter(function (d) { return DP_RANK[d.st] >= 4; }).map(function (d) { return [d.mandat, d.tiers, d.id, dt((d.dt || {}).ord), fmt(dpNet(d)), dpStatBadge(d)]; }), [4], 'Aucun mandat sur cette ligne.'));
     } else if (T === 'pay') {
-      body.appendChild(dpMini(['Mandat', 'Bénéficiaire', 'Mode de paiement', 'Date de paiement', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 6; }).map(function (d) { return [d.mandat, d.tiers, d.mode || '—', dt((d.dt || {}).pay), fmt(dpNet(d))]; }), [4], 'Aucun paiement sur cette ligne.'));
+      block('Payé par rapport au mandaté', dpMeter('Payé', s.p, s.o, DPC.ok, 'du mandaté'));
+      block('Détail', dpMini(['Mandat', 'Bénéficiaire', 'Mode de paiement', 'Date de paiement', 'Montant (MGA)'], docs.filter(function (d) { return DP_RANK[d.st] >= 6; }).map(function (d) { return [d.mandat, d.tiers, d.mode || '—', dt((d.dt || {}).pay), fmt(dpNet(d))]; }), [4], 'Aucun paiement sur cette ligne.'));
     } else {
       var ex = z.r.ex || '2026', prev = bvSpread(cr, z.l, ex), E = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], Li = E.slice(), P = E.slice();
-      docs.forEach(function (d) { var q = d.dt || {}; function put(a, iso, v) { if (iso && iso.slice(0, 4) === ex) a[+iso.slice(5, 7) - 1] += v; } if (DP_RANK[d.st] >= 2) put(E, q.eng, d.mt); if (DP_RANK[d.st] >= 3) put(Li, q.liq, d.mt); if (DP_RANK[d.st] >= 6) put(P, q.pay, d.mt); });
+      docs.forEach(function (d) { var q = d.dt || {}; function put(a, iso, v) { if (iso && iso.slice(0, 4) === ex) a[+iso.slice(5, 7) - 1] += v; } if (d.kind === 'avance') { if (DP_RANK[d.st] >= 6) put(P, q.pay, d.mt); return; } if (DP_RANK[d.st] >= 2) put(E, q.eng, d.mt); if (DP_RANK[d.st] >= 3) put(Li, q.liq, d.mt); if (DP_RANK[d.st] >= 6) put(P, q.pay, dpNet(d)); });
+      function cum(a) { var c = 0; return a.map(function (v) { c += v; return c; }); }
+      var cm = new Date().getMonth(); if (String(new Date().getFullYear()) !== ex) cm = 11; function cut(a) { return a.map(function (v, i) { return i <= cm ? v : null; }).map(function (v, i, arr) { return v == null ? arr[cm] : v; }); }
+      block('Cumul par mois : prévu, engagé et payé', dpLineChart([{ name: 'Prévu (PTBA)', color: DPC.grey, data: cum(prev), dash: true }, { name: 'Engagé', color: DPC.info, data: cut(cum(E)) }, { name: 'Payé', color: DPC.ok, data: cut(cum(P)) }], BVMOIS));
       var head = ['Mois'].concat(BVMOIS, ['Total']); function line(lbl, a) { return [lbl].concat(a.map(function (v) { return v ? fmt(v) : '—'; }), [fmt(bvSum(a))]); }
-      var cum = []; var c = 0; prev.forEach(function (v) { c += v; cum.push(c); });
-      var pc = cvEl('div', 'hint', 'Le crédit est réparti sur les mois du travail prévu ; les engagements et paiements sont placés à leur date réelle.'); pc.style.marginBottom = '8px'; body.appendChild(pc);
-      body.appendChild(dpMini(head, [line('Prévu (PTBA)', prev), line('Engagé', E), line('Liquidé', Li), line('Payé', P)], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
+      block('Détail mensuel (MGA)', dpMini(head, [line('Prévu (PTBA)', prev), line('Engagé', E), line('Liquidé', Li), line('Payé', P)], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], ''));
     }
   }
   function dpTabTitle() { return 'Compte administratif — ' + (DP.tabVer ? 'version V' + DP.tabVer + ' du crédit' : 'version courante du crédit') + (DP.frozen ? ' · figé' : ' · projet non figé'); }
@@ -21166,7 +21198,17 @@ function pcRenderEnv(){
   .dp-dl > div:last-child, .dp-dl > div:nth-last-child(2):not(.full):nth-child(odd) { border-bottom: 0; }
   .dp-dl .k { color: var(--muted); font-size: 13px; flex: 0 0 auto; }
   .dp-dl .v { font-weight: 600; text-align: right; overflow-wrap: anywhere; min-width: 0; }
-  @media (max-width: 1100px) { .dp-dl { grid-template-columns: 1fr; } .dp-dl > div:nth-last-child(2):not(.full) { border-bottom: 1px solid var(--border); } }  .dp-tiles { display: grid; grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 1100px) { .dp-dl { grid-template-columns: 1fr; } .dp-dl > div:nth-last-child(2):not(.full) { border-bottom: 1px solid var(--border); } }  .dp-tabs { display: flex; width: 100%; margin-bottom: 16px; }
+  .dp-tabs button { flex: 1 1 0; min-width: 0; padding-left: 6px; padding-right: 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dp-meter { margin: 0 0 14px; }
+  .dp-meter .t { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 5px; flex-wrap: wrap; }
+  .dp-meter .t b { font-variant-numeric: tabular-nums; color: var(--navy-900, #18244F); }
+  .dp-meter .tr, .dp-stack .tr { height: 12px; background: #E9EBF0; border-radius: 6px; overflow: hidden; display: flex; }
+  .dp-meter .tr i, .dp-stack .tr i { display: block; height: 100%; }
+  .dp-dispo { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border); font-size: 13px; }
+  .dp-stack .lg { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+  .dp-stack .lg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+  .dp-chart { padding: 4px 0; }  .dp-tiles { display: grid; grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); gap: 12px; }
   @media (max-width: 1200px) { .dp-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dp-tiles.odd { grid-template-columns: minmax(0, 1fr); } }
   .dp-tile { border: 1px solid var(--border); border-left: 4px solid var(--navy-200, #CAD9FB); border-radius: 10px; background: #fff; padding: 12px 14px; min-width: 0; }
   .dp-tile .l { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .02em; margin-bottom: 6px; }
