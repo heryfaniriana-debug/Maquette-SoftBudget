@@ -5062,8 +5062,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="row-toolbar" id="dppay-bar" style="margin-bottom:12px"></div>
         <div id="dppay-k"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:900px"><thead id="dppay-h"></thead><tbody id="dppay-b"></tbody></table></div></div>
-        <section class="co-blk" id="dppay-checks"></section>
-        <section class="co-blk"><div class="kb-h">Paiements effectués</div><div class="card"><div class="scroll"><table style="min-width:700px"><thead><tr><th>Mandat</th><th>Bénéficiaire</th><th>Mode de paiement</th><th class="num">Montant (MGA)</th><th>Statut</th></tr></thead><tbody id="dppay-b2"></tbody></table></div></div></section>
+        <div class="panel" id="dp-pay-form" hidden><h2><span id="dp-pay-title">Mandat</span></h2><div class="body" id="dp-pay-body"></div></div>
       </section>
       <section class="view" id="v-dptab">
         <div class="head"><div><h1>Tableau de restitution</h1><p>Exécution de chaque ligne du PTBA validé : crédit, engagements, liquidations, mandats, paiements, disponible et alertes.</p></div></div>
@@ -19901,7 +19900,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20441,23 +20440,33 @@ var EXEC_REC = [
   }
   /* ----- Paiements ----- */
   function dpPayRender() {
-    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'ordonnance'; }), done = (DP.docs || []).filter(function (d) { return d.st === 'paye'; }), sel = rows.filter(function (d) { return d.id === DP.sel.dppay; })[0], t = dpTot();
-    dpKpis('dppay-k', [['Mandaté', fmt(t.o) + ' MGA'], ['Mandats chez le comptable', rows.length + ' · ' + fmt(rows.reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA'], ['Payé', fmt(t.p) + ' MGA'], ['Reste à payer', fmt(t.o - t.p) + ' MGA']]);
-    dpBar('dppay-bar', [['Prendre en charge et payer', true, !!sel, function () {
-      cvAsk({ title: 'Prendre en charge et payer ' + sel.mandat, ok: 'Payer', required: false, optLabel: 'Mode de paiement *', options: DP_MODES, placeholder: 'Observation du comptable' }, function (c, mode) { sel.st = 'paye'; sel.mode = mode; (sel.dt = sel.dt || {}).pay = cadToday(); DP.sel.dppay = null; dpMsg('dppay-msg', sel.mandat + ' pris en charge : ' + fmt(sel.mt) + ' MGA payés (' + mode.toLowerCase() + ').'); dpPayRender(); }); }],
-      ['Rejeter le mandat', false, !!sel, function () {
-      cvAsk({ title: 'Rejeter ' + sel.mandat, ok: 'Rejeter', required: false, optLabel: 'Motif du rejet *', options: DP_MOTIFS, placeholder: 'Précisions pour l’ordonnateur' }, function (c, motif) { sel.st = 'liquide'; sel.mandat = ''; sel.rejet = motif; DP.sel.dppay = null; dpMsg('dppay-msg', 'Mandat rejeté (' + motif.toLowerCase() + ') : retour à l’ordonnateur.', true); dpPayRender(); }); }]]);
+    dpSeed(); var rows = (DP.docs || []).filter(function (d) { return d.st === 'ordonnance'; }), sel = rows.filter(function (d) { return d.id === DP.sel.dppay; })[0];
+    document.getElementById('dppay-k').innerHTML = ''; document.getElementById('dppay-k').appendChild(dpTiles([['Mandats à traiter', String(rows.length), 'brand'], ['Montant à payer', fmt(rows.reduce(function (a, d) { return a + d.mt; }, 0)) + ' MGA', 'info']], { cols: 2 }));
+    dpBar('dppay-bar', [['Ouvrir le mandat', true, !!sel, function () { dpPayOpen(sel); }]]);
     dpTable({ id: 'dppay', head: ['Mandat', 'Bénéficiaire · objet', 'Ligne du PTBA', 'Facture', 'Montant (MGA)', 'Statut'], num: [4], rows: rows, empty: 'Aucun mandat en attente. Émettez un mandat dans « Ordonnancement ».', redraw: dpPayRender,
       cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.mandat, a, dpShort(d), d.fac, fmt(d.mt), dpStatBadge(d)]; } });
-    var cb = document.getElementById('dppay-checks'); cb.innerHTML = '';
-    if (sel) {
-      var z = dpLine(sel.key), s = dpStat(sel.key); cb.appendChild(cvEl('div', 'kb-h', 'Contrôles du comptable — ' + sel.mandat));
-      [['Qualité de l’ordonnateur (délégation en vigueur)', true], ['Disponibilité des crédits sur la ligne', s.dispo >= 0], ['Exacte imputation budgétaire (plans de la configuration renseignés)', !!z && bvLinkMissing(z.r) === 0], ['Validité de la créance : service fait certifié', true], ['Pièces justificatives', !!sel.fac]].forEach(function (c) {
-        var row = cvEl('div', 'list-row'); row.appendChild(cvEl('div', null, c[0])); row.appendChild(badge(c[1] ? 'Conforme' : 'Anomalie', c[1] ? 'b-ok' : 'b-ko')); cb.appendChild(row); });
-    }
-    var pb = document.getElementById('dppay-b2'); pb.innerHTML = '';
-    if (!done.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucun paiement effectué.'); c0.colSpan = 5; c0.style.textAlign = 'left'; pb.appendChild(t0); }
-    done.forEach(function (d) { var tr = cvEl('tr'); cell(tr, d.mandat, 'name'); cell(tr, d.tiers); cell(tr, d.mode || '—'); cell(tr, fmt(d.mt), 'num'); var sc = cell(tr, ''); sc.appendChild(badge('Payé', 'b-ok')); pb.appendChild(tr); });
+  }
+  /* Détail complet d'un mandat : le comptable y trouve tout ce qu'il faut pour contrôler, puis payer ou rejeter */
+  function dpPayChecks(d) { var z = dpLine(d.key), s = dpStat(d.key); return [['Qualité de l’ordonnateur (délégation en vigueur)', true], ['Disponibilité des crédits sur la ligne', s.dispo >= 0], ['Exacte imputation budgétaire (plans de la configuration renseignés)', !!z && bvLinkMissing(z.r) === 0], ['Validité de la créance : service fait certifié', !!d.fac && !!(d.dt && d.dt.liq)], ['Pièces justificatives', !!d.fac]]; }
+  function dpPayOpen(d) {
+    var body = document.getElementById('dp-pay-body'), z = dpLine(d.key), s = dpStat(d.key), dd = d.dt || {}, ch = dpPayChecks(d), ko = ch.filter(function (c) { return !c[1]; }).length; body.innerHTML = '';
+    document.getElementById('dp-pay-title').textContent = 'Mandat ' + d.mandat;
+    var bar = cvEl('div', 'row-toolbar'), pay = cvEl('button', 'btn primary', 'Prendre en charge et payer'), rej = cvEl('button', 'btn', 'Rejeter le mandat'); pay.type = rej.type = 'button'; pay.disabled = ko > 0; if (ko) pay.title = ko + ' contrôle(s) en anomalie : rejetez le mandat ou corrigez le dossier.';
+    pay.addEventListener('click', function () { cvAsk({ title: 'Prendre en charge et payer ' + d.mandat, ok: 'Payer', required: false, optLabel: 'Mode de paiement *', options: DP_MODES, placeholder: 'Observation du comptable' }, function (c, mode) { d.st = 'paye'; d.mode = mode; (d.dt = d.dt || {}).pay = cadToday(); DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', d.mandat + ' pris en charge : ' + fmt(d.mt) + ' MGA payés (' + mode.toLowerCase() + ').'); dpPayRender(); }); });
+    rej.addEventListener('click', function () { cvAsk({ title: 'Rejeter ' + d.mandat, ok: 'Rejeter', required: false, optLabel: 'Motif du rejet *', options: DP_MOTIFS, placeholder: 'Précisions pour l’ordonnateur' }, function (c, motif) { d.st = 'liquide'; d.mandat = ''; d.rejet = motif; DP.sel.dppay = null; document.getElementById('dp-pay-form').hidden = true; dpMsg('dppay-msg', 'Mandat rejeté (' + motif.toLowerCase() + ') : retour à l’ordonnateur.', true); dpPayRender(); }); });
+    bar.appendChild(pay); bar.appendChild(rej); body.appendChild(bar);
+    function sec(title, node) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', title)); x.appendChild(node); body.appendChild(x); return x; }
+    sec('Mandat', dpTiles([['Mandat', d.mandat, 'brand'], ['Bénéficiaire', d.tiers, 'n'], ['Net à payer', fmt(d.mt) + ' MGA', 'warn'], ['Statut', DP_ST[d.st][0], 'info']], { small: true }));
+    sec('Dépense', dpTiles([['Engagement', d.id], ['Acte', d.acte + ' ' + d.ref], ['Facture', d.fac || '—'], ['Marché du PPM', d.ppm || '—']], { small: true }));
+    var obj = cvEl('div', 'hint', 'Objet : ' + d.objet); obj.style.margin = '-4px 0 14px'; body.lastChild.appendChild(obj);
+    var nat = z && z.l.nat && PUB_NAT[z.l.nat] ? PUB_NAT[z.l.nat] + ' · ' + (NATL[z.l.nat] || '').replace(/^\d+ — /, '') : 'Non rattaché';
+    sec('Imputation budgétaire', dpTiles([['Composante', z ? z.perim : '—'], ['Ligne du PTBA', dpShort(d)], ['Compte', nat], ['Source de financement', (z && z.l.axv && z.l.axv.Financier) || '—']], { small: true }));
+    if (z) body.appendChild(dpWork(z));
+    sec('Situation du crédit de la ligne', dpTiles([['Crédit validé', fmt(s.ouv) + ' MGA', 'brand'], ['Engagé (visé)', fmt(s.e) + ' MGA'], ['Payé à ce jour', fmt(s.p) + ' MGA'], ['Disponible', fmt(s.dispo) + ' MGA', s.dispo >= 0 ? 'ok' : 'ko']], { small: true }));
+    var cl = cvEl('div'); ch.forEach(function (c) { var row = cvEl('div', 'list-row'); row.appendChild(cvEl('div', null, c[0])); row.appendChild(badge(c[1] ? 'Conforme' : 'Anomalie', c[1] ? 'b-ok' : 'b-ko')); cl.appendChild(row); }); sec('Contrôles du comptable', cl);
+    var pj = cvEl('div'); pj.appendChild(pjList([d.acte.replace(/ /g, '_') + '_' + d.ref + '.pdf', 'Facture_' + (d.fac || 'sans_numero') + '.pdf', 'PV_de_reception_' + d.id + '.pdf', 'Visa_CF_' + d.id + '.pdf'])); sec('Pièces justificatives', pj);
+    var hl = cvEl('div'); [['Engagement saisi', dd.eng, d.tiers], ['Visa du Contrôle financier', dd.eng, 'Engagement ' + d.id], ['Service fait et liquidation', dd.liq, 'Facture ' + (d.fac || '—')], ['Mandat émis', dd.ord, d.mandat]].forEach(function (x) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, x[0])); l.appendChild(cvEl('div', 'hby', x[2])); row.appendChild(l); row.appendChild(cvEl('span', 'when', x[1] ? isoToFr(x[1]) : '—')); hl.appendChild(row); }); sec('Parcours du dossier', hl);
+    document.getElementById('dp-pay-form').hidden = false;
   }
   function dpNo(id) { return document.getElementById(id) || { addEventListener: function () {} }; }
   var DP_RENDER = { dpeng: dpEngRender, dpliq: dpLiqRender, dpord: dpOrdRender, dppay: dpPayRender };
