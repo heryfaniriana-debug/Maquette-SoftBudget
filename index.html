@@ -1935,18 +1935,12 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <svg class="ico chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="sub">
-          <button class="cprj" data-go="cadcred">Crédits ouverts</button>
           <button class="cprj" data-go="dpeng" title="Engagements : réservation de crédit et visa du Contrôle financier">Engagements</button>
           <button class="cprj" data-go="dpliq" title="Liquidations : service fait et montant dû">Liquidations</button>
           <button class="cprj" data-go="dpord" title="Ordonnancement et mandats">Ordonnancement</button>
           <button class="cprj" data-go="dppay" title="Prise en charge et paiement">Paiements</button>
-          <button data-go="cadeng" style="display:none">Engagements (ancien)</button>
-          <button data-go="cadliq" style="display:none">Liquidations (ancien)</button>
-          <button data-go="cadreg" style="display:none">Règlements (ancien)</button>
           <button class="cprj" data-go="dptab" title="Tableau du compte administratif">Tableau de restitution</button>
           <button class="cprj" data-go="dpclot" title="Clôture de l’exercice">Clôture</button>
-          <button data-go="cadtab" style="display:none">Tableau (ancien)</button>
-          <button data-go="cadclot" style="display:none">Clôture (ancienne)</button>
           <button class="cprj" data-go="cadint" title="Fichiers d’interface">Fichiers d’interface</button>
           <button class="cpub" data-go="pubcred">Crédits ouverts</button>
           <button class="cpub" data-go="pubeng" title="Engagements">Engagements</button>
@@ -4932,42 +4926,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       
 <!-- ===== Compte administratif : crédits ouverts ===== -->
-      <section class="view" id="v-cadcred">
-        <div class="head"><div><h1>Crédits ouverts</h1><p>Lignes du PTBA par composante, source de financement et catégorie, avec les virements et les révisions approuvées par le bailleur (ANO)</p></div>
-          <div class="actions"><button class="btn" id="ccr-exp">Exporter</button></div></div>
-        <div class="callout" id="ccr-lock" hidden style="margin-bottom:12px"></div>
-        <div class="callout" id="ccr-msg" hidden style="margin-bottom:12px"></div>
-        <div class="rpbud" style="margin-bottom:12px"><div class="rpbud-grid"><div class="rpbud-fld"><label for="ccr-ver">Version du crédit</label><select class="field" id="ccr-ver"></select><div class="rpbud-hint" style="margin-top:4px">Par défaut : la dernière version. Seules les révisions approuvées comptent dans le crédit révisé des états.</div></div></div></div>
-        <div class="kpis" id="ccr-k"></div>
-        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1080px">
-          <thead><tr><th>Code</th><th>Libellé de l’activité</th><th>Source de financement</th><th>Catégorie financière</th><th class="num">Crédit initial</th><th class="num">Révisions / transferts</th><th class="num">Crédit révisé</th></tr></thead>
-          <tbody id="ccr-b"></tbody><tfoot id="ccr-f"></tfoot></table></div><div class="pager"><span id="ccr-n"></span><span>Montants en MGA</span></div></div>
-        <div class="panel"><h2>Mouvements de crédits</h2><div class="body" style="padding:0"><div class="scroll"><table style="min-width:1000px">
-          <thead><tr><th>N°</th><th>Type</th><th>Date</th><th>Origine → destination</th><th class="num">Montant</th><th>Autorité</th><th>N° ANO</th><th>Statut</th></tr></thead><tbody id="ccr-mv"></tbody></table></div></div></div>
-      </section>
 
       <!-- ===== Compte administratif : tableau ===== -->
-      <section class="view" id="v-cadtab">
-        <div class="head"><div><h1>Tableau du compte administratif</h1><p>Exécution de chaque ligne du PTBA : crédit révisé, engagements, liquidations, paiements, disponible et alertes d’écart. Les paramètres se renseignent avant la consultation.</p></div>
-          <div class="actions"><button class="btn" id="ctb-xls">Exporter Excel</button><button class="btn" id="ctb-pdf">Exporter PDF réglementaire</button></div></div>
-        <div class="callout" id="ctb-lock" hidden style="margin-bottom:12px"></div>
-        <div class="callout" id="ctb-msg" hidden style="margin-bottom:12px"></div>
-        <div class="rpbud" id="ctb-par"></div>
-        <div id="ctb-res" hidden>
-          <div class="callout" id="ctb-info" style="margin-bottom:12px"></div>
-          <div class="kpis" id="ctb-k"></div>
-          <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1500px"><thead><tr id="ctb-h"></tr></thead><tbody id="ctb-b"></tbody><tfoot><tr id="ctb-f"></tr></tfoot></table></div><div class="pager"><span id="ctb-n"></span><span>Montants en MGA</span></div></div>
-        </div>
-      </section>
 
       <!-- ===== Compte administratif : clôture ===== -->
-      <section class="view" id="v-cadclot">
-        <div class="head"><div><h1>Clôture de l’exercice</h1><p>Opérations de clôture du compte administratif, validation par le RAF, adoption par le Directeur de projet et verrouillage de l’exercice</p></div></div>
-        <div class="callout" id="clo-lock" hidden style="margin-bottom:12px"></div>
-        <div class="callout" id="clo-msg" hidden style="margin-bottom:12px"></div>
-        <div class="panel" style="margin-bottom:14px"><h2>Opérations de clôture <small id="clo-par"></small></h2><div class="body" id="clo-ops" style="padding:0"></div></div>
-        <div class="panel"><h2>Versions du compte administratif</h2><div class="body" id="clo-ver" style="padding:0"></div></div>
-      </section>
 
       <!-- ===== Paramètres : régime et modules ===== -->
       <section class="view" id="v-regime">
@@ -5064,85 +5026,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       
 <!-- ===== Compte administratif : engagements ===== -->
-      <section class="view" id="v-cadeng">
-        <div class="head"><div><h1>Engagements</h1><p>Demande d’engagement financier (DEF) avec contrôle de disponibilité bloquant, visa du RAF puis approbation du Directeur de projet, et fiche d’engagement numérotée</p></div>
-          <div class="actions"><button class="btn primary" id="ceg-new">+ Nouvelle demande d’engagement</button></div></div>
-        <div class="callout" id="ceg-lock" hidden style="margin-bottom:12px"></div>
-        <div class="callout" id="ceg-msg" hidden style="margin-bottom:12px"></div>
-        <div class="callout" id="ceg-mode" style="margin-bottom:12px"></div>
-        <div class="kpis" id="ceg-k"></div>
-        <div class="panel" id="ceg-form" hidden style="margin-bottom:14px"><h2>Demande d’engagement financier <small id="ceg-no"></small></h2><div class="body">
-          <div style="display:grid;grid-template-columns:minmax(0,3fr) minmax(280px,2fr);gap:16px;align-items:start">
-            <div class="fgrid">
-              <div class="full"><label for="ceg-ligne">Ligne budgétaire <em>*</em></label><select id="ceg-ligne" class="field"></select></div>
-              <div><label for="ceg-sup">Fournisseur ou prestataire <em>*</em></label><input id="ceg-sup" class="field" type="text" placeholder="Raison sociale"></div>
-              <div><label for="ceg-acte">Type d’acte <em>*</em></label><select id="ceg-acte" class="field"><option>Bon de commande</option><option>Marché</option><option>Contrat</option><option>Convention</option></select></div>
-              <div><label for="ceg-ref">Référence de l’acte <em>*</em></label><input id="ceg-ref" class="field" type="text" placeholder="BC-2026-…"></div>
-              <div class="full"><label for="ceg-ppm">Marché du plan de passation (PPM) <em>*</em></label><select id="ceg-ppm" class="field"></select><div class="hint">Le marché doit être attribué pour pouvoir être engagé.</div></div>
-              <div><label for="ceg-ano">N° d’ANO du bailleur <em id="ceg-ano-req"></em></label><input id="ceg-ano" class="field" type="text" placeholder="ANO-FAD-2026-…"><div class="hint" id="ceg-ano-h"></div></div>
-              <div><label for="ceg-liv">Livraison prévue</label><input id="ceg-liv" class="field" type="date"></div>
-              <div><label for="ceg-dev">Devise</label><select id="ceg-dev" class="field"><option>MGA</option><option>EUR</option><option>UC</option></select></div>
-              <div><label for="ceg-ht">Montant hors taxes <em>*</em></label><input id="ceg-ht" class="field" type="text" inputmode="numeric" placeholder="0"></div>
-              <div><label for="ceg-tva">TMP</label><select id="ceg-tva" class="field"><option value="0">0 %</option><option value="20" selected>20 %</option></select></div>
-              <div><label for="ceg-ttc">Montant TTC</label><input id="ceg-ttc" class="field" type="text" readonly></div>
-              <div id="ceg-retw" style="display:none"><label for="ceg-ret">Retenue de garantie</label><select id="ceg-ret" class="field"><option value="0">Aucune</option><option value="5">5 %</option><option value="10">10 %</option></select><div class="hint">Libérée sur PV de réception définitive.</div></div>
-              <div class="full"><div class="hint" id="ceg-conv"></div></div>
-              <div class="full"><label for="ceg-objet">Objet <em>*</em></label><textarea id="ceg-objet" class="field" rows="2" style="height:auto;padding:8px 12px" placeholder="Objet de la dépense"></textarea></div>
-              <div class="full"><label for="ceg-pj">Pièces jointes</label><input id="ceg-pj" class="field" type="text" placeholder="Noms de fichiers séparés par des virgules"></div>
-            </div>
-            <div class="card" style="padding:14px 16px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px"><b>Contrôle de disponibilité</b><span id="ceg-chip"></span></div><div id="ceg-dispo"></div><div class="rpbud-hint" id="ceg-block" style="margin-top:8px"></div></div>
-          </div>
-          <div class="err" id="ceg-err"></div>
-          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="ceg-cancel">Annuler</button><button class="btn" id="ceg-draft">Enregistrer le brouillon</button><button class="btn primary" id="ceg-submit">Soumettre au visa</button></div>
-        </div></div>
-        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1180px">
-          <thead><tr><th>N°</th><th>Fournisseur et objet</th><th>Ligne</th><th>Acte</th><th>PPM · ANO</th><th class="num">Montant TTC</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="ceg-b"></tbody></table></div><div class="pager"><span id="ceg-n"></span><span>Montants en MGA</span></div></div>
-        <div class="panel" id="ceg-fiche" hidden><h2><span id="ceg-ft">Fiche</span><span class="actions"><button class="btn small" id="ceg-fclose">Fermer</button></span></h2><div class="body" id="ceg-fb"></div></div>
-      </section>
 
       <!-- ===== Compte administratif : liquidations ===== -->
-      <section class="view" id="v-cadliq">
-        <div class="head"><div><h1>Liquidations</h1><p>Registre des factures, certification du service fait, rapprochement facture, engagement et PV, puis visa du RAF « vu et vérifié »</p></div>
-          <div class="actions"><button class="btn primary" id="cli-new">+ Enregistrer une facture</button></div></div>
-        <div class="callout" id="cli-lock" hidden style="margin-bottom:12px"></div>
-        <div class="callout" id="cli-msg" hidden style="margin-bottom:12px"></div>
-        <div class="kpis" id="cli-k"></div>
-        <div class="panel" id="cli-form" hidden style="margin-bottom:14px"><h2>Facture arrivée <small id="cli-no"></small></h2><div class="body">
-          <div style="display:grid;grid-template-columns:minmax(0,3fr) minmax(280px,2fr);gap:16px;align-items:start">
-            <div class="fgrid">
-              <div class="full"><label for="cli-eng">Engagement visé à liquider <em>*</em></label><select id="cli-eng" class="field"></select></div>
-              <div><label for="cli-cred">Créancier sur la facture <em>*</em></label><input id="cli-cred" class="field" type="text"></div>
-              <div><label for="cli-fno">N° de facture <em>*</em></label><input id="cli-fno" class="field" type="text" placeholder="FAC-…"></div>
-              <div><label for="cli-fdate">Date de la facture <em>*</em></label><input id="cli-fdate" class="field" type="date"></div>
-              <div><label for="cli-pv">Bon de livraison ou PV de réception <em>*</em></label><input id="cli-pv" class="field" type="text" placeholder="PV-2026-…"></div>
-              <div><label for="cli-ht">Montant HT (devise de l’engagement) <em>*</em></label><input id="cli-ht" class="field" type="text" inputmode="numeric"></div>
-              <div><label for="cli-tva">TMP</label><select id="cli-tva" class="field"><option value="0">0 %</option><option value="20" selected>20 %</option></select></div>
-              <div><label for="cli-ttc">Montant TTC réclamé (devise de l’engagement) <em>*</em></label><input id="cli-ttc" class="field" type="text" inputmode="numeric"></div>
-            </div>
-            <div class="card" style="padding:14px 16px"><b>Contrôles automatiques</b><div id="cli-chk" style="margin-top:8px"></div></div>
-          </div>
-          <div class="err" id="cli-err"></div>
-          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="cli-cancel">Annuler</button><button class="btn primary" id="cli-submit">Enregistrer la facture</button></div>
-        </div></div>
-        <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1180px">
-          <thead><tr><th>N°</th><th>Facture</th><th>Engagement et créancier</th><th>Ligne</th><th class="num">Montant TTC</th><th>Service fait</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="cli-b"></tbody></table></div><div class="pager"><span id="cli-n"></span><span>Montants en MGA</span></div></div>
-        <div class="card" style="margin-bottom:14px"><h2 style="margin:0;font-size:14px;font-weight:600;padding:12px 16px;border-bottom:1px solid #E9EBF0">Retenues de garantie <small style="font-weight:400;color:#5B606D">compte de tiers dédié (4017) · libérées sur PV de réception définitive</small></h2><div class="scroll"><table style="min-width:900px"><thead><tr><th>N°</th><th>Créancier</th><th>Ligne</th><th class="num">Montant retenu</th><th>PV définitif</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="cli-rg"></tbody></table></div></div>
-        <div class="panel" id="cli-fiche" hidden><h2><span id="cli-ft">Fiche</span><span class="actions"><button class="btn small" id="cli-fclose">Fermer</button></span></h2><div class="body" id="cli-fb"></div></div>
-      </section>
 
       <!-- ===== Compte administratif : règlements ===== -->
-      <section class="view" id="v-cadreg">
-        <div class="head"><div><h1>Règlements</h1><p>Bon à payer du Directeur de projet, choix de la modalité (paiement direct, compte spécial, contrepartie), bordereau, double signature et paiement</p></div></div>
-        <div class="callout" id="crg-lock" hidden style="margin-bottom:12px"></div>
-        <div class="callout" id="crg-msg" hidden style="margin-bottom:12px"></div>
-        <div class="kpis" id="crg-k"></div>
-        <div class="card" style="margin-bottom:14px"><h2 style="margin:0;font-size:14px;font-weight:600;padding:12px 16px;border-bottom:1px solid #E9EBF0">Liquidations à ordonnancer</h2><div class="scroll"><table style="min-width:1100px">
-          <thead><tr><th>Liquidation</th><th>Créancier</th><th>Ligne et source</th><th class="num">Montant TTC</th><th>Modalité de règlement</th><th>Action</th></tr></thead><tbody id="crg-a"></tbody></table></div></div>
-        <div class="card" style="margin-bottom:14px"><h2 style="margin:0;font-size:14px;font-weight:600;padding:12px 16px;border-bottom:1px solid #E9EBF0">Règlements en cours et réglés</h2><div class="scroll"><table style="min-width:1180px">
-          <thead><tr><th>N°</th><th>Créancier</th><th>Ligne</th><th>Modalité</th><th class="num">Montant</th><th>Signatures</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="crg-b"></tbody></table></div><div class="pager"><span id="crg-n"></span><span>Montants en MGA</span></div></div>
-              <div class="panel" id="crg-doc" hidden style="margin-bottom:14px"><h2><span id="crg-dt">Formulaires</span><span class="actions"><button class="btn small" id="crg-ddl">Télécharger</button><button class="btn small" id="crg-dprint">Imprimer</button><button class="btn small" id="crg-dclose">Fermer</button></span></h2><div class="body" id="crg-db"></div></div>
-        <div class="panel" id="crg-match" hidden><h2><span id="crg-mt">Rapprochement</span><span class="actions"><button class="btn small" id="crg-mclose">Fermer</button></span></h2><div class="body" id="crg-mb"></div></div>
-      </section>
 
       <!-- ===== Compte administratif du projet : chaîne de la dépense, liée au PTBA validé ===== -->
       <section class="view" id="v-dpeng">
@@ -6545,7 +6432,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'cadcred', 'cadeng', 'cadliq', 'cadreg', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'cadtab', 'cadclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6597,18 +6484,12 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     bkrap: ['Trésorerie', 'Rapprochement'],
     bkdvr: ['Analyses et rapports', 'Décaissement vs relevé'],
     cadm: ['Analyses et rapports', 'Bilan d’exécution'],
-    cadcred: ['Compte administratif', 'Crédits ouverts'],
-    cadeng: ['Compte administratif', 'Engagements'],
-    cadliq: ['Compte administratif', 'Liquidations'],
-    cadreg: ['Compte administratif', 'Règlements'],
     dpeng: ['Compte administratif', 'Engagements'],
     dpliq: ['Compte administratif', 'Liquidations'],
     dpord: ['Compte administratif', 'Ordonnancement'],
     dppay: ['Compte administratif', 'Paiements'],
     dptab: ['Compte administratif', 'Tableau de restitution'],
     dpclot: ['Compte administratif', 'Clôture de l’exercice'],
-    cadtab: ['Compte administratif', 'Tableau de restitution'],
-    cadclot: ['Compte administratif', 'Clôture'],
     cadint: ['Compte administratif', 'Fichiers d’interface'],
     pubcred: ['Compte administratif', 'Crédits ouverts'],
     pubeng: ['Compte administratif', 'Engagements'],
@@ -6640,7 +6521,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var NAVGROUPS = {
     'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'real', 'engage', 'decaiss', 'encaiss'],
-    'nav-cadm': ['cadcred', 'cadeng', 'cadliq', 'cadreg', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'cadtab', 'cadclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
+    'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-treso': ['bkacc', 'bkdec', 'pdec', 'dfon', 'bkrel', 'bkrap'],
     'nav-rapports': ['synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
@@ -6695,12 +6576,6 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'bkrap' && typeof bkpRender === 'function') bkpRender();
     if (name === 'bkdvr' && typeof bkvRender === 'function') bkvRender();
     if (name === 'cadm' && typeof cadmRender === 'function') cadmRender();
-    if (name === 'cadcred' && typeof ccrRender === 'function') ccrRender();
-    if (name === 'cadeng' && typeof cegRender === 'function') cegRender();
-    if (name === 'cadliq' && typeof cliRender === 'function') cliRender();
-    if (name === 'cadreg' && typeof crgRender === 'function') crgRender();
-    if (name === 'cadtab' && typeof ctbRender === 'function') ctbRender();
-    if (name === 'cadclot' && typeof cloRender === 'function') cloRender();
     if (name === 'cadint' && typeof citRender === 'function') citRender();
     if (name === 'pubcred' && typeof pcrRender === 'function') pcrRender();
     if (name === 'pubeng' && typeof pegRender === 'function') pegRender();
@@ -14632,9 +14507,6 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
   }
   var CAD_SOON = {
-    cadeng: ['Engagements', 'Demande d’engagement avec contrôle de disponibilité bloquant, visas du RAF puis du Directeur de projet, ANO et lien au plan de passation.', 'Étape 2 du déploiement : circuit projet bailleur.'],
-    cadliq: ['Liquidations', 'Registre des factures, certification du service fait, rapprochement facture, bon de commande et PV, retenue de garantie, détection des doublons.', 'Étape 2 du déploiement : circuit projet bailleur.'],
-    cadreg: ['Règlements', 'Bon à payer, choix de la modalité (paiement direct, compte spécial, contrepartie), bordereau et ordre de virement.', 'Étape 2 du déploiement : circuit projet bailleur.'],
     circuits: ['Circuits de visa et délégations', 'Matrice des rôles (SPSE, RPM, AFC, RAF, Directeur de projet), délégations limitées dans le temps, séparation ordonnateur et payeur.', 'Étape 2 du déploiement.']
   };
   function cadSoon(name) {
@@ -14719,8 +14591,8 @@ var EXEC_REC = [
     }).join('');
     cadLock('ccr-lock'); document.getElementById('ccr-exp').disabled = !ACCESS[ACC].exp;
   }
-  document.getElementById('ccr-ver').addEventListener('change', function () { CAD.ccrVer = +this.value; ccrRender(); });
-  document.getElementById('ccr-exp').addEventListener('click', function () { cadExport('Crédits ouverts', 'Excel (.xlsx)', 'version ' + CAD.ccrVer + ' · exercice ' + CAD.ex, CAD.lines.length, 'ccr-msg', 'credits-ouverts'); });
+  dpNo('ccr-ver').addEventListener('change', function () { CAD.ccrVer = +this.value; ccrRender(); });
+  dpNo('ccr-exp').addEventListener('click', function () { cadExport('Crédits ouverts', 'Excel (.xlsx)', 'version ' + CAD.ccrVer + ' · exercice ' + CAD.ex, CAD.lines.length, 'ccr-msg', 'credits-ouverts'); });
 
   /* ----- Tableau du compte administratif ----- */
   function ctbRender() {
@@ -14731,7 +14603,7 @@ var EXEC_REC = [
     cadLock('ctb-lock');
     if (CAD.tabGen) {
       el.innerHTML = '<div class="rpbud-sum"><span><strong>Paramètres :</strong> ' + escH(sum) + '</span><button type="button" class="btn small" id="ctb-modif">Modifier les paramètres</button></div>';
-      document.getElementById('ctb-modif').addEventListener('click', function () { CAD.tabGen = false; CAD.noteOpen = null; ctbRender(); });
+      dpNo('ctb-modif').addEventListener('click', function () { CAD.tabGen = false; CAD.noteOpen = null; ctbRender(); });
       document.getElementById('ctb-res').hidden = false; document.getElementById('ctb-xls').disabled = !ACCESS[ACC].exp; document.getElementById('ctb-pdf').disabled = !ACCESS[ACC].exp; ctbCompute(); return;
     }
     document.getElementById('ctb-res').hidden = true; document.getElementById('ctb-xls').disabled = true; document.getElementById('ctb-pdf').disabled = true;
@@ -14744,10 +14616,10 @@ var EXEC_REC = [
     h += '<div class="rpbud-fld"><label for="ctb-thr">Seuil d’alerte (points d’écart)</label><input class="field" type="text" inputmode="numeric" id="ctb-thr" value="' + P.thr + '"><div class="rpbud-hint" style="margin-top:4px">Écart entre le taux d’exécution et la programmation à la date d’arrêté.</div></div>';
     h += '</div><div class="rpbud-go"><button type="button" class="btn primary" id="ctb-go">Consulter</button></div>';
     el.innerHTML = h;
-    document.getElementById('ctb-ver').addEventListener('change', function () { P.ver = +this.value; if (P.cmp === P.ver) P.cmp = ''; ctbRender(); });
-    document.getElementById('ctb-grp').addEventListener('change', function () { P.grp = this.value; });
-    document.getElementById('ctb-cmp').addEventListener('change', function () { P.cmp = this.value ? +this.value : ''; });
-    document.getElementById('ctb-go').addEventListener('click', function () {
+    dpNo('ctb-ver').addEventListener('change', function () { P.ver = +this.value; if (P.cmp === P.ver) P.cmp = ''; ctbRender(); });
+    dpNo('ctb-grp').addEventListener('change', function () { P.grp = this.value; });
+    dpNo('ctb-cmp').addEventListener('change', function () { P.cmp = this.value ? +this.value : ''; });
+    dpNo('ctb-go').addEventListener('click', function () {
       var ar = document.getElementById('ctb-ar').value, thr = parseInt0(document.getElementById('ctb-thr').value);
       if (!ar) { bkMsg('ctb-msg', 'Saisissez la date d’arrêté des comptes.', 'warn'); return; }
       if (ar.slice(0, 4) !== CAD.ex) { bkMsg('ctb-msg', 'La date d’arrêté doit être dans l’exercice ' + CAD.ex + '.', 'warn'); return; }
@@ -14786,12 +14658,12 @@ var EXEC_REC = [
     document.getElementById('ctb-f').innerHTML = '<td>Total du projet</td><td class="num">' + fmt(T.cred) + '</td>' + (C ? '<td class="num">' + fmt(C.reduce(function (a, l) { return a + l.cred; }, 0)) + '</td><td class="num">' + fmt(T.cred - C.reduce(function (a, l) { return a + l.cred; }, 0)) + '</td>' : '') + '<td class="num">' + fmt(T.eng) + '</td><td class="num">' + fmt(T.liq) + '</td><td class="num">' + fmt(T.pay) + '</td><td class="num">' + fmt(T.cred - T.eng - T.res) + '</td><td class="num">' + fmt(T.eng - T.pay) + '</td><td class="num">' + pctf(T.cred ? T.eng / T.cred : 0) + '</td><td class="num">' + pctf(T.cred ? T.liq / T.cred : 0) + '</td><td class="num">' + pctf(T.cred ? T.pay / T.cred : 0) + '</td><td></td><td></td><td></td>';
     document.getElementById('ctb-n').textContent = 'Taux de paiement = paiements ÷ crédit révisé · alerte au-delà de ±' + P.thr + ' points d’écart avec la programmation · l’ordonnancement se distinguera du paiement à l’étape 2';
     document.querySelectorAll('#ctb-b button[data-note]').forEach(function (b) { b.addEventListener('click', function () { CAD.noteOpen = b.dataset.note; ctbCompute(); }); });
-    var ns = document.getElementById('ctb-ns'); if (ns) { ns.addEventListener('click', function () { var t = document.getElementById('ctb-nt').value.trim(); if (t.length < 10) { bkMsg('ctb-msg', 'La note explicative doit comporter au moins 10 caractères.', 'warn'); return; } CAD.notes[CAD.noteOpen] = t; bkMsg('ctb-msg', 'Note enregistrée pour la ligne ' + CAD.noteOpen + '.', 'ok'); CAD.noteOpen = null; ctbCompute(); }); document.getElementById('ctb-nc').addEventListener('click', function () { CAD.noteOpen = null; ctbCompute(); }); }
+    var ns = document.getElementById('ctb-ns'); if (ns) { ns.addEventListener('click', function () { var t = document.getElementById('ctb-nt').value.trim(); if (t.length < 10) { bkMsg('ctb-msg', 'La note explicative doit comporter au moins 10 caractères.', 'warn'); return; } CAD.notes[CAD.noteOpen] = t; bkMsg('ctb-msg', 'Note enregistrée pour la ligne ' + CAD.noteOpen + '.', 'ok'); CAD.noteOpen = null; ctbCompute(); }); dpNo('ctb-nc').addEventListener('click', function () { CAD.noteOpen = null; ctbCompute(); }); }
     CAD.out = { fil: 'Version ' + P.ver + ' · arrêté ' + isoToFr(P.arret) + ' · ' + GL_TXT(P.grp) + (P.cmp ? ' · comparé à la version ' + P.cmp : '') + (fr ? ' · figé' : ' · projet'), n: L.length };
   }
   function GL_TXT(g) { return { comp: 'par composante', src: 'par source', cat: 'par catégorie' }[g]; }
-  document.getElementById('ctb-xls').addEventListener('click', function () { cadExport('Tableau du compte administratif', 'Excel (.xlsx)', CAD.out.fil, CAD.out.n, 'ctb-msg', 'compte-administratif'); });
-  document.getElementById('ctb-pdf').addEventListener('click', function () { cadExport('Tableau du compte administratif', 'PDF réglementaire', CAD.out.fil + (cadFrozen() ? '' : ' (filigrane « Projet — non figé »)'), CAD.out.n, 'ctb-msg', 'compte-administratif'); });
+  dpNo('ctb-xls').addEventListener('click', function () { cadExport('Tableau du compte administratif', 'Excel (.xlsx)', CAD.out.fil, CAD.out.n, 'ctb-msg', 'compte-administratif'); });
+  dpNo('ctb-pdf').addEventListener('click', function () { cadExport('Tableau du compte administratif', 'PDF réglementaire', CAD.out.fil + (cadFrozen() ? '' : ' (filigrane « Projet — non figé »)'), CAD.out.n, 'ctb-msg', 'compte-administratif'); });
 
   /* ----- Clôture ----- */
   function cloRender() {
@@ -15150,9 +15022,9 @@ var EXEC_REC = [
     var rej = CAD.cegRej === id, l = cadLines(2).filter(function (z) { return z.code === x.ligne; })[0], sr = cadSrcOf(x.ligne);
     document.getElementById('ceg-fb').innerHTML = '<div class="kv" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 18px;margin-bottom:12px">' + [['Ligne', x.ligne + ' — ' + escH(l.lib)], ['Source', escH(sr.lib)], ['Fournisseur', escH(x.sup)], ['Acte', x.acte + ' ' + escH(x.ref)], ['Plan de passation', escH(x.ppm)], ['ANO', x.ano ? escH(x.ano) : '—'], ['Montant HT', fmt(x.ht) + ' ' + x.dev], ['TMP', x.tva + ' %'], ['Montant TTC', fmt(x.ttcD) + ' ' + x.dev + (x.dev !== 'MGA' ? ' = ' + fmt(x.ttc) + ' MGA (taux ' + fmt(x.taux) + ')' : '')], ['Retenue de garantie', x.ret ? x.ret + ' %' : 'Aucune'], ['Livraison prévue', x.liv ? isoToFr(x.liv) : '—'], ['Pièces', x.pj.length ? escH(x.pj.join(', ')) : '—'], ['Statut', '<span class="badge ' + CEG_ST[x.st] + '">' + x.st + '</span>']].map(function (k) { return '<div><div style="font-size:12px;color:#5B606D">' + k[0] + '</div><div>' + k[1] + '</div></div>'; }).join('') + '</div><div style="margin-bottom:10px;font-size:13.5px"><b>Objet :</b> ' + escH(x.objet) + '</div>' +
       (rej ? '<div class="card" style="padding:12px 14px;margin-bottom:12px"><b>Rejeter cet engagement</b><div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap"><select id="ceg-rm" class="field" style="max-width:340px">' + CAD_MOTIFS.map(function (m) { return '<option>' + m + '</option>'; }).join('') + '</select><button class="btn small" id="ceg-rok">Confirmer le rejet</button><button class="btn small" id="ceg-rno">Annuler</button></div></div>' : '') + '<b>Piste d’audit</b>' + cadHistHtml(x.hist);
-    var ok = document.getElementById('ceg-rok'); if (ok) { ok.addEventListener('click', function () { var m = document.getElementById('ceg-rm').value; x.st = 'Rejeté'; cadHist(x, 'Rejeté — ' + m); cadAudit(x.id, 'Rejeté : ' + m); CAD.cegRej = null; bkMsg('ceg-msg', x.id + ' rejeté (' + m.toLowerCase() + ') : le crédit réservé est libéré.', 'warn'); cegRender(); }); document.getElementById('ceg-rno').addEventListener('click', function () { CAD.cegRej = null; cegFiche(id); }); }
+    var ok = document.getElementById('ceg-rok'); if (ok) { ok.addEventListener('click', function () { var m = document.getElementById('ceg-rm').value; x.st = 'Rejeté'; cadHist(x, 'Rejeté — ' + m); cadAudit(x.id, 'Rejeté : ' + m); CAD.cegRej = null; bkMsg('ceg-msg', x.id + ' rejeté (' + m.toLowerCase() + ') : le crédit réservé est libéré.', 'warn'); cegRender(); }); dpNo('ceg-rno').addEventListener('click', function () { CAD.cegRej = null; cegFiche(id); }); }
   }
-  document.getElementById('ceg-fclose').addEventListener('click', function () { CAD.cegFiche = null; CAD.cegRej = null; document.getElementById('ceg-fiche').hidden = true; });
+  dpNo('ceg-fclose').addEventListener('click', function () { CAD.cegFiche = null; CAD.cegRej = null; document.getElementById('ceg-fiche').hidden = true; });
   function cegCalc() {
     var lines = cadLines(2), code = document.getElementById('ceg-ligne').value, l = lines.filter(function (z) { return z.code === code; })[0], ht = parseInt0(document.getElementById('ceg-ht').value), tva = +document.getElementById('ceg-tva').value, ttc = isNaN(ht) ? 0 : Math.round(ht * (1 + tva / 100));
     document.getElementById('ceg-ttc').value = ttc ? fmt(ttc) : '';
@@ -15165,15 +15037,15 @@ var EXEC_REC = [
     document.getElementById('ceg-ano-req').textContent = need ? '*' : ''; document.getElementById('ceg-ano-h').textContent = need ? 'Obligatoire : ' + (acte === 'Marché' || acte === 'Contrat' ? 'marché ou contrat' : 'montant ≥ ' + fmt(CAD.thr.ano) + ' MGA') + '.' : 'Facultative sous ' + fmt(CAD.thr.ano) + ' MGA.';
     return { ttc: ttc, l: l, ok: ok, need: need, apres: apres };
   }
-  document.getElementById('ceg-new').addEventListener('click', function () {
+  dpNo('ceg-new').addEventListener('click', function () {
     if (!cadOpen('eng_create', 'ceg-msg')) return; if (CAD.ops.stop) { bkMsg('ceg-msg', 'Les engagements sont arrêtés pour l’exercice : aucune nouvelle demande.', 'warn'); return; }
     document.getElementById('ceg-ligne').innerHTML = cadLines(2).map(function (l) { return '<option value="' + l.code + '">' + l.code + ' — ' + escH(l.lib) + ' (' + escH(l.srcLib) + ', disponible ' + fmt(l.cred - l.eng - l.res) + ')</option>'; }).join('');
     ['ceg-sup', 'ceg-ref', 'ceg-ppm', 'ceg-ano', 'ceg-liv', 'ceg-ht', 'ceg-objet', 'ceg-pj'].forEach(function (i) { document.getElementById(i).value = ''; });
     document.getElementById('ceg-acte').value = 'Bon de commande'; document.getElementById('ceg-tva').value = '20'; document.getElementById('ceg-dev').value = 'MGA'; document.getElementById('ceg-ret').value = '0'; if (typeof cegPpmOpts === 'function') cegPpmOpts(); document.getElementById('ceg-err').textContent = '';
     document.getElementById('ceg-no').textContent = '· ENG-2026-0' + (CAD.seq.eng + 1); document.getElementById('ceg-form').hidden = false; cegCalc();
   });
-  ['ceg-ligne', 'ceg-ht', 'ceg-tva', 'ceg-acte', 'ceg-dev', 'ceg-ret'].forEach(function (i) { document.getElementById(i).addEventListener('input', cegCalc); document.getElementById(i).addEventListener('change', cegCalc); });
-  document.getElementById('ceg-cancel').addEventListener('click', function () { document.getElementById('ceg-form').hidden = true; });
+  ['ceg-ligne', 'ceg-ht', 'ceg-tva', 'ceg-acte', 'ceg-dev', 'ceg-ret'].forEach(function (i) { dpNo(i).addEventListener('input', cegCalc); dpNo(i).addEventListener('change', cegCalc); });
+  dpNo('ceg-cancel').addEventListener('click', function () { document.getElementById('ceg-form').hidden = true; });
   function cegSave(submit) {
     var err = document.getElementById('ceg-err'), c = cegCalc(), v = function (i) { return document.getElementById(i).value.trim(); };
     if (!v('ceg-sup') || !v('ceg-ref') || !v('ceg-objet') || !c.ttc) { err.textContent = 'Fournisseur, référence de l’acte, objet et montant sont obligatoires.'; return; }
@@ -15187,8 +15059,8 @@ var EXEC_REC = [
     cadHist(x, submit ? 'Demande soumise au visa — crédit réservé' : 'Brouillon enregistré'); CAD.eng.push(x); cadAudit(id, submit ? 'Soumis au visa (' + fmt(x.ttc) + ' MGA)' : 'Brouillon créé');
     document.getElementById('ceg-form').hidden = true; bkMsg('ceg-msg', id + (submit ? ' soumis au visa du RAF : le crédit de ' + fmt(x.ttc) + ' MGA est réservé.' : ' enregistré en brouillon.'), 'ok'); cegRender();
   }
-  document.getElementById('ceg-draft').addEventListener('click', function () { cegSave(false); });
-  document.getElementById('ceg-submit').addEventListener('click', function () { cegSave(true); });
+  dpNo('ceg-draft').addEventListener('click', function () { cegSave(false); });
+  dpNo('ceg-submit').addEventListener('click', function () { cegSave(true); });
 
   /* ----- Liquidations ----- */
   var CLI_ST = { 'Facture enregistrée': 'b-warn', 'Service fait certifié': 'b-info', 'Liquidée': 'b-ok', 'Rejetée': 'b-ko' };
@@ -15225,9 +15097,9 @@ var EXEC_REC = [
     var rej = CAD.cliRej === id, en = cegGet(x.eng);
     document.getElementById('cli-fb').innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 18px;margin-bottom:12px">' + [['Engagement', x.eng + ' (' + fmt(en.ttc) + ' MGA)'], ['Créancier', escH(x.sup)], ['Facture', escH(x.fno) + ' du ' + isoToFr(x.fdate)], ['Montant HT', fmt(x.ht) + ' ' + x.dev], ['TMP', x.tva + ' %'], ['Montant TTC', fmt(x.ttcD) + ' ' + x.dev + (x.dev !== 'MGA' ? ' = ' + fmt(x.ttc) + ' MGA' : '')], ['Retenue de garantie', x.ret ? fmt(x.ret) + ' MGA (' + x.retPct + ' %)' : 'Aucune'], ['Net à payer', fmt(x.net) + ' MGA'], ['PV ou bon de livraison', escH(x.pv)], ['N° d’ordre', x.order], ['Reste à liquider sur l’engagement', fmt(cadResteLiq(en)) + ' ' + en.dev], ['Statut', '<span class="badge ' + CLI_ST[x.st] + '">' + x.st + '</span>']].map(function (k) { return '<div><div style="font-size:12px;color:#5B606D">' + k[0] + '</div><div>' + k[1] + '</div></div>'; }).join('') + '</div>' +
       (rej ? '<div class="card" style="padding:12px 14px;margin-bottom:12px"><b>Rejeter cette facture</b><div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap"><select id="cli-rm" class="field" style="max-width:340px">' + CAD_MOTIFS.map(function (m) { return '<option>' + m + '</option>'; }).join('') + '</select><button class="btn small" id="cli-rok">Confirmer le rejet</button><button class="btn small" id="cli-rno">Annuler</button></div></div>' : '') + '<b>Piste d’audit</b>' + cadHistHtml(x.hist);
-    var ok = document.getElementById('cli-rok'); if (ok) { ok.addEventListener('click', function () { var m = document.getElementById('cli-rm').value; x.st = 'Rejetée'; cadHist(x, 'Rejetée — ' + m); cadAudit(x.id, 'Facture rejetée : ' + m); CAD.cliRej = null; bkMsg('cli-msg', x.id + ' rejetée (' + m.toLowerCase() + ') : le montant redevient liquidable sur l’engagement.', 'warn'); cliRender(); }); document.getElementById('cli-rno').addEventListener('click', function () { CAD.cliRej = null; cliFiche(id); }); }
+    var ok = document.getElementById('cli-rok'); if (ok) { ok.addEventListener('click', function () { var m = document.getElementById('cli-rm').value; x.st = 'Rejetée'; cadHist(x, 'Rejetée — ' + m); cadAudit(x.id, 'Facture rejetée : ' + m); CAD.cliRej = null; bkMsg('cli-msg', x.id + ' rejetée (' + m.toLowerCase() + ') : le montant redevient liquidable sur l’engagement.', 'warn'); cliRender(); }); dpNo('cli-rno').addEventListener('click', function () { CAD.cliRej = null; cliFiche(id); }); }
   }
-  document.getElementById('cli-fclose').addEventListener('click', function () { CAD.cliFiche = null; CAD.cliRej = null; document.getElementById('cli-fiche').hidden = true; });
+  dpNo('cli-fclose').addEventListener('click', function () { CAD.cliFiche = null; CAD.cliRej = null; document.getElementById('cli-fiche').hidden = true; });
   function cliChecks() {
     var id = document.getElementById('cli-eng').value, en = cegGet(id), v = function (i) { return document.getElementById(i).value.trim(); };
     var ht = parseInt0(v('cli-ht')), tva = +v('cli-tva'), ttc = parseInt0(v('cli-ttc')), res = en ? cadResteLiq(en) : 0, out = [];
@@ -15240,7 +15112,7 @@ var EXEC_REC = [
     document.getElementById('cli-chk').innerHTML = out.map(function (c) { return '<div class="list-row" style="align-items:flex-start"><div><span>' + c[0] + '</span><div class="hby" style="font-size:12.5px;color:#5B606D">' + escH(c[2]) + '</div></div><span class="badge ' + (c[1] ? 'b-ok' : 'b-ko') + '" style="margin-left:auto">' + (c[1] ? 'Conforme' : 'Anomalie') + '</span></div>'; }).join('');
     return { out: out, ok: out.every(function (c) { return c[1]; }), en: en, ht: ht, tva: tva, ttc: ttc };
   }
-  document.getElementById('cli-new').addEventListener('click', function () {
+  dpNo('cli-new').addEventListener('click', function () {
     if (!cadOpen('fac_register', 'cli-msg')) return;
     var ens = CAD.eng.filter(function (e) { return e.st === 'Visé' && cadResteLiq(e) > 0; });
     if (!ens.length) { bkMsg('cli-msg', 'Aucun engagement visé avec un reste à liquider : viser un engagement d’abord.', 'warn'); return; }
@@ -15248,10 +15120,10 @@ var EXEC_REC = [
     ['cli-fno', 'cli-fdate', 'cli-pv', 'cli-ht', 'cli-ttc'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('cli-tva').value = '20';
     document.getElementById('cli-cred').value = ens[0].sup; document.getElementById('cli-err').textContent = ''; document.getElementById('cli-no').textContent = '· LIQ-2026-0' + (CAD.seq.liq + 1); document.getElementById('cli-form').hidden = false; cliChecks();
   });
-  document.getElementById('cli-eng').addEventListener('change', function () { var e = cegGet(this.value); if (e) document.getElementById('cli-cred').value = e.sup; cliChecks(); });
-  ['cli-cred', 'cli-fno', 'cli-fdate', 'cli-pv', 'cli-ht', 'cli-tva', 'cli-ttc'].forEach(function (i) { document.getElementById(i).addEventListener('input', cliChecks); document.getElementById(i).addEventListener('change', cliChecks); });
-  document.getElementById('cli-cancel').addEventListener('click', function () { document.getElementById('cli-form').hidden = true; });
-  document.getElementById('cli-submit').addEventListener('click', function () {
+  dpNo('cli-eng').addEventListener('change', function () { var e = cegGet(this.value); if (e) document.getElementById('cli-cred').value = e.sup; cliChecks(); });
+  ['cli-cred', 'cli-fno', 'cli-fdate', 'cli-pv', 'cli-ht', 'cli-tva', 'cli-ttc'].forEach(function (i) { dpNo(i).addEventListener('input', cliChecks); dpNo(i).addEventListener('change', cliChecks); });
+  dpNo('cli-cancel').addEventListener('click', function () { document.getElementById('cli-form').hidden = true; });
+  dpNo('cli-submit').addEventListener('click', function () {
     var c = cliChecks(), err = document.getElementById('cli-err'), v = function (i) { return document.getElementById(i).value.trim(); };
     if (!c.ok) { err.textContent = 'Enregistrement bloqué : corrigez les anomalies signalées dans les contrôles automatiques.'; return; }
     err.textContent = ''; var n = ++CAD.seq.liq, x = { id: 'LIQ-2026-0' + n, order: 'FA-2026-0' + (++CAD.seq.fa), date: cadToday(), eng: c.en.id, ligne: c.en.ligne, sup: c.en.sup, fno: v('cli-fno'), fdate: v('cli-fdate'), ht: c.ht, tva: c.tva, dev: c.dev, ttcD: c.ttcD, ttc: c.ttc, ret: c.ret, retPct: c.retPct, net: c.net, pv: v('cli-pv'), st: 'Facture enregistrée', sf: null, hist: [] };
@@ -15526,8 +15398,8 @@ var EXEC_REC = [
     CAD.docId = id; document.getElementById('crg-doc').hidden = false; document.getElementById('crg-dt').textContent = title + ' — ' + r.id;
     document.getElementById('crg-db').innerHTML = '<div class="card" style="padding:18px 20px;max-width:760px;margin:0 auto">' + body + '</div>';
   }
-  document.getElementById('crg-dclose').addEventListener('click', function () { document.getElementById('crg-doc').hidden = true; });
-  document.getElementById('crg-dprint').addEventListener('click', function () { sbPrint(document.getElementById('crg-dt').textContent, document.getElementById('crg-db').innerHTML); bkMsg('crg-msg', 'Impression lancée : ' + document.getElementById('crg-dt').textContent + ' (enregistrez en PDF depuis la boîte de dialogue).', 'info'); });
+  dpNo('crg-dclose').addEventListener('click', function () { document.getElementById('crg-doc').hidden = true; });
+  dpNo('crg-dprint').addEventListener('click', function () { sbPrint(document.getElementById('crg-dt').textContent, document.getElementById('crg-db').innerHTML); bkMsg('crg-msg', 'Impression lancée : ' + document.getElementById('crg-dt').textContent + ' (enregistrez en PDF depuis la boîte de dialogue).', 'info'); });
   function crgMatch(id) {
     bkEnsure(); var r = crgGet(id), cand = BKS.mov.filter(function (m) { return m.deb > 0 && m.type !== 'neutre' && !m.regRef; }).sort(function (a, b) { return Math.abs(a.deb - r.ttc) - Math.abs(b.deb - r.ttc); }).slice(0, 6);
     CAD.matchId = id; document.getElementById('crg-match').hidden = false; document.getElementById('crg-mt').textContent = 'Rapprocher ' + r.id + ' (' + fmt(r.ttc) + ' MGA) d’un débit du relevé';
@@ -15536,9 +15408,9 @@ var EXEC_REC = [
       var v = document.querySelector('input[name="crg-mrad"]:checked').value, m = BKS.mov.filter(function (x) { return x.id === v; })[0]; m.regRef = r.id; r.bank = { id: m.id, date: m.date, lib: m.lib, deb: m.deb };
       cadHist(r, 'Rapproché du relevé : ' + m.lib + ' (' + isoToFr(m.date) + ')'); cadAudit(r.id, 'Rapprochement bancaire ' + m.id);
       document.getElementById('crg-match').hidden = true; bkMsg('crg-msg', r.id + ' rapproché du débit « ' + m.lib + ' » du ' + isoToFr(m.date) + (m.deb !== r.ttc ? ' (écart de ' + fmt(m.deb - r.ttc) + ' MGA à justifier)' : ' (montants identiques)') + '.', m.deb !== r.ttc ? 'warn' : 'ok'); crgRender();
-    }); document.getElementById('crg-mno').addEventListener('click', function () { document.getElementById('crg-match').hidden = true; }); }
+    }); dpNo('crg-mno').addEventListener('click', function () { document.getElementById('crg-match').hidden = true; }); }
   }
-  document.getElementById('crg-mclose').addEventListener('click', function () { document.getElementById('crg-match').hidden = true; });
+  dpNo('crg-mclose').addEventListener('click', function () { document.getElementById('crg-match').hidden = true; });
 
   /* ----- Fichiers d'interface ----- */
   function citRows(type, d1, d2, mode) {
@@ -16209,7 +16081,7 @@ var EXEC_REC = [
   function cegPpmOpts() {
     var s = document.getElementById('ceg-ppm'); s.innerHTML = '<option value="">— Choisir un marché du plan de passation —</option>' + CPP.items.filter(function (x) { return x.st !== 'Clôturé'; }).map(function (x) { return '<option value="' + x.ref + '">' + escH(x.ref + ' — ' + x.des + ' (' + x.st + ')') + '</option>'; }).join('');
   }
-  document.getElementById('ceg-ppm').addEventListener('change', function () { var p = ppmGet(this.value); if (p) { document.getElementById('ceg-ligne').value = p.ligne; cegCalc(); } });
+  dpNo('ceg-ppm').addEventListener('change', function () { var p = ppmGet(this.value); if (p) { document.getElementById('ceg-ligne').value = p.ligne; cegCalc(); } });
 
   /* ----- Plan de décaissement ----- */
   var MOIS = ['', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
@@ -20552,6 +20424,7 @@ var EXEC_REC = [
     if (!done.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucun paiement effectué.'); c0.colSpan = 5; c0.style.textAlign = 'left'; pb.appendChild(t0); }
     done.forEach(function (d) { var tr = cvEl('tr'); cell(tr, d.mandat, 'name'); cell(tr, d.tiers); cell(tr, d.mode || '—'); cell(tr, fmt(d.mt), 'num'); var sc = cell(tr, ''); sc.appendChild(badge('Payé', 'b-ok')); pb.appendChild(tr); });
   }
+  function dpNo(id) { return document.getElementById(id) || { addEventListener: function () {} }; }
   var DP_RENDER = { dpeng: dpEngRender, dpliq: dpLiqRender, dpord: dpOrdRender, dppay: dpPayRender };
   /* ----- Tableau de restitution : exécution de chaque ligne du PTBA validé (version du crédit au choix) ----- */
   DP.tabVer = 0; DP.ops = {}; DP.vers = []; DP.frozen = null;
