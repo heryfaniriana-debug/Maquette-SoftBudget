@@ -1943,8 +1943,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="cadeng" style="display:none">Engagements (ancien)</button>
           <button data-go="cadliq" style="display:none">Liquidations (ancien)</button>
           <button data-go="cadreg" style="display:none">Règlements (ancien)</button>
-          <button class="cprj" data-go="cadtab" title="Tableau du compte administratif">Tableau de restitution</button>
-          <button class="cprj" data-go="cadclot" title="Clôture de l’exercice">Clôture</button>
+          <button class="cprj" data-go="dptab" title="Tableau du compte administratif">Tableau de restitution</button>
+          <button class="cprj" data-go="dpclot" title="Clôture de l’exercice">Clôture</button>
+          <button data-go="cadtab" style="display:none">Tableau (ancien)</button>
+          <button data-go="cadclot" style="display:none">Clôture (ancienne)</button>
           <button class="cprj" data-go="cadint" title="Fichiers d’interface">Fichiers d’interface</button>
           <button class="cpub" data-go="pubcred">Crédits ouverts</button>
           <button class="cpub" data-go="pubeng" title="Engagements">Engagements</button>
@@ -5176,6 +5178,21 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <section class="co-blk" id="dppay-checks"></section>
         <section class="co-blk"><div class="kb-h">Paiements effectués</div><div class="card"><div class="scroll"><table style="min-width:700px"><thead><tr><th>Mandat</th><th>Bénéficiaire</th><th>Mode de paiement</th><th class="num">Montant (MGA)</th><th>Statut</th></tr></thead><tbody id="dppay-b2"></tbody></table></div></div></section>
       </section>
+      <section class="view" id="v-dptab">
+        <div class="head"><div><h1>Tableau de restitution</h1><p>Exécution de chaque ligne du PTBA validé : crédit, engagements, liquidations, mandats, paiements, disponible et alertes.</p></div></div>
+        <div class="callout" id="dptab-msg" hidden style="margin-bottom:12px"></div>
+        <div class="row-toolbar" id="dptab-bar" style="margin-bottom:12px"></div>
+        <div class="fgrid" style="margin-bottom:12px"><div><label for="dptab-ver">Version du crédit</label><select id="dptab-ver" class="field"></select></div><div><label>État du compte administratif</label><div id="dptab-state" style="padding-top:6px"></div></div></div>
+        <div id="dptab-k"></div>
+        <div class="card"><div class="scroll"><table style="min-width:1300px"><thead id="dptab-h"></thead><tbody id="dptab-b"></tbody><tfoot><tr id="dptab-f"></tr></tfoot></table></div><div class="pager"><span>Taux = montant ÷ crédit validé · alerte au-delà de 90 % engagé</span><span>Montants en MGA</span></div></div>
+      </section>
+      <section class="view" id="v-dpclot">
+        <div class="head"><div><h1>Clôture de l’exercice</h1><p>Opérations de clôture du compte administratif, validation par le RAF, adoption par le Directeur de projet et verrouillage de l’exercice.</p></div></div>
+        <div class="callout" id="dpclot-msg" hidden style="margin-bottom:12px"></div>
+        <div class="row-toolbar" id="dpclot-bar" style="margin-bottom:12px"></div>
+        <section class="co-blk"><div class="kb-h">Opérations de clôture</div><div class="card" id="dpclot-ops"></div></section>
+        <section class="co-blk"><div class="kb-h">Versions du compte administratif</div><div class="card" id="dpclot-ver"></div></section>
+      </section>
       <!-- ===== Compte administratif : fichiers d'interface ===== -->
       <section class="view" id="v-cadint">
         <div class="head"><div><h1>Fichiers d’interface</h1><p>Écritures d’engagement et de prise en charge des factures pour la comptabilité, et fichier des marchés pour le système d’information des marchés publics</p></div></div>
@@ -6528,7 +6545,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'cadcred', 'cadeng', 'cadliq', 'cadreg', 'dpeng', 'dpliq', 'dpord', 'dppay', 'cadtab', 'cadclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'cadcred', 'cadeng', 'cadliq', 'cadreg', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'cadtab', 'cadclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6588,6 +6605,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     dpliq: ['Compte administratif', 'Liquidations'],
     dpord: ['Compte administratif', 'Ordonnancement'],
     dppay: ['Compte administratif', 'Paiements'],
+    dptab: ['Compte administratif', 'Tableau de restitution'],
+    dpclot: ['Compte administratif', 'Clôture de l’exercice'],
     cadtab: ['Compte administratif', 'Tableau de restitution'],
     cadclot: ['Compte administratif', 'Clôture'],
     cadint: ['Compte administratif', 'Fichiers d’interface'],
@@ -6621,7 +6640,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var NAVGROUPS = {
     'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'real', 'engage', 'decaiss', 'encaiss'],
-    'nav-cadm': ['cadcred', 'cadeng', 'cadliq', 'cadreg', 'dpeng', 'dpliq', 'dpord', 'dppay', 'cadtab', 'cadclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
+    'nav-cadm': ['cadcred', 'cadeng', 'cadliq', 'cadreg', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'cadtab', 'cadclot', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-treso': ['bkacc', 'bkdec', 'pdec', 'dfon', 'bkrel', 'bkrap'],
     'nav-rapports': ['synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
@@ -14580,7 +14599,7 @@ var EXEC_REC = [
     }
     put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['resu']]);
     put('g-budgets', [['list', 'Configuration', 'Configuration : sources, structure et circuit de validation'], ['camp'], ['collecte'], ['arb', 'Validation'], ['bud'], ['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)']]);
-    if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['cadtab'], ['cadclot'], ['cadint']]);
+    if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
     put('g-treso', [['dfon'], ['pdec'], ['bkacc'], ['bkrel'], ['bkrap']]);
     put('g-suivi', [['appr'], ['avanc'], ['engage', circ ? 'Engagements importés' : ''], ['real', circ ? 'Réalisations importées' : ''], ['decaiss', circ ? 'Paiements importés' : ''], ['encaiss', circ ? 'Recettes importées' : '']]);
     var avb = document.querySelector('.sub button[data-go="avanc"]'); if (avb) avb.style.display = '';
@@ -20424,6 +20443,7 @@ var EXEC_REC = [
       cells: function (d) { var a = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); return [d.id, a, dpShort(d), d.acte + ' ' + d.ref, fmt(d.mt), dpStatBadge(d)]; } });
   }
   function dpEngOpen() {
+    if (DP.ops && DP.ops.stop) { dpMsg('dpeng-msg', 'Les engagements sont arrêtés pour l’exercice (clôture en cours).', true); return; }
     var ls = dpLines(); if (!ls.length) { dpMsg('dpeng-msg', 'Aucun budget validé : validez d’abord une campagne pour engager des dépenses.', true); return; }
     DP.f = { key: ls[0].key, tiers: DP_TIERS[0], objet: '', montant: '', acte: 'Bon de commande', ref: '', ppm: '' }; dpEngPaint(); document.getElementById('dp-eng-form').hidden = false;
   }
@@ -20533,6 +20553,64 @@ var EXEC_REC = [
     done.forEach(function (d) { var tr = cvEl('tr'); cell(tr, d.mandat, 'name'); cell(tr, d.tiers); cell(tr, d.mode || '—'); cell(tr, fmt(d.mt), 'num'); var sc = cell(tr, ''); sc.appendChild(badge('Payé', 'b-ok')); pb.appendChild(tr); });
   }
   var DP_RENDER = { dpeng: dpEngRender, dpliq: dpLiqRender, dpord: dpOrdRender, dppay: dpPayRender };
+  /* ----- Tableau de restitution : exécution de chaque ligne du PTBA validé (version du crédit au choix) ----- */
+  DP.tabVer = 0; DP.ops = {}; DP.vers = []; DP.frozen = null;
+  function dpCred(z, ver) { if (!ver) return z.ouv; var v = bvVers(z.r)[ver - 1]; var s = v && v.snap[z.perim + '|' + z.l.c]; return s ? s.dem : 0; }
+  function dpTabData() {
+    dpSeed(); var ver = DP.tabVer, groups = {}, tot = { cred: 0, e: 0, l: 0, o: 0, p: 0, r: 0 };
+    dpLines().forEach(function (z) { var s = dpStat(z.key), cr = dpCred(z, ver), row = { z: z, cred: cr, e: s.e, l: s.l, o: s.o, p: s.p, r: s.r }; (groups[z.perim] = groups[z.perim] || []).push(row); ['cred', 'e', 'l', 'o', 'p', 'r'].forEach(function (k) { tot[k] += row[k]; }); });
+    return { groups: groups, tot: tot };
+  }
+  function dpPct(a, b) { return b ? (Math.round(1000 * a / b) / 10).toString().replace('.', ',') + ' %' : '—'; }
+  var DP_TABH = ['Ligne du PTBA', 'Crédit validé (A)', 'Engagements (B)', 'Liquidations (C)', 'Mandats émis', 'Paiements (D)', 'Disponible (A − B − réservations)', 'Restes à payer (mandats − paiements)', 'Taux d’engagement', 'Taux de paiement', 'Alerte'];
+  function dpTabCells(x) { var al = x.cred && x.e / x.cred >= 0.9; return [x.cred, x.e, x.l, x.o, x.p, x.cred - x.e - x.r, x.o - x.p, dpPct(x.e, x.cred), dpPct(x.p, x.cred), al ? 'Engagé à plus de 90 %' : '—']; }
+  function dpTabRender() {
+    var D = dpTabData(), lock = DP.frozen, ls = dpLines(), r0 = ls[0] && ls[0].r, vs = r0 ? bvVers(r0) : [];
+    var sel = document.getElementById('dptab-ver'); sel.innerHTML = ''; var o0 = cvEl('option', null, 'Version courante (V' + (vs.length || 1) + ')'); o0.value = '0'; sel.appendChild(o0);
+    vs.forEach(function (v) { var o = cvEl('option', null, 'V' + v.v + (v.v === 1 ? ' — budget initial' : '') + ' · ' + v.on.slice(0, 10)); o.value = String(v.v); sel.appendChild(o); }); sel.value = String(DP.tabVer);
+    sel.onchange = function () { DP.tabVer = +sel.value; dpTabRender(); };
+    var st = document.getElementById('dptab-state'); st.innerHTML = ''; st.appendChild(badge(lock ? 'Figé · version ' + lock.v : 'Projet · non figé', lock ? 'b-ok' : 'b-warn'));
+    dpKpis('dptab-k', [['Crédit validé', fmt(D.tot.cred) + ' MGA'], ['Engagements', fmt(D.tot.e) + ' MGA · ' + dpPct(D.tot.e, D.tot.cred)], ['Mandats émis', fmt(D.tot.o) + ' MGA'], ['Paiements', fmt(D.tot.p) + ' MGA · ' + dpPct(D.tot.p, D.tot.cred)]]);
+    dpBar('dptab-bar', [['Exporter Excel', false, true, dpTabXlsx], ['Exporter PDF', false, true, dpTabPdf]]);
+    var th = document.getElementById('dptab-h'); th.innerHTML = '<tr>' + DP_TABH.map(function (h, i) { return '<th' + (i && i < 10 ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr>';
+    var tb = document.getElementById('dptab-b'); tb.innerHTML = '';
+    Object.keys(D.groups).forEach(function (g) {
+      var rows = D.groups[g], s = { cred: 0, e: 0, l: 0, o: 0, p: 0, r: 0 }; rows.forEach(function (x) { Object.keys(s).forEach(function (k) { s[k] += x[k]; }); });
+      var tr = cvEl('tr'); tr.style.fontWeight = '600'; tr.style.background = 'var(--surface-2, #F1F5F9)'; cell(tr, g, 'name'); dpTabCells(s).forEach(function (v, i) { cell(tr, typeof v === 'number' ? fmt(v) : (v === '—' ? '' : v), i < 9 ? 'num' : ''); }); tb.appendChild(tr);
+      rows.forEach(function (x) { var t2 = cvEl('tr'); cell(t2, x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l), 'name').style.paddingLeft = '26px'; dpTabCells(x).forEach(function (v, i) { var c = cell(t2, typeof v === 'number' ? fmt(v) : v, i < 9 ? 'num' : ''); if (i === 9 && v !== '—') c.appendChild(document.createTextNode('')); }); tb.appendChild(t2); });
+    });
+    var tf = document.getElementById('dptab-f'); tf.innerHTML = '<td><b>Total du projet</b></td>' + dpTabCells(D.tot).map(function (v, i) { return '<td' + (i < 9 ? ' class="num"' : '') + '><b>' + (typeof v === 'number' ? fmt(v) : (v === '—' ? '' : escH(v))) + '</b></td>'; }).join('');
+  }
+  function dpTabRowsOut() { var D = dpTabData(), out = []; Object.keys(D.groups).forEach(function (g) { out.push([g].concat(dpTabCells(D.groups[g].reduce(function (s, x) { Object.keys(s).forEach(function (k) { s[k] += x[k]; }); return s; }, { cred: 0, e: 0, l: 0, o: 0, p: 0, r: 0 })))); D.groups[g].forEach(function (x) { out.push(['   ' + x.z.l.c + ' — ' + (x.z.l.lib || x.z.l.l)].concat(dpTabCells(x))); }); }); out.push(['Total du projet'].concat(dpTabCells(D.tot))); return out; }
+  function dpTabTitle() { return 'Compte administratif — ' + (DP.tabVer ? 'version V' + DP.tabVer + ' du crédit' : 'version courante du crédit') + (DP.frozen ? ' · figé' : ' · projet non figé'); }
+  function dpTabXlsx() { sbDl('compte-administratif-' + sbStamp() + '.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', sbXlsx([{ name: 'Compte administratif', rows: [[dpTabTitle()], [], DP_TABH].concat(dpTabRowsOut()), head: 1, boldRows: [0, 2] }])); dpMsg('dptab-msg', 'Export Excel généré.'); }
+  function dpTabPdf() {
+    var E = sbXml; sbPrint('Compte administratif', '<h1>' + E(dpTabTitle()) + '</h1><table><thead><tr>' + DP_TABH.map(function (h, i) { return '<th' + (i && i < 10 ? ' class="num"' : '') + '>' + E(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + dpTabRowsOut().map(function (rw) { return '<tr>' + rw.map(function (c, i) { return '<td' + (i && i < 10 ? ' class="num"' : '') + '>' + E(typeof c === 'number' ? fmt(c) : c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>'); dpMsg('dptab-msg', 'Version imprimable ouverte.');
+  }
+  /* ----- Clôture de l'exercice ----- */
+  function dpClotRender() {
+    dpSeed(); var O = DP.ops, docs = DP.docs || [], fr = DP.frozen, t = dpTot();
+    var soumis = docs.filter(function (d) { return d.st === 'soumis'; }), chez = docs.filter(function (d) { return d.st === 'ordonnance'; }), nonSolde = t.e - t.p;
+    var blockOk = !!(O.stop && O.rep && !soumis.length), res = chez.length + (nonSolde > 0 && O.rep === 'reporte' ? 0 : 0);
+    function chip(k, tx) { return badge(tx, { ok: 'b-ok', warn: 'b-warn', ko: 'b-ko', neutral: 'b-neutral' }[k]); }
+    var box = document.getElementById('dpclot-ops'); box.innerHTML = '';
+    function op(title, sub, chips) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.style.flex = '1'; l.appendChild(cvEl('b', null, title)); l.appendChild(cvEl('div', 'hby', sub)); row.appendChild(l); chips.forEach(function (c) { c.style.marginLeft = '6px'; row.appendChild(c); }); box.appendChild(row); }
+    op('1 · Arrêt des engagements', O.stop ? 'Arrêtés le ' + O.stop + ' : plus aucun engagement possible sur l’exercice.' : 'Plus aucun engagement ne doit être possible sur l’exercice.', [chip(O.stop ? 'ok' : 'warn', O.stop ? 'Fait' : 'À faire'), chip('neutral', 'Bloquant')]);
+    op('2 · Engagements en attente de visa', soumis.length ? pl(soumis.length, 'engagement') + ' à viser ou à rejeter : ' + soumis.map(function (d) { return d.id; }).join(', ') + '.' : 'Aucun engagement en attente de visa.', [chip(soumis.length ? 'ko' : 'ok', soumis.length ? 'À traiter' : 'Conforme'), chip('neutral', 'Bloquant')]);
+    op('3 · Engagements non soldés', fmt(nonSolde) + ' MGA engagés et non encore payés à reporter ou à annuler.' + (O.rep ? ' Décision : ' + (O.rep === 'annule' ? 'annulation' : 'report sur l’exercice suivant') + '.' : ''), [chip(O.rep ? 'ok' : 'warn', O.rep ? 'Fait' : 'À faire'), chip('neutral', 'Bloquant')]);
+    op('4 · Mandats chez le comptable', chez.length ? pl(chez.length, 'mandat') + ' non payé(s) : ' + chez.map(function (d) { return d.mandat; }).join(', ') + '.' : 'Tous les mandats sont payés ou rejetés.', [chip(chez.length ? 'warn' : 'ok', chez.length ? 'Réserve' : 'Conforme')]);
+    op('5 · Validation par le Responsable administratif et financier', O.raf ? 'Validé le ' + O.raf + ' : « VU ET VÉRIFIÉ ».' : (blockOk ? 'Les opérations bloquantes sont faites : le RAF peut valider.' : 'Disponible quand les opérations bloquantes 1 à 3 sont faites.'), [chip(O.raf ? 'ok' : 'neutral', O.raf ? 'Validé' : 'En attente')]);
+    op('6 · Adoption par le Directeur de projet et verrouillage', fr ? 'Version ' + fr.v + ' figée le ' + fr.on + ' : exercice verrouillé.' : 'Fige la version avec ' + pl(res, 'réserve') + ' et verrouille les écritures de l’exercice.', [chip(fr ? 'ok' : 'neutral', fr ? 'Figé' : 'Projet')]);
+    var vb = document.getElementById('dpclot-ver'); vb.innerHTML = '';
+    if (!DP.vers.length) vb.appendChild(cvEl('div', 'hint', 'Aucune version figée : le compte administratif est un projet.'));
+    DP.vers.slice().reverse().forEach(function (v) { var row = cvEl('div', 'list-row'), l = cvEl('div'); l.appendChild(cvEl('b', null, 'Version ' + v.v)); l.appendChild(cvEl('div', 'hby', v.by + ' · ' + pl(v.res, 'réserve'))); row.appendChild(l); row.appendChild(cvEl('span', 'when', v.on)); vb.appendChild(row); });
+    dpBar('dpclot-bar', [['Arrêter les engagements', false, !O.stop && !fr, function () { O.stop = nowStr().split(' ')[0]; dpMsg('dpclot-msg', 'Engagements arrêtés pour l’exercice.'); dpClotRender(); }],
+      ['Traiter les engagements non soldés', false, !!O.stop && !O.rep && !fr, function () { cvAsk({ title: 'Engagements non soldés — ' + fmt(nonSolde) + ' MGA', ok: 'Appliquer', required: false, optLabel: 'Décision *', options: ['Reporter sur l’exercice suivant', 'Annuler'], placeholder: 'Commentaire' }, function (c, d) { O.rep = d === 'Annuler' ? 'annule' : 'reporte'; dpMsg('dpclot-msg', 'Engagements non soldés : ' + (O.rep === 'annule' ? 'annulation' : 'report') + ' enregistré.'); dpClotRender(); }); }],
+      ['Valider (RAF)', false, blockOk && !O.raf && !fr, function () { O.raf = nowStr().split(' ')[0]; dpMsg('dpclot-msg', 'Compte administratif validé par le RAF (« VU ET VÉRIFIÉ »).'); dpClotRender(); }],
+      ['Adopter et figer', true, !!O.raf && !fr, function () { cvAsk({ title: 'Adopter et figer le compte administratif', ok: 'Adopter', required: false, placeholder: 'Commentaire du Directeur de projet' }, function () { var nv = DP.vers.length + 1; DP.frozen = { v: nv, on: nowStr() }; DP.vers.push({ v: nv, on: nowStr(), by: ME, res: res }); dpMsg('dpclot-msg', 'Compte administratif adopté et figé (version ' + nv + ') : exercice verrouillé.'); dpClotRender(); }); }],
+      ['Créer une nouvelle version', false, !!fr, function () { DP.frozen = null; DP.ops.raf = null; dpMsg('dpclot-msg', 'Exercice déverrouillé : la validation du RAF est à refaire.'); dpClotRender(); }]]);
+  }
+  DP_RENDER.dptab = dpTabRender; DP_RENDER.dpclot = dpClotRender;
   /* Menu en tiroir sous 1 024 px (charte §7.3) */
   (function () {
     var mb = document.getElementById('menu-btn');
