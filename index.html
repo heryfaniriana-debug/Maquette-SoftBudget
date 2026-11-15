@@ -3636,7 +3636,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
               </div>
               <div><label for="cm-d1">Ouverture de la collecte <em>*</em></label><input id="cm-d1" class="field" type="date"></div>
               <div><label for="cm-d2">Clôture de la collecte <em>*</em></label><input id="cm-d2" class="field" type="date"><div class="hint">Dates de la collecte, indépendantes de l’exercice : on peut collecter en 2026 le budget de 2027.</div></div>
-              <div class="full"><label for="cm-tpl">Modèle de saisie</label><select id="cm-tpl" class="field"></select></div>
+                            <div class="full" id="cm-rep-w" hidden><label class="chk"><input type="checkbox" id="cm-rep" checked> Reprendre automatiquement les reports de l’exercice précédent<span id="cm-rep-txt"></span></label></div><div class="full"><label for="cm-tpl">Modèle de saisie</label><select id="cm-tpl" class="field"></select></div>
               <div class="full"><label for="cm-instr">Instructions aux contributeurs</label><textarea id="cm-instr" class="field" placeholder="Consignes, plafonds, calendrier…"></textarea></div>
               <div class="full"><label>Périmètres de contribution <em>*</em></label>
                 <div class="dd" id="cm-dd">
@@ -10390,7 +10390,7 @@ function fmAxes() {
     document.getElementById('cm-form').hidden = true;
     renderCamps();
     document.getElementById('cd').hidden = true; cdCur = null;
-    cmMsg('Campagne ' + code + ' créée en brouillon. ' + (perims.some(function (q) { return !cmWho[q]; }) ? 'Affectez un contributeur à chaque périmètre pour pouvoir l’ouvrir.' : 'Elle peut être ouverte.'), 'ok');
+    var rpTxt = cmRepApply(code, ex); cmMsg(rpTxt + 'Campagne ' + code + ' créée en brouillon. ' + (perims.some(function (q) { return !cmWho[q]; }) ? 'Affectez un contributeur à chaque périmètre pour pouvoir l’ouvrir.' : 'Elle peut être ouverte.'), 'ok');
     cmListFocus(code);
   });
   renderCamps();
@@ -21482,8 +21482,8 @@ var EXEC_REC = [
     anaBlock(b, 'Marchés du PPM non engagés', dpMini(['Marché', 'Estimatif', 'Engagé', 'Reste', 'Décision', 'Reporté (MGA)', ''], D.B.map(function (r) { return [nm(r), fmt(r.plan), fmt(r.real), fmt(r.reste), repDecCell(r), rep(r), act(r)]; }), [1, 2, 3, 5], 'Tous les marchés du PPM sont engagés.'));
     anaBlock(b, 'Engagements ouverts : reportés automatiquement par l’échéancier', dpMini(['Engagement', 'Reste à réaliser', 'Prévu en ' + ex, 'Réalisé en ' + ex, 'Reporté sur ' + nx + ' à la clôture', 'Déjà prévu après ' + ex], D.C.map(function (c) { var n = cvEl('div'); n.appendChild(cvEl('b', null, c.i.ref)); n.appendChild(cvEl('div', 'hby', c.i.tiers || '—')); return [n, fmt(c.reste), fmt(c.part), fmt(c.rz), fmt(c.move), fmt(c.later)]; }), [1, 2, 3, 4, 5], 'Aucun engagement ouvert.'));
     if (cl) {
-      var rows = RPT.lines.filter(function (x) { return x.from === ex; }).map(function (x) { return ['Ligne ' + x.label, 'PTBA ' + x.to, fmt(x.amt), x.opt + (x.motif ? ' — ' + x.motif : '')]; }).concat(RPT.ppm.filter(function (x) { return x.from === ex; }).map(function (x) { return [x.ref + ' — ' + x.des, 'PPM ' + x.to + ' (signature prévue le ' + isoToFr(x.d3) + ')', fmt(x.est), x.opt]; }), RPT.engs.filter(function (x) { return x.from === ex; }).map(function (x) { return ['Engagement ' + x.ref, 'Échéancier ' + x.to, fmt(x.move), 'Reste non réalisé reporté']; }));
-      anaBlock(b, 'Reports enregistrés vers ' + nx, dpMini(['Origine', 'Destination', 'Montant (MGA)', 'Décision'], rows, [2], 'Aucun report.'));
+      var rows = RPT.lines.filter(function (x) { return x.from === ex; }).map(function (x) { return ['Ligne ' + x.label, 'PTBA ' + x.to, fmt(x.amt), x.opt + (x.motif ? ' — ' + x.motif : ''), x.used || 'Pas encore repris']; }).concat(RPT.ppm.filter(function (x) { return x.from === ex; }).map(function (x) { return [x.ref + ' — ' + x.des, 'PPM ' + x.to + ' (signature prévue le ' + isoToFr(x.d3) + ')', fmt(x.est), x.opt, x.used || 'Pas encore repris']; }), RPT.engs.filter(function (x) { return x.from === ex; }).map(function (x) { return ['Engagement ' + x.ref, 'Échéancier ' + x.to, fmt(x.move), 'Reste non réalisé reporté', 'Échéancier mis à jour']; }));
+      anaBlock(b, 'Reports enregistrés vers ' + nx, dpMini(['Origine', 'Destination', 'Montant (MGA)', 'Décision', 'Repris dans la campagne'], rows, [2], 'Aucun report.'));
     }
   }
   function repPrev() {
@@ -21499,12 +21499,34 @@ var EXEC_REC = [
     bc.addEventListener('click', function () { document.getElementById('rep-prev').hidden = true; });
     bo.addEventListener('click', function () {
       E.lines.forEach(function (x) { var q = x.r.reste ? Math.round(x.r.qty * x.d.amt / x.r.reste) : 0; RPT.lines.push({ from: ex, to: nx, key: x.r.key, label: x.r.label, perim: x.r.sub, amt: x.d.amt, qty: q, unit: x.r.unit, opt: x.d.opt, motif: x.d.motif }); });
-      E.ppm.forEach(function (x) { var p = x.r.x; RPT.ppm.push({ from: ex, to: nx, ref: p.ref, des: p.des, cat: p.cat, est: x.d.amt, d1: repShift(p.d1), d2: repShift(p.d2), d3: repShift(p.d3 || p.d2 || p.d1), opt: x.d.opt }); });
+      E.ppm.forEach(function (x) { var p = x.r.x; RPT.ppm.push({ from: ex, to: nx, ref: p.ref, des: p.des, cat: p.cat, est: x.d.amt, d1: repShift(p.d1), d2: repShift(p.d2), d3: repShift(p.d3 || p.d2 || p.d1), opt: x.d.opt, met: p.met, ligne: p.ligne, act: p.act }); });
       E.engs.forEach(function (c) { var e = JSON.parse(JSON.stringify(sxEch(c.i))); e[ex] = (e[ex] || 0) - c.move; e[nx] = (e[nx] || 0) + c.move; c.i.ech = e; if (sxPer(c.i).d2.slice(0, 4) < nx) c.i.d2 = nx + '-12-31'; RPT.engs.push({ from: ex, to: nx, ref: c.i.ref, move: c.move }); });
       RPT.closed[ex] = { on: nowStr(), by: ME }; document.getElementById('rep-prev').hidden = true; bkMsg('rep-msg', 'Exercice ' + ex + ' clôturé : ' + pl(E.lines.length, 'ligne') + ', ' + pl(E.ppm.length, 'marché') + ' et ' + pl(E.engs.length, 'engagement') + ' reportés sur ' + nx + '.', 'ok'); repRender();
     });
   }
   document.getElementById('rep-close').addEventListener('click', function () { repPrev(); document.getElementById('rep-prev').hidden = false; });
+  /* Création d'une campagne : reprise automatique des reports de la clôture de l'exercice précédent */
+  function cmRepRefresh() {
+    var w = document.getElementById('cm-rep-w'); if (!w) return; var ex = document.getElementById('cm-ex').value, L = RPT.lines.filter(function (x) { return x.to === ex && !x.used; }), P = RPT.ppm.filter(function (x) { return x.to === ex && !x.used; });
+    var was = w.hidden; w.hidden = !(L.length || P.length); if (w.hidden) return; if (was) document.getElementById('cm-rep').checked = true;
+    document.getElementById('cm-rep-txt').textContent = ' ' + (+ex - 1) + ' : ' + pl(L.length, 'ligne') + ' (' + fmt(L.reduce(function (a, x) { return a + x.amt; }, 0)) + ' MGA) et ' + pl(P.length, 'marché') + ' du PPM';
+  }
+  function cmRepApply(code, ex) {
+    var w = document.getElementById('cm-rep-w'), cb = document.getElementById('cm-rep'); if (!w || w.hidden || !cb.checked) return '';
+    var c = camps.filter(function (x) { return x.code === code; })[0], nl = 0, np = 0, tot = 0, miss = 0; if (!c) return '';
+    RPT.lines.filter(function (x) { return x.to === ex && !x.used; }).forEach(function (x) {
+      var pm = c.perims.filter(function (p) { return p.p === x.perim; })[0]; if (!pm) { miss++; return; }
+      var cd = x.label.split(' — ')[0], ln = pm.lines.filter(function (l) { return l.c === cd; })[0];
+      if (!ln) { ln = { c: cd, l: x.label.split(' — ').slice(1).join(' — '), nat: '', ref: 0, dem: null, just: '' }; pm.lines.push(ln); }
+      ln.rep = (ln.rep || 0) + x.amt; ln.dem = (ln.dem || 0) + x.amt; ln.just = 'Reporté de ' + x.from + ' (' + x.opt.toLowerCase() + ')' + (x.motif ? ' : ' + x.motif : ''); x.used = code; nl++; tot += x.amt;
+    });
+    RPT.ppm.filter(function (x) { return x.to === ex && !x.used; }).forEach(function (x) {
+      CPP.items.push({ ref: 'PPM-' + ex + '-' + (++CPP.seq), des: x.des, ligne: x.ligne, cat: x.cat, met: x.met, est: x.est, d1: x.d1, d2: x.d2, d3: x.d3, st: 'Planifié', act: code + '|' + (x.act || '').split('|')[1], rep: x.ref }); x.used = code; np++;
+    });
+    var txt = 'Reports de ' + (+ex - 1) + ' repris : ' + pl(nl, 'ligne') + ' (' + fmt(tot) + ' MGA) et ' + pl(np, 'marché') + ' du PPM' + (miss ? ' ; ' + pl(miss, 'ligne') + ' non reprise' + (miss > 1 ? 's' : '') + ' (périmètre non retenu)' : '') + '. ';
+    c.reprise = { from: String(+ex - 1), lines: nl, ppm: np, tot: tot }; c.hist.unshift({ t: txt.trim(), by: ME, on: nowStr() }); return txt;
+  }
+  document.getElementById('cm-ex').addEventListener('change', cmRepRefresh); document.getElementById('cm-new').addEventListener('click', function () { setTimeout(cmRepRefresh, 0); });
   function sxFormSetup() {
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
     document.getElementById('sxf-d1').value = cadToday(); document.getElementById('sxf-d2').value = cadToday().slice(0, 4) + '-12-31';
