@@ -7052,9 +7052,10 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var svCur = null, svLines = [], svLocked = false, svChecked = false, svEnv = 600000000, svVtKey = '', fm = null, batchN = 0, siRows = [];
 
   function pl(n, w) { return n + ' ' + (n > 1 ? w.split(' ').map(function (x) { return x + 's'; }).join(' ') : w); }
-  function parseInt0(v) { var s = String(v).replace(/[^\d]/g, ''); return s === '' ? null : parseInt(s, 10); }
+  /* Nombre saisi : espaces des milliers ignorés, virgule ou point décimal acceptés (deux décimales au plus) */
+  function parseInt0(v) { var s = String(v).replace(/[^\d.,]/g, ''); if (s === '' || !/\d/.test(s)) return null; var m = /^(.*)[.,](\d{1,2})$/.exec(s); if (m) return parseFloat(m[1].replace(/[.,]/g, '') + '.' + m[2]); return parseInt(s.replace(/[.,]/g, ''), 10); }
   function parseDec(v) { var s = String(v).replace(/\s/g, '').replace(',', '.'); if (s === '') return null; var f = parseFloat(s); return isNaN(f) ? null : f; }
-  function fmt(n) { return n == null ? '' : Math.round(n).toLocaleString('fr-FR'); }
+  function fmt(n) { if (n == null) return ''; if (Math.abs(n - Math.round(n)) < 0.005) return Math.round(n).toLocaleString('fr-FR'); return (Math.round(n * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function lineAmt(l) { return (l.q != null && l.p != null) ? Math.round(l.q * l.p) : (l.m || 0); }
   function perSum(l) { return (l.per || []).reduce(function (a, v) { return a + (v || 0); }, 0); }
   function perFilled(l) { return (l.per || []).some(function (v) { return v != null; }); }
@@ -11667,7 +11668,11 @@ function fmAxes() {
     var sel = null;
     if (o.options) { var l1 = cvEl('label', null, o.optLabel); box.appendChild(l1); sel = cvEl('select', 'field'); o.options.forEach(function (x) { var op = cvEl('option', null, x); op.value = x; sel.appendChild(op); }); box.appendChild(sel); }
     var nin = null;
-    if (o.num) { box.appendChild(cvEl('label', null, o.num)); nin = cvEl('input', 'field'); nin.type = 'text'; nin.setAttribute('inputmode', 'decimal'); box.appendChild(nin); }
+    if (o.num) {
+      var nl = cvEl('label', null, o.num); box.appendChild(nl); nin = cvEl('input', 'field'); nin.type = 'text'; nin.setAttribute('inputmode', 'decimal'); box.appendChild(nin);
+      /* Champ de valeur dynamique : affiché seulement pour les choix qui en ont besoin */
+      if (o.numFor && sel) { var upd = function () { var on = o.numFor(sel.value); nl.hidden = nin.hidden = !on; if (on && o.numLabel) nl.textContent = o.numLabel(sel.value); }; sel.addEventListener('change', upd); upd(); }
+    }
     box.appendChild(cvEl('label', null, (o.cLabel || 'Commentaire') + (typeof o.required === 'function' ? (o.reqLabel || ' (obligatoire sauf approbation)') : (o.required ? ' *' : ' (facultatif)'))));
     var ta = cvEl('textarea', 'field'); ta.placeholder = o.placeholder || ''; ta.value = o.value || ''; box.appendChild(ta);
     var err = cvEl('div', 'err'); box.appendChild(err);
@@ -11676,8 +11681,8 @@ function fmAxes() {
     bc.addEventListener('click', close); bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
     bo.addEventListener('click', function () {
       var v = ta.value.trim(), need = typeof o.required === 'function' ? o.required(sel ? sel.value : null) : o.required; if (need && !v) { err.textContent = o.cLabel ? 'Le champ « ' + o.cLabel + ' » est obligatoire.' : 'Le commentaire est obligatoire.'; return; }
-      if (nin && !o.numOpt && !nin.value.trim()) { err.textContent = 'La valeur est obligatoire.'; return; }
-      close(); cb(v, sel ? sel.value : null, nin ? nin.value : null);
+      if (nin && !nin.hidden && !o.numOpt && !nin.value.trim()) { err.textContent = 'La valeur est obligatoire.'; return; }
+      close(); cb(v, sel ? sel.value : null, nin ? (nin.hidden ? '' : nin.value) : null);
     });
     bd.appendChild(box); document.body.appendChild(bd); (sel || ta).focus();
   }
@@ -11901,7 +11906,7 @@ function fmAxes() {
     var ind = isPta ? ((bvData(r).c.perims.filter(function (p) { return p.p === sel.x.perim; })[0] || {}).inds || []).filter(function (z) { return z.id === sel.id; })[0] : null;
     cvAsk({ title: 'Réviser la ligne ' + l.c + ' — ' + (isPta ? (l.wk.task || l.l) : (l.lib || l.l)), ok: 'Créer la version ' + (r.vers.length + 1), required: true, cLabel: 'Motif de la révision',
       placeholder: 'Pourquoi cette révision ?', num: isPta ? 'Nouveau volume (' + (ind ? ind.unit : '') + ') — actuellement ' + fmt(k.contrib) : 'Nouveau montant (MGA) — actuellement ' + fmt(l.dem || 0) }, function (motif, _s, nv) {
-      var n = Math.round(parseFloat(String(nv).replace(/\s/g, '').replace(',', '.')));
+      var n = Math.round(parseFloat(String(nv).replace(/\s/g, '').replace(',', '.')) * 100) / 100;
       if (isNaN(n) || n < 0) { cvSay('bv-msg', 'Révision annulée : la valeur saisie n’est pas un nombre valide.'); return; }
       var what;
       if (isPta) { what = 'Ligne ' + l.c + ' · volume : ' + fmt(k.contrib) + ' → ' + fmt(n) + ' ' + (ind ? ind.unit : ''); if (l.wk.inds.length === 1) l.wk.vol = n; k.contrib = n; }
@@ -15305,7 +15310,7 @@ var EXEC_REC = [
     auditAdd('Configuration', 'Délégations', CAD_ROLES[f] + ' → ' + CAD_ROLES[to] + ' : ' + CAD_ACT_LBL[act] + ' du ' + isoToFr(d1) + ' au ' + isoToFr(d2)); bkMsg('cir-msg', 'Délégation ajoutée : ' + CAD_ROLES[to] + ' peut ' + CAD_ACT_LBL[act].toLowerCase() + ' du ' + isoToFr(d1) + ' au ' + isoToFr(d2) + '.', 'ok'); cirRender();
   });
   document.getElementById('cir-ssave').addEventListener('click', function () {
-    var err = document.getElementById('cir-serr'), cn = function (v) { var c = String(v).replace(/\s/g, ''); return /^\d+$/.test(c) ? parseInt(c, 10) : NaN; }, a = cn(document.getElementById('cir-sano').value), d = cn(document.getElementById('cir-sdpd').value);
+    var err = document.getElementById('cir-serr'), cn = function (v) { var c = String(v).replace(/\s/g, ''); return /^\d+([.,]\d{1,2})?$/.test(c) ? parseFloat(c.replace(',', '.')) : NaN; }, a = cn(document.getElementById('cir-sano').value), d = cn(document.getElementById('cir-sdpd').value);
     if (ACC !== 'admin') { err.textContent = 'Les seuils se règlent par l’administrateur.'; return; }
     if (isNaN(a) || a < 0) { err.textContent = 'Le seuil d’ANO doit être un montant positif ou nul.'; return; }
     if (isNaN(d) || d <= 0) { err.textContent = 'Le seuil de paiement direct doit être positif.'; return; }
@@ -21452,7 +21457,7 @@ var EXEC_REC = [
     n.appendChild(badge(d.opt, REP_CLS[d.opt])); if (d.auto) n.appendChild(cvEl('div', 'hby', 'Repris du glissement')); else if (d.motif) n.appendChild(cvEl('div', 'hby', d.motif)); return n;
   }
   function repAsk(r) {
-    cvAsk({ title: 'Décision — ' + r.label, ok: 'Enregistrer la décision', required: true, cLabel: 'Motif', optLabel: 'Reste de ' + fmt(r.reste) + ' MGA : que décidez-vous ?', options: REP_OPT, num: 'Montant à reporter (MGA) — pour « Reporter en partie » ou « Réviser »', numOpt: true, placeholder: 'Pourquoi cette décision ?' }, function (m, opt, nv) {
+    cvAsk({ title: 'Décision — ' + r.label, ok: 'Enregistrer la décision', required: true, cLabel: 'Motif', optLabel: 'Reste de ' + fmt(r.reste) + ' MGA : que décidez-vous ?', options: REP_OPT, num: 'Montant à reporter (MGA)', numFor: function (v) { return v === 'Reporter en partie' || v === 'Réviser'; }, numLabel: function (v) { return v === 'Réviser' ? 'Nouveau montant à reporter (MGA)' : 'Montant à reporter (MGA), au plus ' + fmt(r.reste); }, placeholder: 'Pourquoi cette décision ?' }, function (m, opt, nv) {
       var n = parseInt0(nv), amt;
       if (opt === 'Reporter') amt = r.reste; else if (opt === 'Abandonner') amt = 0;
       else { if (!n || n <= 0 || (opt === 'Reporter en partie' && n > r.reste)) { bkMsg('rep-msg', 'Décision non enregistrée : indiquez un montant valide' + (opt === 'Reporter en partie' ? ' (au plus ' + fmt(r.reste) + ' MGA).' : '.'), 'ko'); return; } amt = n; }
@@ -22703,11 +22708,11 @@ function pcRenderEnv(){
       return !!el.closest('td') || INC.test(t) || /^Ex\.\s*\d{1,3}(\s\d{3})+/.test(el.placeholder || '');
     }
     function format(v, dec) {
-      var s = String(v).replace(/[^\d.,]/g, ''), i = s.search(/[.,]/), ip = i < 0 ? s : s.slice(0, i), fp = (dec && i >= 0) ? s.slice(i + 1).replace(/[^\d]/g, '') : null;
+      var s = String(v).replace(/[^\d.,]/g, ''), i = s.search(/[.,]/), ip = i < 0 ? s : s.slice(0, i), fp = (dec && i >= 0) ? s.slice(i + 1).replace(/[^\d]/g, '').slice(0, 2) : null;
       ip = ip.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, SEP); return ip + (fp !== null ? ',' + fp : '');
     }
     function apply(el) {
-      var dec = el.getAttribute('inputmode') === 'decimal' && !/MGA|UC|Montant|Coût/i.test(labelOf(el)), raw = el.value, nv = format(raw, dec); if (nv === raw) return;
+      var dec = true, raw = el.value, nv = format(raw, dec); if (nv === raw) return;
       var pos = el.selectionStart, n = (raw.slice(0, pos == null ? raw.length : pos).match(/\d/g) || []).length; el.value = nv;
       if (document.activeElement === el) { var c = 0, k = 0; while (k < nv.length && c < n) { if (/\d/.test(nv.charAt(k))) c++; k++; } try { el.setSelectionRange(k, k); } catch (e) { /* ignore */ } }
     }
