@@ -1994,7 +1994,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="sub">
           <button data-go="bkacc">Comptes bancaires</button>
           <button data-go="bkdec" title="Plan de trésorerie prévisionnel">Plan de trésorerie</button>
-                              <button data-go="revpl" title="Révisions des plans : circuit et approbation du bailleur" style="display:none">Révisions</button><button data-go="rep" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
+                                        <button data-go="plana" title="Plan analytique : activités du projet" style="display:none">Plan analytique</button><button data-go="revpl" title="Révisions des plans : circuit et approbation du bailleur" style="display:none">Révisions</button><button data-go="rep" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
           <button data-go="pdec" title="Plan de décaissement du projet">Plan de décaissement</button>
           <button data-go="dfon" title="Demandes de fonds DRF et DPD">Demandes de fonds</button>
           <button data-go="bkrel" title="Relevés bancaires">Relevés bancaires</button>
@@ -5466,6 +5466,12 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         </div></div>
       </section>
 
+      <!-- ===== Projet : plan analytique ===== -->
+      <section class="view" id="v-plana">
+        <div class="head"><div><h1>Plan analytique</h1><p>Les activités du projet par composante : plan initial et activités créées à la collecte.</p></div></div>
+        <div id="plana-body"></div>
+      </section>
+
       <!-- ===== Projet : report et clôture de l'exercice ===== -->
       <section class="view" id="v-rep">
         <div class="head"><div><h1>Report et clôture</h1><p></p></div>
@@ -6003,6 +6009,18 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           </div>
         </div>
 
+                <div class="panel" id="prop-list" hidden><h2><span>Nouvelles activités proposées à la collecte</span></h2><div class="body" id="prop-list-body"></div></div>
+        <div class="panel" id="prop-acc" hidden><h2><span>Accepter l’activité au plan analytique</span></h2><div class="body">
+          <div class="fgrid">
+            <div><label for="prop-comp">Composante</label><input id="prop-comp" class="field" type="text" readonly></div>
+            <div><label for="prop-code">Code de l’activité <em>*</em></label><input id="prop-code" class="field" type="text"></div>
+            <div class="full"><label for="prop-lib">Libellé de l’activité <em>*</em></label><input id="prop-lib" class="field" type="text"></div>
+            <div><label for="prop-nat">Nature de dépense <em>*</em></label><select id="prop-nat" class="field"></select></div>
+            <div><label for="prop-fin">Source de financement <em>*</em></label><select id="prop-fin" class="field"></select></div>
+          </div>
+          <div class="err" id="prop-err"></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="prop-cancel">Annuler</button><button class="btn primary" id="prop-ok">Accepter l’activité</button></div>
+        </div></div>
         <div class="panel" id="cv-dec" hidden>
           <h2><span id="cv-dec-title">Valider la campagne consolidée</span><button class="btn small" id="cv-dec-close">Fermer</button></h2>
           <div class="body">
@@ -6580,7 +6598,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'plana', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6655,6 +6673,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     anfin: ['Analyses', 'Financement et exécution'], aneng: ['Analyses', 'Engagements et PPM'], anrea: ['Analyses', 'Réalisations et PTBA'], andec: ['Analyses', 'Décaissements et plan de décaissement'], anphy: ['Analyses', 'Avancement physique et PTA'], anfp: ['Analyses', 'Réalisations et avancement physique'], anplu: ['Analyses', 'Suivi pluriannuel'], anale: ['Analyses', 'Alertes'], anver: ['Analyses', 'Versions des plans'],
     avanc: ['Exécution', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
+    plana: ['Cadre du projet', 'Plan analytique'],
     revpl: ['Plans annuels', 'R\u00e9visions des plans'],
     rep: ['Plans annuels', 'Report et cl\u00f4ture de l\u2019exercice'],
     pdec: ['Plans annuels', 'Plan de décaissement'],
@@ -6722,6 +6741,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'avini' && typeof aviniRender === 'function') aviniRender();
     if (/^sx(eng|liq|pay|enc|phy)$/.test(name) && typeof sxRender === 'function') { SX.kind = name.slice(2); sxRender(); }
     if (/^an(fin|eng|rea|dec|phy|fp|plu|ale|ver)$/.test(name) && typeof anaRender === 'function') { ANA.kind = name.slice(2); anaRender(); }
+    if (name === 'plana' && typeof planaRender === 'function') planaRender();
     if (name === 'revpl' && typeof revRender === 'function') revRender();
     if (name === 'rep' && typeof repRender === 'function') repRender();
     if (name === 'trpos' && typeof trpRender === 'function') trpRender();
@@ -10477,7 +10497,8 @@ function fmAxes() {
     'Composante 2 — Santé': [
       { c: '2.1', l: 'Construire des centres de santé', nat: '21', ref: 800000000, dem: 640000000, q: 8, p: 80000000, just: 'Huit centres seulement : le budget ne permet pas d’aller plus loin' },
       { c: '2.2', l: 'Former des agents de santé', nat: '62', ref: 190000000, dem: 120000000, q: 120, p: 1000000, just: 'Moins d’agents à former cette année que prévu au plan' },
-      { c: '2.3', l: 'Acheter du matériel médical', nat: '60', ref: 280000000, dem: null, just: '' }
+      { c: '2.3', l: 'Acheter du matériel médical', nat: '60', ref: 280000000, dem: null, just: '' },
+      { c: 'L01', l: 'Dépistage mobile dans les communes isolées', nat: '62', ref: null, dem: 45000000, q: 5000, p: 9000, just: '', added: true, addedWhy: 'Besoin identifié lors de la mission de terrain : communes sans accès à un centre de santé', axv: { Analytique: 'Programme 2', Financier: 'Don du partenaire' } }
     ]
   };
   var CH = {
@@ -11683,7 +11704,7 @@ function fmAxes() {
     k.appendChild(cvKpi('Campagne', c ? c.code + ' — ' + c.lib : r.camp));
     k.appendChild(cvKpi('Montant consolidé', fmt(tot) + ' MGA'));
     var vb = cvEl('div'); vb.appendChild(cvBadge(r.st)); vb.appendChild(document.createTextNode(' ' + (r.st === 'En validation' ? r.step + ' · ' + r.validator : r.validator)));
-    k.appendChild(cvKpi('Validation', vb));
+    k.appendChild(cvKpi('Validation', vb)); var pnd = cvPending(r); if (pnd.length) k.appendChild(cvKpi('Activités proposées', pl(pnd.length, 'à traiter')));
     root.appendChild(k);
     /* graphique : barre du demandé par périmètre, repère = référence */
     var ch = cvEl('section', 'co-blk'); ch.appendChild(cvEl('div', 'kb-h', 'Répartition du montant demandé par périmètre'));
@@ -11769,9 +11790,10 @@ function fmAxes() {
     var bar = document.getElementById('cv-dec-bar'); bar.innerHTML = '';
     var can = r.st === 'En validation';
     [['Valider', 'primary', function () {
-        cvAsk({ title: 'Valider la campagne consolidée', ok: 'Valider', required: false, placeholder: 'Commentaire de validation' }, function (com) {
+        var pn = cvPending(r); if (pn.length) { cvAsk({ title: 'Validation impossible', ok: 'Fermer', required: false, placeholder: pl(pn.length, 'activité') + ' proposée' + (pn.length > 1 ? 's' : '') + ' à la collecte reste à traiter : acceptez, fusionnez ou rejetez ' + (pn.length > 1 ? 'chacune' : 'cette activité') + ' avant de valider.' }, function () {}); return; } cvAsk({ title: 'Valider la campagne consolidée', ok: 'Valider', required: false, placeholder: 'Commentaire de validation' }, function (com) {
           r.st = 'Validée'; r.step = 'Terminée'; r.hist.unshift({ t: 'Validée' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); cvAfter('Campagne ' + r.camp + ' validée.'); });
       }],
+     ['Nouvelles activités' + (cvPending(r).length ? ' (' + cvPending(r).length + ')' : ''), '', function () { propOpen(r); }],
      ['Corriger', '', function () {
         cvAsk({ title: 'Corriger la consolidation', ok: 'Enregistrer la correction', required: true, placeholder: 'Quelle correction apportez-vous ?' }, function (com) {
           r.st = 'Corrigée'; r.step = 'Corrigée par le validateur'; r.hist.unshift({ t: 'Corrigée par le validateur — ' + com, by: ME, on: nowStr() }); cvAfter('Correction enregistrée pour ' + r.camp + '.'); });
@@ -14588,7 +14610,7 @@ var EXEC_REC = [
     var adv = function (c, a) { return a; }, simple = function (c, a) { return !a; }, treso = function (c, a, f) { return f.mods.treso; };
     var ca = [['Engagements', rPrj], ['Liquidations', rPrj], ['Ordonnancement', rPrj], ['Paiements', rPrj], ['Tableau de restitution', rPrj], ['Clôture de l’exercice', rPrj], ['Fichiers d’interface', rPrj]];
     return [
-      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Cadre budgétaire', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
+      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Cadre budgétaire', rAlways], ['Plan analytique', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
       { g: 'Élaboration', items: [['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso], ['Révisions', rAlways], ['Report et clôture', rAlways]] },
       { g: 'Compte administratif', items: ca },
@@ -14643,7 +14665,7 @@ var EXEC_REC = [
       var sub = document.querySelector('#' + gid + ' > .sub');
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
-    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
+    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['plana', 'Plan analytique', 'Plan analytique : activités du projet'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
     put('g-budgets', [['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
@@ -14685,7 +14707,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
   }
   var CAD_SOON = {
@@ -20242,7 +20264,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'revpl-dos', 'av-form', 'av-jus', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'revpl-dos', 'av-form', 'av-jus', 'prop-list', 'prop-acc', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -22037,6 +22059,69 @@ var EXEC_REC = [
   function repFxBlock(body, ex) {
     var close = ex + '-12-31', rows = (DP.docs || []).filter(function (d) { return d.fx && DP_RANK[d.st] >= 2 && DP_RANK[d.st] < 6; }).map(function (d) { var r = srcRate(d.fx.dev, close) || d.fx.tx, g = d.fx.mtd * (r - d.fx.tx); return [d.ref + ' — ' + d.tiers, fmt(d.fx.mtd) + ' ' + d.fx.dev, fmt(d.fx.tx), fmt(r), anaSg(g)]; });
     anaBlock(body, 'Réévaluation de clôture (taux du 31/12/' + ex + ')', dpMini(['Engagement en devise à payer', 'Reste à payer', 'Taux d’engagement', 'Taux de clôture', 'Écart latent (MGA)'], rows, [1, 2, 3, 4], 'Aucun engagement en devise à réévaluer.'));
+  }
+  /* ----- Plan analytique : activités du plan et nouvelles activités proposées à la collecte ----- */
+  var PLANO = {}, PROPR = null, PROPI = null;
+  function propSrc(p) { if (p.lines) return p.lines; if ((COL[p.p] || []).some(function (l) { return l.dem != null; })) return COL[p.p]; return VLINES[p.p] = VLINES[p.p] || []; }
+  function cvPending(r) { var out = []; cvPerims(r).forEach(function (x) { propSrc(x.p).forEach(function (l) { if (l.added && (!l.prop || l.prop.st === 'Proposée')) out.push({ p: x.p, l: l, r: r }); }); }); return out; }
+  function propNextCode(perim, r) {
+    var mx = 0, pre = ''; (PLAN[perim] || []).forEach(function (l) { var q = l.c.split('.'); pre = pre || q[0]; mx = Math.max(mx, +q[1] || 0); });
+    cvPerims(r).forEach(function (x) { if (x.p.p === perim) propSrc(x.p).forEach(function (l) { if (/^\d+\.\d+$/.test(l.c)) { var q = l.c.split('.'); mx = Math.max(mx, +q[1] || 0); } }); });
+    return (pre || '9') + '.' + (mx + 1);
+  }
+  function propOpen(r) { PROPR = r.id; propPaint(); document.getElementById('prop-list').hidden = false; }
+  function propPaint() {
+    var r = cvById(PROPR), body = document.getElementById('prop-list-body'); if (!r) return; body.innerHTML = ''; var items = cvPending(r);
+    var card = cvEl('div', 'card'), sc = cvEl('div', 'scroll'), tb = cvEl('table'), th = cvEl('thead'), tbd = cvEl('tbody'); tb.style.minWidth = '860px';
+    th.innerHTML = '<tr><th>Activité proposée</th><th>Composante</th><th class="num">Montant (MGA)</th><th>Motif de la proposition</th><th></th></tr>'; tb.appendChild(th);
+    if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune activité à traiter : toutes les propositions sont décidées.'); c0.colSpan = 5; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
+    items.forEach(function (it) {
+      var tr = cvEl('tr'), n = cvEl('div'), c1 = cell(tr, '', 'name'); n.appendChild(cvEl('b', null, it.l.lib || it.l.l)); n.appendChild(cvEl('div', 'hby', 'Code provisoire ' + it.l.c)); c1.appendChild(n); cell(tr, it.p.p); cell(tr, fmt(it.l.dem || 0), 'num'); cell(tr, it.l.addedWhy || '—');
+      var a = cell(tr, ''); [['Accepter', function () { propAccOpen(it); }], ['Fusionner', function () { propMerge(it); }], ['Rejeter', function () { propReject(it); }]].forEach(function (x) { var b = cvEl('button', 'btn small', x[0]); b.type = 'button'; b.addEventListener('click', x[1]); a.appendChild(b); });
+      tbd.appendChild(tr);
+    });
+    tb.appendChild(tbd); sc.appendChild(tb); card.appendChild(sc); body.appendChild(card);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bf = cvEl('button', 'btn', 'Fermer'); bf.type = 'button'; bf.addEventListener('click', function () { document.getElementById('prop-list').hidden = true; if (document.getElementById('cv-dec') && !document.getElementById('cv-dec').hidden) cvOpenDecision(PROPR); }); ft.appendChild(bf); body.appendChild(ft);
+  }
+  function propAccOpen(it) {
+    PROPI = it; var r = it.r, fin = {}; dpLines().forEach(function (z) { fin[(z.l.axv && z.l.axv.Financier) || 'Budget de l’État'] = 1; }); if (it.l.axv && it.l.axv.Financier) fin[it.l.axv.Financier] = 1;
+    var sf = document.getElementById('prop-fin'), sn = document.getElementById('prop-nat'); sf.innerHTML = ''; Object.keys(fin).forEach(function (f) { var o = cvEl('option', null, f); o.value = f; sf.appendChild(o); }); sf.value = (it.l.axv && it.l.axv.Financier) || sf.options[0].value;
+    sn.innerHTML = ''; Object.keys(NATL).forEach(function (k) { var o = cvEl('option', null, NATL[k]); o.value = k; sn.appendChild(o); }); sn.value = NATL[it.l.nat] ? it.l.nat : '62';
+    document.getElementById('prop-code').value = propNextCode(it.p.p, r); document.getElementById('prop-lib').value = it.l.lib || it.l.l; document.getElementById('prop-comp').value = it.p.p; document.getElementById('prop-err').textContent = ''; document.getElementById('prop-acc').hidden = false;
+  }
+  function propReject(it) {
+    cvAsk({ title: 'Rejeter l’activité « ' + (it.l.lib || it.l.l) + ' »', ok: 'Rejeter', required: true, cLabel: 'Motif du rejet', placeholder: 'Pourquoi cette activité n’entre-t-elle pas au plan ?' }, function (m) {
+      it.l.prop = { st: 'Rejetée', motif: m, by: ME, on: nowStr() }; it.p.st = 'Retournée'; var r = it.r; r.st = 'Correction demandée'; r.step = 'Correction demandée au contributeur'; r.hist.unshift({ t: 'Activité « ' + (it.l.lib || it.l.l) + ' » rejetée — ' + m, by: ME, on: nowStr() });
+      propPaint(); cvAfter('Activité rejetée : la ligne revient au contributeur en correction.');
+    });
+  }
+  function propMerge(it) {
+    var plan = PLAN[it.p.p] || [], opts = plan.map(function (l) { return l.c + ' — ' + l.l; }); if (!opts.length) return;
+    cvAsk({ title: 'Fusionner « ' + (it.l.lib || it.l.l) + ' » avec une activité du plan', ok: 'Fusionner', required: false, optLabel: 'Activité existante', options: opts, placeholder: 'Commentaire (facultatif)' }, function (m, opt) {
+      var code = opt.split(' — ')[0], pl0 = plan.filter(function (l) { return l.c === code; })[0], arr = propSrc(it.p), ex = arr.filter(function (l) { return l.c === code && l !== it.l && l.dem != null; })[0];
+      if (ex) { ex.m = (ex.dem || 0) + (it.l.dem || 0); ex.q = null; ex.p = null; ex.dem = ex.m; ex.just = (ex.just ? ex.just + ' ; ' : '') + 'Fusion de « ' + (it.l.lib || it.l.l) + ' »'; arr.splice(arr.indexOf(it.l), 1); }
+      else { it.l.c = code; it.l.l = pl0.l; it.l.lib = pl0.l; it.l.prop = { st: 'Fusionnée', into: code, by: ME, on: nowStr() }; }
+      it.r.hist.unshift({ t: 'Activité « ' + (it.l.lib || it.l.l) + ' » fusionnée avec ' + opt + (m ? ' — ' + m : ''), by: ME, on: nowStr() }); propPaint(); cvAfter('Activité fusionnée avec ' + opt + '.');
+    });
+  }
+  document.getElementById('prop-cancel').addEventListener('click', function () { document.getElementById('prop-acc').hidden = true; });
+  document.getElementById('prop-ok').addEventListener('click', function () {
+    var it = PROPI, err = document.getElementById('prop-err'), code = document.getElementById('prop-code').value.trim(), lib = document.getElementById('prop-lib').value.trim(); if (!it) return;
+    if (!/^\d+\.\d+$/.test(code)) { err.textContent = 'Le code doit avoir la forme 2.4 (composante, puis numéro).'; return; } if (!lib) { err.textContent = 'Indiquez le libellé de l’activité.'; return; }
+    if ((PLAN[it.p.p] || []).some(function (l) { return l.c === code; }) || propSrc(it.p).some(function (l) { return l.c === code && l !== it.l; })) { err.textContent = 'Ce code existe déjà dans cette composante.'; return; }
+    var l = it.l, fin = document.getElementById('prop-fin').value, nat = document.getElementById('prop-nat').value;
+    l.c = code; l.l = lib; l.lib = lib; l.nat = nat; l.axv = l.axv || {}; l.axv.Financier = fin; l.axv.Analytique = 'Programme ' + code.split('.')[0]; l.prop = { st: 'Acceptée', by: ME, on: nowStr(), camp: it.r.camp };
+    (PLAN[it.p.p] = PLAN[it.p.p] || []).push({ c: code, l: lib, nat: nat, ref: 0 }); PLANO[it.p.p + '|' + code] = { camp: it.r.camp, by: ME, on: nowStr(), motif: l.addedWhy || '' };
+    it.r.hist.unshift({ t: 'Activité « ' + lib + ' » acceptée au plan analytique (code ' + code + ')', by: ME, on: nowStr() }); document.getElementById('prop-acc').hidden = true; propPaint(); cvAfter('Activité ' + code + ' ajoutée au plan analytique.');
+  });
+  /* Écran Cadre du projet › Plan analytique : lecture seule */
+  function planaRender() {
+    var rows = [], used = {}; dpLines().forEach(function (z) { var k = z.perim + '|' + z.l.c; used[k] = (used[k] || 0) + 1; });
+    Object.keys(PLAN).forEach(function (pm) { (PLAN[pm] || []).forEach(function (l) { var o = PLANO[pm + '|' + l.c], bd = badge('Au plan', 'b-ok'); rows.push([pm, l.c, l.l, 'Programme ' + l.c.split('.')[0], o ? 'Créée à la collecte ' + o.camp + ' · acceptée le ' + o.on.slice(0, 10) : 'Plan initial', String(used[pm + '|' + l.c] || 0), bd]); }); });
+    CVAL.forEach(function (r) { if (!cvCamp(r)) return; cvPending(r).forEach(function (it) { rows.push([it.p.p, '—', it.l.lib || it.l.l, '—', 'Proposée à la collecte ' + r.camp, '0', badge('Proposée', 'b-warn')]); }); });
+    var b = document.getElementById('plana-body'); b.innerHTML = '';
+    b.appendChild(dpTiles([['Activités au plan', String(rows.filter(function (x) { return x[6].textContent === 'Au plan'; }).length), 'brand'], ['Créées à la collecte', String(Object.keys(PLANO).length), 'info'], ['Propositions à traiter', String(rows.filter(function (x) { return x[6].textContent === 'Proposée'; }).length), 'warn']], { cols: 3 }));
+    b.appendChild(dpMini(['Composante', 'Code', 'Activité', 'Programme', 'Origine', 'Lignes de PTBA', 'Statut'], rows, [5], 'Aucune activité.'));
   }
   function sxFormSetup() {
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
