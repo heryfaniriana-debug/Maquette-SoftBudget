@@ -1994,7 +1994,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="sub">
           <button data-go="bkacc">Comptes bancaires</button>
           <button data-go="bkdec" title="Plan de trésorerie prévisionnel">Plan de trésorerie</button>
-                                        <button data-go="plana" title="Plan analytique : activités du projet" style="display:none">Plan analytique</button><button data-go="revpl" title="Révisions des plans : circuit et approbation du bailleur" style="display:none">Révisions</button><button data-go="rep" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
+                                        <button data-go="sites" title="Sites : centres de saisie du projet" style="display:none">Sites</button>
+          <button data-go="plana" title="Plan analytique : activités du projet" style="display:none">Plan analytique</button><button data-go="revpl" title="Révisions des plans : circuit et approbation du bailleur" style="display:none">Révisions</button><button data-go="rep" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
           <button data-go="pdec" title="Plan de décaissement du projet">Plan de décaissement</button>
           <button data-go="dfon" title="Demandes de fonds DRF et DPD">Demandes de fonds</button>
           <button data-go="bkrel" title="Relevés bancaires">Relevés bancaires</button>
@@ -2015,6 +2016,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button class="anp" data-go="andec" title="Décaissements comparés au plan de décaissement" style="display:none">Décaissements et plan</button>
           <button class="anp" data-go="anphy" title="Avancement physique comparé au PTA" style="display:none">Physique et PTA</button>
           <button class="anp" data-go="anfp" title="Dépenses comparées à l’avancement physique" style="display:none">Finances et physique</button>
+          <button class="anp" data-go="ansit" title="Comparaison entre sites" style="display:none">Par site</button>
           <button class="anp" data-go="anplu" title="Suivi pluriannuel" style="display:none">Pluriannuel</button>
           <button class="anp" data-go="anale" title="Règles et alertes" style="display:none">Alertes</button>
           <button data-go="ecarts" title="Écarts à expliquer et commentés">Écarts commentés</button>
@@ -5072,6 +5074,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div class="full"><label for="av-objet">Objet <em>*</em></label><input id="av-objet" class="field" type="text"></div>
             <div><label for="av-ligne">Ligne du PTBA <em>*</em></label><select id="av-ligne" class="field"></select></div>
             <div><label for="av-mt">Montant de l’avance (MGA) <em>*</em></label><input id="av-mt" class="field" type="text" inputmode="decimal"></div>
+            <div><label for="av-site">Site</label><select id="av-site" class="field"></select></div>
             <div data-m="1"><label for="av-d1">Début de la mission</label><input id="av-d1" class="field" type="date"></div>
             <div data-m="1"><label for="av-d2">Fin de la mission</label><input id="av-d2" class="field" type="date"></div>
           </div>
@@ -5407,7 +5410,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       <!-- ===== Projet : analyses (écarts entre les plans et l'exécution) ===== -->
       <section class="view" id="v-ana">
         <div class="head"><div><h1>Analyses</h1><p></p></div>
-          <div class="actions"><button class="btn primary" id="ana-new" style="display:none">+ Nouvelle règle</button></div></div>
+          <div class="actions"><select class="field" id="ana-site" aria-label="Site" style="display:none;width:auto"></select><button class="btn primary" id="ana-new" style="display:none">+ Nouvelle règle</button></div></div>
         <div class="callout" id="ana-msg" hidden style="margin-bottom:12px"></div>
         <div id="ana-body"></div>
         <div class="panel" id="ana-rule" hidden><h2>Nouvelle règle d’alerte</h2><div class="body">
@@ -5472,6 +5475,24 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div id="plana-body"></div>
       </section>
 
+      <!-- ===== Projet : sites (centres de saisie) ===== -->
+      <section class="view" id="v-sites">
+        <div class="head"><div><h1>Sites</h1><p>Les centres de saisie du projet : la coordination et les antennes. Chaque écriture porte le site qui l’a saisie.</p></div>
+          <div class="actions"><button class="btn primary" id="site-new">+ Nouveau site</button></div></div>
+        <div class="callout" id="sites-msg" hidden style="margin-bottom:12px"></div>
+        <div id="sites-body"></div>
+        <div class="panel" id="site-form" hidden><h2 id="site-ft">Nouveau site</h2><div class="body">
+          <div class="fgrid">
+            <div><label for="site-fc">Code <em>*</em></label><input id="site-fc" class="field" type="text" maxlength="3" placeholder="Ex. TOA"></div>
+            <div><label for="site-fr">Responsable</label><input id="site-fr" class="field" type="text"></div>
+            <div class="full"><label for="site-fn">Nom du site <em>*</em></label><input id="site-fn" class="field" type="text" placeholder="Ex. Antenne de Toamasina"></div>
+          </div>
+          <div class="err" id="site-ferr"></div>
+          <div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="site-fcancel">Annuler</button><button class="btn primary" id="site-fsave">Enregistrer le site</button></div>
+        </div></div>
+        <div class="panel" id="site-rep" hidden><h2><span id="site-rep-title">Répartir la ligne</span></h2><div class="body" id="site-rep-body"></div></div>
+      </section>
+
       <!-- ===== Projet : report et clôture de l'exercice ===== -->
       <section class="view" id="v-rep">
         <div class="head"><div><h1>Report et clôture</h1><p></p></div>
@@ -5484,7 +5505,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       <!-- ===== Projet : suivi de l'exécution (engagements, réalisations, paiements, encaissements) ===== -->
       <section class="view" id="v-sx">
         <div class="head"><div><h1>Engagements</h1><p></p></div>
-          <div class="actions"><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-trait-b">À traiter</button><button class="btn" id="sx-suivi-b">Suivi sur une période</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn" id="sx-sync">⟳ Synchroniser</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
+          <div class="actions"><select class="field" id="sx-site" aria-label="Site" style="width:auto"></select><button class="btn" id="sx-rap">Voir le rapprochement</button><button class="btn" id="sx-trait-b">À traiter</button><button class="btn" id="sx-suivi-b">Suivi sur une période</button><button class="btn" id="sx-imp">Importer un fichier</button><button class="btn" id="sx-sync">⟳ Synchroniser</button><button class="btn primary" id="sx-new">+ Saisir</button></div></div>
         <div class="callout" id="sx-msg" hidden style="margin-bottom:12px"></div>
         <div id="sx-k"></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:860px"><thead id="sx-th"></thead><tbody id="sx-b"></tbody></table></div></div>
@@ -5501,7 +5522,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div><label for="sxf-ref"><span id="sxf-reflbl">Référence</span> <em>*</em></label><input id="sxf-ref" class="field" type="text"></div>
             <div><label for="sxf-tiers"><span id="sxf-tglbl">Bénéficiaire</span></label><input id="sxf-tiers" class="field" type="text"></div>
             <div><label for="sxf-mt"><span id="sxf-mtlbl">Montant (MGA)</span> <em>*</em></label><input id="sxf-mt" class="field" type="text" inputmode="numeric"></div>
-                        <div id="sxf-pw" hidden><label for="sxf-d1">Début de l’engagement</label><input id="sxf-d1" class="field" type="date"></div>
+                        <div><label for="sxf-site">Site <em>*</em></label><select id="sxf-site" class="field"></select></div>
+            <div id="sxf-pw" hidden><label for="sxf-d1">Début de l’engagement</label><input id="sxf-d1" class="field" type="date"></div>
             <div id="sxf-p2w" hidden><label for="sxf-d2">Fin de l’engagement</label><input id="sxf-d2" class="field" type="date"></div>
             <div id="sxf-ew" hidden><label for="sxf-eng">Engagement rattaché</label><select id="sxf-eng" class="field"></select></div><div id="sxf-dw" hidden><label class="chk"><input type="checkbox" id="sxf-dpd"> Paiement direct du bailleur (hors décaissements du projet)</label></div>
           </div>
@@ -6598,7 +6620,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'plana', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'plana', 'sites', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6674,6 +6696,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     avanc: ['Exécution', 'Avancement physique'],
     inv: ['Élaboration', 'Budget d’investissement'],
     plana: ['Cadre du projet', 'Plan analytique'],
+    sites: ['Cadre du projet', 'Sites'],
+    ansit: ['Analyses', 'Comparaison entre sites'],
     revpl: ['Plans annuels', 'R\u00e9visions des plans'],
     rep: ['Plans annuels', 'Report et cl\u00f4ture de l\u2019exercice'],
     pdec: ['Plans annuels', 'Plan de décaissement'],
@@ -6697,13 +6721,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-plan': ['ptba', 'pta', 'ppm', 'pdec', 'revpl', 'rep'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
-    'nav-rapports': ['anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
+    'nav-rapports': ['ansit', 'anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
   };
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
   var MENU_OF = { create: 'list', detail: 'bud', saisie: 'bud', valid: 'arb' };
   var LABELLED = ['soon', 'params', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl', 'appr'];
-  var VIEWALIAS = { anfin: 'ana', aneng: 'ana', anrea: 'ana', andec: 'ana', anphy: 'ana', anfp: 'ana', anplu: 'ana', anale: 'ana', anver: 'ana', sxphy: 'sx', sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
+  var VIEWALIAS = { ansit: 'ana', anfin: 'ana', aneng: 'ana', anrea: 'ana', andec: 'ana', anphy: 'ana', anfp: 'ana', anplu: 'ana', anale: 'ana', anver: 'ana', sxphy: 'sx', sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
   function show(name, label) {
     var vn = VIEWALIAS[name] || name;
     views.forEach(function (v) {
@@ -6740,8 +6764,9 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'resu' && typeof resuRender === 'function') resuRender();
     if (name === 'avini' && typeof aviniRender === 'function') aviniRender();
     if (/^sx(eng|liq|pay|enc|phy)$/.test(name) && typeof sxRender === 'function') { SX.kind = name.slice(2); sxRender(); }
-    if (/^an(fin|eng|rea|dec|phy|fp|plu|ale|ver)$/.test(name) && typeof anaRender === 'function') { ANA.kind = name.slice(2); anaRender(); }
+    if (/^an(fin|eng|rea|dec|phy|fp|plu|ale|ver|sit)$/.test(name) && typeof anaRender === 'function') { ANA.kind = name.slice(2); anaRender(); }
     if (name === 'plana' && typeof planaRender === 'function') planaRender();
+    if (name === 'sites' && typeof sitesRender === 'function') sitesRender();
     if (name === 'revpl' && typeof revRender === 'function') revRender();
     if (name === 'rep' && typeof repRender === 'function') repRender();
     if (name === 'trpos' && typeof trpRender === 'function') trpRender();
@@ -14610,12 +14635,12 @@ var EXEC_REC = [
     var adv = function (c, a) { return a; }, simple = function (c, a) { return !a; }, treso = function (c, a, f) { return f.mods.treso; };
     var ca = [['Engagements', rPrj], ['Liquidations', rPrj], ['Ordonnancement', rPrj], ['Paiements', rPrj], ['Tableau de restitution', rPrj], ['Clôture de l’exercice', rPrj], ['Fichiers d’interface', rPrj]];
     return [
-      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Cadre budgétaire', rAlways], ['Plan analytique', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
+      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Cadre budgétaire', rAlways], ['Plan analytique', rAlways], ['Sites', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
       { g: 'Élaboration', items: [['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso], ['Révisions', rAlways], ['Report et clôture', rAlways]] },
       { g: 'Compte administratif', items: ca },
       { g: 'Exécution', items: [[rImp('Engagements', 'Engagements'), rAlways], [rImp('Réalisations', 'Réalisations'), rAlways], [rImp('Décaissements', 'Décaissements'), rAlways], [rImp('Encaissements', 'Encaissements'), rAlways], ['Avancement physique', rAlways], ['Trésorerie (encaissements et décaissements)', treso], ['Demandes de fonds (DRF et DPD)', treso], ['Rapprochement saisie / import', function (c, a, f, ci) { return ci && f.regime === 'projet' && f.mods.sync; }], ['Comptes bancaires', treso], ['Relevés bancaires', treso], ['Rapprochement bancaire', treso]] },
-      { g: 'Analyses', items: [['Vue d’ensemble', rAlways], ['Engagements et PPM', rAlways], ['Réalisations et PTBA', rAlways], ['Décaissements et plan', treso], ['Physique et PTA', rAlways], ['Finances et physique', rAlways], ['Pluriannuel', rAlways], ['Alertes', rAlways]] },
+      { g: 'Analyses', items: [['Vue d’ensemble', rAlways], ['Engagements et PPM', rAlways], ['Réalisations et PTBA', rAlways], ['Décaissements et plan', treso], ['Physique et PTA', rAlways], ['Finances et physique', rAlways], ['Par site', rAlways], ['Pluriannuel', rAlways], ['Alertes', rAlways]] },
       { g: 'Paramètres', items: grp('Paramètres').items.filter(function (it) { return it[0] !== 'Bailleurs' && it[0] !== 'Sources de financement' && it[0] !== 'Taux de change'; }) }
     ];
   })();
@@ -14665,7 +14690,7 @@ var EXEC_REC = [
       var sub = document.querySelector('#' + gid + ' > .sub');
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
-    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['plana', 'Plan analytique', 'Plan analytique : activités du projet'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
+    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['plana', 'Plan analytique', 'Plan analytique : activités du projet'], ['sites', 'Sites', 'Sites : centres de saisie du projet'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
     put('g-budgets', [['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
@@ -14707,7 +14732,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', code === 'prj'); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
   }
   var CAD_SOON = {
@@ -20264,7 +20289,7 @@ var EXEC_REC = [
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modalStack.length) closeModal(modalStack[modalStack.length - 1]); });
 
   /* ---------- Saisie et modification : toujours dans une nouvelle interface, jamais mêlée à la liste ---------- */
-  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'revpl-dos', 'av-form', 'av-jus', 'prop-list', 'prop-acc', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
+  var FP_IDS = ['ec-form', 'si-form', 'ln-form', 'ct-form', 'ctp-form', 'bl-dup', 's-form', 'rv', 'dl-form', 'im-wiz', 'cr-form', 'en-form', 'en-cancel', 'al-auth', 'pm-form', 'pe', 'cm-form', 'cm-act', 'cv-dec', 'cv-view', 'bv-view', 'bv-link', 'dp-eng-form', 'dp-liq-form', 'dp-print', 'dp-pay-form', 'dp-tab-form', 'pdc-det', 'ana-rule', 'ppm-det', 'ppm-guide', 'avini-form', 'sx-form', 'sx-sy', 'sx-suivi', 'sx-ech', 'sx-det', 'sx-trait', 'rep-prev', 'revpl-det', 'revpl-chg', 'revpl-ano', 'revpl-dos', 'av-form', 'av-jus', 'prop-list', 'prop-acc', 'site-form', 'site-rep', 'trp-det', 'resu-form', 'cd', 'co-ctrl', 'cc-adj', 'pt-add', 'rr-form', 'rr-d', 'tr-form', 'cl-reopen', 'if-form',
     'fx-form', 'fx-conv', 'pad-hist', 'sa-panel', 'ba-form', 'bd-gen', 'br-panel', 'bail-form', 'src-form', 'ceg-form', 'cli-form', 'ppm-form', 'dfo-form', 'dfo-resp', 'rct-form', 'prc-form', 'prc-pay', 'inv-form', 'pad-edit'];
   var FP_TITLES = { rv: 'Validation du budget', cd: 'Campagne budgétaire', 'co-ctrl': 'Détail de la collecte', 'rr-d': 'Révision budgétaire', pe: 'Modèle de parcours', 'en-cancel': 'Annuler l’engagement', 'al-auth': 'Autoriser un dépassement exceptionnel' };
   var fpOpenEls = [];
@@ -20712,7 +20737,7 @@ var EXEC_REC = [
     var body = document.getElementById('dp-eng-body'), f = DP.f; body.innerHTML = '';
     var bar = cvEl('div', 'row-toolbar'), mt = parseInt0(f.montant) || 0, s = dpStat(f.key), ok = s.dispo - mt >= 0, sv = cvEl('button', 'btn primary', 'Enregistrer et soumettre au visa'); sv.type = 'button'; sv.disabled = !(ok && mt > 0 && f.objet.trim() && !(dpHasAv(f) && !f.gar.trim()));
     sv.addEventListener('click', function () {
-      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', pm: dfoDocSrc({ key: f.key }) ? (f.pm || 'projet') : 'projet', pmNote: f.pmT && f.pm !== dpPmPropose(f, mt) ? 'Mode de paiement modifié à l’engagement' : '', dt: { eng: cadToday() }, av: dpHasAv(f) ? { pct: parseInt0(f.avpct), amt: Math.round(mt * parseInt0(f.avpct) / 100), garantie: f.gar.trim(), st: 'prevue' } : null, fx: f.dev && f.dev !== 'MGA' ? { dev: f.dev, mtd: parseInt0(f.mtd), tx: srcRate(f.dev, cadToday()) } : undefined });
+      var id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4); DP.docs.push({ id: id, key: f.key, tiers: f.tiers, objet: f.objet.trim(), acte: f.acte, ref: f.ref || 'BC-2026-' + (100 + DP.seqE), mt: mt, st: 'soumis', fac: '', mandat: '', rejet: '', ppm: f.ppm, mode: '', pm: dfoDocSrc({ key: f.key }) ? (f.pm || 'projet') : 'projet', pmNote: f.pmT && f.pm !== dpPmPropose(f, mt) ? 'Mode de paiement modifié à l’engagement' : '', dt: { eng: cadToday() }, av: dpHasAv(f) ? { pct: parseInt0(f.avpct), amt: Math.round(mt * parseInt0(f.avpct) / 100), garantie: f.gar.trim(), st: 'prevue' } : null, site: f.site || 'COO', fx: f.dev && f.dev !== 'MGA' ? { dev: f.dev, mtd: parseInt0(f.mtd), tx: srcRate(f.dev, cadToday()) } : undefined });
       document.getElementById('dp-eng-form').hidden = true; dpMsg('dpeng-msg', id + ' enregistré : crédit réservé sur la ligne ' + dpShort({ key: f.key }) + ', dossier transmis au Contrôle financier.'); DP.sel.dpeng = id; dpEngRender();
     });
     bar.appendChild(sv); body.appendChild(bar);
@@ -20726,7 +20751,7 @@ var EXEC_REC = [
     CPP.items.filter(function (x) { return x.act === f.key.split('|').filter(function (_, i) { return i !== 1; }).join('|'); }).forEach(function (x) { var o = cvEl('option', null, x.ref + ' — ' + x.des + ' (' + fmt(x.est) + ' MGA)'); o.value = x.ref; pp.appendChild(o); }); pp.value = f.ppm;
     pp.addEventListener('change', function () { f.ppm = pp.value; var it = CPP.items.filter(function (x) { return x.ref === pp.value; })[0]; if (it) { f.objet = it.des; f.montant = String(it.est); f.acte = 'Marché'; f.ref = it.ref; } dpEngPaint(); }); fld('Marché du PPM lié à cette activité (facultatif : reprend l’objet et le montant)', pp, true);
     if (dfoDocSrc({ key: f.key })) { var spm = cvEl('select', 'field'); ['projet', 'dpd'].forEach(function (k) { var o = cvEl('option', null, PM_LBL[k]); o.value = k; spm.appendChild(o); }); if (!f.pmT) f.pm = dpPmPropose(f, mt); spm.value = f.pm; spm.addEventListener('change', function () { f.pm = spm.value; f.pmT = true; }); fld('Mode de paiement (proposé d’après le PPM ou le seuil)', spm, true); }
-    var sa = cvEl('select', 'field'); ['Bon de commande', 'Marché', 'Contrat', 'Convention'].forEach(function (x) { sa.appendChild(cvEl('option', null, x)); }); sa.value = f.acte; sa.addEventListener('change', function () { f.acte = sa.value; dpEngPaint(); }); fld('Type d’acte', sa);
+    var sa = cvEl('select', 'field'); ['Bon de commande', 'Marché', 'Contrat', 'Convention'].forEach(function (x) { sa.appendChild(cvEl('option', null, x)); }); sa.value = f.acte; sa.addEventListener('change', function () { f.acte = sa.value; dpEngPaint(); }); fld('Type d’acte', sa); var ss0 = cvEl('select', 'field'); siteFill(ss0, false); ss0.value = f.site || 'COO'; ss0.addEventListener('change', function () { f.site = ss0.value; }); fld('Site de saisie', ss0);
     var ri = cvEl('input', 'field'); ri.type = 'text'; ri.placeholder = 'BC-2026-…'; ri.value = f.ref; ri.addEventListener('input', function () { f.ref = ri.value; }); fld('Référence de l’acte', ri);
     var st = cvEl('select', 'field'); DP_TIERS.forEach(function (x) { st.appendChild(cvEl('option', null, x)); }); st.value = f.tiers; st.addEventListener('change', function () { f.tiers = st.value; }); fld('Tiers', st);
     var dv = cvEl('select', 'field'); ['MGA'].concat(fxDevs()).forEach(function (x) { dv.appendChild(cvEl('option', null, x)); }); dv.value = f.dev || 'MGA'; dv.addEventListener('change', function () { f.dev = dv.value; f.mtd = ''; f.montant = ''; dpEngPaint(); }); fld('Devise de l’engagement', dv);
@@ -20896,6 +20921,7 @@ var EXEC_REC = [
     phy: ['Avancement physique et PTA', 'Les quantités réalisées comparées aux cibles du PTA'],
     fp: ['Réalisations et avancement physique', 'Ce qui est dépensé comparé à ce qui est réalisé sur le terrain'],
     plu: ['Suivi pluriannuel', 'Le cumul depuis le début du projet, exercice par exercice'],
+    sit: ['Comparaison entre sites', 'Le prévu et le réalisé de chaque site : coordination et antennes'],
     ale: ['Alertes', 'Choisissez ce qui est surveillé, par rapport à quel plan, et à partir de quel écart une alerte apparaît'],
     ver: ['Versions des plans', 'Les versions du plan de financement, du PTBA, du PTA, du PPM et du plan de décaissement, et la version prise comme référence']
   };
@@ -20915,7 +20941,7 @@ var EXEC_REC = [
   function anaSnap(z) { if (!ANA.ver) return null; var v = bvVers(z.r)[ANA.ver - 1]; return v ? v.snap[z.perim + '|' + z.l.c] : null; }
   function anaCred(z) { var s = anaSnap(z); return s ? s.dem : (z.l.dem || 0); }
   function anaVol(z) { var w = z.l.wk; if (!w) return 0; var s = anaSnap(z); if (s && s.inds && s.inds.length === 1) return s.inds[0][1]; return w.vol || 0; }
-  function anaSx(kind, key, ex, upto) { sxSeed(); if (kind === 'eng') return (SX.items || []).filter(function (i) { return i.kind === 'eng' && (key == null || i.key === key); }).reduce(function (a, i) { return a + sxPart(i, ex); }, 0); return (SX.items || []).filter(function (i) { return i.kind === kind && (key == null || i.key === key) && i.date && i.date.slice(0, 4) === ex && (!upto || i.date <= upto); }).reduce(function (a, i) { return a + i.mt; }, 0); }
+  function anaSx(kind, key, ex, upto) { sxSeed(); if (kind === 'eng') return (SX.items || []).filter(function (i) { return i.kind === 'eng' && (key == null || i.key === key); }).reduce(function (a, i) { return a + sxPart(i, ex); }, 0); return (SX.items || []).filter(function (i) { return i.kind === kind && (key == null || i.key === key) && i.date && i.date.slice(0, 4) === ex && (!upto || i.date <= upto) && (!ANA_SITE || (i.site || 'COO') === ANA_SITE); }).reduce(function (a, i) { return a + i.mt; }, 0); }
   function anaRules() {
     if (!ANA.rules) { ANA.seq = 5; ANA.rules = [
       { id: 1, nom: 'Engagements en retard sur le PPM', real: 'eng', plan: 'ppm', seuil: 20, sens: 'sous', on: true },
@@ -20934,8 +20960,8 @@ var EXEC_REC = [
       var N = pdcNeeds(r), P = pdcSim(N); for (m = 0; m < 12; m++) { S.pdcCs[m] += N.out[m]; S.pdcDp[m] += N.dpdM[m]; S.inf[m] += P.inflow[m]; }
       ppmLotItems(r).forEach(function (x) { var d = x.d3 || x.d2 || x.d1; if (d && d.slice(0, 4) === ex) S.ppm[+d.slice(5, 7) - 1] += x.est; });
     });
-    anaLines(ex).forEach(function (z) { var sp = bvSpread(anaCred(z), z.l, ex); for (m = 0; m < 12; m++) S.ptba[m] += sp[m]; });
-    (SX.items || []).forEach(function (i) { if (i.kind === 'eng') { var pt = sxPart(i, ex); if (pt) S.eng[i.date.slice(0, 4) === ex ? +i.date.slice(5, 7) - 1 : 0] += pt; return; } if (!i.date || i.date.slice(0, 4) !== ex) return; var k = i.kind === 'pay' && sxIsDpd(i) ? 'dpd' : i.kind; if (S[k] && k !== 'inf') S[k][+i.date.slice(5, 7) - 1] += i.mt; });
+    anaLines(ex).forEach(function (z) { var sp = bvSpread(Math.round(anaCred(z) * (ANA_SITE ? siteShare(z.l, ANA_SITE) : 1)), z.l, ex); for (m = 0; m < 12; m++) S.ptba[m] += sp[m]; });
+    (SX.items || []).forEach(function (i) { if (ANA_SITE && (i.site || 'COO') !== ANA_SITE) return; if (i.kind === 'eng') { var pt = sxPart(i, ex); if (pt) S.eng[i.date.slice(0, 4) === ex ? +i.date.slice(5, 7) - 1 : 0] += pt; return; } if (!i.date || i.date.slice(0, 4) !== ex) return; var k = i.kind === 'pay' && sxIsDpd(i) ? 'dpd' : i.kind; if (S[k] && k !== 'inf') S[k][+i.date.slice(5, 7) - 1] += i.mt; });
     return S;
   }
   /* Lignes de comparaison : une ligne par marché, par ligne du PTBA, par travail ou par mois */
@@ -20947,7 +20973,7 @@ var EXEC_REC = [
       if (hors) rows.push({ id: 'hors', label: 'Engagements hors PPM', sub: 'Non rattachés à un marché du PPM', plan: 0, planTo: 0, real: hors });
       R.planM = S.ppm; R.realM = S.eng;
     } else if (kind === 'rea') {
-      anaLines(ex).forEach(function (z) { var c = anaCred(z), sp = bvSpread(c, z.l, ex); rows.push({ id: z.key, label: z.l.c + ' — ' + (z.l.lib || z.l.l), sub: z.perim, plan: c, planTo: anaSum(sp, cm), real: anaSx('liq', z.key, ex, today) }); });
+      anaLines(ex).forEach(function (z) { var sh = ANA_SITE ? siteShare(z.l, ANA_SITE) : 1; if (ANA_SITE && !sh) return; var c = Math.round(anaCred(z) * sh), sp = bvSpread(c, z.l, ex); rows.push({ id: z.key, label: z.l.c + ' — ' + (z.l.lib || z.l.l), sub: z.perim, plan: c, planTo: anaSum(sp, cm), real: anaSx('liq', z.key, ex, today) }); });
       R.planM = S.ptba; R.realM = S.liq;
     } else if (kind === 'dec') {
       for (m = 0; m <= cm; m++) rows.push({ id: 'm' + m, label: PDC_MOIS[m].charAt(0).toUpperCase() + PDC_MOIS[m].slice(1) + ' ' + ex, plan: S.pdcCs[m], planTo: S.pdcCs[m], real: S.pay[m], plan2: S.pdcDp[m], real2: S.dpd[m] });
@@ -21179,8 +21205,8 @@ var EXEC_REC = [
   function anaRender() {
     var ex = anaEx(), K = ANA_K[ANA.kind], b = document.getElementById('ana-body'); if (!b) return; b.innerHTML = '';
     document.querySelector('#v-ana > .head h1').textContent = K[0]; document.querySelector('#v-ana > .head p').textContent = K[1] + (['plu', 'ale', 'ver'].indexOf(ANA.kind) >= 0 ? '' : ' — exercice ' + ex + ', situation au ' + isoToFr(cadToday()));
-    document.getElementById('ana-new').style.display = ANA.kind === 'ale' ? '' : 'none';
-    if (ANA.kind === 'ale') anaAle(b, ex); else if (ANA.kind === 'plu') anaPlu(b); else if (ANA.kind === 'ver') anaVer(b, ex); else anaCompare(b, ANA.kind, ex);
+    document.getElementById('ana-new').style.display = ANA.kind === 'ale' ? '' : 'none'; ANA_SITE = ANA.kind === 'rea' ? (ANA.site || '') : ''; var asl = document.getElementById('ana-site'); asl.style.display = ANA.kind === 'rea' ? '' : 'none'; if (ANA.kind === 'rea') { siteFill(asl, true); asl.value = ANA.site || ''; asl.onchange = function () { ANA.site = asl.value; anaRender(); }; }
+    if (ANA.kind === 'ale') anaAle(b, ex); else if (ANA.kind === 'sit') anaSite(b, ex); else if (ANA.kind === 'plu') anaPlu(b); else if (ANA.kind === 'ver') anaVer(b, ex); else anaCompare(b, ANA.kind, ex);
   }
   (function () {
     function opts(id, l) { var s = document.getElementById(id); if (!s) return; l.forEach(function (x) { var o = cvEl('option', null, x[1]); o.value = x[0]; s.appendChild(o); }); }
@@ -21255,7 +21281,7 @@ var EXEC_REC = [
   function sxId() { return 'SX-' + ('000' + (++SX.seq)).slice(-4); }
   function sxLineKey(code) { var z = dpLines().filter(function (x) { return x.l.c === code; })[0]; return z ? z.key : null; }
   function sxSeed() {
-    if (SX.items) return; dpSeed(); if (!DP.docs) return; SX.items = []; SX.free = []; var today = cadToday();
+    if (SX.items) return; dpSeed(); if (!DP.docs) return; dpSiteSeed(); SX.items = []; SX.free = []; var today = cadToday();
     function add(kind, key, date, ref, tiers, mt, src, unit, x) { var o = { id: sxId(), kind: kind, key: key, date: date, ref: ref, tiers: tiers, mt: mt, src: src || 'SoftAccounting', unit: unit }; if (x) Object.keys(x).forEach(function (k) { o[k] = x[k]; }); SX.items.push(o); }
     DP.docs.forEach(function (d) {
       var q = d.dt || {};
@@ -21272,8 +21298,9 @@ var EXEC_REC = [
     SX.pool = { 'SoftAccounting': { eng: [{ key: k21, date: today, ref: 'BC-2026-0190', tiers: 'FOURNITEC SARL', mt: 12000000 }], liq: [{ key: k21, date: today, ref: 'FAC-0990', tiers: 'Entreprise Sud B\u00e2timent', mt: 54000000, eng: 'M-2026-051' }], pay: [{ eng: 'CT-2026-016', key: k21, date: today, ref: 'VIR-0471', tiers: 'Cabinet RAKOTO Conseil', mt: 12000000 }], enc: [] }, 'SoftSE': { phy: [{ key: k21, date: today, ref: 'AP-2.1-T4', tiers: w21.task, mt: 1, unit: w21.unit }] }, 'Soft e-Procurement': { eng: [{ key: k21, date: '2026-11-10', ref: 'M-2026-070', tiers: 'ELECTRO-MED Madagascar', mt: 18000000 }, { key: sxLineKey('1.1'), date: '2026-11-12', ref: 'M-2026-071', tiers: 'BTP Andriana', mt: 8000000 }], liq: [], pay: [], enc: [] } }; SX.extra = SX.pool['SoftAccounting'];
     SX.store = { 'SoftAccounting': {}, 'Soft e-Procurement': {}, 'SoftSE': {} };
     SX.store['SoftSE'].phy = SX.items.filter(function (i) { return i.kind === 'phy'; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt, unit: i.unit }; }).concat(SX.pool['SoftSE'].phy); SX.store['SoftSE'].phy.forEach(function (r) { if (r.ref === 'AP-2.2-T3') r.mt = 12; });
-    ['eng', 'liq', 'pay', 'enc'].forEach(function (k) { SX.store['SoftAccounting'][k] = SX.items.filter(function (i) { return i.kind === k; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt, eng: i.eng, d1: i.d1, d2: i.d2, fx: i.fx }; }).concat(SX.pool['SoftAccounting'][k]); SX.store['Soft e-Procurement'][k] = SX.pool['Soft e-Procurement'][k].slice(); });
+    ['eng', 'liq', 'pay', 'enc'].forEach(function (k) { SX.store['SoftAccounting'][k] = SX.items.filter(function (i) { return i.kind === k; }).map(function (i) { return { key: i.key, date: i.date, ref: i.ref, tiers: i.tiers, mt: i.mt, eng: i.eng, d1: i.d1, d2: i.d2, fx: i.fx, site: i.site }; }).concat(SX.pool['SoftAccounting'][k]); SX.store['Soft e-Procurement'][k] = SX.pool['Soft e-Procurement'][k].slice(); });
     SX.store['SoftAccounting'].eng.forEach(function (r) { if (r.ref === 'BC-2026-0171') r.mt = 40000000; });
+    SX.items.forEach(function (i) { if (i.site) return; var dd = (DP.docs || []).filter(function (d) { return d.ref === (i.kind === 'eng' ? i.ref : i.eng); })[0]; i.site = dd ? (dd.site || 'COO') : 'COO'; });
     var e51 = SX.items.filter(function (i) { return i.kind === 'eng' && i.ref === 'M-2026-051'; })[0]; if (e51) e51.ech = { '2026': Math.round(e51.mt * 2 / 3), '2027': e51.mt - Math.round(e51.mt * 2 / 3) };
     SX.log = [{ on: '10/11/2026 08:30', src: 'Synchronisation de la comptabilité', n: SX.items.length, by: 'Système' }]; DP.impLog = SX.log;
   }
@@ -21281,7 +21308,7 @@ var EXEC_REC = [
   function sxAgg() { sxSeed(); var o = {}; (SX.items || []).forEach(function (i) { if (!i.key || ['eng', 'liq', 'pay'].indexOf(i.kind) < 0) return; var r = o[i.key] = o[i.key] || { eng: 0, liq: 0, pay: 0 }; r[i.kind] += i.mt; }); return o; }
   function sxPull(label, src, kind) {
     sxSeed(); var n = 0, kinds = kind ? [kind] : ['eng', 'liq', 'pay', 'enc'], pool = kind === 'phy' ? SX.pool['SoftSE'] : SX.extra;
-    kinds.forEach(function (k) { var e = (pool[k] || []).shift(); if (e) { SX.items.push({ id: sxId(), kind: k, key: e.key, date: e.date, ref: e.ref, tiers: e.tiers, mt: e.mt, unit: e.unit, eng: e.eng, d1: e.d1, d2: e.d2, fx: e.fx, src: src }); n++; } });
+    kinds.forEach(function (k) { var e = (pool[k] || []).shift(); if (e) { SX.items.push({ id: sxId(), kind: k, key: e.key, date: e.date, ref: e.ref, tiers: e.tiers, mt: e.mt, unit: e.unit, eng: e.eng, d1: e.d1, d2: e.d2, fx: e.fx, site: e.site, src: src }); n++; } });
     SX.log.unshift({ on: nowStr(), src: label, n: n, by: ME }); if (kind === 'phy') sxPhyApply(); return n;
   }
   /* Les quantités mesurées alimentent l'avancement physique cumulé de chaque ligne (par trimestre) */
@@ -21293,9 +21320,9 @@ var EXEC_REC = [
       z.l.wk.real = [0, 1, 2, 3].map(function (q) { if (q > last || q > cq) return null; var c = its.filter(function (i) { return i.date <= ex + QE[q]; }).reduce(function (a, i) { return a + i.mt; }, 0); return c || null; });
     });
   }  function sxRender() {
-    sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
+    sxSeed(); var K = SX_K[SX.kind], all = SX.items || [], items = all.filter(function (i) { return i.kind === SX.kind && (!SX.site || (i.site || 'COO') === SX.site); }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), sy = !!(REG.prj && REG.prj.mods.sync);
     document.querySelector('#v-sx > .head h1').textContent = K.h; document.querySelector('#v-sx > .head p').textContent = K.p;
-    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; document.getElementById('sx-suivi-b').style.display = SX.kind === 'liq' ? '' : 'none'; document.getElementById('sx-trait-b').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
+    document.getElementById('sx-sync').style.display = sy ? '' : 'none'; document.getElementById('sx-imp').style.display = sy ? '' : 'none'; document.getElementById('sx-rap').style.display = 'none'; var ssl = document.getElementById('sx-site'); siteFill(ssl, true); ssl.value = SX.site || ''; ssl.onchange = function () { SX.site = ssl.value; sxRender(); }; document.getElementById('sx-suivi-b').style.display = SX.kind === 'liq' ? '' : 'none'; document.getElementById('sx-trait-b').style.display = 'none'; document.getElementById('sx-new').textContent = '+ Saisir ' + (SX.kind === 'enc' ? 'un encaissement' : (SX.kind === 'eng' ? 'un engagement' : (SX.kind === 'liq' ? 'une réalisation' : (SX.kind === 'phy' ? 'une mesure' : 'un décaissement'))));
     var sum = function (s) { return items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).reduce(function (a, i) { return a + i.mt; }, 0); };
     var kb = document.getElementById('sx-k'); kb.innerHTML = ''; var cn = function (s) { return String(items.filter(function (i) { return !s || (s === 'sync' ? (i.src !== 'Import' && i.src !== 'Saisie directe') : i.src === s); }).length); };
     var sd = function (dp) { return items.filter(function (i) { return sxIsDpd(i) === dp; }).reduce(function (a, i) { return a + i.mt; }, 0); };
@@ -21340,12 +21367,12 @@ var EXEC_REC = [
   }
   function sxCols() {
     var K = SX_K[SX.kind];
-    if (SX.kind === 'eng') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Période', 'Montant (MGA)', 'Réalisé (MGA)', 'Reste à réaliser (MGA)', 'Statut', 'Source', ''];
-    if (SX.kind === 'liq' || SX.kind === 'pay') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Engagement', 'Montant (MGA)', 'Source', ''];
-    return ['Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)', 'Source', ''];
+    if (SX.kind === 'eng') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Site', 'Période', 'Montant (MGA)', 'Réalisé (MGA)', 'Reste à réaliser (MGA)', 'Statut', 'Source', ''];
+    if (SX.kind === 'liq' || SX.kind === 'pay') return ['Date', 'Référence', K.tg, 'Ligne du PTBA', 'Site', 'Engagement', 'Montant (MGA)', 'Source', ''];
+    return ['Date', 'Référence', K.tg, SX.kind === 'enc' ? 'Compte' : 'Ligne du PTBA', 'Site', SX.kind === 'phy' ? 'Quantité réalisée' : 'Montant (MGA)', 'Source', ''];
   }
   function sxRow(i) {
-    var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur');
+    var tr = cvEl('tr'); cell(tr, isoToFr(i.date), 'name'); cell(tr, i.ref || '—'); cell(tr, i.tiers || '—'); cell(tr, i.key ? dpShort({ key: i.key }) : 'Compte spécial du bailleur'); cell(tr, siteLbl(i.site));
     if (SX.kind === 'eng') {
       var p = sxPer(i), ys = Object.keys(sxEch(i)), pc = cell(tr, isoToFr(p.d1) + ' → ' + isoToFr(p.d2)); if (ys.length > 1) { var bd = badge(ys.length + ' exercices', 'b-info'); bd.style.marginLeft = '6px'; pc.appendChild(bd); }
       cell(tr, fmt(i.mt), 'num'); var rz = sxRealz(i.ref); cell(tr, fmt(rz), 'num'); var rc = cell(tr, '', 'num'); if (rz > i.mt) rc.appendChild(badge('Dépassé de ' + fmt(rz - i.mt), 'b-ko')); else rc.textContent = fmt(sxReste(i)); var ss = sxStat(i), sc0 = cell(tr, ''); sc0.appendChild(badge(ss.lbl, ss.cls));
@@ -21985,7 +22012,7 @@ var EXEC_REC = [
     }
     return out;
   }
-  function sxSeedMis(d, add) { sxMisItems(d).forEach(function (i) { add(i.kind, d.key, i.date, i.ref, d.tiers, i.mt, undefined, undefined, i.x); }); }
+  function sxSeedMis(d, add) { sxMisItems(d).forEach(function (i) { add(i.kind, d.key, i.date, i.ref, d.tiers, i.mt, undefined, undefined, Object.assign({ site: d.site || 'COO' }, i.x)); }); }
   function dpAvInfo(d) {
     var M = d.mis, t = cadToday(), age = M.stage === 'remise' ? engDays(d.dt.pay, t) : 0;
     return { age: age, late: M.stage === 'remise' && age > 30, st: M.stage === 'engagee' ? ['À remettre', 'b-info'] : (M.stage === 'justifiee' ? ['Justifiée', 'b-ok'] : (age > 30 ? ['Justification en retard', 'b-ko'] : ['À justifier', 'b-warn'])) };
@@ -22001,7 +22028,7 @@ var EXEC_REC = [
     dpTable({ id: 'dpeng', head: ['N°', 'Bénéficiaire · objet', 'Ligne du PTBA', 'Type', 'Avance (MGA)', 'Frais réels (MGA)', 'Statut'], num: [4, 5], rows: docs, empty: 'Aucune avance : créez-en une avec « Nouvelle avance ».', redraw: dpEngRender,
       cells: function (d) { var a = cvEl('div'), I = dpAvInfo(d), st = cvEl('div'); a.appendChild(cvEl('b', null, d.tiers)); a.appendChild(cvEl('div', 'hint', d.objet)); st.appendChild(badge(I.st[0], I.st[1])); if (I.late) st.appendChild(cvEl('div', 'hby', I.age + ' jours depuis la remise')); return [d.ref, a, dpShort(d), d.mis.type === 'regie' ? 'Régie d’avances' : 'Mission', fmt(d.mt), d.mis.jus ? fmt(d.mis.jus.total) : '—', st]; } });
   }
-  function dpAvNew() {
+  function dpAvNew() { siteFill(document.getElementById('av-site'), false);
     var ls = dpLines(); document.getElementById('av-ligne').innerHTML = ls.map(function (z) { return '<option value="' + escH(z.key) + '">' + escH(z.l.c + ' — ' + (z.l.lib || z.l.l)) + '</option>'; }).join('');
     ['av-agent', 'av-objet', 'av-mt'].forEach(function (i) { document.getElementById(i).value = ''; }); document.getElementById('av-type').value = 'mission'; document.getElementById('av-d1').value = cadToday(); document.getElementById('av-d2').value = cadToday(); document.getElementById('av-err').textContent = ''; avTypeSync(); document.getElementById('av-form').hidden = false;
   }
@@ -22027,7 +22054,7 @@ var EXEC_REC = [
     var blocked = (DP.docs || []).filter(function (d) { return d.mis && d.tiers === ag && d.mis.stage === 'remise' && dpAvInfo(d).late; })[0]; if (blocked) { err.textContent = 'Nouvelle avance impossible : ' + ag + ' a une avance non justifiée en retard (' + blocked.ref + ').'; return; }
     if (dpStat(key).dispo < mt) { err.textContent = 'Crédit insuffisant sur la ligne : disponible ' + fmt(dpStat(key).dispo) + ' MGA.'; return; }
     var n = (DP.docs || []).filter(function (d) { return d.mis; }).length + 1, id = 'ENG-2026-' + ('000' + (DP.seqE++)).slice(-4);
-    DP.docs.push({ id: id, key: key, tiers: ag, objet: ob, acte: tp === 'regie' ? 'Régie d’avances' : 'Avance sur mission', ref: (tp === 'regie' ? 'RA-2026-' : 'AM-2026-') + ('00' + n).slice(-3), mt: mt, st: 'vise', fac: '', mandat: '', rejet: '', ppm: '', mode: '', dt: { eng: cadToday() }, mis: { type: tp, agent: ag, d1: tp === 'mission' ? d1 : '', d2: tp === 'mission' ? d2 : '', stage: 'engagee', jus: null } });
+    DP.docs.push({ id: id, key: key, tiers: ag, objet: ob, acte: tp === 'regie' ? 'Régie d’avances' : 'Avance sur mission', ref: (tp === 'regie' ? 'RA-2026-' : 'AM-2026-') + ('00' + n).slice(-3), mt: mt, st: 'vise', fac: '', mandat: '', rejet: '', ppm: '', mode: '', dt: { eng: cadToday() }, site: document.getElementById('av-site').value, mis: { type: tp, agent: ag, d1: tp === 'mission' ? d1 : '', d2: tp === 'mission' ? d2 : '', stage: 'engagee', jus: null } });
     document.getElementById('av-form').hidden = true; DP.sel.dpeng = id; dpMsg('dpeng-msg', 'Avance enregistrée : ' + fmt(mt) + ' MGA engagés sur la ligne. Remettez l’avance pour la décaisser.'); dpEngRender();
   });
   document.getElementById('av-jok').addEventListener('click', function () {
@@ -22123,7 +22150,74 @@ var EXEC_REC = [
     b.appendChild(dpTiles([['Activités au plan', String(rows.filter(function (x) { return x[6].textContent === 'Au plan'; }).length), 'brand'], ['Créées à la collecte', String(Object.keys(PLANO).length), 'info'], ['Propositions à traiter', String(rows.filter(function (x) { return x[6].textContent === 'Proposée'; }).length), 'warn']], { cols: 3 }));
     b.appendChild(dpMini(['Composante', 'Code', 'Activité', 'Programme', 'Origine', 'Lignes de PTBA', 'Statut'], rows, [5], 'Aucune activité.'));
   }
-  function sxFormSetup() {
+  /* ----- Sites : centres de saisie, répartition des lignes du PTBA et suivi par site ----- */
+  var SITES = [{ code: 'COO', nom: 'Coordination — Antananarivo', resp: 'Coordonnateur du projet', on: true }, { code: 'TOL', nom: 'Antenne de Toliara', resp: 'RAKOTONDRAVAO Jean', on: true }, { code: 'FIA', nom: 'Antenne de Fianarantsoa', resp: 'RASOLOFO Miora', on: true }];
+  var SITEMAP = { 'ENG-2026-0004': 'TOL', 'ENG-2026-0012': 'TOL', 'ENG-2026-0014': 'TOL', 'ENG-2026-0005': 'FIA', 'ENG-2026-0010': 'FIA', 'ENG-2026-0015': 'FIA', 'ENG-2026-0016': 'FIA' }, SITEV = { tab: 'sites', edit: null, rep: null };
+  function siteOf(c) { return SITES.filter(function (s) { return s.code === c; })[0]; }
+  function siteLbl(c) { var s = siteOf(c || 'COO'); return s ? s.nom : (c || '—'); }
+  function siteShare(l, code) { return l && l.sites ? (l.sites[code] || 0) / 100 : (code === 'COO' ? 1 : 0); }
+  function dpSiteSeed() {
+    (DP.docs || []).forEach(function (d) { if (!d.site) d.site = SITEMAP[d.id] || 'COO'; });
+    var SS = { '2.1': { COO: 40, TOL: 60 }, '2.2': { COO: 50, FIA: 50 }, '1.2': { COO: 50, FIA: 50 } }; dpLines().forEach(function (z) { if (!z.l.sites && SS[z.l.c]) z.l.sites = SS[z.l.c]; });
+  }
+  function siteFill(sel, withAll) { sel.innerHTML = ''; if (withAll) { var o0 = cvEl('option', null, 'Tous les sites'); o0.value = ''; sel.appendChild(o0); } SITES.filter(function (s) { return s.on || withAll; }).forEach(function (s) { var o = cvEl('option', null, s.nom); o.value = s.code; sel.appendChild(o); }); }
+  function siteStats(ex) {
+    sxSeed(); var o = {}; SITES.forEach(function (s) { o[s.code] = { ptba: 0, eng: 0, liq: 0, pay: 0, adv: 0, n: 0 }; });
+    anaLines(ex).forEach(function (z) { SITES.forEach(function (s) { o[s.code].ptba += Math.round(anaCred(z) * siteShare(z.l, s.code)); }); });
+    (SX.items || []).forEach(function (i) { var c = i.site || 'COO', t = o[c]; if (!t) return; t.n++; if (i.kind === 'eng') t.eng += sxPart(i, ex); else if (i.kind === 'liq' && i.date.slice(0, 4) === ex) t.liq += i.mt; else if (i.kind === 'pay' && i.date.slice(0, 4) === ex) { t.pay += i.mt; if (i.adv && !i.jus) t.adv += i.mt; } });
+    return o;
+  }
+  function sitesRender() {
+    var b = document.getElementById('sites-body'), ex = anaEx(); b.innerHTML = '';
+    var tabs = cvEl('div', 'seg dp-tabs'); tabs.style.marginBottom = '14px'; [['sites', 'Sites'], ['rep', 'Répartition du PTBA par site']].forEach(function (t) { var x = cvEl('button', SITEV.tab === t[0] ? 'on' : '', t[1]); x.type = 'button'; x.addEventListener('click', function () { SITEV.tab = t[0]; sitesRender(); }); tabs.appendChild(x); }); b.appendChild(tabs);
+    document.getElementById('site-new').style.display = SITEV.tab === 'sites' ? '' : 'none';
+    if (SITEV.tab === 'sites') {
+      var st = siteStats(ex), rows = SITES.map(function (s) {
+        var n = cvEl('div'); n.appendChild(cvEl('b', null, s.nom)); n.appendChild(cvEl('div', 'hby', s.code)); var a = cvEl('div');
+        var bm = cvEl('button', 'btn small', 'Modifier'), bt = cvEl('button', 'btn small', s.on ? 'Désactiver' : 'Activer'); bm.type = bt.type = 'button'; bm.addEventListener('click', function () { siteOpen(s); }); bt.addEventListener('click', function () { if (s.on && s.code === 'COO') { bkMsg('sites-msg', 'La coordination ne peut pas être désactivée.', 'ko'); return; } s.on = !s.on; bkMsg('sites-msg', 'Site « ' + s.nom + ' » ' + (s.on ? 'activé' : 'désactivé : plus de nouvelle saisie, écritures conservées') + '.', 'ok'); sitesRender(); }); a.appendChild(bm); a.appendChild(bt);
+        return [n, s.resp || '—', fmt(st[s.code].ptba), String(st[s.code].n), badge(s.on ? 'Actif' : 'Désactivé', s.on ? 'b-ok' : 'b-neutral'), a];
+      });
+      b.appendChild(dpMini(['Site', 'Responsable', 'Part du PTBA ' + ex + ' (MGA)', 'Écritures', 'Statut', ''], rows, [2, 3], 'Aucun site.'));
+    } else {
+      var lines = anaLines(ex), head = ['Ligne du PTBA', 'PTBA (MGA)'].concat(SITES.map(function (s) { return s.code; }), ['']);
+      var rws = lines.map(function (z) {
+        var n = cvEl('div'); n.appendChild(cvEl('b', null, z.l.c + ' — ' + (z.l.lib || z.l.l))); n.appendChild(cvEl('div', 'hby', z.perim)); var a = cvEl('div'), br = cvEl('button', 'btn small', 'Répartir'); br.type = 'button'; br.addEventListener('click', function () { siteRepOpen(z); }); a.appendChild(br);
+        return [n, fmt(anaCred(z))].concat(SITES.map(function (s) { var p = Math.round(siteShare(z.l, s.code) * 100); return p ? fmt(Math.round(anaCred(z) * siteShare(z.l, s.code))) + ' (' + p + ' %)' : '—'; }), [a]);
+      });
+      b.appendChild(dpMini(head, rws, [1, 2, 3, 4], 'Aucune ligne.'));
+    }
+  }
+  function siteOpen(s) {
+    SITEV.edit = s || null; document.getElementById('site-ft').textContent = s ? 'Modifier le site' : 'Nouveau site'; document.getElementById('site-fc').value = s ? s.code : ''; document.getElementById('site-fc').disabled = !!s; document.getElementById('site-fn').value = s ? s.nom : ''; document.getElementById('site-fr').value = s ? s.resp : ''; document.getElementById('site-ferr').textContent = ''; document.getElementById('site-form').hidden = false;
+  }
+  function siteRepOpen(z) {
+    SITEV.rep = z; var box = document.getElementById('site-rep-body'); box.innerHTML = ''; document.getElementById('site-rep-title').textContent = 'Répartir la ligne ' + z.l.c + ' entre les sites';
+    box.appendChild(dpDl([['Ligne', z.l.c + ' — ' + (z.l.lib || z.l.l)], ['Montant du PTBA', fmt(anaCred(z)) + ' MGA']])); var g = cvEl('div', 'fgrid'); g.style.margin = '14px 0'; var ins = {};
+    SITES.filter(function (s) { return s.on || siteShare(z.l, s.code); }).forEach(function (s) { var d = cvEl('div'), i = cvEl('input', 'field'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = String(Math.round(siteShare(z.l, s.code) * 1000) / 10).replace('.', ','); ins[s.code] = i; d.appendChild(cvEl('label', null, s.nom + ' (part en %)')); d.appendChild(i); g.appendChild(d); }); box.appendChild(g);
+    var sum = cvEl('div'); sum.style.marginBottom = '10px'; box.appendChild(sum); function upd() { var t = 0; Object.keys(ins).forEach(function (k) { t += parseFloat(String(ins[k].value).replace(',', '.')) || 0; }); sum.innerHTML = ''; sum.appendChild(badge('Total : ' + String(Math.round(t * 10) / 10).replace('.', ',') + ' %', Math.abs(t - 100) < 0.05 ? 'b-ok' : 'b-ko')); } Object.keys(ins).forEach(function (k) { ins[k].addEventListener('input', upd); }); upd();
+    var err = cvEl('div', 'err'); box.appendChild(err); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:4px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Enregistrer la répartition'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); box.appendChild(ft);
+    bc.addEventListener('click', function () { document.getElementById('site-rep').hidden = true; });
+    bo.addEventListener('click', function () { var o = {}, t = 0; Object.keys(ins).forEach(function (k) { var v = Math.round((parseFloat(String(ins[k].value).replace(',', '.')) || 0) * 10) / 10; if (v) o[k] = v; t += v; }); if (Math.abs(t - 100) > 0.05) { err.textContent = 'Le total doit être égal à 100 % (actuellement ' + String(Math.round(t * 10) / 10).replace('.', ',') + ' %).'; return; } z.l.sites = o; document.getElementById('site-rep').hidden = true; bkMsg('sites-msg', 'Répartition de la ligne ' + z.l.c + ' enregistrée.', 'ok'); sitesRender(); });
+    document.getElementById('site-rep').hidden = false;
+  }
+  document.getElementById('site-new').addEventListener('click', function () { siteOpen(null); });
+  document.getElementById('site-fcancel').addEventListener('click', function () { document.getElementById('site-form').hidden = true; });
+  document.getElementById('site-fsave').addEventListener('click', function () {
+    var err = document.getElementById('site-ferr'), c = document.getElementById('site-fc').value.trim().toUpperCase(), n = document.getElementById('site-fn').value.trim(), r = document.getElementById('site-fr').value.trim();
+    if (!SITEV.edit && !/^[A-Z]{3}$/.test(c)) { err.textContent = 'Le code du site comporte trois lettres (par exemple TOA).'; return; } if (!n) { err.textContent = 'Indiquez le nom du site.'; return; } if (!SITEV.edit && siteOf(c)) { err.textContent = 'Ce code de site existe déjà.'; return; }
+    if (SITEV.edit) { SITEV.edit.nom = n; SITEV.edit.resp = r; } else SITES.push({ code: c, nom: n, resp: r, on: true });
+    document.getElementById('site-form').hidden = true; bkMsg('sites-msg', 'Site enregistré.', 'ok'); sitesRender();
+  });
+  /* Analyses : comparaison entre sites */
+  function anaSite(b, ex) {
+    var st = siteStats(ex), rows = SITES.map(function (s) { var t = st[s.code]; return [s.nom, fmt(t.ptba), fmt(t.eng), fmt(t.liq), fmt(t.pay), t.ptba ? pctf(t.liq / t.ptba) : '—', fmt(t.adv)]; });
+    var tp = 0, tl = 0; SITES.forEach(function (s) { tp += st[s.code].ptba; tl += st[s.code].liq; });
+    b.appendChild(dpTiles([['PTBA ' + ex, fmt(tp) + ' MGA', 'brand'], ['Réalisé', fmt(tl) + ' MGA', 'ok'], ['Taux de réalisation', tp ? pctf(tl / tp) : '—', 'info'], ['Sites actifs', String(SITES.filter(function (s) { return s.on; }).length), 'n']], { cols: 4 }));
+    var card = cvEl('div', 'card'); card.style.padding = '14px 16px'; SITES.forEach(function (s) { card.appendChild(dpMeter(s.nom + ' — réalisé par rapport à sa part du PTBA', st[s.code].liq, st[s.code].ptba, DPC.ok)); }); anaBlock(b, 'Réalisation de chaque site', card);
+    anaBlock(b, 'Comparaison entre sites (MGA)', dpMini(['Site', 'Part du PTBA', 'Engagé', 'Réalisé', 'Décaissé', 'Taux de réalisation', 'Avances à justifier'], rows, [1, 2, 3, 4, 5, 6], ''));
+  }
+  var ANA_SITE = '';
+  function sxFormSetup() { siteFill(document.getElementById('sxf-site'), false);
     var k = SX.kind; document.getElementById('sxf-pw').hidden = k !== 'eng'; document.getElementById('sxf-p2w').hidden = k !== 'eng'; document.getElementById('sxf-ew').hidden = !(k === 'liq' || k === 'pay');
     document.getElementById('sxf-d1').value = cadToday(); document.getElementById('sxf-d2').value = cadToday().slice(0, 4) + '-12-31';
     var s = document.getElementById('sxf-eng'); s.innerHTML = '<option value="">Aucun engagement</option>' + sxEngs().map(function (i) { return '<option value="' + escH(i.ref) + '">' + escH(i.ref + ' — ' + (i.tiers || '') + ' (reste ' + fmt(sxReste(i)) + ')') + '</option>'; }).join('');
@@ -22144,15 +22238,15 @@ var EXEC_REC = [
   function sxSources() { return SX.kind === 'eng' ? ['SoftAccounting', 'Soft e-Procurement', 'Compte administratif'] : (SX.kind === 'phy' ? ['SoftSE', 'Compte administratif'] : ['SoftAccounting', 'Compte administratif']); }
   /* Ce que contient chaque source, indépendamment de ce qui est déjà dans le suivi */
   function sxSrcData(src, kind) {
-    sxSeed(); if (src !== 'Compte administratif') return ((SX.store[src] || {})[kind] || []).map(function (r) { return { key: r.key, date: r.date, ref: r.ref, tiers: r.tiers, mt: r.mt, unit: r.unit, eng: r.eng, d1: r.d1, d2: r.d2, fx: r.fx }; });
+    sxSeed(); if (src !== 'Compte administratif') return ((SX.store[src] || {})[kind] || []).map(function (r) { return { key: r.key, date: r.date, ref: r.ref, tiers: r.tiers, mt: r.mt, unit: r.unit, eng: r.eng, d1: r.d1, d2: r.d2, fx: r.fx, site: r.site }; });
     var out = [];
     (DP.docs || []).forEach(function (d) {
-      var q = d.dt || {}, c = null; if (d.mis) { sxMisItems(d).forEach(function (i) { if (i.kind === kind) out.push(Object.assign({ key: d.key, date: i.date, ref: i.ref, tiers: d.tiers, mt: i.mt }, i.x)); }); return; }
+      var q = d.dt || {}, c = null; if (d.mis) { sxMisItems(d).forEach(function (i) { if (i.kind === kind) out.push(Object.assign({ key: d.key, date: i.date, ref: i.ref, tiers: d.tiers, mt: i.mt, site: d.site || 'COO' }, i.x)); }); return; }
       if (kind === 'eng' && d.kind !== 'avance' && DP_RANK[d.st] >= 2) c = { key: d.key, date: q.eng, ref: d.ref, tiers: d.tiers, mt: d.mt, d1: sxDefPer(d).d1, d2: sxDefPer(d).d2, clot: d.clot ? d.clot.on : '', clotMotif: d.clot ? d.clot.motif : '', lib: d.lib ? d.lib.amt : 0, libMotif: d.lib ? d.lib.motif : '', maint: d.maint ? d.maint.revue : '' };
       if (kind === 'liq' && d.kind !== 'avance' && DP_RANK[d.st] >= 3) c = { key: d.key, date: q.liq, ref: d.fac, tiers: d.tiers, mt: d.mt, eng: d.ref };
       if (kind === 'pay' && DP_RANK[d.st] >= 6) c = { key: d.key, date: q.pay, ref: d.mandat, tiers: d.tiers, mt: dfoAmt(d), eng: d.ref };
       if (kind === 'phy' && d.volReal) c = { key: d.key, date: q.liq, ref: 'AP-' + d.id, tiers: d.objet, mt: d.volReal, unit: d.volUnit };
-      if (c && d.fx) { c.fx = sxFx(d, kind === 'liq' ? 'liq' : (kind === 'pay' ? 'pay' : 'eng')).fx; if (kind === 'liq' && d.fx.liqMt != null) c.mt = d.fx.liqMt; } if (c && c.ref) out.push(c);
+      if (c) c.site = d.site || 'COO'; if (c && d.fx) { c.fx = sxFx(d, kind === 'liq' ? 'liq' : (kind === 'pay' ? 'pay' : 'eng')).fx; if (kind === 'liq' && d.fx.liqMt != null) c.mt = d.fx.liqMt; } if (c && c.ref) out.push(c);
     });
     if (kind === 'enc') { DFS.versements.forEach(function (v) { out.push({ key: null, date: v.date, ref: v.ref, tiers: 'Bailleur — ' + v.lib.toLowerCase(), mt: v.mt, fx: sxFxEnc(v.mt, v.date).fx }); }); CDF.items.forEach(function (x) { if (x.type === 'DRF' && x.st === 'Payée') out.push({ key: null, date: x.dPaie, ref: x.id, tiers: 'Bailleur — reconstitution du compte', mt: x.mtAcc, fx: sxFxEnc(x.mtAcc, x.dPaie).fx }); }); }
     return out;
@@ -22203,8 +22297,8 @@ var EXEC_REC = [
       bk.addEventListener('click', function () {
         var n = { 'new': 0, upd: 0, del: 0 }, done = {};
         P.plan.forEach(function (x) {
-          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, unit: x.r.unit, eng: x.r.eng, d1: x.r.d1, d2: x.r.d2, fx: x.r.fx, src: P.src }); n['new']++; done[x.r.ref] = true; if (x.r.clot || x.r.lib || x.r.maint) sxLifeApply(SX.items[SX.items.length - 1], x.r); }
-          if (x.act === 'upd') { if (x.st.mt !== x.r.mt) delete x.st.ech; x.st.eng = x.r.eng; x.st.fx = x.r.fx; x.st.d1 = x.r.d1; x.st.d2 = x.r.d2; x.st.mt = x.r.mt; x.st.unit = x.r.unit; x.st.date = x.r.date; x.st.tiers = x.r.tiers; x.st.key = x.r.key; x.st.src = P.src; n.upd++; done[x.r.ref] = true; }
+          if (x.act === 'new') { SX.items.push({ id: sxId(), kind: SX.kind, key: x.r.key, date: x.r.date, ref: x.r.ref, tiers: x.r.tiers, mt: x.r.mt, unit: x.r.unit, eng: x.r.eng, d1: x.r.d1, d2: x.r.d2, fx: x.r.fx, site: x.r.site, src: P.src }); n['new']++; done[x.r.ref] = true; if (x.r.clot || x.r.lib || x.r.maint) sxLifeApply(SX.items[SX.items.length - 1], x.r); }
+          if (x.act === 'upd') { if (x.st.mt !== x.r.mt) delete x.st.ech; x.st.eng = x.r.eng; x.st.fx = x.r.fx; x.st.site = x.r.site; x.st.d1 = x.r.d1; x.st.d2 = x.r.d2; x.st.mt = x.r.mt; x.st.unit = x.r.unit; x.st.date = x.r.date; x.st.tiers = x.r.tiers; x.st.key = x.r.key; x.st.src = P.src; n.upd++; done[x.r.ref] = true; }
           if (x.act === 'life') { sxLifeApply(x.st, x.r); n.upd++; } if (x.act === 'del') { SX.items.splice(SX.items.indexOf(x.st), 1); n.del++; }
         });
         [SX.extra, SX.pool['SoftSE']].forEach(function (pl0) { if (pl0[SX.kind]) pl0[SX.kind] = pl0[SX.kind].filter(function (e) { return !done[e.ref]; }); }); if (SX.kind === 'phy') sxPhyApply();
@@ -22225,7 +22319,7 @@ var EXEC_REC = [
   document.getElementById('sxf-save').addEventListener('click', function () {
     var err = document.getElementById('sxf-err'), mt = parseInt0(document.getElementById('sxf-mt').value), ref = document.getElementById('sxf-ref').value.trim(), dt = document.getElementById('sxf-date').value;
     if (!dt) { err.textContent = 'Indiquez la date.'; return; } if (SX.kind === 'eng' && document.getElementById('sxf-d2').value < document.getElementById('sxf-d1').value) { err.textContent = 'La fin de l\u2019engagement doit suivre son d\u00e9but.'; return; } if (ref.length < 3) { err.textContent = 'Indiquez la référence.'; return; } if (!mt || mt <= 0) { err.textContent = 'Le montant doit être positif.'; return; }
-    SX.items.push({ id: sxId(), kind: SX.kind, key: SX.kind === 'enc' ? null : document.getElementById('sxf-ligne').value, date: dt, ref: ref, tiers: document.getElementById('sxf-tiers').value.trim(), mt: mt, src: 'Saisie directe', d1: SX.kind === 'eng' ? document.getElementById('sxf-d1').value : undefined, d2: SX.kind === 'eng' ? document.getElementById('sxf-d2').value : undefined, eng: (SX.kind === 'liq' || SX.kind === 'pay') ? document.getElementById('sxf-eng').value || undefined : undefined, dpd: SX.kind === 'pay' && document.getElementById('sxf-dpd').checked, unit: SX.kind === 'phy' ? ((dpLine(document.getElementById('sxf-ligne').value) || { l: {} }).l.wk || {}).unit : undefined });
+    SX.items.push({ id: sxId(), kind: SX.kind, key: SX.kind === 'enc' ? null : document.getElementById('sxf-ligne').value, date: dt, ref: ref, tiers: document.getElementById('sxf-tiers').value.trim(), mt: mt, src: 'Saisie directe', site: document.getElementById('sxf-site').value, d1: SX.kind === 'eng' ? document.getElementById('sxf-d1').value : undefined, d2: SX.kind === 'eng' ? document.getElementById('sxf-d2').value : undefined, eng: (SX.kind === 'liq' || SX.kind === 'pay') ? document.getElementById('sxf-eng').value || undefined : undefined, dpd: SX.kind === 'pay' && document.getElementById('sxf-dpd').checked, unit: SX.kind === 'phy' ? ((dpLine(document.getElementById('sxf-ligne').value) || { l: {} }).l.wk || {}).unit : undefined });
     if (SX.kind === 'phy') sxPhyApply(); SX.log.unshift({ on: nowStr(), src: 'Saisie directe', n: 1, by: ME }); document.getElementById('sx-form').hidden = true; sxMsg('Écriture enregistrée (saisie directe).'); sxRender();
   });
   /* ----- Trésorerie : encaissements et décaissements, pas seulement les décaissements ----- */
