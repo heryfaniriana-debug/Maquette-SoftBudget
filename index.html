@@ -2134,6 +2134,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button class="anp" data-go="ansit" title="Comparaison entre sites" style="display:none">Par site</button>
           <button class="anp" data-go="anplu" title="Suivi pluriannuel" style="display:none">Pluriannuel</button>
           <button class="anp" data-go="anale" title="Règles et alertes" style="display:none">Alertes</button>
+          <button data-go="ddir" title="Tableau de bord par direction : budget, consommation, prévision et alertes" style="display:none">Tableau de bord par direction</button>
           <button data-go="ecarts" title="Écarts à expliquer et commentés">Écarts commentés</button>
           <button data-go="dispo">Disponibilités</button>
           <button data-go="alertes" title="Dépassements et alertes">Alertes</button>
@@ -5631,6 +5632,11 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div id="scen-body"></div>
       </section>
 
+      <section class="view" id="v-ddir">
+        <div class="head"><div><h1>Tableau de bord par direction</h1><p>Pour chaque direction : budget, consommation, prévision de fin d’année, budget de l’exercice suivant, charges de personnel et points d’attention. Choisissez une direction ou comparez-les toutes.</p></div></div>
+        <div id="ddir-body"></div>
+      </section>
+
       <section class="view" id="v-roll">
         <div class="head"><div><h1>Prévisions glissantes</h1><p>Le réalisé jusqu’à l’arrêté, puis une prévision sur les 12 mois suivants, direction par direction, comparée au budget. Elle se recale à chaque arrêté.</p></div></div>
         <div id="roll-body"></div>
@@ -6891,6 +6897,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     conso: ['Élaboration', 'Consolidation'],
     scen: ['Élaboration', 'Scénarios'],
     roll: ['Analyses', 'Prévisions glissantes'],
+    ddir: ['Analyses', 'Tableau de bord par direction'],
     usr: ['Paramètres', 'Utilisateurs et droits'],
     roles: ['Paramètres', 'Groupes de rôles'],
     echeanc: ['Paramètres', 'Échéances'],
@@ -6919,7 +6926,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-plan': ['ptba', 'pta', 'ppm', 'ppmk', 'pdec', 'revpl', 'rep'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
-    'nav-rapports': ['ansit', 'anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'roll', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
+    'nav-rapports': ['ansit', 'anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'roll', 'ddir', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'usr', 'roles', 'echeanc', 'alrt', 'plana', 'sites', 'orga', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
   };
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
@@ -6973,6 +6980,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'conso' && typeof consoRender === 'function') consoRender();
     if (name === 'scen' && typeof scenRender === 'function') scenRender();
     if (name === 'roll' && typeof rollRender === 'function') rollRender();
+    if (name === 'ddir' && typeof ddirRender === 'function') ddirRender();
     if (name === 'camp' && typeof renderCamps === 'function') renderCamps();
     if (name === 'usr' && typeof guRender === 'function') guRender();
     if (name === 'roles' && typeof roRender === 'function') roRender();
@@ -15231,7 +15239,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="cadr"]', code === 'ent'); regSetVis('.sub button[data-go="perso"]', code === 'ent'); regSetVis('.sub button[data-go="cles"], .sub button[data-go="conso"], .sub button[data-go="scen"], .sub button[data-go="roll"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="cadr"]', code === 'ent'); regSetVis('.sub button[data-go="perso"]', code === 'ent'); regSetVis('.sub button[data-go="cles"], .sub button[data-go="conso"], .sub button[data-go="scen"], .sub button[data-go="roll"], .sub button[data-go="ddir"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
     prmMenu(code); if (typeof siteCtxSync === 'function') siteCtxSync();
     regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code === 'pub'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
@@ -19298,6 +19306,48 @@ var EXEC_REC = [
     rows.push(['Total', fmt(tot.real), fmt(tot.bud26), fmt(tot.fc26), tot.bud26 ? badge((e26 >= 0 ? '+' : '') + cadrDec(e26 / tot.bud26 * 100) + ' %', e26 > 0 ? 'b-warn' : 'b-ok') : '—', fmt(tot.f12), fmt(tot.b12), tot.b12 ? badge((e12 >= 0 ? '+' : '') + cadrDec(e12 / tot.b12 * 100) + ' %', e12 > 0 ? 'b-warn' : 'b-ok') : '—']);
     blk('Par direction', dpMini(['Direction', 'Réalisé à l’arrêté', 'Budget 2026', 'Prévision fin 2026', 'Écart', 'Prévision 12 mois', 'Budget 12 mois', 'Écart'], rows, [1, 2, 3, 5, 6], 'Aucune direction.'), 'Écart : prévision moins budget. Vert : dans le budget ; orange : léger dépassement ; rouge : dépassement de plus de 3 %.');
   }
+  /* ----- Entreprise : tableau de bord par direction ----- */
+  var DDIR = { d: '' };
+  /* réalisé, budget et prévision d'une direction, avec la méthode et l'arrêté choisis dans les prévisions glissantes */
+  function ddirStats(name, i) {
+    var arr = ROLLV.arr, real = 0, ytdB = 0, last3 = 0, b26 = 0, f12 = 0, b12 = 0, fc26 = 0, mR = [], mF = [], mB = [], N = 12 + arr, m, k;
+    for (m = 1; m <= N; m++) { mR[m] = null; mF[m] = null; mB[m] = rollBud(name, m); }
+    for (m = 1; m <= arr; m++) { var r = rollReal(name, m, i); real += r; ytdB += rollBud(name, m); mR[m] = r; if (m > arr - 3) last3 += r; }
+    for (m = 1; m <= 12; m++) b26 += rollBud(name, m); fc26 = real; var cf = ytdB ? real / ytdB : 1;
+    for (k = 1; k <= 12; k++) { var ab = arr + k, bm = rollBud(name, ab), v = ROLLV.meth === 'rythme' ? last3 / 3 * (1 + ROLLV.g / 100 * k / 12) : (ROLLV.meth === 'conso' ? bm * cf : bm); v = Math.round(v); mF[ab] = v; f12 += v; b12 += bm; if (ab <= 12) fc26 += v; }
+    mF[arr] = mR[arr]; return { real: real, ytdB: ytdB, b26: b26, fc26: fc26, f12: f12, b12: b12, mR: mR, mF: mF, mB: mB, N: N, cons: ytdB ? real / ytdB : 0 };
+  }
+  function ddirAlerts(name, st, ex27) {
+    var out = [], C = cadrOf('2027'), env = C.env[name] || 0, cp = camps.filter(function (k) { return k.prof === 'Entreprise' && k.ex === '2027' && k.st !== 'Annulée'; })[0], pr = cp ? cp.perims.filter(function (p) { return p.p === name; })[0] : null, P = persTot('2027'), pers = (P.dir[name] || { tot: 0 }).tot;
+    if (st.cons > 1.05) out.push(['ko', 'Consommation supérieure de ' + cadrDec((st.cons - 1) * 100) + ' % au rythme du budget 2026.']); else if (st.cons > 1) out.push(['warn', 'Consommation légèrement au-dessus du rythme du budget 2026 (+' + cadrDec((st.cons - 1) * 100) + ' %).']);
+    if (st.fc26 > st.b26) out.push([st.fc26 > st.b26 * 1.03 ? 'ko' : 'warn', 'La prévision de fin d’année dépasse le budget 2026 de ' + fmt(st.fc26 - st.b26) + ' MGA.']);
+    if (pr && env && (pr.amt || 0) > env) out.push(['ko', 'La demande 2027 (' + fmt(pr.amt) + ' MGA) dépasse l’enveloppe (' + fmt(env) + ' MGA).']);
+    if (pr && pr.st === 'Brouillon') out.push(['info', 'Le budget 2027 n’est pas encore soumis' + (cp && cp.close ? ' : clôture de la collecte le ' + cp.close + '.' : '.')]);
+    if (env && pers / env >= .85) out.push(['warn', 'Le personnel pèse ' + Math.round(pers / env * 100) + ' % de l’enveloppe 2027 : peu de marge pour le fonctionnement.']);
+    if (!out.length) out.push(['ok', 'Aucun point d’attention : consommation et demande dans le budget.']); return out;
+  }
+  function ddirRender() {
+    guUse(activeCode()); var b = document.getElementById('ddir-body'), dirs = cadrDirs(); b.innerHTML = '';
+    if (DDIR.d && !dirs.some(function (x) { return x.nom === DDIR.d; })) DDIR.d = '';
+    var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Direction')); bar.appendChild(guSel([['', 'Toutes les directions']].concat(dirs.map(function (x) { return [x.nom, x.nom]; })), DDIR.d, function (v) { DDIR.d = v; ddirRender(); }, 'Direction')); bar.appendChild(cvEl('span', 'hint', 'Situation à fin ' + ROLLM[ROLLV.arr - 1] + ' 2026 — l’arrêté et la méthode se règlent dans Prévisions glissantes.')); b.appendChild(bar);
+    function blk(t, node, hint) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', t)); if (hint) { var hh = cvEl('div', 'hint', hint); hh.style.marginBottom = '8px'; x.appendChild(hh); } x.appendChild(node); b.appendChild(x); }
+    var C = cadrOf('2027'), cp = camps.filter(function (k) { return k.prof === 'Entreprise' && k.ex === '2027' && k.st !== 'Annulée'; })[0], P = persTot('2027'), A = clesAlloc('2027');
+    if (!DDIR.d) {
+      var rows = dirs.map(function (x, i) { var st = ddirStats(x.nom, i), al = ddirAlerts(x.nom, st), pr = cp ? cp.perims.filter(function (p) { return p.p === x.nom; })[0] : null, w = al.filter(function (a) { return a[0] === 'ko'; }).length, o = al.filter(function (a) { return a[0] === 'warn'; }).length, nm = cvEl('button', 'btn small', x.nom); nm.type = 'button'; nm.addEventListener('click', function () { DDIR.d = x.nom; ddirRender(); });
+        return [nm, fmt(st.b26), fmt(st.real), badge(cadrDec(st.cons * 100) + ' %', st.cons > 1.05 ? 'b-ko' : (st.cons > 1 ? 'b-warn' : 'b-ok')), fmt(st.fc26), fmt(C.env[x.nom] || 0), fmt(pr ? pr.amt || 0 : 0), pr ? badge(pr.st, pr.st === 'Brouillon' ? 'b-warn' : 'b-ok') : '—', w ? badge(w + ' alerte' + (w > 1 ? 's' : ''), 'b-ko') : (o ? badge(o + ' à surveiller', 'b-warn') : badge('Aucune', 'b-ok'))]; });
+      blk('Comparaison des directions', dpMini(['Direction', 'Budget 2026', 'Réalisé à l’arrêté', 'Consommation', 'Prévision fin 2026', 'Enveloppe 2027', 'Demande 2027', 'Collecte', 'Alertes'], rows, [1, 2, 4, 5, 6], 'Aucune direction.'), 'La consommation compare le réalisé au budget prorata temporis. Cliquez sur une direction pour son détail.');
+      var segs = dirs.map(function (x, i) { return { label: x.nom, val: ddirStats(x.nom, i).real, color: [DPC.brand, DPC.info, DPC.ok, DPC.warn, DPC.ko][i % 5] }; }); blk('Part de chaque direction dans le réalisé', dpStackBar(segs));
+      return;
+    }
+    var di = dirs.map(function (x) { return x.nom; }).indexOf(DDIR.d), nm = DDIR.d, st = ddirStats(nm, di), env = C.env[nm] || 0, pr = cp ? cp.perims.filter(function (p) { return p.p === nm; })[0] : null, pers = (P.dir[nm] || { tot: 0, etp: 0 }), com = 0; clesOf('2027').pools.forEach(function (p) { com += A[nm][p.id] || 0; }); var dm = pr ? pr.amt || 0 : 0;
+    b.appendChild(dpTiles([['Budget 2026', fmt(st.b26) + ' MGA', 'brand', 'réalisé à l’arrêté : ' + fmt(st.real) + ' MGA'], ['Consommation', cadrDec(st.cons * 100) + ' %', st.cons > 1.05 ? 'warn' : 'ok', 'du budget prorata temporis'], ['Prévision fin 2026', fmt(st.fc26) + ' MGA', st.fc26 > st.b26 ? 'warn' : 'ok', (st.fc26 >= st.b26 ? '+' : '') + fmt(st.fc26 - st.b26) + ' par rapport au budget'], ['Enveloppe 2027', fmt(env) + ' MGA', 'info', 'demande : ' + fmt(dm) + ' MGA' + (pr ? ' (' + pr.st.toLowerCase() + ')' : '')]], { cols: 4 }));
+    var lab = []; for (var z = 1; z <= st.N; z++) { var pp = rollAbs(z); lab.push(ROLLM[pp.m - 1] + ' ' + String(pp.y).slice(2)); } var cardx = cvEl('div', 'card'); cardx.style.padding = '14px 16px'; cardx.appendChild(anaChart([{ name: 'Budget', color: DPC.grey, dash: true, data: st.mB.slice(1) }, { name: 'Réalisé', color: DPC.ok, data: st.mR.slice(1) }, { name: 'Prévision glissante', color: DPC.warn, dash: true, data: st.mF.slice(1) }], ROLLV.arr - 1, null, lab));
+    blk('Dépenses mensuelles de la direction', cardx, 'Réalisé jusqu’à l’arrêté, prévision sur les 12 mois suivants, budget du cadrage.');
+    var al = ddirAlerts(nm, st), box = cvEl('div'); al.forEach(function (a) { var l = cvEl('div', 'dp-dispo'); l.appendChild(cvEl('span', null, a[1])); l.appendChild(badge(a[0] === 'ko' ? 'Alerte' : (a[0] === 'warn' ? 'À surveiller' : (a[0] === 'info' ? 'À faire' : 'Conforme')), a[0] === 'ko' ? 'b-ko' : (a[0] === 'warn' ? 'b-warn' : (a[0] === 'info' ? 'b-info' : 'b-ok')))); box.appendChild(l); }); blk('Points d’attention', box);
+    var rest = Math.max(dm - pers.tot, 0), seg = [{ label: 'Personnel', val: pers.tot, color: DPC.brand }, { label: 'Autres charges et investissements', val: rest, color: DPC.info }, { label: 'Charges communes reçues', val: com, color: DPC.warn }]; blk('Composition du coût complet 2027', dpStackBar(seg), 'Demande de la direction (personnel et autres charges) plus sa part des charges communes, hors enveloppe.');
+    var ctr = ENT_CENTRES.filter(function (c) { return c.code === (orgaTree().filter(function (x) { return x.nom === nm && !x.parent; })[0] || {}).code || (orgaRoot(c.code) || {}).nom === nm; }), prow = ctr.map(function (c) { var et = 0, tt = 0, d = persOf('2027'); d.postes.forEach(function (p) { if (p.c === c.code) { et += p.etp; tt += persCost(p, d.par, C.hyp).tot; } }); return [c.parent ? '↳ ' + c.nom : c.nom, c.type, c.resp || '—', cadrDec(et), fmt(tt)]; });
+    blk('Services et effectifs 2027', dpMini(['Centre', 'Type', 'Responsable', 'ETP', 'Coût du personnel (MGA)'], prow, [3, 4], 'Aucun centre.'));
+  }
   (function () {
     var R = RIGHTS0.ROLES2, M = RIGHTS0.RM, U = RIGHTS0.USERS;
     ['Directeur général', 'DAF', 'Contrôleur de gestion', 'Responsable de centre', 'Comptable', 'Auditeur interne'].forEach(function (r) { if (R.indexOf(r) < 0) R.push(r); M[r] = M[r] || {}; });
@@ -19317,7 +19367,7 @@ var EXEC_REC = [
           { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['cadr', 'Cadrage', 'elab'], ['perso', 'Charges de personnel', 'elab'], ['cles', 'Clés de répartition', 'elab'], ['conso', 'Consolidation', 'elab'], ['scen', 'Scénarios', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
           { key: 'g-suivi', label: 'Exécution', kids: [['appr', 'Budgets verrouillés', 'ecr'], ['engage', 'Engagements', 'ecr'], ['real', 'Réalisations', 'ecr'], ['decaiss', 'Paiements comptabilisés', 'ecr'], ['encaiss', 'Recettes comptabilisées', 'ecr']] },
           { key: 'g-treso', label: 'Trésorerie', kids: [['bkdec', 'Plan de trésorerie', 'ecr']] },
-          { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['roll', 'Prévisions glissantes', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
+          { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['roll', 'Prévisions glissantes', 'ana'], ['ddir', 'Tableau de bord par direction', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
           { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['orga', 'Organisation', 'prm'], ['roles', 'Groupes de rôles', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['ctrl', 'Contrôles et seuils', 'prm'], ['trev', 'Types de révision', 'prm'], ['rclot', 'Règles de clôture', 'prm'], ['notifcfg', 'Notifications', 'prm']] }
         ],
         priv: [['export', 'Exporter des données', 'Peut exporter les budgets et les analyses en CSV, Excel et PDF', 2], ['tous_centres', 'Tous les centres', 'Voit les budgets de tous les centres de responsabilité (sinon : son propre centre)', 3],
