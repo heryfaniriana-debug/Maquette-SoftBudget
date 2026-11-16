@@ -23939,25 +23939,45 @@ var EXEC_REC = [
     cvPerims(r).forEach(function (x) { if (x.p.p === perim) propSrc(x.p).forEach(function (l) { if (/^\d+\.\d+$/.test(l.c)) { var q = l.c.split('.'); mx = Math.max(mx, +q[1] || 0); } }); });
     return (pre || '9') + '.' + (mx + 1);
   }
-  function propOpen(r) { PROPR = r.id; propPaint(); document.getElementById('prop-list').hidden = false; }
+  /* Activités proposées à la collecte : fenêtre de traitement (accepter = créer l'activité au plan, fusionner, rejeter) */
+  function propOpen(r) { PROPR = r.id; propPaint(); }
   function propPaint() {
-    var r = cvById(PROPR), body = document.getElementById('prop-list-body'); if (!r) return; body.innerHTML = ''; var items = cvPending(r);
-    var card = cvEl('div', 'card'), sc = cvEl('div', 'scroll'), tb = cvEl('table'), th = cvEl('thead'), tbd = cvEl('tbody'); tb.style.minWidth = '860px';
-    th.innerHTML = '<tr><th>Activité proposée</th><th>Composante</th><th class="num">Montant (MGA)</th><th>Motif de la proposition</th><th></th></tr>'; tb.appendChild(th);
-    if (!items.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucune activité à traiter : toutes les propositions sont décidées.'); c0.colSpan = 5; c0.style.textAlign = 'left'; tbd.appendChild(t0); }
-    items.forEach(function (it) {
-      var tr = cvEl('tr'), n = cvEl('div'), c1 = cell(tr, '', 'name'); n.appendChild(cvEl('b', null, it.l.lib || it.l.l)); n.appendChild(cvEl('div', 'hby', 'Code provisoire ' + it.l.c)); c1.appendChild(n); cell(tr, it.p.p); cell(tr, fmt(it.l.dem || 0), 'num'); cell(tr, it.l.addedWhy || '—');
-      var a = cell(tr, ''); [['Accepter', function () { propAccOpen(it); }], ['Fusionner', function () { propMerge(it); }], ['Rejeter', function () { propReject(it); }]].forEach(function (x) { var b = cvEl('button', 'btn small', x[0]); b.type = 'button'; b.addEventListener('click', x[1]); a.appendChild(b); });
-      tbd.appendChild(tr);
-    });
-    tb.appendChild(tbd); sc.appendChild(tb); card.appendChild(sc); body.appendChild(card);
-    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bf = cvEl('button', 'btn', 'Fermer'); bf.type = 'button'; bf.addEventListener('click', function () { document.getElementById('prop-list').hidden = true; if (document.getElementById('cv-dec') && !document.getElementById('cv-dec').hidden) cvOpenDecision(PROPR); }); ft.appendChild(bf); body.appendChild(ft);
+    var r = cvById(PROPR); if (!r) return; var items = cvPending(r), w = cvEl('div');
+    var sum = cvEl('div', 'callout', items.length ? pl(items.length, 'activité') + ' proposée' + (items.length > 1 ? 's' : '') + ' par les contributeurs, absente' + (items.length > 1 ? 's' : '') + ' du plan. Créez l’activité au plan, fusionnez-la avec une activité existante ou rejetez-la.' : 'Aucune activité à traiter : toutes les propositions sont décidées.'); sum.style.marginBottom = '12px'; w.appendChild(sum);
+    if (items.length) {
+      var rows = items.map(function (it) {
+        var a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
+        [['Créer au plan', 'primary', function () { propAccOpen(it); }], ['Fusionner', '', function () { propMerge(it); }], ['Rejeter', '', function () { propReject(it); }]].forEach(function (x) { var b = cvEl('button', 'btn small' + (x[1] ? ' ' + x[1] : ''), x[0]); b.type = 'button'; b.addEventListener('click', x[2]); a.appendChild(b); });
+        return [(it.l.lib || it.l.l) + ' (code provisoire ' + it.l.c + ')', it.p.p, fmt(it.l.dem || 0), it.l.addedWhy || '—', a];
+      });
+      w.appendChild(dpMini(['Activité proposée', 'Composante', 'Montant (MGA)', 'Motif de la proposition', 'Décision'], rows, [2], ''));
+    }
+    var ft = cvEl('div', 'form-foot'), bf = cvEl('button', 'btn', 'Fermer'); bf.type = 'button'; bf.addEventListener('click', guModalClose); ft.appendChild(bf); w.appendChild(ft);
+    guModal('Activités proposées à traiter — ' + r.camp, w, 980);
   }
+  /* Création de l'activité au plan analytique */
   function propAccOpen(it) {
-    PROPI = it; var r = it.r, fin = {}; dpLines().forEach(function (z) { fin[(z.l.axv && z.l.axv.Financier) || 'Budget de l’État'] = 1; }); if (it.l.axv && it.l.axv.Financier) fin[it.l.axv.Financier] = 1;
-    var sf = document.getElementById('prop-fin'), sn = document.getElementById('prop-nat'); sf.innerHTML = ''; Object.keys(fin).forEach(function (f) { var o = cvEl('option', null, f); o.value = f; sf.appendChild(o); }); sf.value = (it.l.axv && it.l.axv.Financier) || sf.options[0].value;
-    sn.innerHTML = ''; Object.keys(NATL).forEach(function (k) { var o = cvEl('option', null, NATL[k]); o.value = k; sn.appendChild(o); }); sn.value = NATL[it.l.nat] ? it.l.nat : '62';
-    document.getElementById('prop-code').value = propNextCode(it.p.p, r); document.getElementById('prop-lib').value = it.l.lib || it.l.l; document.getElementById('prop-comp').value = it.p.p; document.getElementById('prop-err').textContent = ''; document.getElementById('prop-acc').hidden = false;
+    PROPI = it; var r = it.r, fin = {}, f = cvEl('div'), g = cvEl('div', 'fgrid');
+    dpLines().forEach(function (z) { fin[(z.l.axv && z.l.axv.Financier) || 'Budget de l’État'] = 1; }); if (it.l.axv && it.l.axv.Financier) fin[it.l.axv.Financier] = 1;
+    function fld(lab, el, full) { var d = cvEl('div', full ? 'full' : ''); d.appendChild(cvEl('label', null, lab)); d.appendChild(el); g.appendChild(d); return el; }
+    var comp = cvEl('input', 'field'); comp.type = 'text'; comp.readOnly = true; comp.value = it.p.p; fld('Composante', comp);
+    var code = cvEl('input', 'field'); code.type = 'text'; code.value = propNextCode(it.p.p, r); fld('Code de l’activité *', code);
+    var lib = cvEl('input', 'field'); lib.type = 'text'; lib.value = it.l.lib || it.l.l; fld('Libellé de l’activité *', lib, true);
+    var sn = cvEl('select', 'field'); Object.keys(NATL).forEach(function (k) { var o = cvEl('option', null, NATL[k]); o.value = k; sn.appendChild(o); }); sn.value = NATL[it.l.nat] ? it.l.nat : '62'; fld('Nature de dépense *', sn);
+    var sf = cvEl('select', 'field'); Object.keys(fin).forEach(function (k) { var o = cvEl('option', null, k); o.value = k; sf.appendChild(o); }); sf.value = (it.l.axv && it.l.axv.Financier) || sf.options[0].value; fld('Source de financement *', sf);
+    f.appendChild(g); var err = cvEl('div', 'err'); f.appendChild(err);
+    var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Créer l’activité'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+    bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () {
+      var c = code.value.trim(), lb = lib.value.trim();
+      if (!/^\d+\.\d+$/.test(c)) { err.textContent = 'Le code doit avoir la forme 2.4 (composante, puis numéro).'; return; } if (!lb) { err.textContent = 'Indiquez le libellé de l’activité.'; return; }
+      if ((PLAN[it.p.p] || []).some(function (l) { return l.c === c; }) || propSrc(it.p).some(function (l) { return l.c === c && l !== it.l; })) { err.textContent = 'Ce code existe déjà dans cette composante.'; return; }
+      var l = it.l; l.c = c; l.l = lb; l.lib = lb; l.nat = sn.value; l.axv = l.axv || {}; l.axv.Financier = sf.value; l.axv.Analytique = 'Programme ' + c.split('.')[0]; l.prop = { st: 'Acceptée', by: ME, on: nowStr(), camp: r.camp };
+      (PLAN[it.p.p] = PLAN[it.p.p] || []).push({ c: c, l: lb, nat: sn.value, ref: 0 }); PLANO[it.p.p + '|' + c] = { camp: r.camp, by: ME, on: nowStr(), motif: l.addedWhy || '' };
+      r.hist.unshift({ t: 'Activité « ' + lb + ' » créée au plan analytique (code ' + c + ')', by: ME, on: nowStr() });
+      guModalClose(); guModalClose(); propPaint(); cvAfter('Activité ' + c + ' créée au plan analytique.');
+    });
+    guModal('Créer l’activité au plan analytique', f, 600, true); lib.focus();
   }
   function propReject(it) {
     cvAsk({ title: 'Rejeter l’activité « ' + (it.l.lib || it.l.l) + ' »', ok: 'Rejeter', required: true, cLabel: 'Motif du rejet', placeholder: 'Pourquoi cette activité n’entre-t-elle pas au plan ?' }, function (m) {
