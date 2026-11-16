@@ -1119,6 +1119,29 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 #softappli-portal .pc-kpi b{ font:600 34px/1.2 var(--font-heading); font-variant-numeric:tabular-nums; }
 #softappli-portal .pc-grid2,#softappli-portal .pc-acts{ gap:24px; }
 #softappli-portal .pc-per,#softappli-portal .pc-act{ padding:24px; }
+/* Avancement physique : champs alignés, unité en suffixe, progression lisible */
+#softappli-portal .pc-act{ position:relative; border-left:4px solid var(--n-200); transition:border-color .15s, box-shadow .15s; }
+#softappli-portal .pc-act:hover{ box-shadow:0 4px 14px -6px rgba(11,19,50,.18); }
+#softappli-portal .pc-act.filled{ border-left-color:#10B981; }
+#softappli-portal .pc-act.warn{ border-left-color:#F59E0B; background:#FFFBEB; }
+#softappli-portal .pc-act .pc-f2{ align-items:end; }
+#softappli-portal .pc-act .pc-fld label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#softappli-portal .pc-act .pc-fld.full label{ white-space:normal; }
+#softappli-portal .pc-unit{ position:relative; }
+#softappli-portal .pc-unit input{ padding-right:128px; font-size:17px; font-weight:600; font-variant-numeric:tabular-nums; }
+#softappli-portal .pc-unit span{ position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--n-600); max-width:112px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; pointer-events:none; }
+#softappli-portal .pc-prog{ height:10px; }
+#softappli-portal .pc-prog-l{ gap:10px; flex-wrap:wrap; align-items:center; }
+#softappli-portal .pc-prog-l strong{ font-size:15px; color:var(--navy-950); }
+#softappli-portal .pc-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin:0 5px 0 0; vertical-align:baseline; }
+#softappli-portal .pc-dot.n{ background:var(--navy-700); } #softappli-portal .pc-dot.g{ background:var(--gold-300); margin-left:8px; }
+#softappli-portal .pc-over{ color:#B45309; }
+#softappli-portal .pc-act-ac{ padding-top:12px; border-top:1px dashed var(--n-200); }
+#softappli-portal .pc-act-ac .pc-saved{ font-size:12px; color:#047857; }
+#softappli-portal #pc-avt-note::before{ content:"ℹ️"; margin-right:8px; }
+#softappli-portal .pc-act.warn .pc-fld.full label{ color:#B45309; }
+#softappli-portal #pc-acts{ padding-bottom:8px; }
+#softappli-portal #pc-avt-bar .pc-saved{ font-weight:600; color:var(--navy-700); }
 #softappli-portal .pc-task{ padding:16px 24px; }
 #softappli-portal .pc-task-ic{ width:44px; height:44px; }
 #softappli-portal .pc-btn.primary{ background:var(--navy-700); }
@@ -24077,7 +24100,7 @@ function pcRenderAvt(){
     var opts='<option value="">— Choisir —</option>'+comm.map(function(c){ return '<option'+(c===x.commune?' selected':'')+'>'+c+'</option>'; }).join('');
     return '<div class="pc-act" id="pc-a-'+i+'"><div class="pc-act-h"><strong>'+pcEsc(x.lib)+'</strong><span class="pc-code">'+x.code+'</span></div>'+
       '<div><div class="pc-prog"><i id="pc-ai-'+i+'"></i><b id="pc-ab-'+i+'"></b></div><div class="pc-prog-l" id="pc-al-'+i+'"></div></div>'+
-      '<div class="pc-f2"><div class="pc-fld"><label for="pc-r-'+i+'">Réalisé en '+a.periode.split(' ')[0].toLowerCase()+' ('+pcEsc(x.unite)+')</label><input id="pc-r-'+i+'" type="number" min="0" inputmode="numeric" value="'+x.reel+'"'+d+' oninput="pcSetA('+i+',\'reel\',this.value)"></div>'+
+      '<div class="pc-f2"><div class="pc-fld"><label for="pc-r-'+i+'">Réalisé en '+a.periode.split(' ')[0].toLowerCase()+'</label><div class="pc-unit"><input id="pc-r-'+i+'" type="number" min="0" inputmode="numeric" placeholder="0" value="'+x.reel+'"'+d+' oninput="pcSetA('+i+',\'reel\',this.value)"><span>'+pcEsc(x.unite)+'</span></div></div>'+
       '<div class="pc-fld"><label for="pc-c-'+i+'">Commune</label><select id="pc-c-'+i+'"'+d+' onchange="pcSetA('+i+',\'commune\',this.value)">'+opts+'</select></div>'+
       '<div class="pc-fld full"><label for="pc-o-'+i+'">Observation <span style="font-weight:400;color:var(--n-600)">— obligatoire si la cible annuelle est dépassée</span></label><textarea id="pc-o-'+i+'"'+d+' oninput="pcSetA('+i+',\'obs\',this.value)">'+pcEsc(x.obs)+'</textarea></div></div>'+
       '<div class="pc-act-ac"><button type="button" class="pc-btn sm"'+d+' onclick="pcPhoto('+i+')">📷 Photo <span class="pc-cnt" id="pc-ph-'+i+'">'+x.photos+'</span></button>'+
@@ -24093,8 +24116,9 @@ function pcAvtProg(i){
   var p1=Math.min(100,cum/x.cible*100), p2=Math.min(100-p1,r/x.cible*100);
   document.getElementById('pc-ai-'+i).style.width=p1+'%';
   var b=document.getElementById('pc-ab-'+i); b.style.left=p1+'%'; b.style.width=p2+'%';
-  document.getElementById('pc-al-'+i).innerHTML='<span>Cumul '+pcFmt(tot)+' / cible '+pcFmt(x.cible)+'</span><span><strong>'+Math.round(tot/x.cible*100)+' %</strong></span>';
-  document.getElementById('pc-a-'+i).classList.toggle('warn', tot>x.cible);
+  var rest=Math.max(0,x.cible-tot), pct=Math.round(tot/x.cible*100);
+  document.getElementById('pc-al-'+i).innerHTML='<span><i class="pc-dot n"></i>Cumul '+pcFmt(cum)+' <i class="pc-dot g"></i>ce mois '+pcFmt(r)+' · cible '+pcFmt(x.cible)+' · '+(tot>x.cible?'<b class="pc-over">dépassée de '+pcFmt(tot-x.cible)+'</b>':'reste '+pcFmt(rest))+'</span><span><strong>'+pct+' %</strong></span>';
+  var card=document.getElementById('pc-a-'+i); card.classList.toggle('warn', tot>x.cible); card.classList.toggle('filled', x.reel!==''&&tot<=x.cible);
 }
 function pcAvtCount(){ var n=PC.avt.acts.filter(function(a){ return a.reel!==''; }).length; document.getElementById('pc-avt-count').textContent=PC.avt.st==='Brouillon'? (n+' activité'+(n>1?'s':'')+' renseignée'+(n>1?'s':'')+' sur '+PC.avt.acts.length):''; }
 function pcSetA(i,k,v){ var x=PC.avt.acts[i]; x[k]=v; PC.avt.saved=''; document.getElementById('pc-avt-saved').textContent=''; if(k==='reel'){ pcAvtProg(i); pcAvtCount(); } var e=document.getElementById('pc-e-'+i); if(e) e.textContent=''; }
