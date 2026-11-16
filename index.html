@@ -2015,6 +2015,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         </button>
         <div class="sub">
           <button class="on" data-go="list" title="Paramétrage des budgets">Paramétrage</button>
+          <button data-go="cadr" title="Cadrage : chiffre d’affaires, marge, hypothèses et enveloppes" style="display:none">Cadrage</button>
           <button data-go="camp" title="Campagnes budgétaires">Campagnes</button>
           <button data-go="collecte" title="Collecte et consolidation">Collecte</button>
           <button data-go="arb" title="Valider les données collectées">Validation</button>
@@ -5591,6 +5592,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       </section>
 
       <!-- ===== Projet : sites (centres de saisie) ===== -->
+      <section class="view" id="v-cadr">
+        <div class="head"><div><h1>Cadrage budgétaire</h1><p>Le point de départ du budget : objectifs de chiffre d’affaires et de marge, hypothèses économiques et enveloppes de dépenses par direction. Une fois validé, le cadrage fixe l’enveloppe de chaque direction dans la campagne.</p></div>
+          <div class="actions"><button class="btn" id="cadr-reopen" hidden>Rouvrir le cadrage</button><button class="btn primary" id="cadr-valid">Valider le cadrage</button></div></div>
+        <div class="callout" id="cadr-msg" hidden style="margin-bottom:12px"></div>
+        <div id="cadr-body"></div>
+      </section>
+
       <section class="view" id="v-orga">
         <div class="head"><div><h1>Organisation</h1><p>L’organigramme de l’entreprise : directions, services et centres de responsabilité. Chaque ligne de budget et chaque utilisateur se rattache à un centre.</p></div>
           <div class="actions"><button class="btn primary" id="orga-new">+ Nouveau centre</button></div></div>
@@ -6840,6 +6848,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     plana: ['Paramètres', 'Plan analytique'],
     sites: ['Paramètres', 'Sites'],
     orga: ['Paramètres', 'Organisation'],
+    cadr: ['Élaboration', 'Cadrage budgétaire'],
     usr: ['Paramètres', 'Utilisateurs et droits'],
     roles: ['Paramètres', 'Groupes de rôles'],
     echeanc: ['Paramètres', 'Échéances'],
@@ -6863,7 +6872,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var homeSvg = '<svg class="ico" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>';
 
   var NAVGROUPS = {
-    'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
+    'nav-budgets': ['list', 'cadr', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss', 'sxeng', 'sxliq', 'sxpay', 'sxenc', 'sxphy', 'trpos'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-plan': ['ptba', 'pta', 'ppm', 'ppmk', 'pdec', 'revpl', 'rep'],
@@ -6916,6 +6925,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'plana' && typeof planaRender === 'function') planaRender();
     if (name === 'sites' && typeof sitesRender === 'function') sitesRender();
     if (name === 'orga' && typeof orgaRender === 'function') orgaRender();
+    if (name === 'cadr' && typeof cadrRender === 'function') cadrRender();
     if (name === 'camp' && typeof renderCamps === 'function') renderCamps();
     if (name === 'usr' && typeof guRender === 'function') guRender();
     if (name === 'roles' && typeof roRender === 'function') roRender();
@@ -15174,7 +15184,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="cadr"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
     prmMenu(code); if (typeof siteCtxSync === 'function') siteCtxSync();
     regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code === 'pub'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
@@ -18947,6 +18957,83 @@ var EXEC_REC = [
     guModal(c ? 'Modifier le centre' : 'Nouveau centre de responsabilité', f, 560);
   }
   document.getElementById('orga-new').addEventListener('click', function () { orgaOpen(null); });
+  /* ----- Entreprise : cadrage budgétaire (objectifs de chiffre d'affaires et de marge, hypothèses, enveloppes par direction) ----- */
+  var CADR = {
+    '2026': { st: 'Validé', hyp: { infl: 6, sal: 3.5, eur: 4900, usd: 4500 }, ca: [{ lib: 'Licences et abonnements', unit: 'contrats', n1: 2800000000, vol: 1250, prix: 2300000, marge: 62 }, { lib: 'Services et intégration', unit: 'projets', n1: 1900000000, vol: 380, prix: 5000000, marge: 38 }, { lib: 'Maintenance et support', unit: 'contrats', n1: 1100000000, vol: 820, prix: 1380000, marge: 55 }], env: { 'Direction Générale': 420000000, 'Direction Financière': 480000000, 'Direction Commerciale': 720000000, 'IT & Digital': 1500000000, 'Ressources Humaines': 380000000 } },
+    '2027': { st: 'Brouillon', hyp: { infl: 6.5, sal: 4, eur: 5100, usd: 4650 }, ca: [{ lib: 'Licences et abonnements', unit: 'contrats', n1: 2850000000, vol: 1500, prix: 2400000, marge: 64 }, { lib: 'Services et intégration', unit: 'projets', n1: 1940000000, vol: 420, prix: 5300000, marge: 40 }, { lib: 'Maintenance et support', unit: 'contrats', n1: 1130000000, vol: 900, prix: 1450000, marge: 58 }], env: { 'Direction Générale': 450000000, 'Direction Financière': 520000000, 'Direction Commerciale': 780000000, 'IT & Digital': 1650000000, 'Ressources Humaines': 410000000 } }
+  };
+  var CADV = { ex: '2027' };
+  function cadrOf(ex) { if (!CADR[ex]) CADR[ex] = { st: 'Brouillon', hyp: { infl: 6, sal: 4, eur: 5000, usd: 4600 }, ca: [], env: {} }; return CADR[ex]; }
+  function cadrNum(s) { var v = parseFloat(String(s).replace(/\s| /g, '').replace(',', '.')); return isNaN(v) ? 0 : v; }
+  function cadrDec(v) { return String(Math.round(v * 100) / 100).replace('.', ','); }
+  function cadrTot(c) { var t = { ca: 0, mg: 0, n1: 0, env: 0 }; c.ca.forEach(function (l) { var v = Math.round((l.vol || 0) * (l.prix || 0)); t.ca += v; t.mg += Math.round(v * (l.marge || 0) / 100); t.n1 += l.n1 || 0; }); Object.keys(c.env).forEach(function (k) { t.env += c.env[k] || 0; }); t.res = t.mg - t.env; return t; }
+  function cadrDirs() { return orgaTree().filter(function (x) { return !x.parent && x.on; }); }
+  /* le cadrage validé fixe l'enveloppe maximale de chaque direction dans les campagnes de l'exercice */
+  function cadrSync(ex) { var c = cadrOf(ex); if (c.st !== 'Validé') return; camps.forEach(function (k) { if (k.prof === 'Entreprise' && k.ex === ex && k.st !== 'Clôturée' && k.st !== 'Annulée') k.perims.forEach(function (p) { if (c.env[p.p] != null) p.env = c.env[p.p]; }); }); }
+  Object.keys(CADR).forEach(cadrSync);
+  function cadrMsg(t, k) { bkMsg('cadr-msg', t, k || 'ok'); }
+  function cadrRender() {
+    guUse(activeCode()); var ex = CADV.ex, c = cadrOf(ex), lk = c.st === 'Validé', T = cadrTot(c), pv = CADR[String(parseInt(ex, 10) - 1)], P = pv ? cadrTot(pv) : null, b = document.getElementById('cadr-body'); b.innerHTML = '';
+    document.getElementById('cadr-valid').hidden = lk; document.getElementById('cadr-reopen').hidden = !lk;
+    var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Exercice')); var se = guSel(['2026', '2027', '2028'].map(function (y) { return [y, y]; }), ex, function (v) { CADV.ex = v; cadrRender(); }, 'Exercice'); bar.appendChild(se); bar.appendChild(badge(lk ? 'Cadrage validé' : 'Brouillon', lk ? 'b-ok' : 'b-warn'));
+    if (lk) bar.appendChild(cvEl('span', 'hint', 'Les enveloppes ci-dessous sont reprises par les campagnes de ' + ex + '. Rouvrez le cadrage pour les modifier.')); b.appendChild(bar);
+    var vs = P && P.ca ? T.ca / P.ca - 1 : null;
+    b.appendChild(dpTiles([['Chiffre d’affaires cible', fmt(T.ca) + ' MGA', 'brand', vs != null ? (vs >= 0 ? '+' : '') + cadrDec(vs * 100) + ' % par rapport à ' + (parseInt(ex, 10) - 1) : ''], ['Marge cible', fmt(T.mg) + ' MGA', 'ok', T.ca ? cadrDec(T.mg / T.ca * 100) + ' % du chiffre d’affaires' : ''], ['Enveloppes de dépenses', fmt(T.env) + ' MGA', 'info', pl(cadrDirs().length, 'direction')], ['Résultat prévisionnel', fmt(T.res) + ' MGA', T.res >= 0 ? 'ok' : 'warn', T.res >= 0 ? 'marge moins enveloppes' : 'enveloppes supérieures à la marge']], { cols: 4 }));
+    function blk(t, node, hint, act) { var x = cvEl('section', 'co-blk'), h = cvEl('div', 'kb-h', t); x.appendChild(h); if (hint) { var hh = cvEl('div', 'hint', hint); hh.style.marginBottom = '8px'; x.appendChild(hh); } if (act) { var w = cvEl('div'); w.style.margin = '0 0 8px'; w.appendChild(act); x.appendChild(w); } x.appendChild(node); b.appendChild(x); }
+    /* hypothèses */
+    var H = c.hyp, hrows = [['Inflation attendue', cadrDec(H.infl) + ' %'], ['Évolution des salaires', cadrDec(H.sal) + ' %'], ['Taux de change EUR → MGA', fmt(H.eur)], ['Taux de change USD → MGA', fmt(H.usd)]], hb = cvEl('button', 'btn small', 'Modifier les hypothèses'); hb.type = 'button'; hb.disabled = lk; hb.addEventListener('click', function () { cadrHyp(c); });
+    blk('Hypothèses économiques', dpMini(['Hypothèse', 'Valeur retenue'], hrows, [1], ''), 'Elles servent à chiffrer les charges de personnel, les achats en devises et les prévisions.', hb);
+    /* chiffre d'affaires et marge */
+    var rows = c.ca.map(function (l, i) {
+      var v = Math.round((l.vol || 0) * (l.prix || 0)), mg = Math.round(v * (l.marge || 0) / 100), a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap'; var bm = cvEl('button', 'btn small', 'Modifier'), bd = cvEl('button', 'btn small gu-del', 'Supprimer'); bm.type = bd.type = 'button'; bm.disabled = bd.disabled = lk;
+      bm.addEventListener('click', function () { cadrLine(c, l); }); bd.addEventListener('click', function () { dirConfirm('Supprimer la ligne', 'Supprimer « ' + l.lib + ' » des objectifs de chiffre d’affaires ?', 'Supprimer', function () { c.ca.splice(i, 1); auditAdd('Configuration', 'Cadrage ' + ex, 'Ligne d’activité supprimée : ' + l.lib); cadrRender(); }); }); a.appendChild(bm); a.appendChild(bd);
+      var d = l.n1 ? v / l.n1 - 1 : null; return [l.lib, fmt(l.n1 || 0), fmt(l.vol || 0) + ' ' + (l.unit || ''), fmt(l.prix || 0), fmt(v) + (d != null ? ' (' + (d >= 0 ? '+' : '') + cadrDec(d * 100) + ' %)' : ''), cadrDec(l.marge || 0) + ' %', fmt(mg), a];
+    });
+    if (c.ca.length) rows.push(['Total', fmt(T.n1), '', '', fmt(T.ca), T.ca ? cadrDec(T.mg / T.ca * 100) + ' %' : '', fmt(T.mg), '']);
+    var ab = cvEl('button', 'btn small primary', '+ Ajouter une ligne d’activité'); ab.type = 'button'; ab.disabled = lk; ab.addEventListener('click', function () { cadrLine(c, null); });
+    blk('Objectifs de chiffre d’affaires et de marge', dpMini(['Ligne d’activité', 'CA ' + (parseInt(ex, 10) - 1) + ' (MGA)', 'Volume', 'Prix moyen (MGA)', 'CA cible (MGA)', 'Taux de marge', 'Marge cible (MGA)', ''], rows, [1, 4, 5, 6], 'Aucune ligne d’activité : ajoutez vos produits et services avec leur volume, leur prix et leur taux de marge.'), 'Le chiffre d’affaires cible est le volume multiplié par le prix moyen ; la marge s’en déduit avec le taux.', ab);
+    /* enveloppes par direction */
+    var er = cadrDirs().map(function (dr) {
+      var v = c.env[dr.nom] || 0, o = pv && pv.env[dr.nom] != null ? pv.env[dr.nom] : null, a = cvEl('button', 'btn small', 'Modifier'); a.type = 'button'; a.disabled = lk; a.addEventListener('click', function () { cadrEnv(c, dr); });
+      var cs = camps.filter(function (k) { return k.prof === 'Entreprise' && k.ex === ex && k.st !== 'Annulée'; })[0], pr = cs ? cs.perims.filter(function (p) { return p.p === dr.nom; })[0] : null, dm = pr && pr.amt ? fmt(pr.amt) : '—';
+      return [dr.nom, o != null ? fmt(o) : '—', fmt(v), o ? (v >= o ? '+' : '') + cadrDec((v / o - 1) * 100) + ' %' : '—', T.env ? cadrDec(v / T.env * 100) + ' %' : '—', dm, a];
+    });
+    if (er.length) er.push(['Total', P ? fmt(P.env) : '—', fmt(T.env), P && P.env ? (T.env >= P.env ? '+' : '') + cadrDec((T.env / P.env - 1) * 100) + ' %' : '—', '100 %', '', '']);
+    blk('Enveloppes de dépenses par direction', dpMini(['Direction', 'Enveloppe ' + (parseInt(ex, 10) - 1) + ' (MGA)', 'Enveloppe ' + ex + ' (MGA)', 'Évolution', 'Part', 'Demande reçue (campagne)', ''], er, [1, 2, 3, 4, 5], 'Aucune direction : créez-les dans Paramètres > Organisation.'), 'Chaque direction ne peut pas demander plus que son enveloppe. Les directions viennent de l’organisation.');
+  }
+  function cadrHyp(c) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), H = c.hyp, ins = {};
+    [['infl', 'Inflation attendue (%)'], ['sal', 'Évolution des salaires (%)'], ['eur', 'Taux de change EUR → MGA'], ['usd', 'Taux de change USD → MGA']].forEach(function (x) { var i = cvEl('input', 'field'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = cadrDec(H[x[0]]); ins[x[0]] = i; g.appendChild(guField(x[1], i, true)); }); f.appendChild(g);
+    var err = cvEl('div', 'err'); f.appendChild(err); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Enregistrer'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () { var v = {}; Object.keys(ins).forEach(function (k) { v[k] = cadrNum(ins[k].value); }); if (v.infl < 0 || v.infl > 100 || v.sal < -50 || v.sal > 100) { err.textContent = 'Les pourcentages doivent rester plausibles (inflation entre 0 et 100 %).'; return; } if (v.eur <= 0 || v.usd <= 0) { err.textContent = 'Les taux de change doivent être positifs.'; return; } c.hyp = v; auditAdd('Configuration', 'Cadrage ' + CADV.ex, 'Hypothèses économiques modifiées'); guModalClose(); cadrMsg('Hypothèses enregistrées.'); cadrRender(); });
+    guModal('Hypothèses économiques ' + CADV.ex, f, 480);
+  }
+  function cadrLine(c, l) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), mk = function (v, ph) { var i = cvEl('input', 'field'); i.type = 'text'; i.value = v == null ? '' : v; if (ph) i.placeholder = ph; return i; };
+    var lib = mk(l ? l.lib : '', 'Ex. Formation et conseil'), un = mk(l ? l.unit : '', 'Ex. contrats, projets, clients'), n1 = mk(l ? fmt(l.n1 || 0) : ''), vol = mk(l ? fmt(l.vol || 0) : ''), pr = mk(l ? fmt(l.prix || 0) : ''), mg = mk(l ? cadrDec(l.marge || 0) : '');
+    [n1, vol, pr, mg].forEach(function (i) { i.setAttribute('inputmode', 'decimal'); });
+    var pvw = cvEl('div'); pvw.style.cssText = 'padding:10px 12px;background:var(--neutral-100,#EEF0F5);border-radius:8px;font-weight:600'; function upd() { var v = Math.round(cadrNum(vol.value) * cadrNum(pr.value)); pvw.textContent = 'Chiffre d’affaires cible : ' + fmt(v) + ' MGA · marge : ' + fmt(Math.round(v * cadrNum(mg.value) / 100)) + ' MGA'; } [vol, pr, mg].forEach(function (i) { i.addEventListener('input', upd); }); upd();
+    var d1 = guField('Ligne d’activité (produit ou service)', lib, true); d1.className = 'full'; g.appendChild(d1); g.appendChild(guField('Unité de volume', un)); g.appendChild(guField('Chiffre d’affaires réalisé l’an dernier (MGA)', n1)); g.appendChild(guField('Volume cible', vol, true)); g.appendChild(guField('Prix moyen (MGA)', pr, true)); g.appendChild(guField('Taux de marge (%)', mg, true)); var d2 = cvEl('div', 'full'); d2.appendChild(pvw); g.appendChild(d2); f.appendChild(g);
+    var err = cvEl('div', 'err'); f.appendChild(err); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', l ? 'Enregistrer' : 'Ajouter'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () {
+      var nm = lib.value.trim(), m = cadrNum(mg.value); if (nm.length < 3) { err.textContent = 'Indiquez la ligne d’activité.'; return; } if (c.ca.some(function (x) { return x !== l && x.lib.toLowerCase() === nm.toLowerCase(); })) { err.textContent = 'Cette ligne d’activité existe déjà.'; return; } if (cadrNum(vol.value) <= 0 || cadrNum(pr.value) <= 0) { err.textContent = 'Le volume et le prix moyen doivent être positifs.'; return; } if (m < 0 || m > 100) { err.textContent = 'Le taux de marge est un pourcentage entre 0 et 100.'; return; }
+      var o = { lib: nm, unit: un.value.trim(), n1: Math.round(cadrNum(n1.value)), vol: cadrNum(vol.value), prix: cadrNum(pr.value), marge: m }; if (l) { for (var k in o) l[k] = o[k]; } else c.ca.push(o);
+      auditAdd('Configuration', 'Cadrage ' + CADV.ex, (l ? 'Ligne d’activité modifiée : ' : 'Ligne d’activité ajoutée : ') + nm); guModalClose(); cadrMsg('Ligne « ' + nm + ' » enregistrée.'); cadrRender();
+    });
+    guModal(l ? 'Modifier la ligne d’activité' : 'Nouvelle ligne d’activité', f, 620);
+  }
+  function cadrEnv(c, dr) {
+    var f = cvEl('div'), i = cvEl('input', 'field'); i.type = 'text'; i.setAttribute('inputmode', 'numeric'); i.value = fmt(c.env[dr.nom] || 0); f.appendChild(guField('Enveloppe de dépenses de « ' + dr.nom + ' » (MGA)', i, true));
+    var err = cvEl('div', 'err'); f.appendChild(err); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Enregistrer'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () { var v = Math.round(cadrNum(i.value)); if (v < 0) { err.textContent = 'L’enveloppe ne peut pas être négative.'; return; } c.env[dr.nom] = v; auditAdd('Configuration', 'Cadrage ' + CADV.ex, 'Enveloppe de ' + dr.nom + ' : ' + fmt(v) + ' MGA'); guModalClose(); cadrMsg('Enveloppe de « ' + dr.nom + ' » enregistrée.'); cadrRender(); });
+    guModal('Enveloppe de dépenses ' + CADV.ex, f, 480);
+  }
+  document.getElementById('cadr-valid').addEventListener('click', function () {
+    var ex = CADV.ex, c = cadrOf(ex), T = cadrTot(c), miss = cadrDirs().filter(function (d) { return !(c.env[d.nom] > 0); });
+    if (!c.ca.length) { cadrMsg('Ajoutez au moins une ligne d’activité avant de valider le cadrage.', 'ko'); return; } if (miss.length) { cadrMsg('Il manque l’enveloppe de : ' + miss.map(function (d) { return d.nom; }).join(', ') + '.', 'ko'); return; } if (T.res < 0) { cadrMsg('Le résultat prévisionnel est négatif (' + fmt(T.res) + ' MGA) : réduisez les enveloppes ou relevez les objectifs.', 'ko'); return; }
+    dirConfirm('Valider le cadrage ' + ex, 'Valider le cadrage ' + ex + ' ? Les enveloppes deviennent le plafond de chaque direction dans la campagne.', 'Valider', function () { c.st = 'Validé'; cadrSync(ex); auditAdd('Validation', 'Cadrage ' + ex, 'Cadrage validé : chiffre d’affaires ' + fmt(T.ca) + ' MGA, marge ' + fmt(T.mg) + ' MGA, enveloppes ' + fmt(T.env) + ' MGA'); cadrMsg('Cadrage ' + ex + ' validé : les enveloppes sont reprises par les campagnes.'); cadrRender(); });
+  });
+  document.getElementById('cadr-reopen').addEventListener('click', function () { var ex = CADV.ex; dirConfirm('Rouvrir le cadrage', 'Rouvrir le cadrage ' + ex + ' ? Il repasse en brouillon ; les enveloppes déjà reprises par les campagnes restent en vigueur jusqu’à la prochaine validation.', 'Rouvrir', function () { cadrOf(ex).st = 'Brouillon'; auditAdd('Configuration', 'Cadrage ' + ex, 'Cadrage rouvert'); cadrMsg('Cadrage ' + ex + ' rouvert.', 'info'); cadrRender(); }); });
   (function () {
     var R = RIGHTS0.ROLES2, M = RIGHTS0.RM, U = RIGHTS0.USERS;
     ['Directeur général', 'DAF', 'Contrôleur de gestion', 'Responsable de centre', 'Comptable', 'Auditeur interne'].forEach(function (r) { if (R.indexOf(r) < 0) R.push(r); M[r] = M[r] || {}; });
@@ -18963,7 +19050,7 @@ var EXEC_REC = [
         roles: RIGHTS0.ROLES2, rm: RIGHTS0.RM, users: RIGHTS0.USERS.filter(function (u) { return u.profs.indexOf('Entreprise') >= 0; }), act: RIGHTS0.ACTIONS, adm: 'Administration', cadmap: {}, word: { S: 'Centre', s: 'centre', p: 'centres', all: 'Tous les centres' },
         lv: { 'Administrateur': 4, 'Directeur général': 3, 'DAF': 3, 'Contrôleur de gestion': 3, 'Valideur': 3, 'Contrôleur': 2, 'Comptable': 2, 'Préparateur': 2, 'Auditeur interne': 2, 'Responsable de centre': 1, 'Lecteur': 0 },
         tree: [
-          { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
+          { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['cadr', 'Cadrage', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
           { key: 'g-suivi', label: 'Exécution', kids: [['appr', 'Budgets verrouillés', 'ecr'], ['engage', 'Engagements', 'ecr'], ['real', 'Réalisations', 'ecr'], ['decaiss', 'Paiements comptabilisés', 'ecr'], ['encaiss', 'Recettes comptabilisées', 'ecr']] },
           { key: 'g-treso', label: 'Trésorerie', kids: [['bkdec', 'Plan de trésorerie', 'ecr']] },
           { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
@@ -21764,7 +21851,7 @@ var EXEC_REC = [
   function dpDl(pairs) { var g = cvEl('div', 'dp-dl'); pairs.forEach(function (p) { var d = cvEl('div', p[2] ? 'full' : ''); d.appendChild(cvEl('span', 'k', p[0])); d.appendChild(cvEl('span', 'v', p[1])); g.appendChild(d); }); return g; }
   function dpTiles(arr, opt) {
     opt = opt || {}; var g = cvEl('div', 'dp-tiles' + (opt.small ? ' small' : '')); g.style.setProperty('--c', String(opt.cols || arr.length)); if (arr.length % 2) g.className += ' odd'; g.style.marginBottom = '14px';
-    arr.forEach(function (a) { var t = cvEl('div', 'dp-tile ' + (a[2] || 'n')), v = cvEl('div', 'v'), s = String(a[1]), m = s.match(/^(.*?)(\s(?:MGA))$/); t.appendChild(cvEl('div', 'l', a[0])); if (m) { v.appendChild(document.createTextNode(m[1])); v.appendChild(cvEl('span', 'u', 'MGA')); } else v.textContent = s; t.appendChild(v); g.appendChild(t); });
+    arr.forEach(function (a) { var t = cvEl('div', 'dp-tile ' + (a[2] || 'n')), v = cvEl('div', 'v'), s = String(a[1]), m = s.match(/^(.*?)(\s(?:MGA))$/); t.appendChild(cvEl('div', 'l', a[0])); if (m) { v.appendChild(document.createTextNode(m[1])); v.appendChild(cvEl('span', 'u', 'MGA')); } else v.textContent = s; t.appendChild(v); if (a[3]) { var nt = cvEl('div', 'hby', a[3]); nt.style.marginTop = '4px'; t.appendChild(nt); } g.appendChild(t); });
     return g;
   }
   function dpWork(z) {
