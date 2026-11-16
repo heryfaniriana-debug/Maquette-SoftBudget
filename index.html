@@ -1178,6 +1178,11 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   #softappli-portal .pc-tab{ flex-direction:column; gap:2px; height:64px; min-height:64px; font-size:12px; border-left:0; border-bottom:0; padding:0 4px; position:relative; }
   #softappli-portal .pc-tab.on::before{ content:""; position:absolute; top:0; left:25%; right:25%; height:3px; background:var(--gold-300); border-radius:0 0 3px 3px; }
   #softappli-portal .pc-main{ padding:24px 16px 96px; }
+  #softappli-portal .pc-bar{ bottom:72px; padding:10px 12px; }
+  #softappli-portal .pc-bar-l,#softappli-portal .pc-bar-r{ width:100%; }
+  #softappli-portal .pc-bar-r .pc-btn{ flex:1 1 0; min-width:0; padding:0 8px; }
+  #softappli-portal .pc-user-txt{ display:none; }
+  #softappli-portal .pc-top-in .pc-btn{ min-height:38px; padding:0 12px; }
   #softappli-portal .pc-hero{ padding:32px 16px 40px; }
 }
 
@@ -24374,6 +24379,27 @@ function pcRenderEnv(){
   .co-dec-grid .seg button { flex: 1; }
   .co-dec-grid textarea { width: 100%; box-sizing: border-box; min-height: 84px; }
   @media (max-width: 900px) { .co-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .co-two, .co-dec-grid { grid-template-columns: 1fr; } }
+  /* ----- Aperçu téléphone : tuiles 2 par ligne, barre d'actions sur une ligne, graphes lisibles, filtres pleine largeur ----- */
+  @media (max-width: 700px) {
+    .co-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .co-kpis > * { min-width: 0; }
+    .kpi .v, .dp-tile .v, .co-kpis .v { font-size: 18px; overflow-wrap: anywhere; }
+    .kpi .v small, .kpi .v .u, .dp-tile .u { font-size: 11px; white-space: nowrap; }
+    .sb-fp-head .actions { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; justify-content: flex-start !important; }
+    .sb-fp-head .actions .bv-bar { display: flex; flex-wrap: nowrap; gap: 8px; width: 100%; }
+    .sb-fp-head .actions .bv-bar .btn { flex: 1 1 0; min-width: 0; width: auto; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-fp-head .actions .bv-bar .btn.primary { flex: 2.2 1 0; }
+    .sb-fp-head .actions .bv-bar .btn { font-size: 14px; }
+    .sb-fp-head .actions .ex-sel { width: 100%; justify-content: space-between; }
+    .dp-chart div:has(> svg) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .dp-chart svg { min-width: 560px; }
+    .gu-tool > * { flex: 1 1 100%; width: 100%; max-width: none; }
+    .gu-tool select, .gu-tool input { width: 100%; }
+    .scroll table { min-width: 620px; }
+    .scroll td.name, .scroll th:first-child { min-width: 170px; }
+    .tb-menu { max-width: calc(100vw - 16px); }
+    .row-toolbar { position: static; }
+  }
   /* Règle de la maquette : des champs de même longueur, alignés en colonnes égales */
   .env-grid { display: grid !important; grid-template-columns: minmax(140px, 1.2fr) repeat(4, minmax(0, 1fr)); gap: 10px; align-items: center; }
   .env-grid > .chk { white-space: normal; min-width: 0; }
