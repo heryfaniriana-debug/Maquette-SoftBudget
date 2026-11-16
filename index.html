@@ -2100,6 +2100,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="bkacc">Comptes bancaires</button>
           <button data-go="bkdec" title="Plan de trésorerie prévisionnel">Plan de trésorerie</button>
                                         <button data-go="sites" title="Sites : centres de saisie du projet" style="display:none">Sites</button>
+          <button data-go="orga" title="Organisation : directions, services et centres de responsabilité" style="display:none">Organisation</button>
           <button data-go="roles" title="Groupes de rôles" style="display:none">Groupes de rôles</button>
           <button data-go="echeanc" title="Échéances" style="display:none">Échéances</button>
           <button data-go="alrt" title="Alertes et dépassements" style="display:none">Alertes et dépassements</button>
@@ -5590,6 +5591,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       </section>
 
       <!-- ===== Projet : sites (centres de saisie) ===== -->
+      <section class="view" id="v-orga">
+        <div class="head"><div><h1>Organisation</h1><p>L’organigramme de l’entreprise : directions, services et centres de responsabilité. Chaque ligne de budget et chaque utilisateur se rattache à un centre.</p></div>
+          <div class="actions"><button class="btn primary" id="orga-new">+ Nouveau centre</button></div></div>
+        <div class="callout" id="orga-msg" hidden style="margin-bottom:12px"></div>
+        <div id="orga-body"></div>
+      </section>
+
       <section class="view" id="v-sites">
         <div class="head"><div><h1>Sites</h1><p>Les centres de saisie du projet : la coordination et les antennes. Chaque écriture porte le site qui l’a saisie.</p></div>
           <div class="actions"><button class="btn primary" id="site-new">+ Nouveau site</button></div></div>
@@ -6831,6 +6839,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     inv: ['Élaboration', 'Budget d’investissement'],
     plana: ['Paramètres', 'Plan analytique'],
     sites: ['Paramètres', 'Sites'],
+    orga: ['Paramètres', 'Organisation'],
     usr: ['Paramètres', 'Utilisateurs et droits'],
     roles: ['Paramètres', 'Groupes de rôles'],
     echeanc: ['Paramètres', 'Échéances'],
@@ -6860,7 +6869,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-plan': ['ptba', 'pta', 'ppm', 'ppmk', 'pdec', 'revpl', 'rep'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
     'nav-rapports': ['ansit', 'anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
-    'nav-params': ['params', 'usr', 'roles', 'echeanc', 'alrt', 'plana', 'sites', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
+    'nav-params': ['params', 'usr', 'roles', 'echeanc', 'alrt', 'plana', 'sites', 'orga', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
   };
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
   var MENU_OF = { create: 'list', detail: 'bud', saisie: 'bud', valid: 'arb' };
@@ -6906,6 +6915,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (/^an(fin|eng|rea|dec|phy|fp|plu|ale|ver|sit)$/.test(name) && typeof anaRender === 'function') { ANA.kind = name.slice(2); anaRender(); }
     if (name === 'plana' && typeof planaRender === 'function') planaRender();
     if (name === 'sites' && typeof sitesRender === 'function') sitesRender();
+    if (name === 'orga' && typeof orgaRender === 'function') orgaRender();
     if (name === 'usr' && typeof guRender === 'function') guRender();
     if (name === 'roles' && typeof roRender === 'function') roRender();
     if (name === 'alrt' && typeof alrRender === 'function') alrRender();
@@ -15046,7 +15056,7 @@ var EXEC_REC = [
     document.getElementById('g-plan').style.display = code === 'prj' ? '' : 'none';
     if (code === 'ent') {
       var ps = document.querySelector('#g-params > .sub');
-      [['regime', 'Général', 'Profil, mode de gestion et modules'], ['roles'], ['usr'], ['ctrl'], ['trev'], ['rclot'], ['notifcfg']].forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; ps.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
+      [['regime', 'Général', 'Profil, mode de gestion et modules'], ['orga', 'Organisation', 'Directions, services et centres de responsabilité'], ['roles'], ['usr'], ['ctrl'], ['trev'], ['rclot'], ['notifcfg']].forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; ps.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
     if (code !== 'prj') return;
     nav.insertBefore(gT, gS);
@@ -15139,7 +15149,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
     prmMenu(code); if (typeof siteCtxSync === 'function') siteCtxSync();
     regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code === 'pub'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
@@ -18412,7 +18422,7 @@ var EXEC_REC = [
     { id: 'S3', t: 'Un chef d’antenne ne voit et ne saisit que les écritures de son site', sev: 'Bloquant', act: true, enf: 'Appliquée par le périmètre « Site » de l’utilisateur' },
     { id: 'S4', t: 'Un même utilisateur ne peut pas cumuler la préparation et la validation des plans', sev: 'Avertissement', act: true, enf: 'Détectée dans les conflits de droits' }
   ];
-  function sitesList() { if (GU_CUR === 'ent') return ENT_CENTRES; return typeof SITES !== 'undefined' && SITES ? SITES : []; }
+  function sitesList() { if (GU_CUR === 'ent') return orgaTree().filter(function (c) { return c.on; }); return typeof SITES !== 'undefined' && SITES ? SITES : []; }
   function setRightsMode(prj) {
     PRJM = prj; ROLES2 = prj ? PRJ_ROLES : RIGHTS0.ROLES2; RM = prj ? PRJ_RM : RIGHTS0.RM; ACTIONS = prj ? PRJ_ACTIONS : RIGHTS0.ACTIONS; USERS = prj ? PRJ_USERS : RIGHTS0.USERS; SEPR = prj ? PRJ_SEPR : RIGHTS0.SEPR;
     SEPACT = prj ? ['Valider les plans'] : ['Validation', 'Approbation']; ADMACT = prj ? 'Administrer' : 'Administration'; ACTDEF = prj ? 'Valider les plans' : 'Validation';
@@ -18764,7 +18774,7 @@ var EXEC_REC = [
   function guUsers(box) {
     var tb = cvEl('div', 'gu-tool');
     tb.appendChild(guSel([['', 'Tous les groupes']].concat(GU.groups.map(function (g) { return [g.nom, g.nom]; })), GU.fg, function (v) { GU.fg = v; guRender(); }, 'Groupe'));
-    tb.appendChild(guSel([['', GU_WORD.all], ['Tous les sites', 'Accès à ' + GU_WORD.all.toLowerCase()]].concat(sitesList().map(function (s) { return [s.code, s.nom]; })), GU.site, function (v) { GU.site = v; guRender(); }, GU_WORD.S));
+    tb.appendChild(guSel([['', GU_WORD.all], ['Tous les sites', 'Accès à ' + GU_WORD.all.toLowerCase()]].concat(sitesList().map(function (s) { return [s.code, s.lbl || s.nom]; })), GU.site, function (v) { GU.site = v; guRender(); }, GU_WORD.S));
     var q = cvEl('input', 'field'); q.id = 'gu-q'; q.type = 'text'; q.placeholder = 'Rechercher un utilisateur'; q.value = GU.q; q.style.width = '260px'; q.addEventListener('input', function () { GU.q = q.value; guRender(); var i = document.getElementById('gu-q'); i.focus(); i.setSelectionRange(q.value.length, q.value.length); }); tb.appendChild(q);
     var sp = cvEl('span'); sp.style.flex = '1'; tb.appendChild(sp);
     tb.appendChild(guSel([['', 'Tous les statuts'], ['actif', 'Actif'], ['inactif', 'Inactif']], GU.fs, function (v) { GU.fs = v; guRender(); }, 'Statut')); box.appendChild(tb);
@@ -18795,7 +18805,7 @@ var EXEC_REC = [
     GU.edit = u || null; var f = cvEl('div'), g = cvEl('div', 'fgrid'), mk = function (v, ro) { var i = cvEl('input', 'field'); i.type = 'text'; i.value = v || ''; if (ro) i.readOnly = true; return i; };
     var pre = mk(u ? u.n.split(' ').slice(0, -1).join(' ') : ''), nom = mk(u ? u.n.split(' ').slice(-1)[0] : ''), log = mk(u ? u.login : '', !!u), em = mk(u ? u.email : '');
     var gs = guSel(GU.groups.filter(function (x) { return u || x.nom !== 'Administrateur'; }).map(function (x) { return [x.nom, x.nom]; }), u ? u.roles[0] : 'Comptable', function () { }, 'Groupe'); gs.style.width = '100%';
-    var ss = guSel([['Tous les sites', GU_WORD.all]].concat(sitesList().map(function (s) { return [s.code, s.nom]; })), u ? (u.site || 'Tous les sites') : (GU_CUR === 'ent' ? 'Tous les sites' : 'COO'), function () { }, GU_WORD.S); ss.style.width = '100%';
+    var ss = guSel([['Tous les sites', GU_WORD.all]].concat(sitesList().map(function (s) { return [s.code, s.lbl || s.nom]; })), u ? (u.site || 'Tous les sites') : (GU_CUR === 'ent' ? 'Tous les sites' : 'COO'), function () { }, GU_WORD.S); ss.style.width = '100%';
     g.appendChild(guField('Prénom', pre)); g.appendChild(guField('Nom', nom, true)); g.appendChild(guField('Utilisateur (identifiant)', log, true)); g.appendChild(guField('E-mail', em, true)); g.appendChild(guField('Groupe', gs, true)); g.appendChild(guField(GU_WORD.S, ss, true)); f.appendChild(g);
     var err = cvEl('div', 'err'); f.appendChild(err); if (!u) f.appendChild(cvEl('div', 'hint', 'Un mot de passe temporaire est généré et envoyé par e-mail. L’utilisateur doit le modifier à sa première connexion.'));
     var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', u ? 'Enregistrer' : 'Créer l’utilisateur'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
@@ -18851,8 +18861,65 @@ var EXEC_REC = [
   var GU_RM0 = null, GU_CAD0 = null, GU_CADMAP0 = null;
   /* ----- Entreprise : mêmes écrans (groupes de rôles, utilisateurs, permissions, privilèges), avec leur propre jeu de données ----- */
   var GU_ADM = 'Administrer', GU_CUR = 'prj', GU_SET = null, GU_WORD = { S: 'Site', s: 'site', p: 'sites', all: 'Tous les sites' };
-  var ENT_CENTRES = [{ code: 'DG', nom: 'Direction générale', resp: 'Directeur général', on: true }, { code: 'DAF', nom: 'Direction administrative et financière', resp: 'DAF', on: true }, { code: 'ITD', nom: 'IT & Digital', resp: 'RASOARIMALALA Voahangy Lalao', on: true }, { code: 'COM', nom: 'Direction commerciale', resp: '', on: true }, { code: 'OPS', nom: 'Opérations', resp: '', on: true }];
+  var ENT_TYPES = ['Direction', 'Département', 'Service', 'Centre de coût', 'Centre de profit'];
+  var ENT_CENTRES = [
+    { code: 'DG', nom: 'Direction Générale', type: 'Direction', parent: '', resp: 'RAVELO Fanja', on: true },
+    { code: 'DFI', nom: 'Direction Financière', type: 'Direction', parent: '', resp: 'RANDRIA Haja', on: true },
+    { code: 'CPT', nom: 'Comptabilité', type: 'Service', parent: 'DFI', resp: 'RASOAMANANA Lalaina', on: true },
+    { code: 'CDG', nom: 'Contrôle de gestion', type: 'Service', parent: 'DFI', resp: 'RAKOTOMALALA Sitraka', on: true },
+    { code: 'COM', nom: 'Direction Commerciale', type: 'Centre de profit', parent: '', resp: '', on: true },
+    { code: 'ITD', nom: 'IT & Digital', type: 'Direction', parent: '', resp: 'ANDRIANARIVO Mialy', on: true },
+    { code: 'DEV', nom: 'Développement', type: 'Service', parent: 'ITD', resp: '', on: true },
+    { code: 'INF', nom: 'Infrastructure', type: 'Service', parent: 'ITD', resp: '', on: true },
+    { code: 'RH', nom: 'Ressources Humaines', type: 'Direction', parent: '', resp: '', on: true },
+    { code: 'PAI', nom: 'Paie', type: 'Service', parent: 'RH', resp: '', on: true },
+    { code: 'REC', nom: 'Recrutement', type: 'Service', parent: 'RH', resp: '', on: true }
+  ];
   function guSiteLbl(c) { if (GU_CUR === 'ent') { var x = ENT_CENTRES.filter(function (s) { return s.code === c; })[0]; return x ? x.nom : (c || '—'); } return siteLbl(c); }
+  /* centres dans l'ordre de l'arbre, avec leur profondeur (lbl : nom indenté pour les listes) */
+  function orgaTree() {
+    var out = []; (function walk(p, d) { ENT_CENTRES.filter(function (c) { return (c.parent || '') === p; }).forEach(function (c) { c.depth = d; c.lbl = (d ? new Array(d + 1).join('— ') : '') + c.nom; out.push(c); walk(c.code, d + 1); }); })('', 0); return out;
+  }
+  function orgaKids(code) { return ENT_CENTRES.filter(function (c) { return c.parent === code; }); }
+  function orgaDesc(code) { var o = []; orgaKids(code).forEach(function (k) { o.push(k.code); orgaDesc(k.code).forEach(function (x) { o.push(x); }); }); return o; }
+  function orgaUsers(code) { return RIGHTS0.USERS.filter(function (u) { return u.profs.indexOf('Entreprise') >= 0 && u.site === code; }); }
+  function orgaRender() {
+    guUse(activeCode()); var b = document.getElementById('orga-body'); b.innerHTML = '';
+    var tr = orgaTree(), act = ENT_CENTRES.filter(function (c) { return c.on; }).length;
+    b.appendChild(dpTiles([['Centres', String(ENT_CENTRES.length), 'brand'], ['Actifs', String(act), 'ok'], ['Directions', String(ENT_CENTRES.filter(function (c) { return !c.parent; }).length), 'info'], ['Utilisateurs rattachés', String(RIGHTS0.USERS.filter(function (u) { return u.profs.indexOf('Entreprise') >= 0 && u.site && u.site !== 'Tous les sites'; }).length), 'n']], { cols: 4 }));
+    var rows = tr.map(function (c) {
+      var n = cvEl('div'); n.style.paddingLeft = (c.depth * 22) + 'px'; n.appendChild(cvEl('b', null, (c.depth ? '↳ ' : '') + c.nom)); n.appendChild(cvEl('div', 'hby', c.code));
+      var a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
+      var bm = cvEl('button', 'btn small', 'Modifier'), bt = cvEl('button', 'btn small', c.on ? 'Désactiver' : 'Activer'), bd = cvEl('button', 'btn small gu-del', 'Supprimer'); bm.type = bt.type = bd.type = 'button';
+      bm.addEventListener('click', function () { orgaOpen(c); });
+      bt.addEventListener('click', function () { if (c.on && orgaKids(c.code).some(function (k) { return k.on; })) { bkMsg('orga-msg', 'Désactivez d’abord les centres rattachés à « ' + c.nom + ' ».', 'ko'); return; } c.on = !c.on; auditAdd('Configuration', 'Centre ' + c.nom, c.on ? 'Centre activé' : 'Centre désactivé'); bkMsg('orga-msg', 'Centre « ' + c.nom + ' » ' + (c.on ? 'activé' : 'désactivé : plus de nouvelle ligne de budget, historique conservé') + '.', 'ok'); orgaRender(); });
+      bd.addEventListener('click', function () { var us = orgaUsers(c.code); if (orgaKids(c.code).length) { bkMsg('orga-msg', 'Supprimez ou déplacez d’abord les centres rattachés à « ' + c.nom + ' ».', 'ko'); return; } if (us.length) { bkMsg('orga-msg', pl(us.length, 'utilisateur') + ' rattaché' + (us.length > 1 ? 's' : '') + ' à « ' + c.nom + ' » : changez leur centre avant de supprimer.', 'ko'); return; }
+        dirConfirm('Supprimer le centre', 'Supprimer « ' + c.nom + ' » de l’organisation ?', 'Supprimer', function () { ENT_CENTRES.splice(ENT_CENTRES.indexOf(c), 1); auditAdd('Configuration', 'Centre ' + c.nom, 'Centre supprimé'); bkMsg('orga-msg', 'Centre supprimé.', 'ok'); orgaRender(); }); });
+      a.appendChild(bm); a.appendChild(bt); a.appendChild(bd);
+      var p = c.parent ? ENT_CENTRES.filter(function (x) { return x.code === c.parent; })[0] : null, nu = orgaUsers(c.code).length;
+      return [n, badge(c.type, 'b-neutral'), p ? p.nom : '—', c.resp || '—', String(nu), badge(c.on ? 'Actif' : 'Désactivé', c.on ? 'b-ok' : 'b-neutral'), a];
+    });
+    b.appendChild(dpMini(['Centre', 'Type', 'Rattaché à', 'Responsable', 'Utilisateurs', 'Statut', ''], rows, [4], 'Aucun centre.'));
+  }
+  function orgaOpen(c) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), mk = function (v) { var i = cvEl('input', 'field'); i.type = 'text'; i.value = v || ''; return i; };
+    var cd = mk(c ? c.code : ''), nm = mk(c ? c.nom : ''); cd.maxLength = 4; if (c) cd.disabled = true; cd.placeholder = 'Ex. LOG';
+    var ty = guSel(ENT_TYPES.map(function (t) { return [t, t]; }), c ? c.type : 'Service', function () { }, 'Type'); ty.style.width = '100%';
+    var ex = c ? orgaDesc(c.code).concat([c.code]) : [], pr = guSel([['', '— Aucun (niveau le plus haut) —']].concat(orgaTree().filter(function (x) { return ex.indexOf(x.code) < 0; }).map(function (x) { return [x.code, x.lbl]; })), c ? c.parent : '', function () { }, 'Rattaché à'); pr.style.width = '100%';
+    var us = RIGHTS0.USERS.filter(function (u) { return u.profs.indexOf('Entreprise') >= 0 && u.n !== 'Super Administrateur'; }), rs = guSel([['', '— À désigner —']].concat(us.map(function (u) { return [u.n, u.n + ' (' + u.roles[0] + ')']; })), c ? c.resp : '', function () { }, 'Responsable'); rs.style.width = '100%';
+    g.appendChild(guField('Code', cd, true)); g.appendChild(guField('Type', ty, true)); var d1 = guField('Nom du centre', nm, true); d1.className = 'full'; g.appendChild(d1); g.appendChild(guField('Rattaché à', pr)); g.appendChild(guField('Responsable', rs)); f.appendChild(g);
+    var err = cvEl('div', 'err'); f.appendChild(err); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', c ? 'Enregistrer' : 'Créer le centre'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+    bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () {
+      var code = cd.value.trim().toUpperCase(), n = nm.value.trim();
+      if (!c && !/^[A-Z0-9]{2,4}$/.test(code)) { err.textContent = 'Le code comporte 2 à 4 lettres ou chiffres (par exemple LOG).'; return; } if (!n) { err.textContent = 'Indiquez le nom du centre.'; return; }
+      if (!c && ENT_CENTRES.some(function (x) { return x.code === code; })) { err.textContent = 'Ce code existe déjà.'; return; } if (ENT_CENTRES.some(function (x) { return x !== c && x.nom.toLowerCase() === n.toLowerCase(); })) { err.textContent = 'Un centre porte déjà ce nom.'; return; }
+      if (c) { c.nom = n; c.type = ty.value; c.parent = pr.value; c.resp = rs.value; auditAdd('Configuration', 'Centre ' + n, 'Centre modifié'); } else ENT_CENTRES.push({ code: code, nom: n, type: ty.value, parent: pr.value, resp: rs.value, on: true });
+      if (!c) auditAdd('Configuration', 'Centre ' + n, 'Centre créé'); guModalClose(); bkMsg('orga-msg', 'Centre « ' + n + ' » enregistré.', 'ok'); orgaRender();
+    });
+    guModal(c ? 'Modifier le centre' : 'Nouveau centre de responsabilité', f, 560);
+  }
+  document.getElementById('orga-new').addEventListener('click', function () { orgaOpen(null); });
   (function () {
     var R = RIGHTS0.ROLES2, M = RIGHTS0.RM, U = RIGHTS0.USERS;
     ['Directeur général', 'DAF', 'Contrôleur de gestion', 'Responsable de centre', 'Comptable', 'Auditeur interne'].forEach(function (r) { if (R.indexOf(r) < 0) R.push(r); M[r] = M[r] || {}; });
@@ -18873,7 +18940,7 @@ var EXEC_REC = [
           { key: 'g-suivi', label: 'Exécution', kids: [['appr', 'Budgets verrouillés', 'ecr'], ['engage', 'Engagements', 'ecr'], ['real', 'Réalisations', 'ecr'], ['decaiss', 'Paiements comptabilisés', 'ecr'], ['encaiss', 'Recettes comptabilisées', 'ecr']] },
           { key: 'g-treso', label: 'Trésorerie', kids: [['bkdec', 'Plan de trésorerie', 'ecr']] },
           { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
-          { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['roles', 'Groupes de rôles', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['ctrl', 'Contrôles et seuils', 'prm'], ['trev', 'Types de révision', 'prm'], ['rclot', 'Règles de clôture', 'prm'], ['notifcfg', 'Notifications', 'prm']] }
+          { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['orga', 'Organisation', 'prm'], ['roles', 'Groupes de rôles', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['ctrl', 'Contrôles et seuils', 'prm'], ['trev', 'Types de révision', 'prm'], ['rclot', 'Règles de clôture', 'prm'], ['notifcfg', 'Notifications', 'prm']] }
         ],
         priv: [['export', 'Exporter des données', 'Peut exporter les budgets et les analyses en CSV, Excel et PDF', 2], ['tous_centres', 'Tous les centres', 'Voit les budgets de tous les centres de responsabilité (sinon : son propre centre)', 3],
           ['sensible', 'Données sensibles', 'Accès aux charges de personnel et à la trésorerie', 3], ['audit', 'Journal d’audit', 'Consulter l’historique des actions', 3], ['delegation', 'Délégation', 'Peut déléguer ses validations à un autre utilisateur', 3], ['suppr_def', 'Suppression définitive', 'Peut supprimer sans archivage', 4],
