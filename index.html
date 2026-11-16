@@ -15212,7 +15212,7 @@ var EXEC_REC = [
     if (code === 'ent') {
       /* Entreprise : même ossature que le Projet (cadre, élaboration, budgets annuels, exécution, analyses, paramètres) */
       var putE = function (gid, list) { var sub = document.querySelector('#' + gid + ' > .sub'); list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); }); };
-      putE('g-pcadre', [['cadr', 'Lettre de cadrage', 'Objectifs de chiffre d’affaires et de marge et hypothèses économiques'], ['envl', 'Enveloppes par direction', 'Plafond de dépenses de chaque direction'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['cles', 'Clés de répartition', 'Charges communes et clé de répartition retenue']]);
+      putE('g-pcadre', [['cadr', '1. Lettre de cadrage', 'Ce que l’entreprise vise : ventes, marge, hypothèses et charges communes'], ['envl', '2. Enveloppes par direction', 'Qui peut dépenser combien'], ['cles', '3. Clés de répartition', 'Qui paie quelle part des charges communes'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation']]);
       putE('g-budgets', [['camp', 'Campagnes'], ['collecte', 'Collecte'], ['conso', 'Consolidation'], ['arb', 'Validation']]);
       putE('g-plan', [['bud', 'Budget d’exploitation', 'Budget d’exploitation : saisie et consultation'], ['perso', 'Masse salariale', 'Effectifs, recrutements et masse salariale'], ['inv', 'Plan d’investissement'], ['bkdec', 'Plan de trésorerie'], ['scen', 'Simulations', 'Simulations : scénarios prudent, central et optimiste'], ['revis', 'Révisions'], ['clot', 'Report et clôture', 'Report et clôture de l’exercice']]);
       putE('g-suivi', [['engage', 'Engagements'], ['real', 'Charges réalisées'], ['decaiss', 'Décaissements'], ['encaiss', 'Encaissements']]);
@@ -19115,51 +19115,48 @@ var EXEC_REC = [
   function cadrSync(ex) { var c = cadrOf(ex); if (c.st !== 'Validé') return; camps.forEach(function (k) { if (k.prof === 'Entreprise' && k.ex === ex && k.st !== 'Clôturée' && k.st !== 'Annulée') k.perims.forEach(function (p) { if (c.env[p.p] != null) p.env = c.env[p.p]; }); }); }
   Object.keys(CADR).forEach(cadrSync);
   function cadrMsg(t, k) { bkMsg('cadr-msg', t, k || 'ok'); }
+  /* petits outils de lecture pour les écrans du cadre de l'entreprise */
+  function md(v) { var a = Math.abs(v), s = v < 0 ? '−' : ''; return a >= 1e9 ? s + cadrDec(a / 1e9) + ' Md' : s + Math.round(a / 1e6).toLocaleString('fr-FR') + ' M'; }
+  function enBref(html) { var d = cvEl('div', 'callout'); d.style.cssText = 'margin-bottom:14px;font-size:15px;line-height:1.7;background:var(--neutral-100,#F4F6FB);color:#1F2937'; d.innerHTML = '<span>' + html + '</span>'; return d; }
+  function bar2(pct, over) { var w = cvEl('div', 'bcell'), tk = cvEl('div', 'track'), fl = cvEl('div', 'fill' + (over ? ' ko' : (pct >= 90 ? ' warn' : ''))); fl.style.width = Math.min(100, Math.round(pct)) + '%'; tk.appendChild(fl); w.appendChild(tk); return w; }
   function cadrRender() {
-    guUse(activeCode()); var ex = CADV.ex, c = cadrOf(ex), lk = c.st === 'Validé', T = cadrTot(c), pv = CADR[String(parseInt(ex, 10) - 1)], P = pv ? cadrTot(pv) : null, b = document.getElementById('cadr-body'); b.innerHTML = '';
+    guUse(activeCode()); var ex = CADV.ex, c = cadrOf(ex), lk = c.st === 'Validé', T = cadrTot(c), prev = String(parseInt(ex, 10) - 1), b = document.getElementById('cadr-body'); b.innerHTML = '';
     document.getElementById('cadr-valid').hidden = lk; document.getElementById('cadr-reopen').hidden = !lk;
-    var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Exercice')); var se = guSel(['2026', '2027', '2028'].map(function (y) { return [y, y]; }), ex, function (v) { CADV.ex = v; cadrRender(); }, 'Exercice'); bar.appendChild(se); bar.appendChild(badge(lk ? 'Cadrage validé' : 'Brouillon', lk ? 'b-ok' : 'b-warn'));
-    if (lk) bar.appendChild(cvEl('span', 'hint', 'Les enveloppes sont reprises par les campagnes de ' + ex + '. Rouvrez le cadrage pour modifier la lettre de cadrage.')); b.appendChild(bar);
-    var vs = P && P.ca ? T.ca / P.ca - 1 : null;
-    b.appendChild(dpTiles([['Chiffre d’affaires cible', fmt(T.ca) + ' MGA', 'brand', vs != null ? (vs >= 0 ? '+' : '') + cadrDec(vs * 100) + ' % par rapport à ' + (parseInt(ex, 10) - 1) : ''], ['Marge cible', fmt(T.mg) + ' MGA', 'ok', T.ca ? cadrDec(T.mg / T.ca * 100) + ' % du chiffre d’affaires' : ''], ['Enveloppes de dépenses', fmt(T.env) + ' MGA', 'info', pl(cadrDirs().length, 'direction')], ['Résultat prévisionnel', fmt(T.res) + ' MGA', T.res >= 0 ? 'ok' : 'warn', T.res >= 0 ? 'marge moins enveloppes et charges communes' : 'dépenses supérieures à la marge']], { cols: 4 }));
-    function blk(t, node, hint, act) { var x = cvEl('section', 'co-blk'), h = cvEl('div', 'kb-h', t); x.appendChild(h); if (hint) { var hh = cvEl('div', 'hint', hint); hh.style.marginBottom = '8px'; x.appendChild(hh); } if (act) { var w = cvEl('div'); w.style.margin = '0 0 8px'; w.appendChild(act); x.appendChild(w); } x.appendChild(node); b.appendChild(x); }
-    /* hypothèses */
-    /* deux blocs déroulants : hypothèses économiques, charges communes prévues */
-    var H = c.hyp, pcs = clesOf(ex).pools;
-    function dd(key, title, summary, btnEl, table, hint) {
-      var d = document.createElement('details'); d.className = 'co-blk cadr-dd'; d.open = !!CADOPEN[key]; d.addEventListener('toggle', function () { CADOPEN[key] = d.open; });
-      var s = document.createElement('summary'); s.style.cssText = 'cursor:pointer;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;padding:2px 0 8px;list-style:none'; var ar = cvEl('span', null, d.open ? '▾' : '▸'); ar.style.cssText = 'width:14px;color:#5B606D'; d.addEventListener('toggle', function () { ar.textContent = d.open ? '▾' : '▸'; }); s.appendChild(ar); var t1 = cvEl('span', 'kb-h', title); t1.style.margin = '0'; s.appendChild(t1); s.appendChild(cvEl('span', 'hint', summary)); d.appendChild(s);
-      if (hint) { var hh = cvEl('div', 'hint', hint); hh.style.marginBottom = '8px'; d.appendChild(hh); } var w = cvEl('div'); w.style.margin = '0 0 8px'; w.appendChild(btnEl); d.appendChild(w); d.appendChild(table); b.appendChild(d);
-    }
-    var hb = cvEl('button', 'btn small', 'Modifier les hypothèses'); hb.type = 'button'; hb.disabled = lk; hb.addEventListener('click', function () { cadrHyp(c); });
-    dd('hyp', 'Hypothèses économiques', 'inflation ' + cadrDec(H.infl) + ' % · salaires ' + cadrDec(H.sal) + ' % · EUR ' + fmt(H.eur) + ' · USD ' + fmt(H.usd), hb,
-      dpMini(['Hypothèse', 'Valeur retenue'], [['Inflation attendue', cadrDec(H.infl) + ' %'], ['Évolution des salaires', cadrDec(H.sal) + ' %'], ['Taux de change EUR → MGA', fmt(H.eur)], ['Taux de change USD → MGA', fmt(H.usd)]], [1], ''), 'Elles servent à chiffrer la masse salariale, les achats en devises et les prévisions.');
-    var pb = cvEl('button', 'btn small', 'Gérer les charges communes'); pb.type = 'button'; pb.disabled = lk; pb.addEventListener('click', function () { cadrPools(); });
-    var prows = pcs.map(function (p) { return [p.lib, fmt(p.mt) + ' MGA']; }); if (prows.length) prows.push(['Total des charges communes', fmt(T.cc) + ' MGA']);
-    var pt = dpMini(['Charge commune', 'Montant'], prows, [1], 'Aucune charge commune prévue.'); pt.querySelectorAll('tbody tr').forEach(function (tr, i) { if (prows[i] && prows[i][0] === 'Total des charges communes') tr.style.fontWeight = '700'; });
-    dd('cc', 'Charges communes prévues', fmt(T.cc) + ' MGA · ' + pl(pcs.length, 'charge'), pb, pt, 'Loyer, services généraux, informatique mutualisée, assurances : des contrats connus dès le cadrage. Leur partage entre les directions se règle dans « Clés de répartition ».');    /* chiffre d'affaires et marge */
+    var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Exercice')); bar.appendChild(guSel(['2026', '2027', '2028'].map(function (y) { return [y, y]; }), ex, function (v) { CADV.ex = v; cadrRender(); }, 'Exercice')); bar.appendChild(badge(lk ? 'Cadrage validé' : 'Brouillon', lk ? 'b-ok' : 'b-warn'));
+    if (lk) bar.appendChild(cvEl('span', 'hint', 'Les enveloppes sont reprises par les campagnes de ' + ex + '. Rouvrez le cadrage pour le modifier.')); b.appendChild(bar);
+    /* 1. en bref */
+    b.appendChild(enBref('En ' + ex + ', l’entreprise vise <b>' + md(T.ca) + '</b> de ventes et <b>' + md(T.mg) + '</b> de marge. Après <b>' + md(T.env) + '</b> d’enveloppes de dépenses et <b>' + md(T.cc) + '</b> de charges communes, il reste <b style="color:' + (T.res >= 0 ? '#047857' : '#BE123C') + '">' + md(T.res) + '</b>' + (T.res >= 0 ? '.' : ' : les dépenses dépassent la marge.')));
+    /* 2. le tableau : ce qu'on espère vendre */
     var rows = c.ca.map(function (l, i) {
-      var v = Math.round((l.vol || 0) * (l.prix || 0)), mg = Math.round(v * (l.marge || 0) / 100), a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap'; var bm = cvEl('button', 'btn small', 'Modifier'), bd = cvEl('button', 'btn small gu-del', 'Supprimer'); bm.type = bd.type = 'button'; bm.disabled = bd.disabled = lk;
-      bm.addEventListener('click', function () { cadrLine(c, l); }); bd.addEventListener('click', function () { dirConfirm('Supprimer la ligne', 'Supprimer « ' + l.lib + ' » des objectifs de chiffre d’affaires ?', 'Supprimer', function () { c.ca.splice(i, 1); auditAdd('Configuration', 'Cadrage ' + ex, 'Ligne d’activité supprimée : ' + l.lib); cadrRender(); }); }); a.appendChild(bm); a.appendChild(bd);
-      var d = l.n1 ? v / l.n1 - 1 : null; return [l.lib, fmt(l.n1 || 0), fmt(l.vol || 0) + ' ' + (l.unit || ''), fmt(l.prix || 0), fmt(v) + (d != null ? ' (' + (d >= 0 ? '+' : '') + cadrDec(d * 100) + ' %)' : ''), cadrDec(l.marge || 0) + ' %', fmt(mg), a];
+      var v = Math.round((l.vol || 0) * (l.prix || 0)), mg = Math.round(v * (l.marge || 0) / 100), d = l.n1 ? v / l.n1 - 1 : null, nm = cvEl('div'); nm.appendChild(cvEl('b', null, l.lib)); nm.appendChild(cvEl('div', 'hby', fmt(l.vol || 0) + ' ' + (l.unit || '') + ' × ' + fmt(l.prix || 0) + ' MGA' + (d != null ? ' · ' + (d >= 0 ? '+' : '') + cadrDec(d * 100) + ' % par rapport à ' + prev : '')));
+      var a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap'; var bm = cvEl('button', 'btn small', 'Modifier'), bd = cvEl('button', 'btn small gu-del', 'Supprimer'); bm.type = bd.type = 'button'; bm.disabled = bd.disabled = lk;
+      bm.addEventListener('click', function () { cadrLine(c, l); }); bd.addEventListener('click', function () { dirConfirm('Supprimer l’activité', 'Supprimer « ' + l.lib + ' » des ventes visées ?', 'Supprimer', function () { c.ca.splice(i, 1); auditAdd('Configuration', 'Cadrage ' + ex, 'Ligne d’activité supprimée : ' + l.lib); cadrRender(); }); }); a.appendChild(bm); a.appendChild(bd);
+      return [nm, fmt(v), cadrDec(l.marge || 0) + ' %', fmt(mg), a];
     });
-    if (c.ca.length) rows.push(['Total', fmt(T.n1), '', '', fmt(T.ca), T.ca ? cadrDec(T.mg / T.ca * 100) + ' %' : '', fmt(T.mg), '']);
-    var ab = cvEl('button', 'btn small primary', '+ Ajouter une ligne d’activité'); ab.type = 'button'; ab.disabled = lk; ab.addEventListener('click', function () { cadrLine(c, null); });
-    blk('Objectifs de chiffre d’affaires et de marge', dpMini(['Ligne d’activité', 'CA ' + (parseInt(ex, 10) - 1) + ' (MGA)', 'Volume', 'Prix moyen (MGA)', 'CA cible (MGA)', 'Taux de marge', 'Marge cible (MGA)', ''], rows, [1, 4, 5, 6], 'Aucune ligne d’activité : ajoutez vos produits et services avec leur volume, leur prix et leur taux de marge.'), 'Le chiffre d’affaires cible est le volume multiplié par le prix moyen ; la marge s’en déduit avec le taux.', ab);
+    if (c.ca.length) rows.push(['Total', fmt(T.ca), T.ca ? cadrDec(T.mg / T.ca * 100) + ' %' : '', fmt(T.mg), '']);
+    var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', 'Ce qu’on espère vendre')); var hh = cvEl('div', 'hint', 'Ventes prévues = volume × prix moyen. La marge, c’est ce qui reste après le coût direct du produit ou du service.'); hh.style.marginBottom = '8px'; x.appendChild(hh);
+    /* 3. boutons pour aller plus loin */
+    var bw = cvEl('div'); bw.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px';
+    var ab = cvEl('button', 'btn small primary', '+ Ajouter une activité'), hb = cvEl('button', 'btn small', 'Hypothèses économiques'), pb = cvEl('button', 'btn small', 'Charges communes (' + md(T.cc) + ')'); ab.type = hb.type = pb.type = 'button'; ab.disabled = hb.disabled = pb.disabled = lk;
+    ab.addEventListener('click', function () { cadrLine(c, null); }); hb.addEventListener('click', function () { cadrHyp(c); }); pb.addEventListener('click', function () { cadrPools(); }); bw.appendChild(ab); bw.appendChild(hb); bw.appendChild(pb); x.appendChild(bw);
+    x.appendChild(dpMini(['Activité', 'Ventes prévues (MGA)', 'Marge (%)', 'Marge (MGA)', ''], rows, [1, 2, 3], 'Aucune activité : ajoutez vos produits et services avec leur volume, leur prix et leur taux de marge.')); b.appendChild(x);
   }
   /* Enveloppes de dépenses par direction : écran à part, le statut du cadrage se règle dans la lettre de cadrage */
   function envlRender() {
-    guUse(activeCode()); var ex = CADV.ex, c = cadrOf(ex), lk = c.st === 'Validé', T = cadrTot(c), pv = CADR[String(parseInt(ex, 10) - 1)], P = pv ? cadrTot(pv) : null, b = document.getElementById('envl-body'); b.innerHTML = '';
+    guUse(activeCode()); var ex = CADV.ex, c = cadrOf(ex), lk = c.st === 'Validé', T = cadrTot(c), prev = String(parseInt(ex, 10) - 1), pv = CADR[prev], b = document.getElementById('envl-body'); b.innerHTML = '';
     var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Exercice')); bar.appendChild(guSel(['2026', '2027', '2028'].map(function (y) { return [y, y]; }), ex, function (v) { CADV.ex = v; envlRender(); }, 'Exercice')); bar.appendChild(badge(lk ? 'Cadrage validé' : 'Brouillon', lk ? 'b-ok' : 'b-warn')); bar.appendChild(cvEl('span', 'hint', lk ? 'Les enveloppes sont reprises par les campagnes de ' + ex + '. Rouvrez le cadrage dans la lettre de cadrage pour les modifier.' : 'Le cadrage se valide dans la lettre de cadrage.')); b.appendChild(bar);
-    b.appendChild(dpTiles([['Enveloppes de dépenses', fmt(T.env) + ' MGA', 'info', pl(cadrDirs().length, 'direction')], ['Marge cible', fmt(T.mg) + ' MGA', 'ok', 'objectif du cadrage'], ['Résultat prévisionnel', fmt(T.res) + ' MGA', T.res >= 0 ? 'ok' : 'warn', T.res >= 0 ? 'marge moins enveloppes et charges communes' : 'dépenses supérieures à la marge']], { cols: 3 }));
-    var er = cadrDirs().map(function (dr) {
-      var v = c.env[dr.nom] || 0, o = pv && pv.env[dr.nom] != null ? pv.env[dr.nom] : null, a = cvEl('button', 'btn small', 'Modifier'); a.type = 'button'; a.disabled = lk; a.addEventListener('click', function () { cadrEnv(c, dr); });
-      var cs = camps.filter(function (k) { return k.prof === 'Entreprise' && k.ex === ex && k.st !== 'Annulée'; })[0], pr = cs ? cs.perims.filter(function (p) { return p.p === dr.nom; })[0] : null, dm = pr && pr.amt ? fmt(pr.amt) : '—';
-      return [dr.nom, o != null ? fmt(o) : '—', fmt(v), o ? (v >= o ? '+' : '') + cadrDec((v / o - 1) * 100) + ' %' : '—', T.env ? cadrDec(v / T.env * 100) + ' %' : '—', dm, a];
+    var cp = camps.filter(function (k) { return k.prof === 'Entreprise' && k.ex === ex && k.st !== 'Annulée'; })[0], dmT = 0;
+    var rows = cadrDirs().map(function (dr) {
+      var v = c.env[dr.nom] || 0, o = pv && pv.env[dr.nom] != null ? pv.env[dr.nom] : null, pr = cp ? cp.perims.filter(function (p) { return p.p === dr.nom; })[0] : null, dm = pr ? pr.amt || 0 : 0, pc = v ? dm / v * 100 : 0; dmT += dm;
+      var nm = cvEl('div'); nm.appendChild(cvEl('b', null, dr.nom)); nm.appendChild(cvEl('div', 'hby', o != null ? prev + ' : ' + md(o) + (o ? ' · ' + (v >= o ? '+' : '') + cadrDec((v / o - 1) * 100) + ' %' : '') : 'Nouvelle direction'));
+      var dc = cvEl('div'); dc.appendChild(cvEl('div', null, fmt(dm) + (v ? ' (' + Math.round(pc) + ' %)' : ''))); dc.appendChild(bar2(pc, dm > v));
+      var a = cvEl('button', 'btn small', 'Modifier'); a.type = 'button'; a.disabled = lk; a.addEventListener('click', function () { cadrEnv(c, dr); });
+      return [nm, fmt(v), dc, dm > v ? badge('Dépassement de ' + fmt(dm - v), 'b-ko') : fmt(v - dm), a];
     });
-    if (er.length) er.push(['Total', P ? fmt(P.env) : '—', fmt(T.env), P && P.env ? (T.env >= P.env ? '+' : '') + cadrDec((T.env / P.env - 1) * 100) + ' %' : '—', '100 %', '', '']);
-    var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', 'Enveloppes de dépenses par direction')); var hh = cvEl('div', 'hint', 'Chaque direction ne peut pas demander plus que son enveloppe. Les directions viennent de l’organisation.'); hh.style.marginBottom = '8px'; x.appendChild(hh);
-    x.appendChild(dpMini(['Direction', 'Enveloppe ' + (parseInt(ex, 10) - 1) + ' (MGA)', 'Enveloppe ' + ex + ' (MGA)', 'Évolution', 'Part', 'Demande reçue (campagne)', ''], er, [1, 2, 3, 4, 5], 'Aucune direction : créez-les dans Paramètres > Organisation.')); b.appendChild(x);
+    if (rows.length) rows.push(['Total', fmt(T.env), fmt(dmT), T.env >= dmT ? fmt(T.env - dmT) : badge('Dépassement de ' + fmt(dmT - T.env), 'b-ko'), '']);
+    b.appendChild(enBref('Chaque direction peut dépenser <b>jusqu’à son enveloppe</b> : <b>' + md(T.env) + '</b> au total en ' + ex + (T.ca ? ', soit <b>' + Math.round(T.env / T.ca * 100) + ' %</b> des ventes visées' : '') + '. La colonne « Déjà demandé » vient de la campagne.'));
+    var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', 'Enveloppes par direction')); var hh = cvEl('div', 'hint', 'Une direction ne peut pas demander plus que son enveloppe dans la campagne. Les directions viennent de l’organisation.'); hh.style.marginBottom = '8px'; x.appendChild(hh);
+    x.appendChild(dpMini(['Direction', 'Enveloppe ' + ex + ' (MGA)', 'Déjà demandé (MGA)', 'Il reste (MGA)', ''], rows, [1, 2, 3], 'Aucune direction : créez-les dans Paramètres > Organisation.')); b.appendChild(x);
   }
   function cadrHyp(c) {
     var f = cvEl('div'), g = cvEl('div', 'fgrid'), H = c.hyp, ins = {};
@@ -19276,17 +19273,23 @@ var EXEC_REC = [
   /* montant de chaque charge commune réparti entre les directions, le reste d'arrondi allant à la dernière */
   function clesAlloc(ex) { var c = clesOf(ex), dirs = cadrDirs(), res = {}; dirs.forEach(function (d) { res[d.nom] = {}; }); c.pools.forEach(function (p) { var base = clesBase(p.key, ex), s = 0, acc = 0; dirs.forEach(function (d) { s += base[d.nom]; }); dirs.forEach(function (d, i) { var a = s ? (i === dirs.length - 1 ? p.mt - acc : Math.round(p.mt * base[d.nom] / s)) : 0; acc += a; res[d.nom][p.id] = a; }); }); return res; }
   function clesMsg(t, k) { bkMsg('cles-msg', t, k || 'ok'); }
+  var CLES_COL = ['#2E427B', '#5F77B9', '#047857', '#B45309', '#BE123C', '#7C3AED', '#0EA5E9'];
   function clesRender() {
-    guUse(activeCode()); var ex = CLESV.ex, c = clesOf(ex), dirs = cadrDirs(), P = persTot(ex), A = clesAlloc(ex), b = document.getElementById('cles-body'); b.innerHTML = '';
+    guUse(activeCode()); var ex = CLESV.ex, c = clesOf(ex), dirs = cadrDirs(), A = clesAlloc(ex), b = document.getElementById('cles-body'); b.innerHTML = '';
     var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Exercice')); bar.appendChild(guSel(['2026', '2027', '2028'].map(function (y) { return [y, y]; }), ex, function (v) { CLESV.ex = v; clesRender(); }, 'Exercice')); b.appendChild(bar);
     var totP = 0; c.pools.forEach(function (p) { totP += p.mt; });
-    b.appendChild(dpTiles([['Charges communes', fmt(totP) + ' MGA', 'brand', pl(c.pools.length, 'charge')], ['Directions concernées', String(dirs.length), 'info', 'issues de l’organisation'], ['Effectif servant de clé', cadrDec(P.etp) + ' ETP', 'ok', 'charges de personnel ' + ex], ['Clés utilisées', String(Object.keys(c.pools.reduce(function (o, p) { o[p.key] = 1; return o; }, {})).length), 'n', 'sur ' + Object.keys(CLES_KEYS).length + ' disponibles']], { cols: 4 }));
-    function blk(t, node, hint, act) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', t)); if (hint) { var hh = cvEl('div', 'hint', hint); hh.style.marginBottom = '8px'; x.appendChild(hh); } if (act) { var w = cvEl('div'); w.style.margin = '0 0 8px'; w.appendChild(act); x.appendChild(w); } x.appendChild(node); b.appendChild(x); }
-    /* bases des clés : dans une fenêtre */
+    b.appendChild(enBref('<b>' + c.pools.length + ' charge' + (c.pools.length > 1 ? 's' : '') + ' commune' + (c.pools.length > 1 ? 's' : '') + '</b>, <b>' + md(totP) + '</b> au total, partagée' + (c.pools.length > 1 ? 's' : '') + ' entre <b>' + pl(dirs.length, 'direction') + '</b>. Pour chaque charge, on choisit <b>qui paie quelle part</b> : selon les effectifs, la surface, à parts égales ou en pourcentages fixés.'));
+    var lg = cvEl('div'); lg.style.cssText = 'display:flex;gap:14px;flex-wrap:wrap;margin:0 0 8px;font-size:13px'; dirs.forEach(function (d, i) { var s = cvEl('span'), sw = cvEl('i'); sw.style.cssText = 'display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:' + CLES_COL[i % CLES_COL.length]; s.appendChild(sw); s.appendChild(document.createTextNode(d.nom)); lg.appendChild(s); });
     var bs = cvEl('button', 'btn small', 'Bases des clés (effectifs, surfaces, pourcentages)'); bs.type = 'button'; bs.addEventListener('click', function () { clesBases(c); });
-    /* charges communes */
-    var pr = c.pools.map(function (p) { var a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap'; var bs1 = cvEl('button', 'btn small', 'Répartition'), bk = cvEl('button', 'btn small', 'Changer la clé'); bs1.type = bk.type = 'button'; bs1.addEventListener('click', function () { clesPoolSplit(p); }); bk.addEventListener('click', function () { clesKeyEdit(c, p); }); a.appendChild(bs1); a.appendChild(bk); return [p.lib, fmt(p.mt), CLES_KEYS[p.key], a]; });    if (pr.length) pr.push(['Total', fmt(totP), '', '']);
-    blk('Charges communes et clé retenue', dpMini(['Charge commune', 'Montant (MGA)', 'Clé de répartition', ''], pr, [1], 'Aucune charge commune : saisissez-les dans la lettre de cadrage.'), 'Les montants viennent de la lettre de cadrage. Ici, on choisit seulement la clé de chaque charge ; « Répartition » montre ce que chaque direction paie.', bs);
+    var pr = c.pools.map(function (p) {
+      var a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap'; var bs1 = cvEl('button', 'btn small', 'Répartition'), bk = cvEl('button', 'btn small', 'Changer la clé'); bs1.type = bk.type = 'button'; bs1.addEventListener('click', function () { clesPoolSplit(p); }); bk.addEventListener('click', function () { clesKeyEdit(c, p); }); a.appendChild(bs1); a.appendChild(bk);
+      var st = cvEl('div'); st.style.cssText = 'display:flex;height:14px;border-radius:7px;overflow:hidden;min-width:220px;background:#E9EBF0'; dirs.forEach(function (d, i) { var m = A[d.nom][p.id] || 0, pc = p.mt ? m / p.mt * 100 : 0, s = cvEl('i'); s.style.cssText = 'display:block;height:100%;width:' + pc + '%;background:' + CLES_COL[i % CLES_COL.length]; s.title = d.nom + ' : ' + fmt(m) + ' MGA (' + cadrDec(pc) + ' %)'; st.appendChild(s); });
+      var nm = cvEl('div'); nm.appendChild(cvEl('b', null, p.lib));
+      return [nm, fmt(p.mt), CLES_KEYS[p.key], st, a];
+    });
+    if (pr.length) pr.push(['Total', fmt(totP), '', '', '']);
+    var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', 'Charges communes et partage')); var hh = cvEl('div', 'hint', 'Les montants viennent de la lettre de cadrage. Passez la souris sur la barre pour voir la part de chaque direction, ou cliquez sur « Répartition » pour les montants exacts.'); hh.style.marginBottom = '8px'; x.appendChild(hh); var bw = cvEl('div'); bw.style.margin = '0 0 8px'; bw.appendChild(bs); x.appendChild(bw); x.appendChild(lg);
+    x.appendChild(dpMini(['Charge commune', 'Montant (MGA)', 'Partagée selon', 'Qui paie combien', ''], pr, [1], 'Aucune charge commune : saisissez-les dans la lettre de cadrage.')); b.appendChild(x);
   }
   /* Répartition d'une charge commune entre les directions : s'ouvre dans une fenêtre depuis sa ligne */
   var CLES_BASE_U = { effectif: 'ETP', surface: 'm²', egal: '', manuel: '%' };
