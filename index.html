@@ -16431,7 +16431,7 @@ var EXEC_REC = [
   function ppmActs() {
     var out = [];
     if (typeof PARAMS === 'undefined' || !PARAMS || !PARAMS.filter) return out;
-    bvList().forEach(function (r) { var d = bvData(r); d.lines.forEach(function (x) { out.push({ key: r.camp + '|' + x.l.c, lot: r.camp, perim: x.perim, code: x.l.c, lib: x.l.lib || x.l.l, cost: x.l.dem || 0, node: nodeOfAct(x.perim, x.l.c), nat: x.l.nat, wk: x.l.wk, ex: d.c.ex, fin: (x.l.axv && x.l.axv.Financier) || '' }); }); });
+    bvList().forEach(function (r) { var d = bvData(r); d.lines.forEach(function (x) { out.push({ key: r.camp + '|' + x.l.c, lot: r.camp, perim: x.perim, code: x.l.c, lib: x.l.lib || x.l.l, cost: x.l.dem || 0, node: nodeOfAct(x.perim, x.l.c), nat: x.l.nat, wk: x.l.wk, ln: x.l, camp: d.c, ex: d.c.ex, fin: (x.l.axv && x.l.axv.Financier) || '' }); }); });
     return out;
   }
   function ppmActOf(key) { return ppmActs().filter(function (a) { return a.key === key; })[0]; }
@@ -16709,6 +16709,32 @@ var EXEC_REC = [
       var act = cell(tr, ''), b = cvEl('button', 'btn small', 'Consulter'); b.type = 'button'; b.addEventListener('click', function () { PPMG.lot = r; PPMG.g = null; PPMG.msg = null; ppmPaint(); document.getElementById('ppm-det').hidden = false; }); act.appendChild(b); body.appendChild(tr);
     });
   }
+  /* Fiche d'un besoin : tout ce qui a été renseigné à la collecte pour la ligne du PTBA */
+  function ppmDetail(a) {
+    var l = a.ln || {}, c = a.camp || {}, pr = (c.perims || []).filter(function (p) { return p.p === a.perim; })[0] || {}, root = cvEl('div'), items = CPP.items.filter(function (x) { return x.act === a.key; });
+    function sec(t) { var s = cvEl('section', 'co-blk'); s.appendChild(cvEl('div', 'kb-h', t)); root.appendChild(s); return s; }
+    function kv(s, rows) { var g = cvEl('div', 'fgrid'); rows.forEach(function (r) { if (r[1] === '' || r[1] == null) return; var d = cvEl('div', r[2] ? 'full' : ''); d.appendChild(cvEl('label', null, r[0])); d.appendChild(cvEl('div', null, String(r[1]))); g.appendChild(d); }); s.appendChild(g); }
+    var s1 = sec('Identification'), wk = l.wk || {};
+    kv(s1, [['Ligne du plan', a.code + ' — ' + a.lib, true], ['Nœud du plan analytique', a.node ? (function () { var nd = nodeById(a.node); return a.node + (nd && (nd.l || nd.lib || nd.n) ? ' — ' + (nd.l || nd.lib || nd.n) : ''); })() : ''], ['Périmètre de collecte', a.perim], ['Collecte', (c.code || '') + (c.lib ? ' — ' + c.lib : '')], ['Exercice', a.ex], ['Saisi par', pr.who], ['Statut du périmètre', pr.st], ['Nature comptable', l.nat && NATL[l.nat] ? (String(NATL[l.nat]).indexOf(l.nat) === 0 ? NATL[l.nat] : l.nat + ' — ' + NATL[l.nat]) : (l.nat || '')], ['Financeur', a.fin]]);
+    var s2 = sec('Montant et calendrier');
+    kv(s2, [['Montant demandé', fmt(a.cost) + ' MGA'], ['Montant de référence (exercice précédent)', l.ref != null ? fmt(l.ref) + ' MGA' : ''], ['Quantité × prix unitaire', l.q ? fmt(l.q) + ' × ' + fmt(l.p || 0) + ' MGA' : ''], ['Période du travail prévu', wk.d1 && wk.d2 ? isoToFr(wk.d1) + ' → ' + isoToFr(wk.d2) : ''], ['Travail prévu', wk.task || '', true], ['Justification', l.just || '', true]]);
+    var sp = bvSpread(a.cost, l, a.ex), mo = cvEl('div', 'scroll'), tm = cvEl('table'); tm.style.minWidth = '720px'; tm.innerHTML = '<thead><tr>' + BVMOIS.map(function (m) { return '<th class="num">' + escH(m) + '</th>'; }).join('') + '<th class="num">Total</th></tr></thead><tbody><tr>' + sp.map(function (v) { return '<td class="num">' + (v ? fmt(v) : '—') + '</td>'; }).join('') + '<td class="num"><b>' + fmt(bvSum(sp)) + '</b></td></tr></tbody>'; mo.appendChild(tm); var sm = cvEl('div', 'hint', 'Répartition mensuelle du montant'); sm.style.margin = '10px 0 6px'; s2.appendChild(sm); s2.appendChild(mo);
+    var s3 = sec('Répartition par site'); var sites = siteSplit(l, a.cost || 0, 0);
+    s3.appendChild(dpMini(['Site', 'Part', 'Montant (MGA)'], sites.map(function (x) { return [siteLbl(x.code), x.pct + ' %', fmt(x.amt)]; }), [1, 2], 'Aucun site.'));
+    var s4 = sec('Répartition par axe'), ar = [];
+    ((c.par && parById(c.par) ? parById(c.par).axes : (parById((CAMPPAR[c.code] || [])[0]) || { axes: [] }).axes) || []).filter(function (x) { return !x.c; }).forEach(function (x) {
+      bvAxSplit(l, x).forEach(function (q) { ar.push([x.n === 'Comptable' ? 'Plan comptable' : x.n, q.v, q.pct + ' %', fmt(Math.round((a.cost || 0) * q.pct / 100))]); });
+    });
+    s4.appendChild(dpMini(['Axe', 'Valeur', 'Part', 'Montant (MGA)'], ar, [2, 3], 'Aucun axe à renseigner.'));
+    var s5 = sec('Indicateurs et cibles');
+    s5.appendChild(dpMini(['Indicateur', 'Unité', 'Cible annuelle', 'Contribution de la ligne'], (wk.inds || []).map(function (i) { var pi = (pr.inds || []).filter(function (z) { return z.id === i.id; })[0] || {}; return [(i.lib || pi.lib || i.id), i.unit || pi.unit || '', pi.cible != null ? String(pi.cible) : '—', fmt(i.contrib || 0)]; }), [2, 3], 'Aucun indicateur rattaché à cette ligne.'));
+    var s6 = sec('Pièces jointes et suivi'); var pjs = l.pj || [];
+    if (pjs.length) s6.appendChild(pjList(pjs)); else s6.appendChild(cvEl('div', 'hint', 'Aucune pièce jointe à la collecte.'));
+    var sv = cvEl('div', 'hint', items.length ? 'Marchés déjà planifiés pour cette ligne : ' + items.map(function (x) { return x.ref + ' (' + fmt(x.est) + ' MGA)'; }).join(' · ') : 'Aucun marché planifié pour cette ligne.'); sv.style.marginTop = '8px'; s6.appendChild(sv);
+    var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Fermer'), bp = cvEl('button', 'btn primary', items.length ? 'Ajouter un marché' : 'Planifier la passation'); bc.type = bp.type = 'button'; bp.disabled = a.cost - ppmActTotal(a.key) <= 0; ft.appendChild(bc); ft.appendChild(bp); root.appendChild(ft);
+    bc.addEventListener('click', guModalClose); bp.addEventListener('click', function () { guModalClose(); ppmGuide(a); });
+    guModal('Besoin ' + a.code + ' — ' + a.lib, root, 920);
+  }
   function ppmGuide(a) { var s = ppmSuggest(ppmCatOf(a), Math.max(a.cost - ppmActTotal(a.key), 0)), d = ppmDates(a, s.i); PPMG.g = { a: a, des: a.lib, cat: ppmCatOf(a), mi: s.i, est: Math.max(a.cost - ppmActTotal(a.key), 0), d: d, mT: false, dT: false, pm: '', pT: false }; PPMG.g.pm = ppmPmSuggest(a, PPMG.g.est); ppmGuidePaint(); document.getElementById('ppm-guide').hidden = false; }
   function ppmGuidePaint() {
     var g = PPMG.g; if (!g) return; var body = document.getElementById('ppm-guide-body'); body.innerHTML = ''; document.getElementById('ppm-guide-title').textContent = 'Planifier la passation : ligne ' + g.a.code + ' · ' + g.a.lib;
@@ -16742,8 +16768,10 @@ var EXEC_REC = [
     /* Besoins identifiés dans le PTBA */
     var needs = acts.map(function (a) {
       var tot = ppmActTotal(a.key), rest = a.cost - tot, bt = rest < 0 ? badge('Dépassement', 'b-ko') : (!tot ? badge('À planifier', 'b-warn') : (rest === 0 ? badge('Entièrement couvert', 'b-ok') : badge('Couvert à ' + Math.round(100 * tot / a.cost) + ' %', 'b-info'))), bt2 = cvEl('button', 'btn small' + (!tot ? ' primary' : ''), tot ? 'Ajouter un marché' : 'Planifier'); bt2.type = 'button'; bt2.disabled = rest <= 0; bt2.addEventListener('click', function () { ppmGuide(a); });
-      var nm = cvEl('div'); nm.appendChild(cvEl('b', null, a.code + ' — ' + a.lib)); nm.appendChild(cvEl('div', 'hint', a.perim));
-      return [nm, badge(ppmCatOf(a), 'b-neutral'), fmt(a.cost), fmt(tot), fmt(Math.max(rest, 0)), bt, bt2];
+      var nm = cvEl('div'); nm.appendChild(cvEl('b', null, a.code + ' — ' + a.lib)); var wk0 = a.wk || {}, ln0 = a.ln || {}, ni = (wk0.inds || []).length;
+      nm.appendChild(cvEl('div', 'hint', a.perim + (wk0.d1 && wk0.d2 ? ' · ' + isoToFr(wk0.d1) + ' → ' + isoToFr(wk0.d2) : '') + ' · ' + siteSplit(ln0, a.cost || 0, 0).map(function (x) { return siteLbl(x.code); }).join(', ') + ' · ' + pl(ni, 'indicateur') + ((ln0.pj || []).length ? ' · ' + pl((ln0.pj || []).length, 'pièce jointe') : '')));
+      var bd = cvEl('button', 'btn small', 'Détail de la collecte'); bd.type = 'button'; bd.addEventListener('click', function () { ppmDetail(a); }); var bw = cvEl('div'); bw.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap'; bw.appendChild(bd); bw.appendChild(bt2);
+      return [nm, badge(ppmCatOf(a), 'b-neutral'), fmt(a.cost), fmt(tot), fmt(Math.max(rest, 0)), bt, bw];
     });
     var part = ppmPart();
     if (part !== 'mk') block('Besoins identifiés dans le PTBA', dpMini(['Ligne du PTBA', 'Besoin', 'Coût au PTBA', 'Programmé', 'Reste', 'Couverture', ''], needs, [2, 3, 4], 'Aucune ligne dans ce lot.'));
