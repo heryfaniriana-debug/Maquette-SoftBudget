@@ -24411,6 +24411,12 @@ function pcRenderEnv(){
     .view > .head .actions .btn.primary, .sb-fp-head .actions > .btn.primary { flex: 1 1 100%; order: 9; }
     .fgrid > *, .gu-modal .body > * { min-width: 0; }
     .field, select.field, input.field, textarea.field { max-width: 100%; box-sizing: border-box; }
+    input[type="date"], input[type="month"], input[type="time"], input[type="datetime-local"], input[type="number"], input[type="file"], select, textarea { display: block; width: 100%; min-width: 0 !important; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
+    select, select.field { background-repeat: no-repeat !important; background-position: right 12px center !important; padding-right: 34px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235B606D' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") !important; }
+    input[type="date"], input[type="month"], input[type="time"] { min-height: 44px; text-align: left; }
+    input[type="date"]::-webkit-date-and-time-value { text-align: left; min-width: 0; }
+    form, .fgrid, .fgrid > div, .card, .panel .body { min-width: 0; max-width: 100%; }
+    input[type="checkbox"], input[type="radio"] { width: auto; display: inline-block; -webkit-appearance: auto; appearance: auto; }
     .gu-modal .btn.small, .gu-modal .btn { max-width: 100%; white-space: normal; }
     .view > .head select, .view > .head .field { width: 100%; max-width: 100%; margin: 0; }
     .scroll table { min-width: 620px; }
