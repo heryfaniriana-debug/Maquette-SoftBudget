@@ -12710,12 +12710,10 @@ function fmAxes() {
       cell(tr, r.hist.length ? r.hist[0].on : '—');
       var act = cell(tr, '');
       var b1 = cvEl('button', 'btn small', 'Consulter'); b1.type = 'button';
-      b1.addEventListener('click', function () { document.getElementById('cv-view-title').textContent = 'Campagne consolidée — ' + (c ? c.code : r.camp); cvRender(document.getElementById('cv-view-body'), r, true); document.getElementById('cv-view').hidden = false; });
+      b1.addEventListener('click', function () { document.getElementById('cv-view-title').textContent = 'Campagne consolidée — ' + (c ? c.code : r.camp); cvRender(document.getElementById('cv-view-body'), r, true); bvPreviewBlock(document.getElementById('cv-view-body'), r); document.getElementById('cv-view').hidden = false; });
       var b2 = cvEl('button', 'btn small', 'Relancer'); b2.type = 'button'; b2.disabled = r.st !== 'En validation'; if (b2.disabled) b2.title = 'Seule une validation en cours peut être relancée.';
       b2.addEventListener('click', function () { r.hist.unshift({ t: 'Relance envoyée à ' + r.validator, by: ME, on: nowStr() }); renderValCfg(); cvSay('cv-msg', 'Relance envoyée à ' + r.validator + ' pour ' + r.camp + '.'); });
-      var b3 = cvEl('button', 'btn small', 'Aperçu PTBA'), b4 = cvEl('button', 'btn small', 'Aperçu PTA'); b3.type = b4.type = 'button';
-      b3.addEventListener('click', function () { bvPreview(r, 'ptba'); }); b4.addEventListener('click', function () { bvPreview(r, 'pta'); });
-      act.appendChild(b1); act.appendChild(b3); act.appendChild(b4); act.appendChild(b2); act.style.whiteSpace = 'nowrap';
+      act.appendChild(b1); act.appendChild(b2);
       body.appendChild(tr);
     });
   }
@@ -12729,8 +12727,15 @@ function fmAxes() {
     var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (tv.head.length * 90) + 'px';
     tb.innerHTML = '<thead><tr>' + tv.head.map(function (h, i) { return '<th' + (i >= tv.numFrom ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + (tv.rows.length ? tv.rows.map(function (x) { return '<tr' + (x.k ? ' style="font-weight:600;background:#F6F7F9"' : '') + '>' + x.c.map(function (c, i) { return '<td' + (i >= tv.numFrom ? ' class="num"' : '') + '>' + escH(typeof c === 'number' ? fmt(c) : c) + '</td>'; }).join('') + '</tr>'; }).join('') : '<tr><td colspan="' + tv.head.length + '">Aucune ligne dans cette campagne.</td></tr>') + '</tbody>';
     sc.appendChild(tb); w.appendChild(sc);
-    var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn primary', 'Fermer'); bc.type = 'button'; ft.appendChild(bc); w.appendChild(ft); bc.addEventListener('click', guModalClose);
-    guModal(nm + ' — ' + (d.c ? d.c.code + ' ' + d.c.lib : r.camp), w, 1100);
+    return w;
+  }
+  /* Dans le détail de la campagne : bascule Aperçu du PTBA / Aperçu du PTA */
+  function bvPreviewBlock(root, r) {
+    var box = cvEl('div'); box.style.marginTop = '18px';
+    var seg = cvEl('div', 'seg'), host = cvEl('div'); host.style.marginTop = '12px';
+    function show(k) { host.innerHTML = ''; host.appendChild(bvPreview(r, k)); seg.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.dataset.k === k); }); }
+    [['ptba', 'Aperçu du PTBA'], ['pta', 'Aperçu du PTA']].forEach(function (x) { var b = cvEl('button', null, x[1]); b.type = 'button'; b.dataset.k = x[0]; b.addEventListener('click', function () { show(x[0]); }); seg.appendChild(b); });
+    box.appendChild(seg); box.appendChild(host); root.appendChild(box); show('ptba');
   }
   function renderArb() {
     renderValCfg();
