@@ -6971,6 +6971,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (typeof fpAfterShow === 'function') fpAfterShow(vn);
     if (typeof prmTabs === 'function') prmTabs(name, vn);
     if (typeof entTabs === 'function') entTabs(name, vn);
+    if (typeof entFinish === 'function') setTimeout(function () { entFinish(name, vn); }, 0);
     var hd =document.querySelector('#v-' + vn + ' > .head > div:first-child');
     if (hd) { var ey = hd.querySelector('.eyebrow'); if (!ey) { ey = document.createElement('div'); ey.className = 'eyebrow'; hd.insertBefore(ey, hd.firstChild); } ey.textContent = t[0]; }
     document.getElementById('nav-dashboard').classList.toggle('active', name === 'dashboard');
@@ -7142,6 +7143,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     document.querySelectorAll('.pcard').forEach(function (c) { c.querySelector('input[type=checkbox]').checked = c.dataset.profile === id; });
     document.getElementById('pr-switch').hidden = true;
     refreshProfiles();
+    if (typeof renderAccessSelects === 'function') { renderAccessSelects(); if (typeof setAccess === 'function') setAccess(ACC); }
     if (typeof buSel !== 'undefined') buSel.par = null;
     if (typeof renderBudgets === 'function') renderBudgets();
     auditAdd('Configuration', 'Profils budgétaires', 'Profil actif : ' + names[old] + ' → ' + names[id]);
@@ -10218,12 +10220,14 @@ function fmAxes() {
   };
   /* lignes proposées aux directions de l'entreprise (kept apart from the project's analytical plan) */
   var PLAN_ENT = {
-    'Direction Générale': [{ c: '1.1', l: 'Frais de direction et représentation', nat: '60', ref: 120000000 }, { c: '1.2', l: 'Honoraires et conseils', nat: '62', ref: 90000000 }],
-    'Direction Financière': [{ c: '2.1', l: 'Honoraires d’audit et d’expertise', nat: '62', ref: 140000000 }, { c: '2.2', l: 'Fournitures et frais de bureau', nat: '60', ref: 70000000 }, { c: '2.3', l: 'Frais bancaires et assurances', nat: '62', ref: 85000000 }],
-    'Direction Commerciale': [{ c: '3.1', l: 'Missions et déplacements', nat: '62', ref: 60000000 }, { c: '3.2', l: 'Publicité et promotion', nat: '62', ref: 180000000 }, { c: '3.3', l: 'Salons et événements', nat: '62', ref: 95000000 }],
-    'IT & Digital': [{ c: '4.1', l: 'Postes de travail', nat: '21', ref: 400000000 }, { c: '4.2', l: 'Serveurs et hébergement', nat: '21', ref: 500000000 }, { c: '4.3', l: 'Licences logicielles', nat: '60', ref: 700000000 }],
-    'Ressources Humaines': [{ c: '5.1', l: 'Formation du personnel', nat: '62', ref: 110000000 }, { c: '5.2', l: 'Recrutement et intégration', nat: '62', ref: 65000000 }, { c: '5.3', l: 'Œuvres sociales', nat: '60', ref: 50000000 }]
+    'Direction Générale': [{ c: '1.0', l: 'Salaires et charges du personnel', nat: '63', ref: 170000000, cat: 'Personnel' }, { c: '1.1', l: 'Déplacements et représentation du directeur général', nat: '62', ref: 110000000, cat: 'Fonctionnement' }, { c: '1.2', l: 'Honoraires d’avocat et de notaire', nat: '61', ref: 70000000, cat: 'Fonctionnement' }],
+    'Direction Financière': [{ c: '2.0', l: 'Salaires et charges du personnel', nat: '63', ref: 380000000, cat: 'Personnel' }, { c: '2.1', l: 'Audit externe des comptes', nat: '61', ref: 45000000, cat: 'Fonctionnement' }, { c: '2.2', l: 'Fournitures et frais de bureau', nat: '60', ref: 28000000, cat: 'Fonctionnement' }, { c: '2.3', l: 'Frais bancaires et assurances', nat: '61', ref: 24000000, cat: 'Fonctionnement' }],
+    'Direction Commerciale': [{ c: '3.0', l: 'Salaires et charges du personnel', nat: '63', ref: 440000000, cat: 'Personnel' }, { c: '3.1', l: 'Missions et déplacements commerciaux', nat: '62', ref: 55000000, cat: 'Fonctionnement' }, { c: '3.2', l: 'Publicité et réseaux sociaux', nat: '62', ref: 100000000, cat: 'Fonctionnement' }, { c: '3.3', l: 'Salons et événements clients', nat: '62', ref: 60000000, cat: 'Fonctionnement' }],
+    'IT & Digital': [{ c: '4.0', l: 'Salaires et charges du personnel', nat: '63', ref: 1300000000, cat: 'Personnel' }, { c: '4.1', l: 'Ordinateurs portables', nat: '21', ref: 50000000, cat: 'Investissement' }, { c: '4.2', l: 'Hébergement et serveurs cloud', nat: '61', ref: 110000000, cat: 'Fonctionnement' }, { c: '4.3', l: 'Licences Microsoft 365 et antivirus', nat: '60', ref: 90000000, cat: 'Fonctionnement' }],
+    'Ressources Humaines': [{ c: '5.0', l: 'Salaires et charges du personnel', nat: '63', ref: 220000000, cat: 'Personnel' }, { c: '5.1', l: 'Formation du personnel (Excel, sécurité, anglais)', nat: '62', ref: 30000000, cat: 'Fonctionnement' }, { c: '5.2', l: 'Recrutement et intégration (annonces, tests)', nat: '62', ref: 30000000, cat: 'Fonctionnement' }, { c: '5.3', l: 'Cantine et fête de fin d’année', nat: '60', ref: 20000000, cat: 'Fonctionnement' }]
   };
+  /* catégorie d'une ligne de l'entreprise, pour le regroupement de la consolidation */
+  var ENT_CAT = {}; Object.keys(PLAN_ENT).forEach(function (k) { PLAN_ENT[k].forEach(function (l) { ENT_CAT[l.c] = l.cat; }); });
   function planLines(name) { return (PLAN[name] || PLAN_ENT[name] || []).map(function (l) { return { c: l.c, l: l.l, nat: l.nat, ref: l.ref, dem: null, just: '' }; }); }
   var TPLS = ['Modèle de saisie standard (nature de dépense)', 'Modèle de saisie PTBA (activité et source de financement)'];
   var camps = [
@@ -10250,11 +10254,11 @@ function fmAxes() {
     { code: 'CAMP-2027-04', lib: 'Campagne budgétaire 2027 — SoftWell Madagascar', prof: 'Entreprise', ex: '2027', model: 'm3', mver: 1, open: '01/10/2026', close: '30/11/2026', st: 'En collecte', tpl: TPLS[0],
       instr: 'Chaque direction prépare son budget 2027 : charges, achats, investissements. Justifiez toute variation de plus de 10 % par rapport à 2026.',
       perims: [
-        { p: 'Direction Générale', who: 'RAVELO Fanja', st: 'Brouillon', amt: 400000000, min: null, env: null },
-        { p: 'Direction Financière', who: 'RANDRIA Haja', st: 'Brouillon', amt: 480000000, min: null, env: null },
-        { p: 'Direction Commerciale', who: 'RAKOTO Hanta', st: 'Brouillon', amt: 700000000, min: null, env: null },
+        { p: 'Direction Générale', who: 'RAVELO Fanja', st: 'Brouillon', amt: 360000000, min: null, env: null },
+        { p: 'Direction Financière', who: 'RANDRIA Haja', st: 'Brouillon', amt: 505000000, min: null, env: null },
+        { p: 'Direction Commerciale', who: 'RAKOTO Hanta', st: 'Brouillon', amt: 714000000, min: null, env: null },
         { p: 'IT & Digital', who: 'ANDRIANARIVO Mialy', st: 'Soumise', amt: 1650000000, min: null, env: null },
-        { p: 'Ressources Humaines', who: 'RASOARIMALALA Voahangy Lalao', st: 'Brouillon', amt: 350000000, min: null, env: null }
+        { p: 'Ressources Humaines', who: 'RASOARIMALALA Voahangy Lalao', st: 'Brouillon', amt: 331000000, min: null, env: null }
       ],
       hist: [
         { t: 'Campagne ouverte — 5 contributeurs notifiés', by: ME, on: '01/10/2026 08:00' },
@@ -10660,8 +10664,9 @@ function fmAxes() {
       mi.addEventListener('blur', function () { mi.value = cmMin[p] != null ? fmt(cmMin[p]) : ''; }); fld('Minimum (MGA)', mi);
       var inp = txt('Enveloppe maximale de ' + p, 'Sans plafond', cmEnv[p] != null ? fmt(cmEnv[p]) : '', function (i) { cmEnv[p] = parseInt0(i.value); }, true);
       inp.addEventListener('blur', function () { inp.value = cmEnv[p] != null ? fmt(cmEnv[p]) : ''; }); fld('Maximum (MGA)', inp);
-      fld('Objectif général de l’exercice', txt('Objectif général de l’exercice pour ' + p, 'Ex. Permettre à plus d’enfants d’aller à l’école', cmObj[p] || '', function (i) { cmObj[p] = i.value; }), 'full');
-      /* Les indicateurs sont la répartition de l'objectif général : chacun a sa cible chiffrée */
+      fld('Objectif général de l’exercice', txt('Objectif général de l’exercice pour ' + p, (activeCode() === 'ent' ? 'Ex. Réduire de 5 % les frais de déplacement' : 'Ex. Permettre à plus d’enfants d’aller à l’école'), cmObj[p] || '', function (i) { cmObj[p] = i.value; }), 'full');
+      /* Les indicateurs sont la répartition de l'objectif général : chacun a sa cible chiffrée (profils Projet et Entité publique) */
+      if (activeCode() !== 'ent') {
       var ih = document.createElement('div'); ih.className = 'full env-l'; ih.style.marginTop = '4px'; ih.textContent = 'Indicateurs : la répartition de l’objectif général en cibles chiffrées'; grid.appendChild(ih);
       cmInds[p] = cmInds[p] || [];
       cmInds[p].forEach(function (it, k) {
@@ -10676,6 +10681,7 @@ function fmAxes() {
       });
       var add = document.createElement('div'); add.className = 'full'; var ab = document.createElement('button'); ab.type = 'button'; ab.className = 'btn small'; ab.textContent = '+ Ajouter un indicateur'; ab.disabled = !ck.checked;
       ab.addEventListener('click', function () { cmInds[p].push({ lib: '', cible: null, unit: '' }); cmEnvRender(); }); add.appendChild(ab); grid.appendChild(add);
+      }
       card.appendChild(grid); box.appendChild(card);
     });
     if (!labs.length) { var h = document.createElement('div'); h.className = 'hint'; h.textContent = 'Aucun périmètre de collecte : choisissez d’abord une configuration.'; box.appendChild(h); }
@@ -10819,13 +10825,48 @@ function fmAxes() {
       { c: '2.2', l: 'Former des agents de santé', nat: '62', ref: 190000000, dem: 120000000, q: 120, p: 1000000, just: 'Moins d’agents à former cette année que prévu au plan' },
       { c: '2.3', l: 'Acheter du matériel médical', nat: '60', ref: 280000000, dem: null, just: '' },
       { c: 'L01', l: 'Dépistage mobile dans les communes isolées', nat: '62', ref: null, dem: 45000000, q: 5000, p: 9000, just: '', added: true, addedWhy: 'Besoin identifié lors de la mission de terrain : communes sans accès à un centre de santé', axv: { Analytique: 'Programme 2', Financier: 'Don du partenaire' } }
+    ],
+    /* Entreprise : des lignes de la vie courante, avec quantité × prix */
+    'Direction Générale': [
+      { c: '1.0', l: 'Salaires et charges du personnel', nat: '63', ref: 170000000, dem: 180000000, q: 1, p: 180000000, just: 'Voir la masse salariale : une assistante de plus à mi-année' },
+      { c: '1.1', l: 'Déplacements et représentation du directeur général', nat: '62', ref: 110000000, dem: 120000000, q: 12, p: 10000000, just: 'Un déplacement par mois chez les partenaires, billets d’avion en hausse de 8 %' },
+      { c: '1.2', l: 'Honoraires d’avocat et de notaire', nat: '61', ref: 70000000, dem: 60000000, q: 4, p: 15000000, just: 'Un seul dossier juridique prévu cette année' }
+    ],
+    'Direction Financière': [
+      { c: '2.0', l: 'Salaires et charges du personnel', nat: '63', ref: 380000000, dem: 400000000, q: 1, p: 400000000, just: 'Voir la masse salariale : un contrôleur de gestion junior recruté en avril' },
+      { c: '2.1', l: 'Audit externe des comptes', nat: '61', ref: 45000000, dem: 50000000, q: 1, p: 50000000, just: 'Le cabinet augmente ses honoraires de 10 %' },
+      { c: '2.2', l: 'Fournitures et frais de bureau', nat: '60', ref: 28000000, dem: 30000000, q: 12, p: 2500000, just: '' },
+      { c: '2.3', l: 'Frais bancaires et assurances', nat: '61', ref: 24000000, dem: 25000000, q: 5, p: 5000000, just: 'Cinq contrats : incendie, véhicules, santé, responsabilité civile, frais de tenue de compte' }
+    ],
+    'Direction Commerciale': [
+      { c: '3.0', l: 'Salaires et charges du personnel', nat: '63', ref: 440000000, dem: 464000000, q: 1, p: 464000000, just: 'Voir la masse salariale : trois commerciaux grands comptes à recruter en mars' },
+      { c: '3.1', l: 'Missions et déplacements commerciaux', nat: '62', ref: 55000000, dem: 60000000, q: 40, p: 1500000, just: 'Quarante visites clients en province, à 1,5 million en moyenne (transport et hôtel)' },
+      { c: '3.2', l: 'Publicité et réseaux sociaux', nat: '62', ref: 100000000, dem: 120000000, q: 6, p: 20000000, just: 'Une campagne par trimestre plus deux pour les fêtes de fin d’année' },
+      { c: '3.3', l: 'Salons et événements clients', nat: '62', ref: 60000000, dem: 70000000, q: 2, p: 35000000, just: 'Deux salons : un à Antananarivo, un à Toamasina' }
+    ],
+    'IT & Digital': [
+      { c: '4.0', l: 'Salaires et charges du personnel', nat: '63', ref: 1300000000, dem: 1375000000, q: 1, p: 1375000000, just: 'Voir la masse salariale : quatre développeurs seniors recrutés en février' },
+      { c: '4.1', l: 'Ordinateurs portables', nat: '21', ref: 50000000, dem: 60000000, q: 20, p: 3000000, just: 'Vingt portables de plus de cinq ans à remplacer', pj: ['Devis_ordinateurs.pdf'] },
+      { c: '4.2', l: 'Hébergement et serveurs cloud', nat: '61', ref: 110000000, dem: 120000000, q: 12, p: 10000000, just: 'Dix millions par mois, le prix du cloud augmente de 8 %' },
+      { c: '4.3', l: 'Licences Microsoft 365 et antivirus', nat: '60', ref: 90000000, dem: 95000000, q: 95, p: 1000000, just: 'Une licence par employé : 95 postes' }
+    ],
+    'Ressources Humaines': [
+      { c: '5.0', l: 'Salaires et charges du personnel', nat: '63', ref: 220000000, dem: 236000000, q: 1, p: 236000000, just: 'Voir la masse salariale' },
+      { c: '5.1', l: 'Formation du personnel (Excel, sécurité, anglais)', nat: '62', ref: 30000000, dem: 40000000, q: 8, p: 5000000, just: 'Huit sessions de deux jours, une par trimestre et par grand service' },
+      { c: '5.2', l: 'Recrutement et intégration (annonces, tests)', nat: '62', ref: 30000000, dem: 35000000, q: 7, p: 5000000, just: 'Huit recrutements prévus dans l’année' },
+      { c: '5.3', l: 'Cantine et fête de fin d’année', nat: '60', ref: 20000000, dem: 20000000, q: 1, p: 20000000, just: '' }
     ]
   };
   var CH = {
     'Composante 1 — Éducation': [{ t: 'Contribution soumise', by: 'RAKOTO Hanta', on: '15/10/2026 09:30' }],
-    'Composante 2 — Santé': [{ t: 'Brouillon enregistré (première ligne saisie)', by: 'RASOARIMALALA Voahangy Lalao', on: '16/10/2026 14:05' }]
+    'Composante 2 — Santé': [{ t: 'Brouillon enregistré (première ligne saisie)', by: 'RASOARIMALALA Voahangy Lalao', on: '16/10/2026 14:05' }],
+    'IT & Digital': [{ t: 'Contribution soumise', by: 'ANDRIANARIVO Mialy', on: '12/10/2026 16:10' }],
+    'Direction Commerciale': [{ t: 'Brouillon enregistré (première ligne saisie)', by: 'RAKOTO Hanta', on: '14/10/2026 11:20' }],
+    'Direction Financière': [{ t: 'Brouillon enregistré (première ligne saisie)', by: 'RANDRIA Haja', on: '15/10/2026 08:45' }]
   };
-  var IMPLOG = [{ on: '06/10/2026 09:12', file: 'contributions_composante_education.xlsx', p: 'Composante 1 — Éducation', by: 'RAKOTO Hanta', ok: 3, rej: 0 }];
+  var IMPLOG = [{ on: '06/10/2026 09:12', file: 'contributions_composante_education.xlsx', p: 'Composante 1 — Éducation', by: 'RAKOTO Hanta', ok: 3, rej: 0 }, { on: '08/10/2026 14:30', file: 'budget_it_digital_2027.xlsx', p: 'IT & Digital', by: 'ANDRIANARIVO Mialy', ok: 3, rej: 0 }];
+  var IMPSAMPLE_ENT = [['4.1', '21', '66000000', 'Trois ordinateurs portables de plus que prévu'], ['4.2', '61', '120000000', ''], ['4.9', '60', '12000000', 'Ligne inexistante'], ['4.2', '61', '120000000', ''], ['4.1', '21', 'abc', 'Montant illisible'], ['4.1', '21', '-500000', 'Montant négatif']];
+  function impSample() { return activeCode() === 'ent' ? IMPSAMPLE_ENT : IMPSAMPLE; }
   var IMPSAMPLE = [
     ['2.1', '21', '700000000', 'Neuf centres de santé au lieu de huit'],
     ['2.2', '62', '130000000', ''],
@@ -11567,7 +11608,7 @@ function fmAxes() {
     coVisible().forEach(function (p) { var o = document.createElement('option'); o.textContent = p.p; if (p.p === prev) o.selected = true; sel.appendChild(o); });
     var body = document.getElementById('ci-log');
     body.innerHTML = '';
-    IMPLOG.forEach(function (h) {
+    IMPLOG.filter(function (h) { var pn = names[activeCode()]; return (PERIMS[pn] || []).indexOf(h.p) >= 0; }).forEach(function (h) {
       var tr = document.createElement('tr');
       cell(tr, h.on); cell(tr, h.file, 'name'); cell(tr, h.p); cell(tr, h.by); cell(tr, String(h.ok), 'num'); cell(tr, String(h.rej), 'num');
       body.appendChild(tr);
@@ -11587,7 +11628,7 @@ function fmAxes() {
     var ok = 0, ko = 0;
     var body = document.getElementById('ci-prev-body');
     body.innerHTML = '';
-    IMPSAMPLE.forEach(function (r, i) {
+    impSample().forEach(function (r, i) {
       var s, m = '';
       var line = lines2.filter(function (l) { return l.c === r[0]; })[0];
       if (!line) { s = 'err'; m = 'Colonne Code ligne : « ' + r[0] + ' » n’existe pas dans ce périmètre.'; }
@@ -11605,7 +11646,7 @@ function fmAxes() {
       cell(tr, m);
       body.appendChild(tr);
     });
-    document.getElementById('ci-sum').textContent = pl(IMPSAMPLE.length, 'ligne') + ' lue' + (IMPSAMPLE.length > 1 ? 's' : '') + ' · ' + ok + ' valide' + (ok > 1 ? 's' : '') + ' · ' + ko + ' rejetée' + (ko > 1 ? 's' : '') + (p.st === 'Brouillon' || p.st === 'Retournée' ? ' · les valeurs du brouillon seront remplacées' : '');
+    document.getElementById('ci-sum').textContent = pl(impSample().length, 'ligne') + ' lue' + (impSample().length > 1 ? 's' : '') + ' · ' + ok + ' valide' + (ok > 1 ? 's' : '') + ' · ' + ko + ' rejetée' + (ko > 1 ? 's' : '') + (p.st === 'Brouillon' || p.st === 'Retournée' ? ' · les valeurs du brouillon seront remplacées' : '');
     var go = document.getElementById('ci-go');
     go.disabled = locked || ok === 0;
     if (locked) { block.hidden = false; block.textContent = 'Import impossible : la contribution de « ' + name + ' » est déjà ' + p.st.toLowerCase() + '. L’import n’écrase jamais des données soumises : demandez un retour pour correction.'; }
@@ -11615,7 +11656,7 @@ function fmAxes() {
   document.getElementById('ci-tpl').addEventListener('click', function () { sbDl('modele-collecte.csv', 'text/csv;charset=utf-8', sbCsv([['Code ligne', 'Nature', 'Montant demandé', 'Justification']])); coMsg('Modèle de fichier téléchargé : colonnes Code ligne, Nature, Montant demandé, Justification.', 'info'); });
   document.getElementById('ci-sample').addEventListener('click', function () {
     ciOn = true;
-    document.getElementById('ci-file').textContent = 'contributions_infrastructures.xlsx · ' + IMPSAMPLE.length + ' lignes';
+    document.getElementById('ci-file').textContent = 'contributions_infrastructures.xlsx · ' + impSample().length + ' lignes';
     renderImpPrev();
   });
   document.getElementById('ci-go').addEventListener('click', function () {
@@ -11623,13 +11664,13 @@ function fmAxes() {
     var p = coPerim(name);
     var lines2 = getLines(name);
     var ok = 0;
-    IMPSAMPLE.forEach(function (r) {
+    impSample().forEach(function (r) {
       if (r.s !== 'ok') return;
       var l = lines2.filter(function (x) { return x.c === r[0]; })[0];
       l.dem = parseInt(r[2], 10); l.just = r[3];
       ok++;
     });
-    var rej = IMPSAMPLE.length - ok;
+    var rej = impSample().length - ok;
     if (p.st === 'Non démarrée' || p.st === 'Retournée') p.st = 'Brouillon';
     syncAmt(name);
     IMPLOG.unshift({ on: nowStr(), file: 'contributions_infrastructures.xlsx', p: name, by: coIsResp() ? ME : coWho(), ok: ok, rej: rej });
@@ -11685,9 +11726,9 @@ function fmAxes() {
 
   /* ---------- Consolidation, arbitrage et budget final (SB-06-US-006, 007, 008) ---------- */
   var PROG = { P1: 'Programme 1 — Éducation de base', P2: 'Programme 2 — Enseignement supérieur', P3: 'Programme 3 — Infrastructures éducatives', P4: 'Programme 4 — Pilotage et soutien', P5: 'Programme 4 — Pilotage et soutien', P6: 'Programme 4 — Pilotage et soutien' };
-  var NATL = { '60': '60 — Achats et fournitures', '61': '61 — Services extérieurs', '62': '62 — Fonctionnement', '65': '65 — Transferts et subventions', '21': '21 — Investissements' };
+  var NATL = { '60': '60 — Achats et fournitures', '61': '61 — Services extérieurs', '62': '62 — Fonctionnement', '63': '63 — Charges de personnel', '65': '65 — Transferts et subventions', '21': '21 — Investissements' };
   var PLAFP = { 'Programme 1 — Éducation de base': 8000000000, 'Programme 2 — Enseignement supérieur': 4000000000, 'Programme 3 — Infrastructures éducatives': 3500000000, 'Programme 4 — Pilotage et soutien': 2000000000 };
-  function progOf(code) { return PROG[code.split('.')[0]] || 'Autre programme'; }
+  function progOf(code) { if (activeCode() === 'ent' && ENT_CAT[code]) return ENT_CAT[code]; return PROG[code.split('.')[0]] || 'Autre programme'; }
   var snap = null, ADJ = {}, CONF_RES = {}, EXCL = {}, CONH = [], ARB = [], ARBSAVED = {}, ARBH = [], consoView = 'ligne';
   var FINAL = { ver: 0, lines: [], status: '', hist: [] };
 
@@ -12151,7 +12192,7 @@ function fmAxes() {
      Une campagne consolidée validée devient un budget validé, consultable au niveau du PTBA :
      uniquement le détail des lignes (axes, nature, quantité, coût, montant, répartition), sans enveloppes min/max ni pièces jointes. */
   var VLINES = {};
-  Object.keys(COL).forEach(function (k) { COL[k].forEach(function (l) { if (!l.axv) l.axv = { Analytique: 'Programme ' + l.c.split('.')[0], Financier: 'Budget de l’État' }; }); });
+  Object.keys(COL).forEach(function (k) { COL[k].forEach(function (l) { if (!l.axv) l.axv = PLAN_ENT[k] ? { Analytique: k, Financier: 'Fonds propres' } : { Analytique: 'Programme ' + l.c.split('.')[0], Financier: 'Budget de l’État' }; }); });
   function bvList() {
     var yrs = exYears(); if (!PLAN_EX_USER) { var pick = yrs.indexOf('2027') >= 0 ? '2027' : yrs[yrs.length - 1]; if (pick) PLAN_EX = pick; } else if (yrs.indexOf(PLAN_EX) < 0 && yrs.length) PLAN_EX = yrs[yrs.length - 1];
     if (directMode()) return [directLot(PLAN_EX).cv];
@@ -13549,7 +13590,7 @@ function fmAxes() {
     { n: 'Révision des prévisions', rule: 'Libre', max: 0, circuit: 'Un niveau', role: 'Responsable budgétaire', act: true },
     { n: 'Budget supplémentaire', rule: 'Positif', max: 15, circuit: 'Deux niveaux', role: 'Direction Financière', act: true },
     { n: 'Réduction budgétaire', rule: 'Négatif', max: 30, circuit: 'Deux niveaux', role: 'Direction Financière', act: true },
-    { n: 'Révision du PTBA', rule: 'Libre', max: 20, circuit: 'Deux niveaux', role: 'Coordinateur de projet', act: true }
+    { n: 'Report de crédits', rule: 'Libre', max: 20, circuit: 'Deux niveaux', role: 'Direction Financière', act: true }
   ];
   var TREVH = [{ t: 'Type « Budget supplémentaire » : plafond de variation 10 % → 15 %', by: ME, on: '02/09/2026 14:10' }];
   var CIRC = {
@@ -13557,7 +13598,7 @@ function fmAxes() {
     'Deux niveaux': ['Contrôle — Direction Financière', 'Approbation — Direction Générale']
   };
   var RULES = [['Nul', 'Total nul'], ['Positif', 'Total positif'], ['Négatif', 'Total négatif'], ['Libre', 'Libre']];
-  var ROLES = ['Responsable budgétaire', 'Direction Financière', 'Coordinateur de projet', 'Direction Générale'];
+  var ROLES = ['Responsable budgétaire', 'Direction Financière', 'Contrôleur de gestion', 'Direction Générale'];
   var REVS = [
     { code: 'REV-2026-003', type: 'Réallocation entre lignes', motif: 'Couvrir le dépassement prévu des missions', by: ME, on: '22/10/2026', st: 'Brouillon', step: 0,
       lines: [{ c: '6.3', before: 0, delta: 10000000 }, { c: '2.1', before: 0, delta: -10000000 }],
@@ -14133,7 +14174,8 @@ var EXEC_REC = [
   function perQ(key) { return { 'Cumul à fin T1': 0, 'Cumul à fin T2': 1, 'Cumul à fin T3': 2, 'Année 2026 (cumul)': 3 }[key]; }
   function entRows(f) { return EXEC.filter(function (r) { return !f.ent || f.ent === 'Toutes les entités' || r.ent === f.ent; }); }
   function refPT() { if (rpVerPT) { var x = PT.versions.filter(function (v) { return String(v.v) === rpVerPT; })[0]; if (x) return x; } return PT.versions.filter(function (v) { return v.ref; })[0]; }
-  function accProfiles() { return ACCESS[ACC].profiles; }
+  /* profils visibles : ceux du rôle d'accès, limités au profil actif (l'Entreprise ne voit que ses propres données) */
+  function accProfiles() { var a = ACCESS[ACC].profiles, pn = typeof names !== 'undefined' && typeof activeCode === 'function' ? names[activeCode()] : null; return pn && a.indexOf(pn) >= 0 ? [pn] : a; }
   function thr() { return { w: (parseInt0(document.getElementById('al-warn').value) || 90) / 100, o: (parseInt0(document.getElementById('al-over').value) || 100) / 100 }; }
 
   var REPORTS = [
@@ -14337,10 +14379,11 @@ var EXEC_REC = [
     document.getElementById('rp-go').addEventListener('click', function () { rpGen = true; runReport(); });
   }
   function renderAccessSelects() {
+    var pnA = names[activeCode()]; if (ACCESS[ACC].profiles.indexOf(pnA) < 0) ACC = 'admin';
     ['rp-acc', 'db-acc', 'dr-acc', 'au-acc', 'tk-acc', 'nc-acc', 'cl-acc', 'rc-acc', 'if-acc'].forEach(function (id) {
       var s = document.getElementById(id);
       s.innerHTML = '';
-      Object.keys(ACCESS).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = ACCESS[k].label; if (k === ACC) o.selected = true; s.appendChild(o); });
+      Object.keys(ACCESS).filter(function (k) { return ACCESS[k].profiles.indexOf(pnA) >= 0; }).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = ACCESS[k].label; if (k === ACC) o.selected = true; s.appendChild(o); });
     });
     var p = document.getElementById('rp-prof');
     var prev = p.value;
@@ -14349,8 +14392,9 @@ var EXEC_REC = [
     var d = document.getElementById('db-prof');
     var prevD = d.value;
     d.innerHTML = '';
-    var all = document.createElement('option'); all.textContent = 'Tous les profils'; d.appendChild(all);
+    if (accProfiles().length > 1) { var all = document.createElement('option'); all.textContent = 'Tous les profils'; d.appendChild(all); }
     accProfiles().forEach(function (x) { var o = document.createElement('option'); o.textContent = x; if (x === prevD) o.selected = true; d.appendChild(o); });
+    d.style.display = accProfiles().length > 1 ? '' : 'none'; var lb = document.querySelector('label[for="db-prof"]'); if (lb) lb.style.display = d.style.display; /* sélecteur de profil inutile s'il n'y en a qu'un */
   }
   function setAccess(k) {
     ACC = k;
@@ -15287,6 +15331,7 @@ var EXEC_REC = [
     if (typeof renderRights === 'function') renderRights();
     regSetVis('#g-params .sub button[data-go="rclot"], #g-params .sub button[data-go="trev"], #g-params .sub button[data-go="ctrl"], #g-params .sub button[data-go="circuits"]', code !== 'prj' && (cfg.regime !== 'importe' || true)); /* projet : clôture, révisions, contrôles budgétaires et circuits de visa n’existent plus (menus Plans annuels, alertes des Analyses, circuit du cadre budgétaire) */
     if (code !== 'prj') regSetVis('#g-params .sub button[data-go="circuits"]', circ && adv);
+    var indB = document.getElementById('cs-ind-add'); if (indB) indB.style.display = code === 'ent' ? 'none' : '';
     /* Entreprise : écrans regroupés sous une autre entrée (onglets) ou intégrés ailleurs */
     regSetVis('.sub button[data-go="clot"], .sub button[data-go="envl"], .sub button[data-go="repc"]', code === 'ent');
     if (code === 'ent') { regSetVis('.sub button[data-go="dispo"], .sub button[data-go="prev"], .sub button[data-go="bkdvr"], .sub button[data-go="vcmp"], .sub button[data-go="cadm"], .sub button[data-go="exports"], .sub button[data-go="appr"], .sub button[data-go="trev"], .sub button[data-go="rclot"], .sub button[data-go="params"], .sub button[data-go="droits"], .sub button[data-go="audit"], .sub button[data-go="corresp"], .sub button[data-go="interfaces"], .sub button[data-go="circuits"]', false); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso !== false); regSetVis('.sub button[data-go="conso"]', adv && cfg.mods.elab !== false); regSetVis('.sub button[data-go="bud"]', true); }
@@ -19066,8 +19111,8 @@ var EXEC_REC = [
   document.getElementById('inv-b2').addEventListener('click', function () { invModal('inv-p2', 'Calendrier prévisionnel : besoins de décaissement par trimestre'); });
   /* ----- Entreprise : cadrage budgétaire (objectifs de chiffre d'affaires et de marge, hypothèses, enveloppes par direction) ----- */
   var CADR = {
-    '2026': { st: 'Validé', hyp: { infl: 6, sal: 3.5, eur: 4900, usd: 4500 }, ca: [{ lib: 'Licences et abonnements', unit: 'contrats', n1: 2800000000, vol: 1250, prix: 2300000, marge: 62 }, { lib: 'Services et intégration', unit: 'projets', n1: 1900000000, vol: 380, prix: 5000000, marge: 38 }, { lib: 'Maintenance et support', unit: 'contrats', n1: 1100000000, vol: 820, prix: 1380000, marge: 55 }], env: { 'Direction Générale': 420000000, 'Direction Financière': 480000000, 'Direction Commerciale': 720000000, 'IT & Digital': 1500000000, 'Ressources Humaines': 380000000 } },
-    '2027': { st: 'Brouillon', hyp: { infl: 6.5, sal: 4, eur: 5100, usd: 4650 }, ca: [{ lib: 'Licences et abonnements', unit: 'contrats', n1: 2850000000, vol: 1500, prix: 2400000, marge: 64 }, { lib: 'Services et intégration', unit: 'projets', n1: 1940000000, vol: 420, prix: 5300000, marge: 40 }, { lib: 'Maintenance et support', unit: 'contrats', n1: 1130000000, vol: 900, prix: 1450000, marge: 58 }], env: { 'Direction Générale': 450000000, 'Direction Financière': 520000000, 'Direction Commerciale': 780000000, 'IT & Digital': 1650000000, 'Ressources Humaines': 410000000 } }
+    '2026': { st: 'Validé', hyp: { infl: 6, sal: 3.5, eur: 4900, usd: 4500 }, ca: [{ lib: 'Licences et abonnements', unit: 'contrats', n1: 2800000000, vol: 1250, prix: 2300000, marge: 62 }, { lib: 'Services et intégration', unit: 'missions', n1: 1900000000, vol: 380, prix: 5000000, marge: 38 }, { lib: 'Maintenance et support', unit: 'contrats', n1: 1100000000, vol: 820, prix: 1380000, marge: 55 }], env: { 'Direction Générale': 420000000, 'Direction Financière': 480000000, 'Direction Commerciale': 720000000, 'IT & Digital': 1500000000, 'Ressources Humaines': 380000000 } },
+    '2027': { st: 'Brouillon', hyp: { infl: 6.5, sal: 4, eur: 5100, usd: 4650 }, ca: [{ lib: 'Licences et abonnements', unit: 'contrats', n1: 2850000000, vol: 1500, prix: 2400000, marge: 64 }, { lib: 'Services et intégration', unit: 'missions', n1: 1940000000, vol: 420, prix: 5300000, marge: 40 }, { lib: 'Maintenance et support', unit: 'contrats', n1: 1130000000, vol: 900, prix: 1450000, marge: 58 }], env: { 'Direction Générale': 450000000, 'Direction Financière': 520000000, 'Direction Commerciale': 780000000, 'IT & Digital': 1650000000, 'Ressources Humaines': 410000000 } }
   };
   var CADV = { ex: '2027' };
   function cadrOf(ex) { if (!CADR[ex]) CADR[ex] = { st: 'Brouillon', hyp: { infl: 6, sal: 4, eur: 5000, usd: 4600 }, ca: [], env: {} }; return CADR[ex]; }
@@ -19427,6 +19472,59 @@ var EXEC_REC = [
   }
   var ENT_CRUMB = { envl: 1, repc: 1, cadr: 1, list: 1, cles: 1, camp: 1, collecte: 1, conso: 1, arb: 1, bud: 1, perso: 1, inv: 1, bkdec: 1, scen: 1, revis: 1, clot: 1, engage: 1, real: 1, decaiss: 1, encaiss: 1, ddir: 1, ecarts: 1, roll: 1, cash: 1, pluri: 1, alertes: 1, rapports: 1 };
   function entCrumb(name, t) { var k = MENU_OF[name] || name, b = document.querySelector('.sub button[data-go="' + k + '"]'); if (!ENT_CRUMB[k] || !b) return t; var g = b.closest('.group'), h = g && navHead(g); return h ? [h.textContent.trim(), b.textContent.trim()] : t; }
+  /* ----- Entreprise : vocabulaire d'entreprise et exemples simples sur chaque écran ----- */
+  var ENT_EX = {
+    cadr: 'L’entreprise espère vendre 1 500 abonnements à 2 400 000 MGA l’un : cela fait 3,6 milliards de chiffre d’affaires. Avec 64 % de marge, il reste 2,3 milliards pour payer les salaires, le loyer et le reste. C’est la « lettre de cadrage » que la direction générale envoie aux directions.',
+    envl: 'La direction commerciale a une enveloppe de 780 millions : elle peut demander des déplacements, de la publicité et des salons jusqu’à ce montant, pas un franc de plus sans accord.',
+    cles: 'Le loyer du siège (180 millions) est partagé selon la surface : un service qui occupe 20 % des locaux paie 20 % du loyer. Pour l’assurance, on peut aussi fixer des pourcentages à la main.',
+    repc: 'Le loyer coûte 180 millions et IT & Digital occupe 38 % des locaux : cette direction supporte 68 millions de loyer, en plus de son propre budget.',
+    perso: 'On recrute 4 développeurs à 4 500 000 MGA par mois à partir de février : cela fait 11 mois de salaire, plus un 13e mois au prorata, plus 18 % de charges patronales.',
+    conso: 'Les cinq directions demandent 3,56 milliards au total ; leurs enveloppes réunies font 3,81 milliards, donc tout rentre. Sinon, la direction générale doit arbitrer.',
+    scen: 'Et si on vendait 10 % de moins que prévu ? Le scénario « Prudent » montre aussitôt ce que cela change sur la marge et sur le résultat.',
+    clot: 'Fin décembre, une commande de 80 millions est passée mais pas encore livrée : elle reste « engagée ». À la clôture, elle est reportée sur l’année suivante.',
+    ddir: 'Si une direction a déjà dépensé 107 % de ce qu’elle devait avoir dépensé à ce stade de l’année, une alerte rouge apparaît pour la prévenir.',
+    roll: 'Fin octobre, on regarde ce qui a été dépensé et on estime les 12 mois suivants en prolongeant le rythme des trois derniers mois.',
+    camp: 'Chaque direction reçoit une demande de budget avec une date limite. La direction commerciale remplit ses lignes (publicité, déplacements, salons), puis envoie.',
+    collecte: 'Le directeur financier suit qui a rendu sa copie : ici, une direction a envoyé son budget et quatre sont encore en brouillon.',
+    arb: 'Le comité compare la demande de chaque direction à son enveloppe, puis accepte, réduit ou rejette ligne par ligne.',
+    bud: 'Un petit budget « IT & Digital 2027 » regroupe des lignes de la vie courante : ordinateurs portables, licences Microsoft 365, hébergement.',
+    inv: 'Acheter 20 ordinateurs portables à 3 millions pièce, c’est 60 millions d’investissement. On le planifie par trimestre pour savoir quand l’argent sortira.',
+    bkdec: 'Un gros paiement de 200 millions tombe en mars : on vérifie qu’il y aura assez d’argent en banque ce mois-là.',
+    revis: 'La publicité coûte moins cher que prévu : on déplace 10 millions vers les déplacements commerciaux. Ce transfert est une révision.',
+    engage: 'On commande 20 ordinateurs : c’est un engagement. L’argent n’est pas encore sorti, mais il est réservé sur le budget.',
+    real: 'Le fournisseur livre les ordinateurs et envoie sa facture : la charge est maintenant réalisée.',
+    decaiss: 'La facture est payée par virement : c’est un décaissement.',
+    encaiss: 'Un client règle sa facture de licences : c’est un encaissement.',
+    ecarts: 'La ligne « Missions et déplacements » dépasse de 20 % : son responsable explique pourquoi (un salon qui n’était pas prévu).',
+    alertes: 'Quand une ligne atteint 90 % de son budget, une alerte orange prévient ; à 100 %, l’alerte devient rouge.',
+    cash: 'Recettes moins dépenses du mois : c’est ce qu’il reste vraiment en caisse.',
+    pluri: 'On suit le budget IT & Digital sur 2024-2027 pour voir s’il grossit plus vite que le chiffre d’affaires.',
+    rapports: 'L’état « Budget et réalisations » s’édite en un clic pour le conseil d’administration.',
+    prev: 'Si on continue au même rythme, on finira l’année à 3,4 milliards de dépenses pour un budget de 3,5 milliards.',
+    dispo: 'Budget 100, déjà engagé 60 : il reste 40 de disponible. Au-delà, plus de commande possible sans révision.',
+    ctrl: 'Règle : « une dépense de plus de 5 millions doit être validée par la direction financière ».',
+    notifcfg: 'Quand un budget est envoyé, le contrôleur de gestion reçoit un message pour le vérifier.',
+    orga: 'La Direction Financière contient la Comptabilité et le Contrôle de gestion : ce sont ses services.',
+    roles: 'Le groupe « Responsable de centre » peut saisir le budget de son service, mais pas le valider.',
+    usr: 'On rattache Mialy à la direction IT & Digital : elle ne voit que le budget de cette direction.',
+    regime: 'En mode Simple, on saisit directement le budget. En mode Avancé, on lance une campagne et chaque direction remplit sa part.',
+    list: 'Le cadre budgétaire dit : « montants en MGA, une ligne par dépense, un budget par direction ».',
+    trev: 'Le type « Réallocation entre lignes » ne change pas le total du budget ; « Budget supplémentaire » l’augmente.',
+    rclot: 'On ne ferme pas l’année tant qu’une révision est encore en cours.'
+  };
+  function entExample(name, vn) {
+    document.querySelectorAll('.ent-ex').forEach(function (e) { e.remove(); });
+    var k = MENU_OF[name] || name, t = ENT_EX[k] || ENT_EX[name], v = document.getElementById('v-' + vn), h = v && v.querySelector(':scope > .head'); if (!t || !h) return;
+    var d = document.createElement('div'); d.className = 'callout ent-ex'; d.style.cssText = 'margin:12px 0;background:var(--info-bg,#F1F5FF);color:#2E427B'; d.innerHTML = '<b>Exemple simple</b> — '; d.appendChild(document.createTextNode(t)); h.parentNode.insertBefore(d, h.nextSibling);
+  }
+  var ENT_WORDS = [['PTBA et PTA V1 · PPM et plan de décaissement en vigueur', 'Budget 2026 V1 · révisions en vigueur'], ['Plans de référence', 'Budget de référence'], ['PTBA de référence', 'budget de référence'], ['Budget 2027 — Ministère de l’Éducation', 'Budget 2027 — SoftWell Madagascar'], ['Ministère de l’Éducation', 'SoftWell Madagascar'], ['chaque projet a un responsable', 'chaque investissement a un responsable'], ['un budget ou un projet sur plusieurs', 'un budget ou une direction sur plusieurs'], ['groupe de rôles du projet', 'groupe de rôles'], ['des groupes de rôles du projet', 'des groupes de rôles']];
+  function entVocab(vn) {
+    var v = document.getElementById('v-' + vn); if (!v) return; var w = document.createTreeWalker(v, NodeFilter.SHOW_TEXT, null), n, list = [];
+    while ((n = w.nextNode())) list.push(n);
+    list.forEach(function (t) { var s = t.nodeValue; if (!s || /^\s*$/.test(s)) return; ENT_WORDS.forEach(function (p) { if (s.indexOf(p[0]) >= 0) s = s.split(p[0]).join(p[1]); }); if (s !== t.nodeValue) t.nodeValue = s; });
+    v.querySelectorAll('th').forEach(function (th) { if (th.textContent.trim() === 'Programme') th.textContent = 'Catégorie'; });
+  }
+  function entFinish(name, vn) { if (typeof activeCode !== 'function' || activeCode() !== 'ent') { document.querySelectorAll('.ent-ex').forEach(function (e) { e.remove(); }); return; } entVocab(vn); entExample(name, vn); }
   /* ----- Entreprise : report et clôture de l'exercice ----- */
   var CLOT = { '2025': { st: 'Clôturé', on: '31/01/2026 17:40', by: 'RANDRIA Haja' }, '2026': { st: 'En cours' }, '2027': { st: 'À venir' } };
   var CLOTV = { ex: '2026' };
