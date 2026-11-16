@@ -24399,6 +24399,11 @@ function pcRenderEnv(){
     .dp-chart svg { min-width: 560px; }
     .gu-tool > * { flex: 1 1 100%; width: 100%; max-width: none; }
     .gu-tool select, .gu-tool input { width: 100%; }
+    .view > .head .actions { display: flex; flex-direction: row; flex-wrap: wrap; align-items: stretch; justify-content: stretch; gap: 8px; width: 100%; }
+    .view > .head .actions .dock-mirror { display: flex; flex: 1 1 100%; gap: 8px; width: 100%; }
+    .view > .head .actions .dock-mirror .btn { flex: 1 1 0; width: auto; min-width: 0; }
+    .view > .head .actions .btn, .sb-fp-head .actions > .btn { flex: 1 1 calc(50% - 8px); width: auto; min-width: 0; margin: 0; }
+    .view > .head .actions .btn.primary, .sb-fp-head .actions > .btn.primary { flex: 1 1 100%; order: 9; }
     .fgrid > *, .gu-modal .body > * { min-width: 0; }
     .field, select.field, input.field, textarea.field { max-width: 100%; box-sizing: border-box; }
     .gu-modal .btn.small, .gu-modal .btn { max-width: 100%; white-space: normal; }
