@@ -12713,9 +12713,24 @@ function fmAxes() {
       b1.addEventListener('click', function () { document.getElementById('cv-view-title').textContent = 'Campagne consolidée — ' + (c ? c.code : r.camp); cvRender(document.getElementById('cv-view-body'), r, true); document.getElementById('cv-view').hidden = false; });
       var b2 = cvEl('button', 'btn small', 'Relancer'); b2.type = 'button'; b2.disabled = r.st !== 'En validation'; if (b2.disabled) b2.title = 'Seule une validation en cours peut être relancée.';
       b2.addEventListener('click', function () { r.hist.unshift({ t: 'Relance envoyée à ' + r.validator, by: ME, on: nowStr() }); renderValCfg(); cvSay('cv-msg', 'Relance envoyée à ' + r.validator + ' pour ' + r.camp + '.'); });
-      act.appendChild(b1); act.appendChild(b2);
+      var b3 = cvEl('button', 'btn small', 'Aperçu PTBA'), b4 = cvEl('button', 'btn small', 'Aperçu PTA'); b3.type = b4.type = 'button';
+      b3.addEventListener('click', function () { bvPreview(r, 'ptba'); }); b4.addEventListener('click', function () { bvPreview(r, 'pta'); });
+      act.appendChild(b1); act.appendChild(b3); act.appendChild(b4); act.appendChild(b2); act.style.whiteSpace = 'nowrap';
       body.appendChild(tr);
     });
+  }
+  /* Aperçu global du PTBA ou du PTA tel qu'il sera généré une fois la campagne validée */
+  function bvPreview(r, kind) {
+    var tv = kind === 'pta' ? bvPta(r) : bvPtba(r), nm = kind === 'pta' ? 'PTA' : 'PTBA', d = bvData(r), w = cvEl('div');
+    var tot = d.lines.reduce(function (s, x) { return s + (x.l.dem || 0); }, 0), inds = kind === 'pta' ? tv.rows.filter(function (x) { return x.k === 'ind'; }).length : 0;
+    var sum = cvEl('div', 'callout'); sum.style.marginBottom = '12px';
+    sum.textContent = kind === 'pta' ? 'Aperçu du PTA : ' + pl(inds, 'indicateur') + ' et ' + d.lines.length + ' ' + (d.lines.length > 1 ? 'travaux' : 'travail') + ', répartis par site et par mois.' : 'Aperçu du PTBA : ' + pl(d.lines.length, 'ligne') + ' pour ' + fmt(tot) + ' MGA, répartis par site, par axe et par mois.';
+    w.appendChild(sum);
+    var sc = cvEl('div', 'scroll'), tb = cvEl('table'); tb.style.minWidth = (tv.head.length * 90) + 'px';
+    tb.innerHTML = '<thead><tr>' + tv.head.map(function (h, i) { return '<th' + (i >= tv.numFrom ? ' class="num"' : '') + '>' + escH(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + (tv.rows.length ? tv.rows.map(function (x) { return '<tr' + (x.k ? ' style="font-weight:600;background:#F6F7F9"' : '') + '>' + x.c.map(function (c, i) { return '<td' + (i >= tv.numFrom ? ' class="num"' : '') + '>' + escH(typeof c === 'number' ? fmt(c) : c) + '</td>'; }).join('') + '</tr>'; }).join('') : '<tr><td colspan="' + tv.head.length + '">Aucune ligne dans cette campagne.</td></tr>') + '</tbody>';
+    sc.appendChild(tb); w.appendChild(sc);
+    var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn primary', 'Fermer'); bc.type = 'button'; ft.appendChild(bc); w.appendChild(ft); bc.addEventListener('click', guModalClose);
+    guModal(nm + ' — ' + (d.c ? d.c.code + ' ' + d.c.lib : r.camp), w, 1100);
   }
   function renderArb() {
     renderValCfg();
