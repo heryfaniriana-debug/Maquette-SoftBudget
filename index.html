@@ -6916,6 +6916,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'plana' && typeof planaRender === 'function') planaRender();
     if (name === 'sites' && typeof sitesRender === 'function') sitesRender();
     if (name === 'orga' && typeof orgaRender === 'function') orgaRender();
+    if (name === 'camp' && typeof renderCamps === 'function') renderCamps();
     if (name === 'usr' && typeof guRender === 'function') guRender();
     if (name === 'roles' && typeof roRender === 'function') roRender();
     if (name === 'alrt' && typeof alrRender === 'function') alrRender();
@@ -7019,7 +7020,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   function prNote(t, k) { noteTo('mode-note', t, k); }
   function applyMenus() {
     var code = activeCode(), adv = modes[code] === 'Avancé';
-    var rules = { bud: !adv, camp: adv, collecte: adv, arb: adv, parcours: adv, ctpl: adv, valid: adv, ptba: code === 'prj' };
+    var el = !(code === 'ent' && typeof REG !== 'undefined' && REG.ent && REG.ent.mods && REG.ent.mods.elab === false), ad = adv && el;
+    var rules = { bud: !ad, camp: ad, collecte: ad, arb: ad, parcours: ad, ctpl: ad, valid: ad, ptba: code === 'prj' };
     var ap = document.querySelector('.sub button[data-go="appr"]'); if (ap) ap.textContent = 'Budgets verrouillés';
     Object.keys(rules).forEach(function (k) {
       document.querySelectorAll('.sub button[data-go="' + k + '"]').forEach(function (b) { b.style.display = rules[k] ? '' : 'none'; });
@@ -9683,16 +9685,16 @@ function fmAxes() {
       ],
       versions: [{ v: 1, st: 'Active', on: '20/06/2026 09:00', by: ME, bud: 2, n: 6 }],
       aff: [] },
-    { id: 'm3', name: 'Parcours Entreprise avancé', prof: 'Entreprise', status: 'Brouillon', ver: 0, dirty: false, derog: { allow: false, role: 'Direction Générale' },
+    { id: 'm3', name: 'Parcours Entreprise avancé', prof: 'Entreprise', status: 'Actif', ver: 1, dirty: false, derog: { allow: false, role: 'Direction Générale' },
       steps: [
         mkStep('Lancement de campagne', 'Lancement', { rv: 'Responsable budgétaire' }),
         mkStep('Collecte des besoins', 'Collecte', { rv: 'Chef de service', conds: ['compl'] }),
         mkStep('Arbitrage', 'Arbitrage', { rv: 'Comité d’arbitrage', conds: ['dec'], valid: true, motif: true }),
         mkStep('Consolidation', 'Consolidation', { rv: 'Contrôleur de gestion', conds: ['compl'] }),
         mkStep('Validation', 'Validation', { rt: 'Service', rv: 'Direction Financière', conds: ['dec'], valid: true, motif: true }),
-        mkStep('Approbation', 'Approbation', { rt: 'Service', rv: '', conds: ['dec'], valid: true, motif: false })
+        mkStep('Approbation', 'Approbation', { rt: 'Fonction', rv: 'Directeur général', conds: ['dec'], valid: true, motif: true, notif: ['Responsable de l’étape', 'Préparateur'] })
       ],
-      versions: [], aff: [] }
+      versions: [{ v: 1, st: 'Active', on: '15/09/2026 11:00', by: ME, bud: 0, n: 6 }], aff: [] }
   ];
   var pc = null;
 
@@ -10119,7 +10121,15 @@ function fmAxes() {
       { c: '2.3', l: 'Acheter du matériel médical', nat: '60', ref: 280000000 }
     ]
   };
-  function planLines(name) { return (PLAN[name] || []).map(function (l) { return { c: l.c, l: l.l, nat: l.nat, ref: l.ref, dem: null, just: '' }; }); }
+  /* lignes proposées aux directions de l'entreprise (kept apart from the project's analytical plan) */
+  var PLAN_ENT = {
+    'Direction Générale': [{ c: '1.1', l: 'Frais de direction et représentation', nat: '60', ref: 120000000 }, { c: '1.2', l: 'Honoraires et conseils', nat: '62', ref: 90000000 }],
+    'Direction Financière': [{ c: '2.1', l: 'Honoraires d’audit et d’expertise', nat: '62', ref: 140000000 }, { c: '2.2', l: 'Fournitures et frais de bureau', nat: '60', ref: 70000000 }, { c: '2.3', l: 'Frais bancaires et assurances', nat: '62', ref: 85000000 }],
+    'Direction Commerciale': [{ c: '3.1', l: 'Missions et déplacements', nat: '62', ref: 60000000 }, { c: '3.2', l: 'Publicité et promotion', nat: '62', ref: 180000000 }, { c: '3.3', l: 'Salons et événements', nat: '62', ref: 95000000 }],
+    'IT & Digital': [{ c: '4.1', l: 'Postes de travail', nat: '21', ref: 400000000 }, { c: '4.2', l: 'Serveurs et hébergement', nat: '21', ref: 500000000 }, { c: '4.3', l: 'Licences logicielles', nat: '60', ref: 700000000 }],
+    'Ressources Humaines': [{ c: '5.1', l: 'Formation du personnel', nat: '62', ref: 110000000 }, { c: '5.2', l: 'Recrutement et intégration', nat: '62', ref: 65000000 }, { c: '5.3', l: 'Œuvres sociales', nat: '60', ref: 50000000 }]
+  };
+  function planLines(name) { return (PLAN[name] || PLAN_ENT[name] || []).map(function (l) { return { c: l.c, l: l.l, nat: l.nat, ref: l.ref, dem: null, just: '' }; }); }
   var TPLS = ['Modèle de saisie standard (nature de dépense)', 'Modèle de saisie PTBA (activité et source de financement)'];
   var camps = [
     { code: 'CAMP-2027-01', lib: 'Campagne 2027 — Projet Écoles et Santé', prof: 'Projet / Programme', ex: '2027', model: 'm2', mver: 1, open: '01/10/2026', close: '05/11/2026', st: 'En collecte', tpl: TPLS[1],
@@ -10141,6 +10151,19 @@ function fmAxes() {
       hist: [
         { t: 'Collecte clôturée — toutes les contributions acceptées', by: ME, on: '31/07/2025 18:00' },
         { t: 'Campagne ouverte — 2 contributeurs notifiés', by: ME, on: '01/07/2025 08:00' }
+      ] },
+    { code: 'CAMP-2027-04', lib: 'Campagne budgétaire 2027 — SoftWell Madagascar', prof: 'Entreprise', ex: '2027', model: 'm3', mver: 1, open: '01/10/2026', close: '30/11/2026', st: 'En collecte', tpl: TPLS[0],
+      instr: 'Chaque direction prépare son budget 2027 : charges, achats, investissements. Justifiez toute variation de plus de 10 % par rapport à 2026.',
+      perims: [
+        { p: 'Direction Générale', who: 'RAVELO Fanja', st: 'Brouillon', amt: 0, min: null, env: null },
+        { p: 'Direction Financière', who: 'RANDRIA Haja', st: 'Brouillon', amt: 0, min: null, env: null },
+        { p: 'Direction Commerciale', who: 'RAKOTO Hanta', st: 'Brouillon', amt: 0, min: null, env: null },
+        { p: 'IT & Digital', who: 'ANDRIANARIVO Mialy', st: 'Soumise', amt: 1650000000, min: null, env: null },
+        { p: 'Ressources Humaines', who: 'RASOARIMALALA Voahangy Lalao', st: 'Brouillon', amt: 0, min: null, env: null }
+      ],
+      hist: [
+        { t: 'Campagne ouverte — 5 contributeurs notifiés', by: ME, on: '01/10/2026 08:00' },
+        { t: 'Campagne créée (brouillon)', by: ME, on: '24/09/2026 16:45' }
       ] }
   ];
   var cdCur = null;
@@ -10209,10 +10232,12 @@ function fmAxes() {
   }
   function modelOf(c) { return models.filter(function (m) { return m.id === c.model; })[0]; }
 
+  /* campagnes du profil actif seulement */
+  function campsActive() { var nm = { ent: 'Entreprise', pub: 'Entité publique', prj: 'Projet / Programme' }[typeof activeCode === 'function' ? activeCode() : '']; return nm ? camps.filter(function (c) { return c.prof === nm; }) : camps; }
   function renderCamps() {
     var body = document.getElementById('cm-body');
     body.innerHTML = '';
-    camps.forEach(function (c) {
+    campsActive().forEach(function (c) {
       var tr = document.createElement('tr');
       var paL = c.par ? parById(c.par) : null;
       cell(tr, c.code); cell(tr, c.lib, 'name'); cell(tr, paL ? paL.lib : c.prof); cell(tr, c.ex + (c.per && c.per !== 'Exercice' ? ' · ' + c.per : ''));
@@ -10575,7 +10600,7 @@ function fmAxes() {
     while (cur <= end) { var yi = CPAD.years.indexOf(cur.getFullYear()); if (yi >= 0) tot += (env[yi] || 0) / 12; cur.setMonth(cur.getMonth() + 1); }
     return Math.round(tot) || null;
   }
-  function prjCampHide() { var pj = activeCode() === 'prj'; if (pj) ['cm-tpl'].forEach(function (id) { document.getElementById(id).parentNode.hidden = true; }); document.getElementById('cm-pj-w').hidden = !pj; var sw = document.getElementById('cm-sites-w'); sw.hidden = !pj; if (pj) { var sb = document.getElementById('cm-sites'), old = {}; sb.querySelectorAll('input').forEach(function (i) { old[i.value] = i.checked; }); sb.innerHTML = ''; sitesList().filter(function (x) { return x.on; }).forEach(function (x) { var l = mkChk(old[x.code] !== false, x.nom, function () { }); l.querySelector('input').value = x.code; sb.appendChild(l); l.querySelector('input').addEventListener('change', cmSitesUpd); }); cmSitesUpd(); } }
+  function prjCampHide() { var pj = activeCode() === 'prj'; if (pj) ['cm-tpl'].forEach(function (id) { document.getElementById(id).parentNode.hidden = true; }); document.getElementById('cm-pj-w').hidden = !(pj || activeCode() === 'ent'); var sw = document.getElementById('cm-sites-w'); sw.hidden = !pj; if (pj) { var sb = document.getElementById('cm-sites'), old = {}; sb.querySelectorAll('input').forEach(function (i) { old[i.value] = i.checked; }); sb.innerHTML = ''; sitesList().filter(function (x) { return x.on; }).forEach(function (x) { var l = mkChk(old[x.code] !== false, x.nom, function () { }); l.querySelector('input').value = x.code; sb.appendChild(l); l.querySelector('input').addEventListener('change', cmSitesUpd); }); cmSitesUpd(); } }
   function prjCampSync(pa) {
     var prj = activeCode() === 'prj';
     document.querySelector('label[for="cm-par"]').firstChild.nodeValue = prj ? 'Configuration ' : 'Paramétrage ';
@@ -11522,7 +11547,7 @@ function fmAxes() {
 
   /* Initialisation */
   function renderCollecte() {
-    var cs = camps.filter(function (c) { return c.st === 'En collecte'; });
+    var cs = campsActive().filter(function (c) { return c.st === 'En collecte'; });
     var sel = document.getElementById('co-camp');
     var prev = sel.value;
     sel.innerHTML = '';
@@ -15517,28 +15542,30 @@ var EXEC_REC = [
   function regRender() {
     var ok = ACC === 'admin', dn = document.getElementById('reg-deny'), mn = document.getElementById('reg-main'); dn.hidden = ok; mn.hidden = !ok;
     if (!ok) { dn.textContent = 'Le régime d’exécution et les modules se configurent par l’administrateur. Changez « Mon accès » dans États à éditer pour y accéder.'; return; }
-    var sel = document.getElementById('reg-prof'), cur = activeCode() === 'prj' ? 'prj' : (sel.value || activeCode());
+    var sel = document.getElementById('reg-prof'), cur = (activeCode() === 'prj' || activeCode() === 'ent') ? activeCode() : (sel.value || activeCode());
     sel.innerHTML = Object.keys(REG_NAMES).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + REG_NAMES[k] + (k === activeCode() ? ' (profil actif)' : '') + '</option>'; }).join('');
-    REG.prj.mode = modes.prj; REG.prj.mods.elab = REG.prj.mods.elab !== false;
+    REG.prj.mode = modes.prj; REG.prj.mods.elab = REG.prj.mods.elab !== false; REG.ent.mode = modes.ent; REG.ent.mods.elab = REG.ent.mods.elab !== false;
     REGD = bkClone(REG[sel.value]);
     regDraw(); if (typeof regArchRender === 'function') regArchRender();
   }
   function regDraw() {
     var code = document.getElementById('reg-prof').value, cfg = REGD, saved = REG[code];
     document.getElementById('reg-mode').textContent = 'Mode ' + modes[code] + ' (défini dans Profils et modes).';
-    var pj = code === 'prj' && activeCode() === 'prj';
+    var pj = (code === 'prj' || code === 'ent') && activeCode() === code, isPrj = code === 'prj';
     document.getElementById('reg-prev').closest('.panel').style.display = pj ? 'none' : '';
     document.getElementById('reg-modebox').hidden = !pj; document.getElementById('reg-profbox').hidden = pj; document.getElementById('reg-regbox').hidden = pj;
-    var rh = document.querySelector('#v-regime .head h1'), rp = document.querySelector('#v-regime .head p'); if (rh) rh.textContent = pj ? 'Général' : 'Régime et modules'; if (rp) rp.textContent = pj ? 'Le mode de gestion du projet et les modules activés. Le choix du profil se fait avec le sélecteur SoftBudget en haut.' : 'Le menu se compose à partir du profil, du mode et du régime d’exécution. Chaque module s’active séparément.';
+    var rh = document.querySelector('#v-regime .head h1'), rp = document.querySelector('#v-regime .head p'); if (rh) rh.textContent = pj ? 'Général' : 'Régime et modules'; if (rp) rp.textContent = pj ? 'Le mode de gestion ' + (isPrj ? 'du projet' : 'de l’entreprise') + ' et les modules activés. Le choix du profil se fait avec le sélecteur SoftBudget en haut.' : 'Le menu se compose à partir du profil, du mode et du régime d’exécution. Chaque module s’active séparément.';
     var cc = document.querySelector('#crumbs .current'); if (pj && cc && document.getElementById('v-regime').classList.contains('on')) cc.textContent = 'Général';
     document.querySelectorAll('#reg-modeseg button').forEach(function (b) { b.classList.toggle('on', b.dataset.mode === cfg.mode); });
-    document.getElementById('reg-modehint').textContent = cfg.mode === 'Avancé' ? 'Avancé : l’élaboration (campagnes, collecte, validation) et le compte administratif sont disponibles.' : 'Simple : le projet saisit directement ses plans ; l’élaboration et le compte administratif ne sont pas proposés.';
+    document.getElementById('reg-modehint').textContent = cfg.mode === 'Avancé' ? 'Avancé : l’élaboration (campagnes, collecte, validation) et le compte administratif sont disponibles.' : (isPrj ? 'Simple : le projet saisit directement ses plans ; l’élaboration et le compte administratif ne sont pas proposés.' : 'Simple : les budgets se saisissent directement, sans campagne ni collecte auprès des centres.');
+    if (!isPrj && cfg.mode === 'Avancé') document.getElementById('reg-modehint').textContent = 'Avancé : l’élaboration (campagnes, collecte auprès des centres de responsabilité, validation) est disponible.';
     document.getElementById('reg-regime').innerHTML = Object.keys(REGIMES).map(function (k) { return '<option value="' + k + '"' + (k === cfg.regime ? ' selected' : '') + '' + '>' + REGIMES[k] + '' + '</option>'; }).join('');
     document.getElementById('reg-regime-h').textContent = { importe: 'L’exécution arrive par synchronisation ou import (SoftAccounting, SoftDocs, e-Procurement). Le menu Exécution est celui d’aujourd’hui.', projet: 'Le budget gère l’engagement, la liquidation et le règlement, avec visas, ANO et compte administratif. Conçu pour les projets cofinancés par un bailleur.', 'public': 'Engagement visé par le Contrôleur financier, liquidation, mandats émis par l’ordonnateur et paiement par l’agent comptable via Soft e-Payment. Conçu pour les entités publiques.' }[cfg.regime];
     var circ = cfg.regime !== 'importe';
     if (!circ) { cfg.mods.cadm = false; cfg.mods.multi = false; cfg.mods.sync = true; }
     var M = [['treso', 'Trésorerie bancaire', 'Comptes, budgets de décaissement, relevés et rapprochement', false], ['cadm', 'Saisie dans le compte administratif', 'Première méthode de suivi : engagements, liquidations, mandats et paiements saisis dans SoftBudget — nécessite un circuit natif', !circ], ['sync', 'Synchronisation ou import des données d’exécution', 'Seconde méthode : comptabilité ou fichier Excel. Activée avec la saisie, elle ajoute le rapprochement des deux sources', !circ], ['pluri', 'Suivi pluriannuel', 'Suivi budgétaire sur plusieurs exercices (Analyses)', false], ['multi', 'Multi-bailleurs et multi-devises', 'Sources de financement et taux de change — circuit projet uniquement', cfg.regime !== 'projet']];
-    if (pj) { var sm = cfg.mode === 'Simple'; M = [['elab', 'Élaboration', 'Campagnes, collecte et validation des budgets — mode Avancé seulement', sm, sm], ['cadm', 'Compte administratif', 'Engagements, liquidations, ordonnancement et paiements saisis dans SoftBudget — mode Avancé seulement', sm, sm], ['sync', 'Exécution : synchronisation et import', 'Données d’exécution venant de la comptabilité ou d’un fichier Excel — toujours activé', true, false, true], ['pluri', 'Suivi pluriannuel', 'Menu Analyses : suivi sur plusieurs exercices — toujours activé', true, false, true], ['multi', 'Bailleurs, sources de financement et taux de change', 'Menus du Cadre du projet pour le multi-bailleurs et les devises — toujours activé', true, false, true]]; cfg.mods.sync = cfg.mods.pluri = cfg.mods.multi = true; } /* projet : plus de trésorerie bancaire, modules nommés comme les menus */
+    if (pj && !isPrj) { var sme = cfg.mode === 'Simple'; cfg.mods.sync = true; cfg.mods.cadm = false; cfg.mods.multi = false; M = [['elab', 'Élaboration', 'Campagnes, collecte auprès des centres et validation des budgets — mode Avancé seulement', sme, sme], ['treso', 'Trésorerie', 'Plan de trésorerie, relevés bancaires et rapprochement', false], ['sync', 'Exécution : import des réalisations', 'Réalisations importées de la comptabilité ou d’un fichier Excel — toujours activé', true, false, true], ['pluri', 'Suivi pluriannuel', 'Menu Analyses : suivi sur plusieurs exercices', false]]; }
+    if (pj && isPrj) { var sm = cfg.mode === 'Simple'; M = [['elab', 'Élaboration', 'Campagnes, collecte et validation des budgets — mode Avancé seulement', sm, sm], ['cadm', 'Compte administratif', 'Engagements, liquidations, ordonnancement et paiements saisis dans SoftBudget — mode Avancé seulement', sm, sm], ['sync', 'Exécution : synchronisation et import', 'Données d’exécution venant de la comptabilité ou d’un fichier Excel — toujours activé', true, false, true], ['pluri', 'Suivi pluriannuel', 'Menu Analyses : suivi sur plusieurs exercices — toujours activé', true, false, true], ['multi', 'Bailleurs, sources de financement et taux de change', 'Menus du Cadre du projet pour le multi-bailleurs et les devises — toujours activé', true, false, true]]; cfg.mods.sync = cfg.mods.pluri = cfg.mods.multi = true; } /* projet : plus de trésorerie bancaire, modules nommés comme les menus */
     document.getElementById('reg-mods').innerHTML = M.map(function (m) { return '<label class="chk"' + (m[3] && !m[5] ? ' style="opacity:.55"' : '') + '><input type="checkbox" data-mod="' + m[0] + '"' + (cfg.mods[m[0]] && !m[4] ? ' checked' : '') + (m[3] ? ' disabled' : '') + '> <b>' + m[1] + '</b> <span style="color:#5B606D">— ' + m[2] + '</span></label>'; }).join('');
     document.querySelectorAll('#reg-mods input').forEach(function (i) { i.addEventListener('change', function () { cfg.mods[i.dataset.mod] = i.checked; regDraw(); }); });
     var pv = menuPreview(code, cfg);
@@ -15559,7 +15586,7 @@ var EXEC_REC = [
     var before = menuPreview(code, old), after = menuPreview(code, nw), added = [], removed = [];
     after.forEach(function (g, gi) { g.items.forEach(function (it, ii) { var b = before[gi].items[ii]; if ((it[1] || it[2]) && !(b[1] || b[2])) added.push(it[0]); if (!(it[1] || it[2]) && (b[1] || b[2])) removed.push(it[0]); }); });
     REG[code] = bkClone(nw);
-    if (code === 'prj' && nw.mode && nw.mode !== modes.prj) { modes.prj = nw.mode; auditAdd('Configuration', 'Général', 'Mode de gestion du projet : ' + nw.mode); refreshProfiles(); }
+    if ((code === 'prj' || code === 'ent') && nw.mode && nw.mode !== modes[code]) { modes[code] = nw.mode; auditAdd('Configuration', 'Général', 'Mode de gestion ' + (code === 'prj' ? 'du projet' : 'de l’entreprise') + ' : ' + nw.mode); refreshProfiles(); }
     auditAdd('Configuration', 'Régime et modules', REG_NAMES[code] + ' : ' + REGIMES[nw.regime] + ' · modules ' + Object.keys(nw.mods).filter(function (k) { return nw.mods[k]; }).join(', '));
     applyRegime();
     bkMsg('reg-msg', 'Configuration enregistrée pour ' + REG_NAMES[code] + '.' + (added.length ? ' Entrées ajoutées : ' + added.join(', ') + '.' : '') + (removed.length ? ' Entrées retirées : ' + removed.join(', ') + '.' : '') + (code !== activeCode() ? ' Elle s’appliquera quand ce profil sera actif.' : ''), 'ok');
@@ -19697,7 +19724,7 @@ var EXEC_REC = [
   PARAMS.forEach(function (pa) { if (PARMODEL[pa.id]) pa.model = PARMODEL[pa.id]; });
   BUDGETS.forEach(function (b) { b.par = BUDPAR[b.code]; if (!b.per) b.per = 'Exercice'; var pa = PARAMS.filter(function (x) { return x.id === b.par; })[0]; if (pa) b.period = pa.period; });
   /* Campagnes d’exemple : rattachées à un paramétrage, avec une enveloppe maximale par périmètre */
-  var CAMPPAR = { 'CAMP-2027-01': ['PAR-008', 'BUD-2026-004'], 'CAMP-2026-02': ['PAR-008', 'BUD-2026-004'], 'CAMP-2027-03': ['PAR-009', 'BUD-2026-005'] };
+  var CAMPPAR = { 'CAMP-2027-01': ['PAR-008', 'BUD-2026-004'], 'CAMP-2026-02': ['PAR-008', 'BUD-2026-004'], 'CAMP-2027-03': ['PAR-009', 'BUD-2026-005'], 'CAMP-2027-04': ['PAR-001', 'BUD-2026-001'] };
   var MIN0 = { 'Direction des Infrastructures': 3950000000, 'Direction Administrative et Financière': 1500000000, 'Cabinet': 300000000 };
   var ENV0 = { 'Direction de l’Enseignement fondamental': 8400000000, 'Direction de l’Enseignement supérieur': 4200000000, 'Direction des Infrastructures': 4000000000, 'Direction Administrative et Financière': 1700000000, 'Inspection générale': 500000000, 'Cabinet': 400000000 };
   camps.forEach(function (c) {
