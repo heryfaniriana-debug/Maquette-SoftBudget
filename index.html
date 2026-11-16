@@ -2016,6 +2016,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="sub">
           <button class="on" data-go="list" title="Paramétrage des budgets">Paramétrage</button>
           <button data-go="cadr" title="Cadrage : chiffre d’affaires, marge, hypothèses et enveloppes" style="display:none">Cadrage</button>
+          <button data-go="perso" title="Charges de personnel : effectifs, recrutements et masse salariale" style="display:none">Charges de personnel</button>
           <button data-go="camp" title="Campagnes budgétaires">Campagnes</button>
           <button data-go="collecte" title="Collecte et consolidation">Collecte</button>
           <button data-go="arb" title="Valider les données collectées">Validation</button>
@@ -5599,6 +5600,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div id="cadr-body"></div>
       </section>
 
+      <section class="view" id="v-perso">
+        <div class="head"><div><h1>Charges de personnel</h1><p>Effectifs, recrutements et masse salariale par direction : les postes, leur salaire, les charges patronales et les primes donnent le coût du personnel, comparé à l’enveloppe de chaque direction.</p></div>
+          <div class="actions"><button class="btn" id="perso-reopen" hidden>Rouvrir</button><button class="btn" id="perso-valid">Valider les charges de personnel</button><button class="btn primary" id="perso-new">+ Ajouter un poste</button></div></div>
+        <div class="callout" id="perso-msg" hidden style="margin-bottom:12px"></div>
+        <div id="perso-body"></div>
+      </section>
+
       <section class="view" id="v-orga">
         <div class="head"><div><h1>Organisation</h1><p>L’organigramme de l’entreprise : directions, services et centres de responsabilité. Chaque ligne de budget et chaque utilisateur se rattache à un centre.</p></div>
           <div class="actions"><button class="btn primary" id="orga-new">+ Nouveau centre</button></div></div>
@@ -6849,6 +6857,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     sites: ['Paramètres', 'Sites'],
     orga: ['Paramètres', 'Organisation'],
     cadr: ['Élaboration', 'Cadrage budgétaire'],
+    perso: ['Élaboration', 'Charges de personnel'],
     usr: ['Paramètres', 'Utilisateurs et droits'],
     roles: ['Paramètres', 'Groupes de rôles'],
     echeanc: ['Paramètres', 'Échéances'],
@@ -6872,7 +6881,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var homeSvg = '<svg class="ico" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>';
 
   var NAVGROUPS = {
-    'nav-budgets': ['list', 'cadr', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
+    'nav-budgets': ['list', 'cadr', 'perso', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss', 'sxeng', 'sxliq', 'sxpay', 'sxenc', 'sxphy', 'trpos'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-plan': ['ptba', 'pta', 'ppm', 'ppmk', 'pdec', 'revpl', 'rep'],
@@ -6926,6 +6935,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'sites' && typeof sitesRender === 'function') sitesRender();
     if (name === 'orga' && typeof orgaRender === 'function') orgaRender();
     if (name === 'cadr' && typeof cadrRender === 'function') cadrRender();
+    if (name === 'perso' && typeof persRender === 'function') persRender();
     if (name === 'camp' && typeof renderCamps === 'function') renderCamps();
     if (name === 'usr' && typeof guRender === 'function') guRender();
     if (name === 'roles' && typeof roRender === 'function') roRender();
@@ -15184,7 +15194,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="cadr"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="cadr"]', code === 'ent'); regSetVis('.sub button[data-go="perso"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
     prmMenu(code); if (typeof siteCtxSync === 'function') siteCtxSync();
     regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code === 'pub'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
@@ -19034,6 +19044,77 @@ var EXEC_REC = [
     dirConfirm('Valider le cadrage ' + ex, 'Valider le cadrage ' + ex + ' ? Les enveloppes deviennent le plafond de chaque direction dans la campagne.', 'Valider', function () { c.st = 'Validé'; cadrSync(ex); auditAdd('Validation', 'Cadrage ' + ex, 'Cadrage validé : chiffre d’affaires ' + fmt(T.ca) + ' MGA, marge ' + fmt(T.mg) + ' MGA, enveloppes ' + fmt(T.env) + ' MGA'); cadrMsg('Cadrage ' + ex + ' validé : les enveloppes sont reprises par les campagnes.'); cadrRender(); });
   });
   document.getElementById('cadr-reopen').addEventListener('click', function () { var ex = CADV.ex; dirConfirm('Rouvrir le cadrage', 'Rouvrir le cadrage ' + ex + ' ? Il repasse en brouillon ; les enveloppes déjà reprises par les campagnes restent en vigueur jusqu’à la prochaine validation.', 'Rouvrir', function () { cadrOf(ex).st = 'Brouillon'; auditAdd('Configuration', 'Cadrage ' + ex, 'Cadrage rouvert'); cadrMsg('Cadrage ' + ex + ' rouvert.', 'info'); cadrRender(); }); });
+  /* ----- Entreprise : charges de personnel (postes, recrutements, salaires, charges patronales, primes) ----- */
+  var PERS_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  var PERSO = {
+    '2027': { st: 'Brouillon', par: { ch: 18, prime: 1 }, postes: [
+      { poste: 'Directeur général', c: 'DG', type: 'Existant', etp: 1, brut: 9500000 }, { poste: 'Assistante de direction', c: 'DG', type: 'Existant', etp: 1, brut: 1800000 },
+      { poste: 'Directeur administratif et financier', c: 'DFI', type: 'Existant', etp: 1, brut: 7200000 }, { poste: 'Chef comptable', c: 'CPT', type: 'Existant', etp: 1, brut: 3400000 }, { poste: 'Comptables', c: 'CPT', type: 'Existant', etp: 3, brut: 1900000 }, { poste: 'Contrôleurs de gestion', c: 'CDG', type: 'Existant', etp: 2, brut: 3600000 }, { poste: 'Contrôleur de gestion junior', c: 'CDG', type: 'Recrutement', etp: 1, brut: 2200000, debut: 4 },
+      { poste: 'Directeur commercial', c: 'COM', type: 'Existant', etp: 1, brut: 6500000 }, { poste: 'Commerciaux', c: 'COM', type: 'Existant', etp: 8, brut: 2100000 }, { poste: 'Commerciaux grands comptes', c: 'COM', type: 'Recrutement', etp: 3, brut: 2400000, debut: 3 },
+      { poste: 'Directeur IT & Digital', c: 'ITD', type: 'Existant', etp: 1, brut: 7500000 }, { poste: 'Développeurs', c: 'DEV', type: 'Existant', etp: 14, brut: 3200000 }, { poste: 'Développeurs seniors', c: 'DEV', type: 'Recrutement', etp: 4, brut: 4500000, debut: 2 }, { poste: 'Ingénieurs infrastructure', c: 'INF', type: 'Existant', etp: 5, brut: 3600000 },
+      { poste: 'Directrice des ressources humaines', c: 'RH', type: 'Existant', etp: 1, brut: 6000000 }, { poste: 'Gestionnaires de paie', c: 'PAI', type: 'Existant', etp: 2, brut: 2000000 }, { poste: 'Chargés de recrutement', c: 'REC', type: 'Existant', etp: 2, brut: 2400000 }
+    ] }
+  };
+  PERSO['2026'] = { st: 'Validé', par: { ch: 18, prime: 1 }, postes: PERSO['2027'].postes.filter(function (p) { return p.type === 'Existant'; }).map(function (p) { return { poste: p.poste, c: p.c, type: 'Existant', etp: p.etp, brut: Math.round(p.brut / 1.04) }; }) };
+  var PERSV = { ex: '2027' };
+  function persOf(ex) { if (!PERSO[ex]) PERSO[ex] = { st: 'Brouillon', par: { ch: 18, prime: 1 }, postes: [] }; return PERSO[ex]; }
+  function orgaRoot(code) { var c = ENT_CENTRES.filter(function (x) { return x.code === code; })[0]; while (c && c.parent) c = ENT_CENTRES.filter(function (x) { return x.code === c.parent; })[0]; return c; }
+  /* coût d'un poste sur l'exercice : salaire revalorisé (postes existants), mois de présence, prime annuelle au prorata, charges patronales */
+  function persCost(p, par, hyp) { var mo = p.type === 'Recrutement' ? 12 - (p.debut || 1) + 1 : 12, brut = (p.brut || 0) * (p.type === 'Existant' ? 1 + (hyp.sal || 0) / 100 : 1), base = (p.etp || 0) * brut * (mo + (par.prime || 0) * mo / 12), ch = base * (par.ch || 0) / 100; return { mo: mo, base: Math.round(base), ch: Math.round(ch), tot: Math.round(base + ch) }; }
+  function persTot(ex) {
+    var d = persOf(ex), hyp = cadrOf(ex).hyp, t = { etp: 0, ex: 0, rc: 0, base: 0, ch: 0, tot: 0, dir: {} };
+    d.postes.forEach(function (p) { var k = persCost(p, d.par, hyp), r = orgaRoot(p.c), nm = r ? r.nom : '—'; t.etp += p.etp || 0; if (p.type === 'Recrutement') t.rc += p.etp || 0; else t.ex += p.etp || 0; t.base += k.base; t.ch += k.ch; t.tot += k.tot; var x = t.dir[nm] = t.dir[nm] || { etp: 0, tot: 0 }; x.etp += p.etp || 0; x.tot += k.tot; });
+    return t;
+  }
+  function persMsg(t, k) { bkMsg('perso-msg', t, k || 'ok'); }
+  function persRender() {
+    guUse(activeCode()); var ex = PERSV.ex, d = persOf(ex), lk = d.st === 'Validé', T = persTot(ex), C = cadrOf(ex), CT = cadrTot(C), b = document.getElementById('perso-body'); b.innerHTML = '';
+    document.getElementById('perso-new').disabled = lk; document.getElementById('perso-valid').hidden = lk; document.getElementById('perso-reopen').hidden = !lk;
+    var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Exercice')); bar.appendChild(guSel(['2026', '2027', '2028'].map(function (y) { return [y, y]; }), ex, function (v) { PERSV.ex = v; persRender(); }, 'Exercice')); bar.appendChild(badge(lk ? 'Validé' : 'Brouillon', lk ? 'b-ok' : 'b-warn')); b.appendChild(bar);
+    b.appendChild(dpTiles([['Effectif prévu', cadrDec(T.etp) + ' ETP', 'brand', T.ex + ' en poste · ' + T.rc + ' à recruter'], ['Masse salariale brute', fmt(T.base) + ' MGA', 'info', 'salaires et primes de l’exercice'], ['Charges patronales', fmt(T.ch) + ' MGA', 'warn', cadrDec(d.par.ch) + ' % de la masse salariale'], ['Coût total du personnel', fmt(T.tot) + ' MGA', 'ok', CT.ca ? cadrDec(T.tot / CT.ca * 100) + ' % du chiffre d’affaires cible' : '']], { cols: 4 }));
+    function blk(t, node, hint, act) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', t)); if (hint) { var hh = cvEl('div', 'hint', hint); hh.style.marginBottom = '8px'; x.appendChild(hh); } if (act) { var w = cvEl('div'); w.style.margin = '0 0 8px'; w.appendChild(act); x.appendChild(w); } x.appendChild(node); b.appendChild(x); }
+    var pb = cvEl('button', 'btn small', 'Modifier les paramètres'); pb.type = 'button'; pb.disabled = lk; pb.addEventListener('click', function () { persPar(d); });
+    blk('Paramètres de rémunération', dpMini(['Paramètre', 'Valeur'], [['Évolution des salaires des postes existants (cadrage)', cadrDec(C.hyp.sal) + ' %'], ['Charges patronales', cadrDec(d.par.ch) + ' % du salaire brut'], ['Primes et 13e mois', cadrDec(d.par.prime) + ' mois de salaire par an']], [1], ''), 'L’évolution des salaires vient des hypothèses du cadrage. Les recrutements sont payés au salaire indiqué, à partir de leur mois d’arrivée.', pb);
+    var rows = d.postes.map(function (p, i) {
+      var k = persCost(p, d.par, C.hyp), c = ENT_CENTRES.filter(function (x) { return x.code === p.c; })[0], a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap'; var bm = cvEl('button', 'btn small', 'Modifier'), bd = cvEl('button', 'btn small gu-del', 'Supprimer'); bm.type = bd.type = 'button'; bm.disabled = bd.disabled = lk;
+      bm.addEventListener('click', function () { persPoste(d, p); }); bd.addEventListener('click', function () { dirConfirm('Supprimer le poste', 'Supprimer « ' + p.poste + ' » du budget de personnel ?', 'Supprimer', function () { d.postes.splice(i, 1); auditAdd('Configuration', 'Charges de personnel ' + ex, 'Poste supprimé : ' + p.poste); persRender(); }); }); a.appendChild(bm); a.appendChild(bd);
+      var nm = cvEl('div'); nm.appendChild(cvEl('b', null, p.poste)); nm.appendChild(cvEl('div', 'hby', c ? c.nom : p.c));
+      return [nm, badge(p.type, p.type === 'Recrutement' ? 'b-info' : 'b-neutral'), cadrDec(p.etp), fmt(p.brut), p.type === 'Recrutement' ? PERS_MOIS[(p.debut || 1) - 1] : '—', fmt(k.tot), a];
+    });
+    if (rows.length) rows.push(['Total', '', cadrDec(T.etp), '', '', fmt(T.tot), '']);
+    blk('Postes et recrutements', dpMini(['Poste', 'Type', 'ETP', 'Salaire brut mensuel (MGA)', 'Arrivée', 'Coût de l’exercice (MGA)', ''], rows, [2, 3, 5], 'Aucun poste : ajoutez les postes existants et les recrutements prévus.'), 'Le coût de l’exercice comprend le salaire, la prime au prorata des mois travaillés et les charges patronales.');
+    var dr = cadrDirs().map(function (x) { var v = T.dir[x.nom] || { etp: 0, tot: 0 }, en = C.env[x.nom] || 0, pc = en ? v.tot / en : null; return [x.nom, cadrDec(v.etp), fmt(v.tot), fmt(en), pc == null ? '—' : badge(Math.round(pc * 100) + ' % de l’enveloppe', pc > 1 ? 'b-ko' : (pc > .85 ? 'b-warn' : 'b-ok')), fmt(Math.max(en - v.tot, 0))]; });
+    blk('Coût du personnel par direction', dpMini(['Direction', 'ETP', 'Coût du personnel (MGA)', 'Enveloppe (cadrage)', 'Part de l’enveloppe', 'Reste pour fonctionnement et investissement (MGA)'], dr, [1, 2, 3, 5], 'Aucune direction.'), 'Le coût du personnel ne doit pas dépasser l’enveloppe de la direction définie au cadrage.');
+  }
+  function persPar(d) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), ch = cvEl('input', 'field'), pr = cvEl('input', 'field'); ch.type = pr.type = 'text'; ch.setAttribute('inputmode', 'decimal'); pr.setAttribute('inputmode', 'decimal'); ch.value = cadrDec(d.par.ch); pr.value = cadrDec(d.par.prime);
+    g.appendChild(guField('Charges patronales (% du salaire brut)', ch, true)); g.appendChild(guField('Primes et 13e mois (mois de salaire par an)', pr, true)); f.appendChild(g);
+    var err = cvEl('div', 'err'); f.appendChild(err); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Enregistrer'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () { var a = cadrNum(ch.value), p = cadrNum(pr.value); if (a < 0 || a > 60) { err.textContent = 'Les charges patronales sont un pourcentage entre 0 et 60.'; return; } if (p < 0 || p > 6) { err.textContent = 'Les primes vont de 0 à 6 mois de salaire par an.'; return; } d.par = { ch: a, prime: p }; auditAdd('Configuration', 'Charges de personnel ' + PERSV.ex, 'Paramètres de rémunération modifiés'); guModalClose(); persMsg('Paramètres enregistrés.'); persRender(); });
+    guModal('Paramètres de rémunération ' + PERSV.ex, f, 480);
+  }
+  function persPoste(d, p) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), mk = function (v) { var i = cvEl('input', 'field'); i.type = 'text'; i.value = v == null ? '' : v; return i; };
+    var po = mk(p ? p.poste : ''), et = mk(p ? cadrDec(p.etp) : '1'), br = mk(p ? fmt(p.brut) : ''); et.setAttribute('inputmode', 'decimal'); br.setAttribute('inputmode', 'numeric');
+    var ce = guSel(orgaTree().filter(function (x) { return x.on; }).map(function (x) { return [x.code, x.lbl]; }), p ? p.c : 'DG', function () { }, 'Centre'); ce.style.width = '100%';
+    var dw, ty = guSel([['Existant', 'Poste existant'], ['Recrutement', 'Recrutement prévu']], p ? p.type : 'Existant', function () { upd(); }, 'Type'); ty.style.width = '100%';
+    var de = guSel(PERS_MOIS.map(function (m, i) { return [String(i + 1), m]; }), String(p && p.debut ? p.debut : 1), function () { }, 'Mois d’arrivée'); de.style.width = '100%'; dw = guField('Mois d’arrivée', de, true); function upd() { dw.style.display = ty.value === 'Recrutement' ? '' : 'none'; } upd();
+    var d1 = guField('Intitulé du poste', po, true); d1.className = 'full'; g.appendChild(d1); g.appendChild(guField('Centre de responsabilité', ce, true)); g.appendChild(guField('Type', ty, true)); g.appendChild(guField('Effectif (ETP)', et, true)); g.appendChild(guField('Salaire brut mensuel moyen (MGA)', br, true)); g.appendChild(dw); f.appendChild(g);
+    var err = cvEl('div', 'err'); f.appendChild(err); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', p ? 'Enregistrer' : 'Ajouter'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () {
+      var n = po.value.trim(), e = cadrNum(et.value), s = Math.round(cadrNum(br.value)); if (n.length < 3) { err.textContent = 'Indiquez l’intitulé du poste.'; return; } if (e <= 0 || e > 500) { err.textContent = 'L’effectif doit être positif.'; return; } if (s <= 0) { err.textContent = 'Le salaire brut mensuel doit être positif.'; return; }
+      var o = { poste: n, c: ce.value, type: ty.value, etp: e, brut: s }; if (ty.value === 'Recrutement') o.debut = parseInt(de.value, 10); if (p) { delete p.debut; for (var k in o) p[k] = o[k]; } else d.postes.push(o);
+      auditAdd('Configuration', 'Charges de personnel ' + PERSV.ex, (p ? 'Poste modifié : ' : 'Poste ajouté : ') + n); guModalClose(); persMsg('Poste « ' + n + ' » enregistré.'); persRender();
+    });
+    guModal(p ? 'Modifier le poste' : 'Nouveau poste', f, 600);
+  }
+  document.getElementById('perso-new').addEventListener('click', function () { persPoste(persOf(PERSV.ex), null); });
+  document.getElementById('perso-valid').addEventListener('click', function () {
+    var ex = PERSV.ex, d = persOf(ex), T = persTot(ex), C = cadrOf(ex), over = cadrDirs().filter(function (x) { return C.env[x.nom] && (T.dir[x.nom] || { tot: 0 }).tot > C.env[x.nom]; });
+    if (!d.postes.length) { persMsg('Ajoutez au moins un poste avant de valider.', 'ko'); return; } if (over.length) { persMsg('Le coût du personnel dépasse l’enveloppe de : ' + over.map(function (x) { return x.nom; }).join(', ') + '. Revoyez les recrutements ou relevez l’enveloppe dans le cadrage.', 'ko'); return; }
+    dirConfirm('Valider les charges de personnel ' + ex, 'Valider un coût du personnel de ' + fmt(T.tot) + ' MGA pour ' + cadrDec(T.etp) + ' ETP ?', 'Valider', function () { d.st = 'Validé'; auditAdd('Validation', 'Charges de personnel ' + ex, 'Charges de personnel validées : ' + fmt(T.tot) + ' MGA'); persMsg('Charges de personnel ' + ex + ' validées.'); persRender(); });
+  });
+  document.getElementById('perso-reopen').addEventListener('click', function () { var ex = PERSV.ex; persOf(ex).st = 'Brouillon'; auditAdd('Configuration', 'Charges de personnel ' + ex, 'Charges de personnel rouvertes'); persMsg('Charges de personnel ' + ex + ' rouvertes.', 'info'); persRender(); });
   (function () {
     var R = RIGHTS0.ROLES2, M = RIGHTS0.RM, U = RIGHTS0.USERS;
     ['Directeur général', 'DAF', 'Contrôleur de gestion', 'Responsable de centre', 'Comptable', 'Auditeur interne'].forEach(function (r) { if (R.indexOf(r) < 0) R.push(r); M[r] = M[r] || {}; });
@@ -19050,7 +19131,7 @@ var EXEC_REC = [
         roles: RIGHTS0.ROLES2, rm: RIGHTS0.RM, users: RIGHTS0.USERS.filter(function (u) { return u.profs.indexOf('Entreprise') >= 0; }), act: RIGHTS0.ACTIONS, adm: 'Administration', cadmap: {}, word: { S: 'Centre', s: 'centre', p: 'centres', all: 'Tous les centres' },
         lv: { 'Administrateur': 4, 'Directeur général': 3, 'DAF': 3, 'Contrôleur de gestion': 3, 'Valideur': 3, 'Contrôleur': 2, 'Comptable': 2, 'Préparateur': 2, 'Auditeur interne': 2, 'Responsable de centre': 1, 'Lecteur': 0 },
         tree: [
-          { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['cadr', 'Cadrage', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
+          { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['cadr', 'Cadrage', 'elab'], ['perso', 'Charges de personnel', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
           { key: 'g-suivi', label: 'Exécution', kids: [['appr', 'Budgets verrouillés', 'ecr'], ['engage', 'Engagements', 'ecr'], ['real', 'Réalisations', 'ecr'], ['decaiss', 'Paiements comptabilisés', 'ecr'], ['encaiss', 'Recettes comptabilisées', 'ecr']] },
           { key: 'g-treso', label: 'Trésorerie', kids: [['bkdec', 'Plan de trésorerie', 'ecr']] },
           { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
