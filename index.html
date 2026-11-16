@@ -12096,7 +12096,7 @@ function fmAxes() {
   /* Contenu commun : synthèse, graphique simple, périmètres dépliables, et (en consultation) historique */
   function cvRender(root, r, withHist) {
     root.innerHTML = '';
-    var c = cvCamp(r), pe = cvPerims(r), tot = cvSum(pe, 'dem'), iss = cvIssues(r), nKo = iss.filter(function (z) { return z.sev === 'ko'; }).length, nWa = iss.length - nKo, perDet = {}, detSec;
+    var c = cvCamp(r), pe = cvPerims(r), tot = cvSum(pe, 'dem'), iss = cvIssues(r), nKo = iss.filter(function (z) { return z.sev === 'ko'; }).length, nWa = iss.length - nKo, perOpen = {};
     /* 1. En bref : le verdict, puis les chiffres qui comptent */
     var envT = pe.reduce(function (s, x) { return s + (x.p.env != null ? x.p.env : 0); }, 0), hasEnv = pe.some(function (x) { return x.p.env != null; });
     var br = cvEl('div', 'callout'); br.style.cssText = 'margin-bottom:14px;display:block';
@@ -12121,40 +12121,50 @@ function fmAxes() {
         var tr = cvEl('tr'); tr.appendChild(cvEl('td', 'name', z.pt)); tr.appendChild(cvEl('td', null, z.cst));
         var g = cvEl('td'); g.appendChild(badge(z.sev === 'ko' ? 'Bloquant' : 'À surveiller', z.sev === 'ko' ? 'b-ko' : 'b-warn')); tr.appendChild(g);
         var a = cvEl('td'); a.style.whiteSpace = 'nowrap'; var bb = cvEl('button', 'btn small', z.pend ? 'Traiter' : 'Voir'); bb.type = 'button';
-        bb.addEventListener('click', function () { if (z.pend) { propOpen(r); return; } var d0 = perDet[z.perim]; if (!d0) return; detSec.open = true; d0.open = true; d0.scrollIntoView({ block: 'center' }); });
+        bb.addEventListener('click', function () { if (z.pend) { propOpen(r); return; } if (perOpen[z.perim]) perOpen[z.perim](); });
         a.appendChild(bb); tr.appendChild(a); tbd0.appendChild(tr);
       });
       tb0.appendChild(tbd0); sc0.appendChild(tb0); pv.appendChild(sc0);
     }
     root.appendChild(pv);
     /* périmètres dépliables, avec leurs lignes */
-    var bl = cvEl('details', 'co-blk'); detSec = bl; var bls = cvEl('summary', 'kb-h', 'Détail par périmètre : objectif, indicateurs et lignes'); bls.style.cursor = 'pointer'; bl.appendChild(bls);
+    /* Périmètres : un tableau, le détail s'ouvre dans une fenêtre */
+    var bl = cvEl('section', 'co-blk'); bl.appendChild(cvEl('div', 'kb-h', 'Périmètres'));
+    var sc1 = cvEl('div', 'scroll'), tb1 = cvEl('table'); tb1.style.minWidth = '760px';
+    tb1.innerHTML = '<thead><tr><th>Périmètre</th><th>Responsable</th><th class="num">Demandé (MGA)</th><th>Situation</th><th></th></tr></thead>'; var tbd1 = cvEl('tbody');
     pe.forEach(function (x) {
-      var d = cvEl('details', 'val-cfg'); perDet[x.p.p] = d; var s = cvEl('summary', 'cv-sum');
-      var nmd = cvEl('div'); nmd.appendChild(cvEl('b', null, x.p.p));
-      var tg = tgtInds(x.p), nI = (x.p.inds || []).length, bI;
-      var worst = tg.filter(function (z) { return z.pos && z.pos.st === 'Non atteignable'; })[0], cond = tg.filter(function (z) { return z.pos && z.pos.st === 'Atteignable sous conditions'; })[0], unc = tg.filter(function (z) { return covOf(x.p, z).rate < 1; })[0];
-      if (worst) bI = badge('Objectif non atteignable', 'b-ko'); else if (cond) bI = badge('Atteignable sous conditions', 'b-warn'); else if (unc) bI = badge('Objectif non couvert', 'b-ko'); else if (tg.length) bI = badge('Objectif couvert', 'b-ok'); else bI = badge(nI ? pl(nI, 'indicateur') : 'Sans indicateur', nI ? 'b-info' : 'b-warn');
-      bI.style.marginLeft = '8px'; nmd.appendChild(bI);
-      var nAdd = x.lines.filter(function (z) { return z.added; }).length; if (nAdd) { var bA = badge(pl(nAdd, 'ligne') + ' hors plan', 'b-warn'); bA.style.marginLeft = '6px'; nmd.appendChild(bA); }
-      s.appendChild(nmd); s.appendChild(cvEl('span', null, x.p.who || 'Non affecté'));
-      s.appendChild(cvEl('span', 'num', fmt(x.dem) + ' MGA'));
-      var vr = x.ref ? Math.round((x.dem - x.ref) / x.ref * 100) : null; s.appendChild(cvEl('span', 'num', vr == null ? '—' : (vr > 0 ? '+' : '') + vr + ' %'));
-      d.appendChild(s);
-      var body = cvEl('div', 'val-body');
-      /* alignement : objectif de l'exercice fixé au cadrage, face aux indicateurs proposés par le contributeur */
-      var obj = cvEl('div'); obj.style.cssText = 'margin:0 0 8px;font-size:13px';
-      obj.appendChild(cvEl('b', null, 'Objectif de l’exercice : ')); obj.appendChild(document.createTextNode(x.p.obj || 'non défini au cadrage'));
-      body.appendChild(obj);
-      body.appendChild(indView(x.p, x.lines));
-      d.appendChild(body); bl.appendChild(d);
+      var tr = cvEl('tr'); tr.appendChild(cvEl('td', 'name', x.p.p)); tr.appendChild(cvEl('td', null, x.p.who || 'Non affecté')); tr.appendChild(cvEl('td', 'num', fmt(x.dem)));
+      var st = cvEl('td'), mine = iss.filter(function (z) { return z.perim === x.p.p; }), ko = mine.filter(function (z) { return z.sev === 'ko'; }).length;
+      st.appendChild(badge(ko ? pl(ko, 'point bloquant') : (mine.length ? pl(mine.length, 'point') + ' à surveiller' : 'Conforme'), ko ? 'b-ko' : (mine.length ? 'b-warn' : 'b-ok'))); tr.appendChild(st);
+      var a = cvEl('td'), bb = cvEl('button', 'btn small', 'Détail'); bb.type = 'button'; bb.addEventListener('click', function () { perOpen[x.p.p](); }); a.appendChild(bb); tr.appendChild(a); tbd1.appendChild(tr);
+      perOpen[x.p.p] = function () { cvPerimModal(x); };
     });
+    tb1.appendChild(tbd1); sc1.appendChild(tb1); bl.appendChild(sc1);
     root.appendChild(bl);
     if (withHist) {
       var hs = cvEl('details', 'co-blk cv-hist'); var hsm = cvEl('summary', 'kb-h', 'Historique de la validation'); hsm.style.cursor = 'pointer'; hs.appendChild(hsm);
       r.hist.forEach(function (h) { var row = cvEl('div', 'list-row'); var l = cvEl('div'); l.appendChild(cvEl('b', null, h.t)); l.appendChild(cvEl('div', 'hby', h.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', h.on)); hs.appendChild(row); });
       root.appendChild(hs);
     }
+  }
+  /* Fenêtre de détail d'un périmètre : fiche, objectifs et indicateurs, lignes du budget */
+  function cvPerimModal(x) {
+    var p = x.p, w = cvEl('div'), nz = function (v) { return v == null ? '—' : fmt(v); }, vr = x.ref ? Math.round((x.dem - x.ref) / x.ref * 100) : null;
+    function sec(t, node) { var s = cvEl('section', 'co-blk'); s.appendChild(cvEl('div', 'kb-h', t)); s.appendChild(node); w.appendChild(s); }
+    sec('Fiche du périmètre', dpDl([['Responsable', p.who || 'Non affecté'], ['Statut', p.st || '—'], ['Montant demandé', fmt(x.dem) + ' MGA'],
+      ['Maximum autorisé', p.env != null ? fmt(p.env) + ' MGA' + (x.dem > p.env ? ' (dépassé de ' + fmt(x.dem - p.env) + ')' : ' (reste ' + fmt(p.env - x.dem) + ')') : 'Aucun plafond'], ['Minimum attendu', p.min != null ? fmt(p.min) + ' MGA' : '—'],
+      ['Budget de référence', x.ref ? fmt(x.ref) + ' MGA' + (vr != null ? ' (' + (vr > 0 ? '+' : '') + vr + ' %)' : '') : '—'], ['Objectif de l’exercice', p.obj || 'Non défini au cadrage', true]]));
+    var inds = (p.inds || []).slice().sort(function (a, b) { return (b.fixed ? 1 : 0) - (a.fixed ? 1 : 0); });
+    sec('Objectifs et indicateurs', dpMini(['Indicateur', 'Origine', 'Cible', 'Planifié', 'Couverture', 'Position du contributeur'], inds.map(function (i) {
+      var pn = indCible(p, i.id), rt = i.fixed && i.cible ? pn / i.cible : null, pb = posBadge(i), cov = rt == null ? '—' : badge(Math.round(100 * rt) + ' %', rt >= 1 ? 'b-ok' : 'b-ko');
+      return [i.lib, i.fixed ? 'Cadrage' : 'Contributeur', i.fixed ? fmt(i.cible) + ' ' + i.unit : '—', fmt(pn) + ' ' + i.unit, cov, pb ? pb : (rt != null && rt < 1 ? badge('À donner', 'b-warn') : '—')];
+    }), [2, 3], 'Aucun indicateur pour ce périmètre.'));
+    sec('Lignes du budget', dpMini(['Ligne', 'Travail prévu', 'Période', 'Montant (MGA)', 'Écart référence', 'Statut'], x.lines.map(function (l) {
+      var v = l.ref ? Math.round((l.dem - l.ref) / l.ref * 100) : null, wk = l.wk;
+      return [l.c + ' — ' + (l.lib || l.l), wk ? wk.task + ' (' + fmt(wk.vol) + ' ' + wk.unit + ')' : 'Non renseigné', wk ? isoToFr(wk.d1) + ' → ' + isoToFr(wk.d2) : '—', fmt(l.dem || 0), v == null ? '—' : (v > 0 ? '+' : '') + v + ' %', l.added ? badge('Hors plan', 'b-warn') : (wk ? badge('Plan du cadrage', 'b-neutral') : badge('Sans plan de travail', 'b-warn'))];
+    }), [3, 4], 'Aucune ligne.'));
+    var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn primary', 'Fermer'); bc.type = 'button'; ft.appendChild(bc); w.appendChild(ft); bc.addEventListener('click', guModalClose);
+    guModal(p.p, w, 960);
   }
   /* Fenêtre qui demande un commentaire */
   function cvAsk(o, cb) {
