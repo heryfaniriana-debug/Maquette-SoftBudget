@@ -15044,6 +15044,10 @@ var EXEC_REC = [
     var pkb = document.querySelector('.sub button[data-go="ppmk"]'); if (pkb) pkb.style.display = code === 'prj' ? '' : 'none';
     document.getElementById('g-pcadre').style.display = code === 'prj' ? '' : 'none';
     document.getElementById('g-plan').style.display = code === 'prj' ? '' : 'none';
+    if (code === 'ent') {
+      var ps = document.querySelector('#g-params > .sub');
+      [['regime', 'Général', 'Profil, mode de gestion et modules'], ['roles'], ['usr'], ['ctrl'], ['trev'], ['rclot'], ['notifcfg']].forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; ps.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
+    }
     if (code !== 'prj') return;
     nav.insertBefore(gT, gS);
     var circ = cfg.regime !== 'importe', revCA = cfg.regime === 'projet' && cfg.mods.cadm;
@@ -15100,7 +15104,7 @@ var EXEC_REC = [
         var b = document.querySelector('#g-params .sub button[data-go="' + e[0] + '"]'); if (!b) return;
         if (b.dataset.o0 === undefined) b.dataset.o0 = JSON.stringify([b.textContent.trim(), b.getAttribute('title') || '']);
         if (prj) { if (i) MENU_OF[e[0]] = s.m[0][0]; else navSetBtn(b, s.t, s.t); if (i) b.style.display = 'none'; else b.style.display = ''; }
-        else { delete MENU_OF[e[0]]; var o = JSON.parse(b.dataset.o0); if (!i) navSetBtn(b, o[0], o[1]); }
+        else { delete MENU_OF[e[0]]; var o = JSON.parse(b.dataset.o0); if (!i && !(code === 'ent' && e[0] === 'regime')) navSetBtn(b, o[0], o[1]); }
       });
     });
     if (!prj) PRM_SECT.forEach(function (s) { s.m.forEach(function (e, i) { var b = document.querySelector('#g-params .sub button[data-go="' + e[0] + '"]'); if (b && i && ['circuits', 'regime', 'bailleurs', 'sources', 'taux', 'plana', 'sites'].indexOf(e[0]) < 0) b.style.display = ''; }); });
@@ -15120,6 +15124,7 @@ var EXEC_REC = [
   function applyRegime() {
     if (typeof REG === 'undefined' || !REG) return;
     var code = activeCode(), cfg = REG[code], adv = modes[code] === 'Avancé', circ = cfg.regime !== 'importe';
+    if (typeof guUse === 'function') guUse(code);
     applyProjectMenu(code, cfg);
     regSetVis('#g-rapports .sub button:not(.anp)', true); regSetVis('#g-rapports .sub button.anp', code === 'prj');
     regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso && code !== 'prj');
@@ -15134,11 +15139,11 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code !== 'prj'); regSetVis('.sub button[data-go="usr"]', code === 'prj'); regSetVis('.sub button[data-go="roles"]', code === 'prj'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
     prmMenu(code); if (typeof siteCtxSync === 'function') siteCtxSync();
-    regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code !== 'prj'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
-    regSetVis('#g-params .sub button[data-go="params"], #g-params .sub button[data-go="droits"]', code !== 'prj'); /* projet : plus de séparation des accès */ /* projet : le mode se règle dans Général */
+    regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code === 'pub'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
+    regSetVis('#g-params .sub button[data-go="params"], #g-params .sub button[data-go="droits"]', code === 'pub'); /* projet : plus de séparation des accès */ /* projet : le mode se règle dans Général */
     if (code === 'prj') { regSetVis('#g-budgets', adv && cfg.mods.elab !== false); regSetVis('#g-cadm', adv && circ && cfg.mods.cadm); } else regSetVis('#g-budgets', true); /* projet : élaboration et compte administratif seulement en mode Avancé */
     if (typeof renderRights === 'function') renderRights();
     regSetVis('#g-params .sub button[data-go="rclot"], #g-params .sub button[data-go="trev"], #g-params .sub button[data-go="ctrl"], #g-params .sub button[data-go="circuits"]', code !== 'prj' && (cfg.regime !== 'importe' || true)); /* projet : clôture, révisions, contrôles budgétaires et circuits de visa n’existent plus (menus Plans annuels, alertes des Analyses, circuit du cadre budgétaire) */
@@ -18407,7 +18412,7 @@ var EXEC_REC = [
     { id: 'S3', t: 'Un chef d’antenne ne voit et ne saisit que les écritures de son site', sev: 'Bloquant', act: true, enf: 'Appliquée par le périmètre « Site » de l’utilisateur' },
     { id: 'S4', t: 'Un même utilisateur ne peut pas cumuler la préparation et la validation des plans', sev: 'Avertissement', act: true, enf: 'Détectée dans les conflits de droits' }
   ];
-  function sitesList() { return typeof SITES !== 'undefined' && SITES ? SITES : []; }
+  function sitesList() { if (GU_CUR === 'ent') return ENT_CENTRES; return typeof SITES !== 'undefined' && SITES ? SITES : []; }
   function setRightsMode(prj) {
     PRJM = prj; ROLES2 = prj ? PRJ_ROLES : RIGHTS0.ROLES2; RM = prj ? PRJ_RM : RIGHTS0.RM; ACTIONS = prj ? PRJ_ACTIONS : RIGHTS0.ACTIONS; USERS = prj ? PRJ_USERS : RIGHTS0.USERS; SEPR = prj ? PRJ_SEPR : RIGHTS0.SEPR;
     SEPACT = prj ? ['Valider les plans'] : ['Validation', 'Approbation']; ADMACT = prj ? 'Administrer' : 'Administration'; ACTDEF = prj ? 'Valider les plans' : 'Validation';
@@ -18701,6 +18706,13 @@ var EXEC_REC = [
   function guDefPerm(g, leaf) {
     var p = { menu: false, voir: false, creer: false, modifier: false, supprimer: false, valider: false }, R = PRJ_RM[g.nom] || {}, c = leaf.cat, rd = !!R['Consulter'];
     if (g.fixe) { GU_COLS.forEach(function (k) { p[k] = true; }); return p; }
+    if (GU_CUR === 'ent') {
+      if (c === 'prm') return p; var cr = !!R['Création'], md = !!R['Modification'], vl = !!R['Validation'] || !!R['Approbation'], im = !!R['Import'];
+      rd = !!R['Consultation']; p.menu = p.voir = rd; if (!rd) return p;
+      if (c === 'elab') { p.creer = cr; p.modifier = md; p.valider = vl; if (leaf.key === 'revis') p.valider = vl; }
+      else if (c === 'ecr') { p.creer = p.modifier = im || (cr && leaf.key !== 'appr'); p.valider = vl && leaf.key === 'appr'; }
+      return p;
+    }
     var prep = !!R['Préparer ou réviser les plans'], val = !!R['Valider les plans'], sai = !!R['Saisir ou synchroniser les écritures'];
     if (c === 'prm') { return p; }
     if (g.nom === 'Bailleur' && c !== 'plan' && c !== 'ana') return p;
@@ -18730,8 +18742,8 @@ var EXEC_REC = [
   }
   function guModalClose() { var m = document.getElementById('gu-modal'); if (m) m.remove(); var p = document.getElementById('gu-modal-parent'); if (p) { p.id = 'gu-modal'; p.style.display = ''; } }
   function guRender() {
-    guInit(); var b = document.getElementById('gu-body'); b.innerHTML = '';
-    var titles = { users: ['Gestion des utilisateurs', 'Administration — SoftBudget Projet'], perm: ['Permissions', 'Définir les droits (voir, créer, modifier, supprimer, valider) pour chaque groupe et chaque menu.'], priv: ['Privilèges', 'Activer, pour chaque utilisateur individuellement, les droits et privilèges dont il dispose dans SoftBudget.'] }[GU.tab];
+    guUse(activeCode()); guInit(); var b = document.getElementById('gu-body'); b.innerHTML = '';
+    var titles = { users: ['Gestion des utilisateurs', 'Administration — SoftBudget ' + (GU_CUR === 'ent' ? 'Entreprise' : 'Projet')], perm: ['Permissions', 'Définir les droits (voir, créer, modifier, supprimer, valider) pour chaque groupe et chaque menu.'], priv: ['Privilèges', 'Activer, pour chaque utilisateur individuellement, les droits et privilèges dont il dispose dans SoftBudget.'] }[GU.tab];
     document.getElementById('gu-title').textContent = titles[0]; document.getElementById('gu-sub').textContent = titles[1];
     var nb = document.getElementById('gu-new'); nb.style.display = GU.tab === 'users' ? '' : 'none';
     var card = cvEl('div', 'gu-card'), tabs = cvEl('div', 'tabs gu-tabs'); tabs.setAttribute('role', 'tablist');
@@ -18745,20 +18757,20 @@ var EXEC_REC = [
       var g = u.roles[0]; if (GU.fg && g !== GU.fg) return false; if (GU.fs && (GU.fs === 'actif') !== u.act) return false; if (GU.site && (u.site || 'Tous les sites') !== GU.site) return false;
       return !q || (u.n + ' ' + u.login + ' ' + u.email).toLowerCase().indexOf(q) >= 0;
     });
-    var k = GU.sort; l.sort(function (a, b) { function v(u) { return k === 'login' ? u.login : k === 'groupe' ? u.roles[0] : k === 'site' ? siteLbl(u.site === 'Tous les sites' ? '' : u.site) : k === 'email' ? u.email : k === 'statut' ? (u.act ? 'a' : 'b') : u.n; } return v(a).localeCompare(v(b)) * GU.dir; });
+    var k = GU.sort; l.sort(function (a, b) { function v(u) { return k === 'login' ? u.login : k === 'groupe' ? u.roles[0] : k === 'site' ? guSiteLbl(u.site === 'Tous les sites' ? '' : u.site) : k === 'email' ? u.email : k === 'statut' ? (u.act ? 'a' : 'b') : u.n; } return v(a).localeCompare(v(b)) * GU.dir; });
     return l;
   }
   function guSel(opts, val, fn, aria) { var s = cvEl('select', 'field'); s.style.width = 'auto'; s.setAttribute('aria-label', aria); opts.forEach(function (o) { var op = cvEl('option', null, o[1]); op.value = o[0]; if (o[0] === val) op.selected = true; s.appendChild(op); }); s.addEventListener('change', function () { fn(s.value); }); return s; }
   function guUsers(box) {
     var tb = cvEl('div', 'gu-tool');
     tb.appendChild(guSel([['', 'Tous les groupes']].concat(GU.groups.map(function (g) { return [g.nom, g.nom]; })), GU.fg, function (v) { GU.fg = v; guRender(); }, 'Groupe'));
-    tb.appendChild(guSel([['', 'Tous les sites'], ['Tous les sites', 'Accès à tous les sites']].concat(sitesList().map(function (s) { return [s.code, s.nom]; })), GU.site, function (v) { GU.site = v; guRender(); }, 'Site'));
+    tb.appendChild(guSel([['', GU_WORD.all], ['Tous les sites', 'Accès à ' + GU_WORD.all.toLowerCase()]].concat(sitesList().map(function (s) { return [s.code, s.nom]; })), GU.site, function (v) { GU.site = v; guRender(); }, GU_WORD.S));
     var q = cvEl('input', 'field'); q.id = 'gu-q'; q.type = 'text'; q.placeholder = 'Rechercher un utilisateur'; q.value = GU.q; q.style.width = '260px'; q.addEventListener('input', function () { GU.q = q.value; guRender(); var i = document.getElementById('gu-q'); i.focus(); i.setSelectionRange(q.value.length, q.value.length); }); tb.appendChild(q);
     var sp = cvEl('span'); sp.style.flex = '1'; tb.appendChild(sp);
     tb.appendChild(guSel([['', 'Tous les statuts'], ['actif', 'Actif'], ['inactif', 'Inactif']], GU.fs, function (v) { GU.fs = v; guRender(); }, 'Statut')); box.appendChild(tb);
     var l = guFiltered(), bar = cvEl('div', 'gu-bar'); bar.appendChild(cvEl('span', 'gu-count', l.length + ' utilisateur' + (l.length > 1 ? 's' : '')));
     var ex = cvEl('button', 'btn small', 'Exporter en CSV'); ex.type = 'button'; ex.addEventListener('click', function () { guCsv(l); }); bar.appendChild(ex); box.appendChild(bar);
-    var heads = [['nom', 'Nom'], ['login', 'Utilisateur'], ['groupe', 'Groupe'], ['site', 'Site'], ['email', 'E-mail'], ['statut', 'Statut'], ['', '']];
+    var heads = [['nom', 'Nom'], ['login', 'Utilisateur'], ['groupe', 'Groupe'], ['site', GU_WORD.S], ['email', 'E-mail'], ['statut', 'Statut'], ['', '']];
     var rows = l.map(function (u) {
       var nm = cvEl('div', 'gu-nm'); nm.appendChild(guAvatar(u, 38)); var t = cvEl('div'); t.appendChild(cvEl('b', null, u.n)); t.appendChild(cvEl('div', 'hby', u.roles[0])); nm.appendChild(t);
       var st = cvEl('div', 'gu-st'), sw = mkSwitch(u.act, 'Compte actif : ' + u.n, function (v) {
@@ -18767,14 +18779,14 @@ var EXEC_REC = [
       }); if (u.sys) sw.querySelector('input').disabled = true; st.appendChild(sw); st.appendChild(cvEl('span', u.act ? 'gu-on' : 'gu-off', u.act ? 'Actif' : 'Inactif'));
       var ac = cvEl('div', 'gu-ac'), be = cvEl('button', 'btn small', 'Modifier'); be.type = 'button'; be.addEventListener('click', function () { guUserOpen(u); }); ac.appendChild(be);
       if (!u.sys) { var bd = cvEl('button', 'btn small gu-del', 'Retirer'); bd.type = 'button'; bd.addEventListener('click', function () { guUserDel(u); }); ac.appendChild(bd); }
-      return [nm, u.login, u.roles[0], !u.site || u.site === 'Tous les sites' ? 'Tous les sites' : siteLbl(u.site), u.email, st, ac];
+      return [nm, u.login, u.roles[0], !u.site || u.site === 'Tous les sites' ? GU_WORD.all : guSiteLbl(u.site), u.email, st, ac];
     });
     var tbl = dpMini(heads.map(function (h) { return h[1]; }), rows, [], 'Aucun utilisateur.');
     tbl.querySelectorAll('th').forEach(function (th, i) { var h = heads[i]; if (!h[0]) return; th.style.cursor = 'pointer'; th.textContent = h[1] + ' ' + (GU.sort === h[0] ? (GU.dir > 0 ? '▲' : '▼') : '⇅'); th.addEventListener('click', function () { if (GU.sort === h[0]) GU.dir = -GU.dir; else { GU.sort = h[0]; GU.dir = 1; } guRender(); }); });
     box.appendChild(tbl);
   }
   function guCsv(l) {
-    var rows = [['Nom', 'Utilisateur', 'Groupe', 'Site', 'E-mail', 'Statut']].concat(l.map(function (u) { return [u.n, u.login, u.roles[0], !u.site || u.site === 'Tous les sites' ? 'Tous les sites' : siteLbl(u.site), u.email, u.act ? 'Actif' : 'Inactif']; }));
+    var rows = [['Nom', 'Utilisateur', 'Groupe', GU_WORD.S, 'E-mail', 'Statut']].concat(l.map(function (u) { return [u.n, u.login, u.roles[0], !u.site || u.site === 'Tous les sites' ? GU_WORD.all : guSiteLbl(u.site), u.email, u.act ? 'Actif' : 'Inactif']; }));
     var csv = '﻿' + rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';'); }).join('\n');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'utilisateurs-softbudget.csv'; document.body.appendChild(a); a.click(); a.remove();
   }
@@ -18783,8 +18795,8 @@ var EXEC_REC = [
     GU.edit = u || null; var f = cvEl('div'), g = cvEl('div', 'fgrid'), mk = function (v, ro) { var i = cvEl('input', 'field'); i.type = 'text'; i.value = v || ''; if (ro) i.readOnly = true; return i; };
     var pre = mk(u ? u.n.split(' ').slice(0, -1).join(' ') : ''), nom = mk(u ? u.n.split(' ').slice(-1)[0] : ''), log = mk(u ? u.login : '', !!u), em = mk(u ? u.email : '');
     var gs = guSel(GU.groups.filter(function (x) { return u || x.nom !== 'Administrateur'; }).map(function (x) { return [x.nom, x.nom]; }), u ? u.roles[0] : 'Comptable', function () { }, 'Groupe'); gs.style.width = '100%';
-    var ss = guSel([['Tous les sites', 'Tous les sites']].concat(sitesList().map(function (s) { return [s.code, s.nom]; })), u ? (u.site || 'Tous les sites') : 'COO', function () { }, 'Site'); ss.style.width = '100%';
-    g.appendChild(guField('Prénom', pre)); g.appendChild(guField('Nom', nom, true)); g.appendChild(guField('Utilisateur (identifiant)', log, true)); g.appendChild(guField('E-mail', em, true)); g.appendChild(guField('Groupe', gs, true)); g.appendChild(guField('Site', ss, true)); f.appendChild(g);
+    var ss = guSel([['Tous les sites', GU_WORD.all]].concat(sitesList().map(function (s) { return [s.code, s.nom]; })), u ? (u.site || 'Tous les sites') : (GU_CUR === 'ent' ? 'Tous les sites' : 'COO'), function () { }, GU_WORD.S); ss.style.width = '100%';
+    g.appendChild(guField('Prénom', pre)); g.appendChild(guField('Nom', nom, true)); g.appendChild(guField('Utilisateur (identifiant)', log, true)); g.appendChild(guField('E-mail', em, true)); g.appendChild(guField('Groupe', gs, true)); g.appendChild(guField(GU_WORD.S, ss, true)); f.appendChild(g);
     var err = cvEl('div', 'err'); f.appendChild(err); if (!u) f.appendChild(cvEl('div', 'hint', 'Un mot de passe temporaire est généré et envoyé par e-mail. L’utilisateur doit le modifier à sa première connexion.'));
     var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', u ? 'Enregistrer' : 'Créer l’utilisateur'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
     bc.addEventListener('click', guModalClose);
@@ -18792,17 +18804,17 @@ var EXEC_REC = [
       var n = nom.value.trim(), p = pre.value.trim(), lg = log.value.trim(), m = em.value.trim();
       if (!n) { err.textContent = 'Le nom est obligatoire.'; return; } if (!lg) { err.textContent = 'L’identifiant est obligatoire.'; return; } if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)) { err.textContent = 'Adresse e-mail invalide.'; return; }
       var full = (p ? p + ' ' : '') + n;
-      if (u) { if (u.roles[0] === 'Administrateur' && gs.value !== 'Administrateur' && PRJ_USERS.filter(function (x) { return x.act && x.roles.indexOf('Administrateur') >= 0; }).length === 1) { err.textContent = 'Au moins un administrateur actif est requis.'; return; } u.n = full; u.email = m; u.roles = [gs.value]; u.site = ss.value; if (typeof siteCtxSync === 'function') siteCtxSync(); auditAdd('Configuration', 'Utilisateur ' + u.n, 'Utilisateur modifié (groupe ' + gs.value + ', site ' + ss.value + ')'); guModalClose(); guRender(); guToast('Utilisateur modifié.'); return; }
+      if (u) { if (u.roles[0] === 'Administrateur' && gs.value !== 'Administrateur' && PRJ_USERS.filter(function (x) { return x.act && x.roles.indexOf('Administrateur') >= 0; }).length === 1) { err.textContent = 'Au moins un administrateur actif est requis.'; return; } u.n = full; u.email = m; u.roles = [gs.value]; u.site = ss.value; if (typeof siteCtxSync === 'function') siteCtxSync(); auditAdd('Configuration', 'Utilisateur ' + u.n, 'Utilisateur modifié (groupe ' + gs.value + ', ' + GU_WORD.s + ' ' + ss.value + ')'); guModalClose(); guRender(); guToast('Utilisateur modifié.'); return; }
       if (PRJ_USERS.some(function (x) { return x.login.toLowerCase() === lg.toLowerCase(); })) { err.textContent = 'Cet identifiant existe déjà.'; return; }
-      var nu = pjU(full, [gs.value], ss.value); nu.login = lg; nu.email = m; PRJ_USERS.push(nu); auditAdd('Configuration', 'Utilisateur ' + full, 'Utilisateur créé (groupe ' + gs.value + ', site ' + ss.value + ')'); guModalClose(); guRender(); guToast('Utilisateur ajouté : identifiants envoyés par e-mail.');
+      var nu = pjU(full, [gs.value], ss.value); nu.login = lg; nu.email = m; if (GU_CUR === 'ent') { nu.profs = ['Entreprise']; nu.proj = 'Tous les projets'; nu.ent = ss.value === 'Tous les sites' ? 'Toutes les entités' : guSiteLbl(ss.value); RIGHTS0.USERS.push(nu); } PRJ_USERS.indexOf(nu) < 0 && PRJ_USERS.push(nu); auditAdd('Configuration', 'Utilisateur ' + full, 'Utilisateur créé (groupe ' + gs.value + ', ' + GU_WORD.s + ' ' + ss.value + ')'); guModalClose(); guRender(); guToast('Utilisateur ajouté : identifiants envoyés par e-mail.');
     });
-    guModal(u ? 'Modifier l’utilisateur' : 'Nouvel utilisateur — SoftBudget Projet', f, 600);
+    guModal(u ? 'Modifier l’utilisateur' : 'Nouvel utilisateur — SoftBudget ' + (GU_CUR === 'ent' ? 'Entreprise' : 'Projet'), f, 600);
   }
   function guUserDel(u) {
     var f = cvEl('div'); f.appendChild(cvEl('p', null, u.n + ' n’aura plus accès à SoftBudget. Ses écritures et son historique sont conservés.'));
     var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Retirer l’accès'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
     bc.addEventListener('click', guModalClose);
-    bo.addEventListener('click', function () { if (u.roles.indexOf('Administrateur') >= 0 && PRJ_USERS.filter(function (x) { return x.act && x.roles.indexOf('Administrateur') >= 0; }).length === 1) { guModalClose(); guToast('Le dernier administrateur ne peut pas être retiré.'); return; } PRJ_USERS.splice(PRJ_USERS.indexOf(u), 1); auditAdd('Configuration', 'Utilisateur ' + u.n, 'Accès retiré'); guModalClose(); guRender(); guToast('Accès retiré.'); });
+    bo.addEventListener('click', function () { if (u.roles.indexOf('Administrateur') >= 0 && PRJ_USERS.filter(function (x) { return x.act && x.roles.indexOf('Administrateur') >= 0; }).length === 1) { guModalClose(); guToast('Le dernier administrateur ne peut pas être retiré.'); return; } PRJ_USERS.splice(PRJ_USERS.indexOf(u), 1); if (GU_CUR === 'ent' && RIGHTS0.USERS.indexOf(u) >= 0) RIGHTS0.USERS.splice(RIGHTS0.USERS.indexOf(u), 1); auditAdd('Configuration', 'Utilisateur ' + u.n, 'Accès retiré'); guModalClose(); guRender(); guToast('Accès retiré.'); });
     guModal('Retirer l’accès ?', f, 460);
   }
   /* --- onglet Permissions --- */
@@ -18837,8 +18849,49 @@ var EXEC_REC = [
   var GU_ACTGRP = [['Plans', ['Consulter', 'Préparer ou réviser les plans', 'Valider les plans', 'Soumettre au bailleur']], ['Exécution', ['Saisir ou synchroniser les écritures', 'Gérer les avances et justifications', 'Clôturer l’exercice']], ['Référentiels', ['Gérer les taux et devises']], ['Transverse', ['Voir tous les sites', 'Exporter', 'Administrer']]];
   var GU_CADMAP = { 'Coordonnateur': 'dir', 'RAF': 'raf', 'Comptable': 'afc', 'Suivi-évaluation': 'spse', 'Passation des marchés': 'rpm' };
   var GU_RM0 = null, GU_CAD0 = null, GU_CADMAP0 = null;
+  /* ----- Entreprise : mêmes écrans (groupes de rôles, utilisateurs, permissions, privilèges), avec leur propre jeu de données ----- */
+  var GU_ADM = 'Administrer', GU_CUR = 'prj', GU_SET = null, GU_WORD = { S: 'Site', s: 'site', p: 'sites', all: 'Tous les sites' };
+  var ENT_CENTRES = [{ code: 'DG', nom: 'Direction générale', resp: 'Directeur général', on: true }, { code: 'DAF', nom: 'Direction administrative et financière', resp: 'DAF', on: true }, { code: 'ITD', nom: 'IT & Digital', resp: 'RASOARIMALALA Voahangy Lalao', on: true }, { code: 'COM', nom: 'Direction commerciale', resp: '', on: true }, { code: 'OPS', nom: 'Opérations', resp: '', on: true }];
+  function guSiteLbl(c) { if (GU_CUR === 'ent') { var x = ENT_CENTRES.filter(function (s) { return s.code === c; })[0]; return x ? x.nom : (c || '—'); } return siteLbl(c); }
+  (function () {
+    var R = RIGHTS0.ROLES2, M = RIGHTS0.RM, U = RIGHTS0.USERS;
+    ['Directeur général', 'DAF', 'Contrôleur de gestion', 'Responsable de centre', 'Comptable', 'Auditeur interne'].forEach(function (r) { if (R.indexOf(r) < 0) R.push(r); M[r] = M[r] || {}; });
+    function g(r, a) { a.forEach(function (x) { M[r][x] = true; }); }
+    g('Directeur général', ['Consultation', 'Validation', 'Approbation', 'Export']); g('DAF', ['Consultation', 'Création', 'Modification', 'Soumission', 'Validation', 'Import', 'Export']);
+    g('Contrôleur de gestion', ['Consultation', 'Création', 'Modification', 'Soumission', 'Import', 'Export']); g('Responsable de centre', ['Consultation', 'Création', 'Modification', 'Soumission']);
+    g('Comptable', ['Consultation', 'Import', 'Export']); g('Auditeur interne', ['Consultation', 'Export']);
+    [['RAVELO Fanja', 'Directeur général', 'Toutes les entités'], ['RANDRIA Haja', 'DAF', 'Toutes les entités'], ['RAKOTOMALALA Sitraka', 'Contrôleur de gestion', 'Toutes les entités'], ['ANDRIANARIVO Mialy', 'Responsable de centre', 'IT & Digital'], ['RASOAMANANA Lalaina', 'Comptable', 'Toutes les entités'], ['RABEMANANA Tahina', 'Auditeur interne', 'Toutes les entités']].forEach(function (x) { U.push({ n: x[0], roles: [x[1]], profs: ['Entreprise'], ent: x[2], proj: 'Tous les projets', act: true }); });
+  })();
+  function guBuildSets() {
+    GU_SET = {
+      prj: { roles: PRJ_ROLES, rm: PRJ_RM, users: PRJ_USERS, lv: GU_LV, tree: GU_TREE, priv: GU_PRIV, act: PRJ_ACTIONS, actgrp: GU_ACTGRP, rdesc: GU_RDESC, cadmap: GU_CADMAP, adm: 'Administrer', word: { S: 'Site', s: 'site', p: 'sites', all: 'Tous les sites' } },
+      ent: {
+        roles: RIGHTS0.ROLES2, rm: RIGHTS0.RM, users: RIGHTS0.USERS.filter(function (u) { return u.profs.indexOf('Entreprise') >= 0; }), act: RIGHTS0.ACTIONS, adm: 'Administration', cadmap: {}, word: { S: 'Centre', s: 'centre', p: 'centres', all: 'Tous les centres' },
+        lv: { 'Administrateur': 4, 'Directeur général': 3, 'DAF': 3, 'Contrôleur de gestion': 3, 'Valideur': 3, 'Contrôleur': 2, 'Comptable': 2, 'Préparateur': 2, 'Auditeur interne': 2, 'Responsable de centre': 1, 'Lecteur': 0 },
+        tree: [
+          { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
+          { key: 'g-suivi', label: 'Exécution', kids: [['appr', 'Budgets verrouillés', 'ecr'], ['engage', 'Engagements', 'ecr'], ['real', 'Réalisations', 'ecr'], ['decaiss', 'Paiements comptabilisés', 'ecr'], ['encaiss', 'Recettes comptabilisées', 'ecr']] },
+          { key: 'g-treso', label: 'Trésorerie', kids: [['bkdec', 'Plan de trésorerie', 'ecr']] },
+          { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
+          { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['roles', 'Groupes de rôles', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['ctrl', 'Contrôles et seuils', 'prm'], ['trev', 'Types de révision', 'prm'], ['rclot', 'Règles de clôture', 'prm'], ['notifcfg', 'Notifications', 'prm']] }
+        ],
+        priv: [['export', 'Exporter des données', 'Peut exporter les budgets et les analyses en CSV, Excel et PDF', 2], ['tous_centres', 'Tous les centres', 'Voit les budgets de tous les centres de responsabilité (sinon : son propre centre)', 3],
+          ['sensible', 'Données sensibles', 'Accès aux charges de personnel et à la trésorerie', 3], ['audit', 'Journal d’audit', 'Consulter l’historique des actions', 3], ['delegation', 'Délégation', 'Peut déléguer ses validations à un autre utilisateur', 3], ['suppr_def', 'Suppression définitive', 'Peut supprimer sans archivage', 4],
+          ['cloture', 'Clôturer l’exercice', 'Peut lancer la clôture budgétaire et le report des budgets non consommés', 3], ['reviser', 'Valider une révision budgétaire', 'Peut approuver un transfert ou une rallonge entre lignes et centres', 3], ['arbitrer', 'Arbitrer la campagne', 'Peut ajuster, réduire ou rejeter les demandes des centres', 3], ['sync', 'Lancer l’import des réalisations', 'Peut importer les réalisations depuis la comptabilité', 2]],
+        actgrp: [['Budgets', ['Consultation', 'Création', 'Modification', 'Soumission']], ['Validation', ['Validation', 'Approbation']], ['Données', ['Import', 'Export']], ['Administration', ['Administration']]],
+        rdesc: { 'Directeur général': 'Arbitre et approuve le budget de l’entreprise.', 'DAF': 'Pilote la campagne, prépare et valide les budgets, importe les réalisations.', 'Contrôleur de gestion': 'Consolide les budgets, analyse les écarts et prépare les révisions.', 'Responsable de centre': 'Saisit et soumet le budget de son centre de responsabilité.', 'Comptable': 'Importe les réalisations et consulte les budgets.', 'Auditeur interne': 'Consulte et exporte, sans rien modifier.', 'Lecteur': 'Consulte les budgets.', 'Préparateur': 'Prépare et soumet les budgets.', 'Contrôleur': 'Contrôle les budgets soumis.', 'Valideur': 'Valide et approuve les budgets.', 'Administrateur': 'Configure les paramètres et gère les utilisateurs.' }
+      }
+    };
+  }
+  /* bascule les jeux de données des écrans Groupes de rôles / Utilisateurs selon le profil actif */
+  function guUse(code) {
+    var p = code === 'ent' ? 'ent' : 'prj'; if (typeof RIGHTS0 === 'undefined' || !RIGHTS0) return; if (!GU_SET) guBuildSets(); if (p === GU_CUR) return;
+    var s = GU_SET[p]; PRJ_ROLES = s.roles; PRJ_RM = s.rm; PRJ_USERS = s.users; GU_LV = s.lv; GU_TREE = s.tree; GU_PRIV = s.priv; PRJ_ACTIONS = s.act; GU_ACTGRP = s.actgrp || GU_SET.prj.actgrp; GU_RDESC = s.rdesc || GU_SET.prj.rdesc; GU_CADMAP = s.cadmap; GU_ADM = s.adm; GU_WORD = s.word; GU_CUR = p;
+    GU_RM0 = null; GU.init = false; GU.groups = null; GU.grp = null; GU.work = null; GU.dirty = false; GU.rl = null; GU.rwork = null; GU.rdirty = false; GU.pu = null; GU.pwork = null; GU.pdirty = false; GU.fg = ''; GU.site = ''; GU.q = ''; GU.tab = 'users';
+    if (p === 'ent') { var m = { 'IT & Digital': 'ITD' }; PRJ_USERS.forEach(function (u) { if (!u.site) u.site = m[u.ent] || 'Tous les sites'; }); }
+  }
   function roRender() {
-    guInit(); var box = document.getElementById('ro-body'); box.innerHTML = '';
+    guUse(activeCode()); guInit(); var box = document.getElementById('ro-body'); box.innerHTML = '';
     if (!GU_RM0) { GU_RM0 = JSON.parse(JSON.stringify(PRJ_RM)); GU_CAD0 = JSON.parse(JSON.stringify(CAD_ACT)); GU_CADMAP0 = JSON.parse(JSON.stringify(GU_CADMAP)); }
     var gs = GU.groups;
     if (!GU.rl || !guGroup(GU.rl)) {
@@ -18846,9 +18899,9 @@ var EXEC_REC = [
       var rows = gs.map(function (x) {
         var nm = cvEl('div'); nm.appendChild(cvEl('b', null, x.nom)); nm.appendChild(cvEl('div', 'hby', GU_RDESC[x.nom] || 'Groupe de rôles personnalisé.'));
         var nA = Object.keys(PRJ_RM[x.nom] || {}).filter(function (k) { return PRJ_RM[x.nom][k]; }).length, ck = GU_CADMAP[x.nom], ac = cvEl('div', 'gu-ac'), bo = cvEl('button', 'btn small', 'Configurer'); bo.type = 'button'; bo.addEventListener('click', function () { GU.rl = x.nom; GU.rwork = null; roRender(); }); ac.appendChild(bo);
-        return [nm, String(guMembers().filter(function (u) { return u.roles[0] === x.nom; }).length), String(nA) + ' / ' + PRJ_ACTIONS.length, ck ? CAD_ROLES[ck] : '—', ac];
+        return GU_CUR === 'ent' ? [nm, String(guMembers().filter(function (u) { return u.roles[0] === x.nom; }).length), String(nA) + ' / ' + PRJ_ACTIONS.length, ac] : [nm, String(guMembers().filter(function (u) { return u.roles[0] === x.nom; }).length), String(nA) + ' / ' + PRJ_ACTIONS.length, ck ? CAD_ROLES[ck] : '—', ac];
       });
-      var lt = dpMini(['Groupe de rôles', 'Utilisateurs', 'Actions du projet', 'Rôle du circuit', ''], rows, [1, 2], 'Aucun groupe de rôles.');
+      var lt = dpMini(GU_CUR === 'ent' ? ['Groupe de rôles', 'Utilisateurs', 'Actions autorisées', ''] : ['Groupe de rôles', 'Utilisateurs', 'Actions du projet', 'Rôle du circuit', ''], rows, [1, 2], 'Aucun groupe de rôles.');
       lt.querySelectorAll('tbody tr').forEach(function (tr, i) { tr.style.cursor = 'pointer'; tr.addEventListener('click', function (e) { if (e.target.closest('button')) return; GU.rl = gs[i].nom; GU.rwork = null; roRender(); }); });
       box.appendChild(lt); return;
     }
@@ -18856,7 +18909,7 @@ var EXEC_REC = [
     function cadHas(ck, a) { return !!ck && CAD_ACT[a].indexOf(ck) >= 0; }
     if (!GU.rwork || GU.rwork.g !== g.nom) { var ck0 = GU_CADMAP[g.nom] || ''; GU.rwork = { g: g.nom, a: JSON.parse(JSON.stringify(PRJ_RM[g.nom] || {})), ck: ck0, cad: {} }; Object.keys(CAD_ACT).forEach(function (a) { GU.rwork.cad[a] = cadHas(ck0, a); }); GU.rdirty = false; }
     var W = GU.rwork;
-    var grid = cvEl('div', 'gu-split'), left = cvEl('div', 'gu-side'), lh = cvEl('div', 'gu-side-h'); lh.appendChild(cvEl('div', 'gu-cap', 'Groupes de rôles du projet')); lh.appendChild(cvEl('div', 'hby', 'Chaque utilisateur appartient à un groupe de rôles. Les droits par menu (Permissions) en découlent.')); left.appendChild(lh);
+    var grid = cvEl('div', 'gu-split'), left = cvEl('div', 'gu-side'), lh = cvEl('div', 'gu-side-h'); lh.appendChild(cvEl('div', 'gu-cap', GU_CUR === 'ent' ? 'Groupes de rôles' : 'Groupes de rôles du projet')); lh.appendChild(cvEl('div', 'hby', 'Chaque utilisateur appartient à un groupe de rôles. Les droits par menu (Permissions) en découlent.')); left.appendChild(lh);
     var list = cvEl('div', 'gu-gl'); gs.forEach(function (x) {
       var it = cvEl('button', 'gu-g' + (x.nom === g.nom ? ' on' : '')); it.type = 'button'; var t = cvEl('div', 'gu-g-t'); t.appendChild(cvEl('b', null, x.nom)); t.appendChild(cvEl('span', 'gu-n', String(guMembers().filter(function (u) { return u.roles[0] === x.nom; }).length))); it.appendChild(t); it.appendChild(cvEl('div', 'hby', Object.keys(PRJ_RM[x.nom] || {}).filter(function (k) { return PRJ_RM[x.nom][k]; }).length + ' action(s) autorisée(s)'));
       it.addEventListener('click', function () { if (GU.rdirty && !confirm('Des modifications non enregistrées seront perdues. Continuer ?')) return; GU.rdirty = false; GU.rl = x.nom; GU.rwork = null; roRender(); }); list.appendChild(it);
@@ -18866,7 +18919,7 @@ var EXEC_REC = [
     rs.addEventListener('click', function () { W.a = JSON.parse(JSON.stringify(GU_RM0[g.nom] || {})); W.ck = GU_CADMAP0[g.nom] || ''; Object.keys(CAD_ACT).forEach(function (a) { W.cad[a] = !!W.ck && GU_CAD0[a].indexOf(W.ck) >= 0; }); GU.rdirty = true; roRender(); }); ra.appendChild(rs);
     var sv = cvEl('button', 'btn primary', 'Enregistrer'); sv.type = 'button'; sv.disabled = !GU.rdirty;
     sv.addEventListener('click', function () {
-      W.a['Administrer'] = g.fixe ? true : W.a['Administrer']; PRJ_RM[g.nom] = JSON.parse(JSON.stringify(W.a));
+      W.a[GU_ADM] = g.fixe ? true : W.a[GU_ADM]; PRJ_RM[g.nom] = JSON.parse(JSON.stringify(W.a));
       if (W.ck) { GU_CADMAP[g.nom] = W.ck; Object.keys(CAD_ACT).forEach(function (a) { var i = CAD_ACT[a].indexOf(W.ck); if (W.cad[a] && i < 0) CAD_ACT[a].push(W.ck); else if (!W.cad[a] && i >= 0 && CAD_ACT[a].length > 1) CAD_ACT[a].splice(i, 1); }); } else delete GU_CADMAP[g.nom];
       g.perms = {}; GU.work = null; GU.rdirty = false; GU.rwork = null; auditAdd('Configuration', 'Groupe de rôles ' + g.nom, 'Actions du groupe et du circuit du compte administratif enregistrées'); guToast('Groupe de rôles « ' + g.nom + ' » enregistré : les permissions par menu sont recalculées.'); roRender();
     }); ra.appendChild(sv); rh.appendChild(ra); right.appendChild(rh);
@@ -18875,10 +18928,11 @@ var EXEC_REC = [
       body.appendChild(cvEl('div', 'gu-cap', sec[0]));
       sec[1].forEach(function (a) {
         var row = cvEl('div', 'gu-prow'), t = cvEl('div'); t.appendChild(cvEl('b', null, a)); row.appendChild(t);
-        var lock = g.fixe && a === 'Administrer', sw = mkSwitch(lock ? true : !!W.a[a], a, function (v) { W.a[a] = v; GU.rdirty = true; roRender(); }); if (lock) sw.querySelector('input').disabled = true; row.appendChild(sw); body.appendChild(row);
+        var lock = g.fixe && a === GU_ADM, sw = mkSwitch(lock ? true : !!W.a[a], a, function (v) { W.a[a] = v; GU.rdirty = true; roRender(); }); if (lock) sw.querySelector('input').disabled = true; row.appendChild(sw); body.appendChild(row);
       });
     });
-    /* circuit du compte administratif : préparamétré, modifiable */
+    /* circuit du compte administratif : préparamétré, modifiable (profil Projet) */
+    if (GU_CUR === 'ent') { right.appendChild(body); var bk0 = cvEl('button', 'btn', '← Tous les groupes de rôles'); bk0.type = 'button'; bk0.style.marginBottom = '12px'; bk0.addEventListener('click', function () { if (GU.rdirty && !confirm('Des modifications non enregistrées seront perdues. Continuer ?')) return; GU.rl = null; GU.rwork = null; GU.rdirty = false; roRender(); }); box.appendChild(bk0); box.appendChild(right); return; }
     body.appendChild(cvEl('div', 'gu-cap', 'Compte administratif — circuit (visa, ordonnancement, paiement)'));
     var rowc = cvEl('div', 'gu-prow'), tc = cvEl('div'); tc.appendChild(cvEl('b', null, 'Rôle tenu dans le circuit')); tc.appendChild(cvEl('div', 'hby', 'Préparamétré selon le rôle ; modifiable. Les actions d’un rôle de circuit sont communes à tous les rôles du projet qui le tiennent.')); rowc.appendChild(tc);
     var cs = guSel([['', '— Aucun —']].concat(Object.keys(CAD_ROLES).map(function (k) { return [k, CAD_ROLES[k]]; })), W.ck, function (v) { W.ck = v; Object.keys(CAD_ACT).forEach(function (a) { W.cad[a] = cadHas(v, a); }); GU.rdirty = true; roRender(); }, 'Rôle du circuit'); rowc.appendChild(cs); body.appendChild(rowc);
@@ -18913,7 +18967,7 @@ var EXEC_REC = [
     var ra = cvEl('div', 'gu-ac'), rs = cvEl('button', 'btn', 'Rétablir ceux du groupe'); rs.type = 'button'; rs.disabled = u.sys; rs.addEventListener('click', function () { att.forEach(function (k) { GU.pwork.v[k[0]] = true; }); GU.pdirty = true; guRender(); }); ra.appendChild(rs);
     var sv = cvEl('button', 'btn primary', 'Enregistrer'); sv.type = 'button'; sv.disabled = !GU.pdirty; sv.addEventListener('click', function () { u.priv = {}; att.forEach(function (k) { if (GU.pwork.v[k[0]] === false) u.priv[k[0]] = false; }); GU.pdirty = false; auditAdd('Configuration', 'Utilisateur ' + u.n, 'Privilèges enregistrés'); guToast('Privilèges de ' + u.n + ' enregistrés.'); guRender(); }); ra.appendChild(sv); rh.appendChild(ra); right.appendChild(rh);
     var body = cvEl('div', 'gu-priv');
-    [['Privilèges communs', att.filter(function (k) { return GU_PRIV.indexOf(k) < 6; })], ['Privilèges propres au projet', att.filter(function (k) { return GU_PRIV.indexOf(k) >= 6; })]].forEach(function (sec) {
+    [['Privilèges communs', att.filter(function (k) { return GU_PRIV.indexOf(k) < 6; })], ['Privilèges propres ' + (GU_CUR === 'ent' ? 'à l’entreprise' : 'au projet'), att.filter(function (k) { return GU_PRIV.indexOf(k) >= 6; })]].forEach(function (sec) {
       if (!sec[1].length) return; body.appendChild(cvEl('div', 'gu-cap', sec[0]));
       sec[1].forEach(function (k) { var row = cvEl('div', 'gu-prow'), t = cvEl('div'); t.appendChild(cvEl('b', null, k[1])); t.appendChild(cvEl('div', 'hby', k[2])); row.appendChild(t); var v = GU.pwork.v[k[0]] !== false;
         var tag = cvEl('span', 'gu-tag', v ? 'Rattaché au groupe' : 'Retiré pour cet utilisateur'); if (!v) tag.classList.add('adj'); row.appendChild(tag);
