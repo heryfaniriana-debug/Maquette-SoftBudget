@@ -15188,7 +15188,7 @@ var EXEC_REC = [
     var adv = function (c, a) { return a; }, simple = function (c, a) { return !a; }, treso = function (c, a, f) { return f.mods.treso; };
     var ca = [['Engagements', rPrj], ['Liquidations', rPrj], ['Ordonnancement', rPrj], ['Paiements', rPrj], ['Tableau de restitution', rPrj], ['Clôture de l’exercice', rPrj], ['Fichiers d’interface', rPrj]];
     return [
-      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Cadre budgétaire', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways]] },
+      { g: 'Cadre du projet', items: [['Bailleurs', rAlways], ['Sources de financement', rAlways], ['Taux de change', rAlways], ['Plan de financement (PAD)', rAlways], ['Avance et paiement direct', treso], ['Cadre de résultats', rAlways], ['Cadre budgétaire', rAlways]] },
       { g: 'Élaboration', items: [['Campagnes', adv], ['Collecte', adv], ['Validation', adv], ['Budgets (saisie directe)', simple], ['Répartition des crédits', rPubl], ['Plan d’engagement', rPubl], ['Budget rectificatif', rPubl], ['Révisions', rRevPg]] },
       { g: 'Plans annuels', items: [['PTBA', rAlways], ['PTA', rAlways], ['PPM', rAlways], ['Plan de décaissement', treso], ['Révisions', rAlways], ['Report et clôture', rAlways]] },
       { g: 'Compte administratif', items: ca },
@@ -15256,7 +15256,7 @@ var EXEC_REC = [
       var sub = document.querySelector('#' + gid + ' > .sub');
       list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
     }
-    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
+    put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation']]);
     put('g-params', [['sites', 'Sites', 'Sites : centres de saisie du projet'], ['roles', 'Groupes de rôles', 'Groupes de rôles'], ['usr', 'Utilisateurs et droits', 'Utilisateurs et droits'], ['notifcfg', 'Notifications', 'Notifications'], ['echeanc', 'Échéances', 'Échéances'], ['alrt', 'Alertes et dépassements', 'Alertes et dépassements']]);
     put('g-budgets', [['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
     put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM — Besoins identifiés', 'Plan de passation des marchés : besoins identifiés dans le PTBA'], ['ppmk', 'PPM — Marchés du plan', 'Plan de passation des marchés : marchés planifiés'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
@@ -18902,7 +18902,7 @@ var EXEC_REC = [
   var GU_LV = { 'Administrateur': 4, 'Coordonnateur': 3, 'RAF': 3, 'Comptable': 2, 'Suivi-évaluation': 2, 'Passation des marchés': 2, 'Contrôleur interne': 2, 'Chef d’antenne': 1, 'Bailleur': 0 };
   var GU_COLS = ['menu', 'voir', 'creer', 'modifier', 'supprimer', 'valider'], GU_CL = { menu: 'Menu', voir: 'Voir', creer: 'Créer', modifier: 'Modifier', supprimer: 'Supprimer', valider: 'Valider' };
   var GU_TREE = [
-    { key: 'g-pcadre', label: 'Cadre du projet', kids: [['bailleurs', 'Bailleurs', 'taux'], ['sources', 'Sources de financement', 'taux'], ['taux', 'Taux de change', 'taux'], ['pad', 'Plan de financement (PAD)', 'cadre'], ['list', 'Cadre budgétaire', 'cadre'], ['avini', 'Avance et paiement direct', 'cadre'], ['resu', 'Cadre de résultats', 'cadre']] },
+    { key: 'g-pcadre', label: 'Cadre du projet', kids: [['bailleurs', 'Bailleurs', 'taux'], ['sources', 'Sources de financement', 'taux'], ['taux', 'Taux de change', 'taux'], ['pad', 'Plan de financement (PAD)', 'cadre'], ['avini', 'Avance et paiement direct', 'cadre'], ['resu', 'Cadre de résultats', 'cadre'], ['list', 'Cadre budgétaire', 'cadre']] },
     { key: 'g-budgets', label: 'Élaboration', kids: [['camp', 'Campagnes', 'elab'], ['collecte', 'Collecte', 'elab'], ['arb', 'Validation', 'elab'], ['bud', 'Budgets (saisie directe)', 'elab']] },
     { key: 'g-plan', label: 'Plans annuels', kids: [['ptba', 'PTBA', 'plan'], ['pta', 'PTA', 'plan'], ['ppm', 'PPM — Besoins identifiés', 'plan'], ['ppmk', 'PPM — Marchés du plan', 'plan'], ['pdec', 'Plan de décaissement', 'plan'], ['revpl', 'Révisions', 'plan'], ['rep', 'Report et clôture', 'plan']] },
     { key: 'g-cadm', label: 'Compte administratif', kids: [['dpeng', 'Engagements', 'adm'], ['dpliq', 'Liquidations', 'adm'], ['dpord', 'Ordonnancement', 'adm'], ['dppay', 'Paiements', 'adm'], ['dptab', 'Tableau de restitution', 'adm'], ['dpclot', 'Clôture de l’exercice', 'adm'], ['cadint', 'Interface comptable', 'adm']] },
