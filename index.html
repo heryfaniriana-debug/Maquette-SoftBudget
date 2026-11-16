@@ -2020,6 +2020,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="cles" title="Clés de répartition des charges communes" style="display:none">Clés de répartition</button>
           <button data-go="conso" title="Consolidation des budgets des directions" style="display:none">Consolidation</button>
           <button data-go="scen" title="Scénarios : prudent, central, optimiste" style="display:none">Scénarios</button>
+          <button data-go="clot" title="Report et clôture de l’exercice" style="display:none">Report et clôture</button>
           <button data-go="camp" title="Campagnes budgétaires">Campagnes</button>
           <button data-go="collecte" title="Collecte et consolidation">Collecte</button>
           <button data-go="arb" title="Valider les données collectées">Validation</button>
@@ -5599,14 +5600,14 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
       <!-- ===== Projet : sites (centres de saisie) ===== -->
       <section class="view" id="v-cadr">
-        <div class="head"><div><h1>Cadrage budgétaire</h1><p>Le point de départ du budget : objectifs de chiffre d’affaires et de marge, hypothèses économiques et enveloppes de dépenses par direction. Une fois validé, le cadrage fixe l’enveloppe de chaque direction dans la campagne.</p></div>
+        <div class="head"><div><h1>Lettre de cadrage</h1><p>Le point de départ du budget : objectifs de chiffre d’affaires et de marge, hypothèses économiques et enveloppes de dépenses par direction. Une fois validé, le cadrage fixe l’enveloppe de chaque direction dans la campagne.</p></div>
           <div class="actions"><button class="btn" id="cadr-reopen" hidden>Rouvrir le cadrage</button><button class="btn primary" id="cadr-valid">Valider le cadrage</button></div></div>
         <div class="callout" id="cadr-msg" hidden style="margin-bottom:12px"></div>
         <div id="cadr-body"></div>
       </section>
 
       <section class="view" id="v-perso">
-        <div class="head"><div><h1>Charges de personnel</h1><p>Effectifs, recrutements et masse salariale par direction : les postes, leur salaire, les charges patronales et les primes donnent le coût du personnel, comparé à l’enveloppe de chaque direction.</p></div>
+        <div class="head"><div><h1>Masse salariale</h1><p>Effectifs, recrutements et masse salariale par direction : les postes, leur salaire, les charges patronales et les primes donnent le coût du personnel, comparé à l’enveloppe de chaque direction.</p></div>
           <div class="actions"><button class="btn" id="perso-reopen" hidden>Rouvrir</button><button class="btn" id="perso-valid">Valider les charges de personnel</button><button class="btn primary" id="perso-new">+ Ajouter un poste</button></div></div>
         <div class="callout" id="perso-msg" hidden style="margin-bottom:12px"></div>
         <div id="perso-body"></div>
@@ -5626,10 +5627,17 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       </section>
 
       <section class="view" id="v-scen">
-        <div class="head"><div><h1>Scénarios</h1><p>Testez le budget face à plusieurs hypothèses : volumes et prix de vente, taux de marge, salaires, inflation. Le scénario central reprend le cadrage ; chacun donne son résultat prévisionnel.</p></div>
+        <div class="head"><div><h1>Simulations</h1><p>Testez le budget face à plusieurs hypothèses : volumes et prix de vente, taux de marge, salaires, inflation. Le scénario central reprend le cadrage ; chacun donne son résultat prévisionnel.</p></div>
           <div class="actions"><button class="btn primary" id="scen-new">+ Nouveau scénario</button></div></div>
         <div class="callout" id="scen-msg" hidden style="margin-bottom:12px"></div>
         <div id="scen-body"></div>
+      </section>
+
+      <section class="view" id="v-clot">
+        <div class="head"><div><h1>Report et clôture</h1><p>Clôture de l’exercice : conditions à réunir, engagements ouverts reportés sur l’exercice suivant, crédits non consommés et verrouillage du budget.</p></div>
+          <div class="actions"><button class="btn primary" id="clot-go">Clôturer l’exercice</button></div></div>
+        <div class="callout" id="clot-msg" hidden style="margin-bottom:12px"></div>
+        <div id="clot-body"></div>
       </section>
 
       <section class="view" id="v-ddir">
@@ -6812,7 +6820,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
 
 <script>
 (function () {
-  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'plana', 'sites', 'usr', 'roles', 'alrt', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon'];
+  var views = ['taux', 'bailleurs', 'list', 'create', 'detail', 'dashboard', 'params', 'struct', 'saisie', 'valid', 'versions', 'real', 'corresp', 'engage', 'dispo', 'alertes', 'synth', 'ecarts', 'compare', 'parcours', 'camp', 'collecte', 'arb', 'ptba', 'revis', 'trev', 'prev', 'rapports', 'exports', 'droits', 'audit', 'taches', 'notifcfg', 'cloture', 'rclot', 'interfaces', 'appr', 'ctrl', 'ctpl', 'bud', 'vcmp', 'pluri', 'cash', 'bkacc', 'bkdec', 'bkrel', 'bkrap', 'bkdvr', 'cadm', 'dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'sx', 'ana', 'rep', 'revpl', 'plana', 'sites', 'usr', 'roles', 'alrt', 'trpos', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'ppm', 'pad', 'avini', 'resu', 'avanc', 'inv', 'pdec', 'dfon', 'pubrect', 'pubdot', 'pubpep', 'pubrec', 'regime', 'circuits', 'sources', 'soon', 'orga', 'cadr', 'perso', 'cles', 'conso', 'scen', 'roll', 'ddir', 'clot'];
   var titles = {
     list: ['Budgets', 'Paramétrage des budgets'],
     bud: ['Budgets', 'Budgets'],
@@ -6896,6 +6904,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     cles: ['Élaboration', 'Clés de répartition'],
     conso: ['Élaboration', 'Consolidation'],
     scen: ['Élaboration', 'Scénarios'],
+    clot: ['Budgets annuels', 'Report et clôture'],
     roll: ['Analyses', 'Prévisions glissantes'],
     ddir: ['Analyses', 'Tableau de bord par direction'],
     usr: ['Paramètres', 'Utilisateurs et droits'],
@@ -6921,7 +6930,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var homeSvg = '<svg class="ico" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>';
 
   var NAVGROUPS = {
-    'nav-budgets': ['list', 'cadr', 'perso', 'cles', 'conso', 'scen', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
+    'nav-budgets': ['list', 'cadr', 'perso', 'cles', 'conso', 'scen', 'clot', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss', 'sxeng', 'sxliq', 'sxpay', 'sxenc', 'sxphy', 'trpos'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-plan': ['ptba', 'pta', 'ppm', 'ppmk', 'pdec', 'revpl', 'rep'],
@@ -6944,6 +6953,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     document.getElementById('crumbs').innerHTML = crumb;
     if (typeof fpAfterShow === 'function') fpAfterShow(vn);
     if (typeof prmTabs === 'function') prmTabs(name, vn);
+    if (typeof entTabs === 'function') entTabs(name, vn);
     var hd =document.querySelector('#v-' + vn + ' > .head > div:first-child');
     if (hd) { var ey = hd.querySelector('.eyebrow'); if (!ey) { ey = document.createElement('div'); ey.className = 'eyebrow'; hd.insertBefore(ey, hd.firstChild); } ey.textContent = t[0]; }
     document.getElementById('nav-dashboard').classList.toggle('active', name === 'dashboard');
@@ -6981,6 +6991,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'scen' && typeof scenRender === 'function') scenRender();
     if (name === 'roll' && typeof rollRender === 'function') rollRender();
     if (name === 'ddir' && typeof ddirRender === 'function') ddirRender();
+    if (name === 'clot' && typeof clotRender === 'function') clotRender();
     if (name === 'camp' && typeof renderCamps === 'function') renderCamps();
     if (name === 'usr' && typeof guRender === 'function') guRender();
     if (name === 'roles' && typeof roRender === 'function') roRender();
@@ -7086,7 +7097,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   function applyMenus() {
     var code = activeCode(), adv = modes[code] === 'Avancé';
     var el = !(code === 'ent' && typeof REG !== 'undefined' && REG.ent && REG.ent.mods && REG.ent.mods.elab === false), ad = adv && el;
-    var rules = { bud: !ad, camp: ad, collecte: ad, arb: ad, parcours: ad, ctpl: ad, valid: ad, ptba: code === 'prj' };
+    var rules = { bud: code === 'ent' ? true : !ad, camp: ad, collecte: ad, arb: ad, parcours: ad, ctpl: ad, valid: ad, ptba: code === 'prj' };
     var ap = document.querySelector('.sub button[data-go="appr"]'); if (ap) ap.textContent = 'Budgets verrouillés';
     Object.keys(rules).forEach(function (k) {
       document.querySelectorAll('.sub button[data-go="' + k + '"]').forEach(function (b) { b.style.display = rules[k] ? '' : 'none'; });
@@ -15142,11 +15153,19 @@ var EXEC_REC = [
     var gS = document.getElementById('g-suivi'), gT = document.getElementById('g-treso');
     nav.insertBefore(gS, gT);
     var pkb = document.querySelector('.sub button[data-go="ppmk"]'); if (pkb) pkb.style.display = code === 'prj' ? '' : 'none';
-    document.getElementById('g-pcadre').style.display = code === 'prj' ? '' : 'none';
-    document.getElementById('g-plan').style.display = code === 'prj' ? '' : 'none';
+    document.getElementById('g-pcadre').style.display = (code === 'prj' || code === 'ent') ? '' : 'none';
+    document.getElementById('g-plan').style.display = (code === 'prj' || code === 'ent') ? '' : 'none';
     if (code === 'ent') {
-      var ps = document.querySelector('#g-params > .sub');
-      [['regime', 'Général', 'Profil, mode de gestion et modules'], ['orga', 'Organisation', 'Directions, services et centres de responsabilité'], ['roles'], ['usr'], ['ctrl'], ['trev'], ['rclot'], ['notifcfg']].forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; ps.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); });
+      /* Entreprise : même ossature que le Projet (cadre, élaboration, budgets annuels, exécution, analyses, paramètres) */
+      var putE = function (gid, list) { var sub = document.querySelector('#' + gid + ' > .sub'); list.forEach(function (e) { var b = document.querySelector('.sub button[data-go="' + e[0] + '"]'); if (!b) return; sub.appendChild(b); if (e[1]) navSetBtn(b, e[1], e[2]); }); };
+      putE('g-pcadre', [['cadr', 'Lettre de cadrage', 'Objectifs de chiffre d’affaires et de marge, hypothèses et enveloppes par direction'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['cles', 'Clés de répartition', 'Répartition des charges communes entre les directions']]);
+      putE('g-budgets', [['camp', 'Campagnes'], ['collecte', 'Collecte'], ['conso', 'Consolidation'], ['arb', 'Validation']]);
+      putE('g-plan', [['bud', 'Budget d’exploitation', 'Budget d’exploitation : saisie et consultation'], ['perso', 'Masse salariale', 'Effectifs, recrutements et masse salariale'], ['inv', 'Plan d’investissement'], ['bkdec', 'Plan de trésorerie'], ['scen', 'Simulations', 'Simulations : scénarios prudent, central et optimiste'], ['revis', 'Révisions'], ['clot', 'Report et clôture', 'Report et clôture de l’exercice']]);
+      putE('g-suivi', [['engage', 'Engagements'], ['real', 'Charges réalisées'], ['decaiss', 'Décaissements'], ['encaiss', 'Encaissements']]);
+      putE('g-rapports', [['ddir'], ['ecarts', 'Analyse des écarts'], ['roll'], ['cash'], ['pluri'], ['alertes'], ['rapports', 'Rapports et exports', 'États à éditer, exports, comparaison de versions et bilan d’exécution']]);
+      putE('g-params', [['regime', 'Général', 'Profil, mode de gestion et modules'], ['orga', 'Organisation', 'Directions, services et centres de responsabilité'], ['roles'], ['usr'], ['notifcfg', 'Notifications et échéances'], ['ctrl', 'Alertes et dépassements', 'Alertes et dépassements']]);
+      navSetGroup(document.getElementById('g-pcadre'), 'Cadre de l’entreprise', 'Lettre de cadrage, cadre budgétaire et clés de répartition'); navSetGroup(document.getElementById('g-plan'), 'Budgets annuels', 'Budget d’exploitation, masse salariale, investissements, trésorerie, simulations, révisions et clôture');
+      var gTr = document.getElementById('g-treso'); if (gTr) gTr.style.display = 'none';
     }
     if (code !== 'prj') return;
     nav.insertBefore(gT, gS);
@@ -15174,6 +15193,7 @@ var EXEC_REC = [
     var b = prjBtn(name), g = b && b.closest('.group'); return g ? g.id : null;
   }
   function prjCrumb(name, t, label) {
+    if (typeof activeCode === 'function' && activeCode() === 'ent' && typeof entCrumb === 'function') return entCrumb(name, t);
     var gid = prjGroupOf(name); if (!gid || !PRJ_CRUMB_G[gid]) return t;
     var b = prjBtn(name), h = navHead(document.getElementById(gid));
     var lbl = (!label && b.dataset.o !== undefined && (MENU_OF[name] || name) === name) ? b.textContent.trim() : t[1];
@@ -15204,7 +15224,7 @@ var EXEC_REC = [
         var b = document.querySelector('#g-params .sub button[data-go="' + e[0] + '"]'); if (!b) return;
         if (b.dataset.o0 === undefined) b.dataset.o0 = JSON.stringify([b.textContent.trim(), b.getAttribute('title') || '']);
         if (prj) { if (i) MENU_OF[e[0]] = s.m[0][0]; else navSetBtn(b, s.t, s.t); if (i) b.style.display = 'none'; else b.style.display = ''; }
-        else { delete MENU_OF[e[0]]; var o = JSON.parse(b.dataset.o0); if (!i && !(code === 'ent' && e[0] === 'regime')) navSetBtn(b, o[0], o[1]); }
+        else { delete MENU_OF[e[0]]; var o = JSON.parse(b.dataset.o0); if (!i && !(code === 'ent' && (e[0] === 'regime' || e[0] === 'notifcfg'))) navSetBtn(b, o[0], o[1]); }
       });
     });
     if (!prj) PRM_SECT.forEach(function (s) { s.m.forEach(function (e, i) { var b = document.querySelector('#g-params .sub button[data-go="' + e[0] + '"]'); if (b && i && ['circuits', 'regime', 'bailleurs', 'sources', 'taux', 'plana', 'sites'].indexOf(e[0]) < 0) b.style.display = ''; }); });
@@ -15227,7 +15247,7 @@ var EXEC_REC = [
     if (typeof guUse === 'function') guUse(code);
     applyProjectMenu(code, cfg);
     regSetVis('#g-rapports .sub button:not(.anp)', true); regSetVis('#g-rapports .sub button.anp', code === 'prj');
-    regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso && code !== 'prj');
+    regSetVis('#g-cadm', circ && cfg.mods.cadm); regSetVis('#g-cadm .sub button.cprj', cfg.regime === 'projet'); regSetVis('#g-cadm .sub button.cpub', cfg.regime === 'public'); regSetVis('#g-treso', cfg.mods.treso && code === 'pub');
     regSetVis('.sub button[data-go="pluri"]', cfg.mods.pluri); regSetVis('.sub button[data-go="bkdvr"]', cfg.mods.treso); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso && code !== 'prj'); regSetVis('.sub button[data-go="pdec"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="dfon"]', cfg.mods.treso && code === 'prj'); regSetVis('.sub button[data-go="ppm"]', code === 'prj'); regSetVis('.sub button[data-go="pta"]', code === 'prj'); regSetVis('.sub button[data-go="inv"]', code === 'ent'); regSetVis('.sub button[data-go="pad"]', code === 'prj'); regSetVis('.sub button.epub', cfg.regime === 'public'); regSetVis('.sub button[data-go="revis"]', cfg.regime !== 'public');
     regSetVis('.sub button[data-go="dprap"]', false); /* masqué pour l’instant */
     regSetVis('.sub button[data-go="sxeng"], .sub button[data-go="sxliq"], .sub button[data-go="sxpay"], .sub button[data-go="sxenc"], .sub button[data-go="sxphy"]', code === 'prj');
@@ -15242,12 +15262,15 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="cadr"]', code === 'ent'); regSetVis('.sub button[data-go="perso"]', code === 'ent'); regSetVis('.sub button[data-go="cles"], .sub button[data-go="conso"], .sub button[data-go="scen"], .sub button[data-go="roll"], .sub button[data-go="ddir"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
     prmMenu(code); if (typeof siteCtxSync === 'function') siteCtxSync();
-    regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code === 'pub'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
+    regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code === 'pub'); if (code === 'prj' || code === 'ent') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
     regSetVis('#g-params .sub button[data-go="params"], #g-params .sub button[data-go="droits"]', code === 'pub'); /* projet : plus de séparation des accès */ /* projet : le mode se règle dans Général */
-    if (code === 'prj') { regSetVis('#g-budgets', adv && cfg.mods.elab !== false); regSetVis('#g-cadm', adv && circ && cfg.mods.cadm); } else regSetVis('#g-budgets', true); /* projet : élaboration et compte administratif seulement en mode Avancé */
+    if (code === 'prj') { regSetVis('#g-budgets', adv && cfg.mods.elab !== false); regSetVis('#g-cadm', adv && circ && cfg.mods.cadm); } else if (code === 'ent') regSetVis('#g-budgets', adv && cfg.mods.elab !== false); else regSetVis('#g-budgets', true); /* projet : élaboration et compte administratif seulement en mode Avancé */
     if (typeof renderRights === 'function') renderRights();
     regSetVis('#g-params .sub button[data-go="rclot"], #g-params .sub button[data-go="trev"], #g-params .sub button[data-go="ctrl"], #g-params .sub button[data-go="circuits"]', code !== 'prj' && (cfg.regime !== 'importe' || true)); /* projet : clôture, révisions, contrôles budgétaires et circuits de visa n’existent plus (menus Plans annuels, alertes des Analyses, circuit du cadre budgétaire) */
     if (code !== 'prj') regSetVis('#g-params .sub button[data-go="circuits"]', circ && adv);
+    /* Entreprise : écrans regroupés sous une autre entrée (onglets) ou intégrés ailleurs */
+    regSetVis('.sub button[data-go="clot"]', code === 'ent');
+    if (code === 'ent') { regSetVis('.sub button[data-go="dispo"], .sub button[data-go="prev"], .sub button[data-go="bkdvr"], .sub button[data-go="vcmp"], .sub button[data-go="cadm"], .sub button[data-go="exports"], .sub button[data-go="appr"], .sub button[data-go="trev"], .sub button[data-go="rclot"], .sub button[data-go="params"], .sub button[data-go="droits"], .sub button[data-go="audit"], .sub button[data-go="corresp"], .sub button[data-go="interfaces"], .sub button[data-go="circuits"]', false); regSetVis('.sub button[data-go="bkdec"]', cfg.mods.treso !== false); regSetVis('.sub button[data-go="conso"]', adv && cfg.mods.elab !== false); regSetVis('.sub button[data-go="bud"]', true); }
   }
   var CAD_SOON = {
     circuits: ['Circuits de visa et délégations', 'Matrice des rôles (SPSE, RPM, AFC, RAF, Directeur de projet), délégations limitées dans le temps, séparation ordonnateur et payeur.', 'Étape 2 du déploiement.']
@@ -19348,6 +19371,49 @@ var EXEC_REC = [
     var ctr = ENT_CENTRES.filter(function (c) { return c.code === (orgaTree().filter(function (x) { return x.nom === nm && !x.parent; })[0] || {}).code || (orgaRoot(c.code) || {}).nom === nm; }), prow = ctr.map(function (c) { var et = 0, tt = 0, d = persOf('2027'); d.postes.forEach(function (p) { if (p.c === c.code) { et += p.etp; tt += persCost(p, d.par, C.hyp).tot; } }); return [c.parent ? '↳ ' + c.nom : c.nom, c.type, c.resp || '—', cadrDec(et), fmt(tt)]; });
     blk('Services et effectifs 2027', dpMini(['Centre', 'Type', 'Responsable', 'ETP', 'Coût du personnel (MGA)'], prow, [3, 4], 'Aucun centre.'));
   }
+  /* ----- Entreprise : écrans regroupés sous une même entrée du menu (onglets en haut de page) ----- */
+  var ENT_TABS = [
+    [['rapports', 'États à éditer'], ['exports', 'Exports'], ['vcmp', 'Comparaison de versions'], ['cadm', 'Bilan d’exécution']],
+    [['roll', 'Prévisions glissantes'], ['prev', 'Prévisions de fin de période'], ['dispo', 'Disponibilités']],
+    [['bkdec', 'Plan de trésorerie'], ['bkdvr', 'Décaissement vs relevé']],
+    [['revis', 'Révisions'], ['trev', 'Types de révision']],
+    [['clot', 'Report et clôture'], ['rclot', 'Règles de clôture']]
+  ];
+  function entTabs(name, vn) {
+    document.querySelectorAll('.ent-tabs').forEach(function (e) { e.remove(); });
+    if (typeof activeCode !== 'function' || activeCode() !== 'ent') return;
+    var g = ENT_TABS.filter(function (q) { return q.some(function (e) { return e[0] === name; }); })[0], v = document.getElementById('v-' + vn); if (!g || !v) return;
+    var bar = document.createElement('div'); bar.className = 'seg dp-tabs ent-tabs'; bar.style.marginBottom = '14px';
+    g.forEach(function (e) { var x = document.createElement('button'); x.type = 'button'; x.textContent = e[1]; if (e[0] === name) x.className = 'on'; x.addEventListener('click', function () { show(e[0]); }); bar.appendChild(x); });
+    v.insertBefore(bar, v.firstChild);
+  }
+  var ENT_CRUMB = { cadr: 1, list: 1, cles: 1, camp: 1, collecte: 1, conso: 1, arb: 1, bud: 1, perso: 1, inv: 1, bkdec: 1, scen: 1, revis: 1, clot: 1, engage: 1, real: 1, decaiss: 1, encaiss: 1, ddir: 1, ecarts: 1, roll: 1, cash: 1, pluri: 1, alertes: 1, rapports: 1 };
+  function entCrumb(name, t) { var k = MENU_OF[name] || name, b = document.querySelector('.sub button[data-go="' + k + '"]'); if (!ENT_CRUMB[k] || !b) return t; var g = b.closest('.group'), h = g && navHead(g); return h ? [h.textContent.trim(), b.textContent.trim()] : t; }
+  /* ----- Entreprise : report et clôture de l'exercice ----- */
+  var CLOT = { '2025': { st: 'Clôturé', on: '31/01/2026 17:40', by: 'RANDRIA Haja' }, '2026': { st: 'En cours' }, '2027': { st: 'À venir' } };
+  var CLOTV = { ex: '2026' };
+  function clotConds(ex) {
+    var open = ENG.filter(function (e) { return e.st === 'En cours'; }), done = CLOT[ex].st === 'Clôturé', fut = CLOT[ex].st === 'À venir';
+    var ok = { C6: !fut, C1: done || (!fut && REALCOV >= ex + '-12-31'), C2: done || (!fut && !open.length), C4: !fut, C5: !fut, C7: !fut };
+    return CLR.filter(function (r) { return r.act; }).map(function (r) { return { r: r, ok: ok[r.id] !== false }; });
+  }
+  function clotMsg(t, k) { bkMsg('clot-msg', t, k || 'ok'); }
+  function clotRender() {
+    guUse(activeCode()); var ex = CLOTV.ex, S = CLOT[ex], cd = clotConds(ex), open = ENG.filter(function (e) { return e.st === 'En cours'; }), dirs = cadrDirs(), b = document.getElementById('clot-body'); b.innerHTML = '';
+    var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Exercice')); bar.appendChild(guSel(['2025', '2026', '2027'].map(function (y) { return [y, y]; }), ex, function (v) { CLOTV.ex = v; clotRender(); }, 'Exercice')); bar.appendChild(badge(S.st, S.st === 'Clôturé' ? 'b-ok' : (S.st === 'En cours' ? 'b-info' : 'b-neutral'))); if (S.on) bar.appendChild(cvEl('span', 'hint', 'Clôturé le ' + S.on + ' par ' + S.by + '.')); b.appendChild(bar);
+    var go = document.getElementById('clot-go'); go.disabled = S.st !== 'En cours'; go.textContent = 'Clôturer l’exercice ' + ex;
+    var nOk = cd.filter(function (c) { return c.ok; }).length, tot = 0, fc = 0; dirs.forEach(function (d, i) { var st = ddirStats(d.nom, i); tot += st.b26; fc += st.fc26; }); var nc = Math.max(tot - fc, 0), ea = 0; open.forEach(function (e) { ea += e.amt; });
+    b.appendChild(dpTiles([['Conditions de clôture', nOk + ' sur ' + cd.length, nOk === cd.length ? 'ok' : 'warn', pl(cd.filter(function (c) { return !c.ok && c.r.sev === 'Bloquant'; }).length, 'condition bloquante') + ' à traiter'], ['Engagements ouverts', String(ex === '2026' ? open.length : 0), ex === '2026' && open.length ? 'info' : 'n', ex === '2026' ? fmt(ea) + ' MGA reportés sur 2027' : ''], ['Crédits non consommés', ex === '2026' ? fmt(nc) + ' MGA' : '—', 'brand', ex === '2026' ? 'budget 2026 moins prévision de fin d’année' : ''], ['Statut', S.st, S.st === 'Clôturé' ? 'ok' : 'n', S.st === 'En cours' ? 'budget verrouillé à la clôture' : '']], { cols: 4 }));
+    function blk(t, node, hint) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', t)); if (hint) { var hh = cvEl('div', 'hint', hint); hh.style.marginBottom = '8px'; x.appendChild(hh); } x.appendChild(node); b.appendChild(x); }
+    blk('Conditions à réunir avant la clôture', dpMini(['Condition', 'Gravité', 'État'], cd.map(function (c) { return [c.r.id + ' — ' + c.r.n, badge(c.r.sev, c.r.sev === 'Bloquant' ? 'b-ko' : 'b-warn'), badge(c.ok ? 'Satisfaite' : 'À traiter', c.ok ? 'b-ok' : 'b-warn')]; }), [], ''), 'Les règles se modifient dans l’onglet « Règles de clôture ». Une condition bloquante non satisfaite empêche la clôture.');
+    blk('Engagements ouverts reportés sur ' + (parseInt(ex, 10) + 1), dpMini(['Engagement', 'Ligne', 'Direction', 'Date', 'Montant (MGA)'], ex === '2026' ? open.map(function (e) { return [e.ref, e.c, e.ent, e.date, fmt(e.amt)]; }) : [], [4], ex === '2026' ? 'Aucun engagement ouvert.' : 'Aucun engagement à reporter.'), 'À la clôture, les engagements non soldés sont reportés automatiquement sur l’exercice suivant : ils consomment son budget.');
+    if (ex === '2026') blk('Crédits non consommés par direction', dpMini(['Direction', 'Budget 2026', 'Prévision de fin d’année', 'Crédit non consommé'], dirs.map(function (d, i) { var st = ddirStats(d.nom, i); return [d.nom, fmt(st.b26), fmt(st.fc26), badge(fmt(Math.max(st.b26 - st.fc26, 0)), st.b26 >= st.fc26 ? 'b-ok' : 'b-ko')]; }), [1, 2, 3], ''), 'Les crédits non consommés ne sont pas reportés : ils retournent à la direction financière.');
+  }
+  document.getElementById('clot-go').addEventListener('click', function () {
+    var ex = CLOTV.ex, S = CLOT[ex]; if (S.st !== 'En cours') return; var bl = clotConds(ex).filter(function (c) { return !c.ok && c.r.sev === 'Bloquant'; });
+    if (bl.length) { clotMsg('Clôture impossible : ' + pl(bl.length, 'condition bloquante') + ' à traiter (' + bl.map(function (c) { return c.r.id; }).join(', ') + ').', 'ko'); return; }
+    dirConfirm('Clôturer l’exercice ' + ex, 'Clôturer l’exercice ' + ex + ' ? Le budget est verrouillé et les engagements ouverts sont reportés sur ' + (parseInt(ex, 10) + 1) + '.', 'Clôturer', function () { S.st = 'Clôturé'; S.on = nowStr(); S.by = ME; auditAdd('Clôture', 'Exercice ' + ex, 'Exercice clôturé : budget verrouillé, engagements reportés'); clotMsg('Exercice ' + ex + ' clôturé.'); clotRender(); });
+  });
   (function () {
     var R = RIGHTS0.ROLES2, M = RIGHTS0.RM, U = RIGHTS0.USERS;
     ['Directeur général', 'DAF', 'Contrôleur de gestion', 'Responsable de centre', 'Comptable', 'Auditeur interne'].forEach(function (r) { if (R.indexOf(r) < 0) R.push(r); M[r] = M[r] || {}; });
@@ -19364,11 +19430,12 @@ var EXEC_REC = [
         roles: RIGHTS0.ROLES2, rm: RIGHTS0.RM, users: RIGHTS0.USERS.filter(function (u) { return u.profs.indexOf('Entreprise') >= 0; }), act: RIGHTS0.ACTIONS, adm: 'Administration', cadmap: {}, word: { S: 'Centre', s: 'centre', p: 'centres', all: 'Tous les centres' },
         lv: { 'Administrateur': 4, 'Directeur général': 3, 'DAF': 3, 'Contrôleur de gestion': 3, 'Valideur': 3, 'Contrôleur': 2, 'Comptable': 2, 'Préparateur': 2, 'Auditeur interne': 2, 'Responsable de centre': 1, 'Lecteur': 0 },
         tree: [
-          { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['cadr', 'Cadrage', 'elab'], ['perso', 'Charges de personnel', 'elab'], ['cles', 'Clés de répartition', 'elab'], ['conso', 'Consolidation', 'elab'], ['scen', 'Scénarios', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
-          { key: 'g-suivi', label: 'Exécution', kids: [['appr', 'Budgets verrouillés', 'ecr'], ['engage', 'Engagements', 'ecr'], ['real', 'Réalisations', 'ecr'], ['decaiss', 'Paiements comptabilisés', 'ecr'], ['encaiss', 'Recettes comptabilisées', 'ecr']] },
-          { key: 'g-treso', label: 'Trésorerie', kids: [['bkdec', 'Plan de trésorerie', 'ecr']] },
-          { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['roll', 'Prévisions glissantes', 'ana'], ['ddir', 'Tableau de bord par direction', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
-          { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['orga', 'Organisation', 'prm'], ['roles', 'Groupes de rôles', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['ctrl', 'Contrôles et seuils', 'prm'], ['trev', 'Types de révision', 'prm'], ['rclot', 'Règles de clôture', 'prm'], ['notifcfg', 'Notifications', 'prm']] }
+          { key: 'g-pcadre', label: 'Cadre de l’entreprise', kids: [['cadr', 'Lettre de cadrage', 'elab'], ['list', 'Cadre budgétaire', 'elab'], ['cles', 'Clés de répartition', 'elab']] },
+          { key: 'g-budgets', label: 'Élaboration', kids: [['camp', 'Campagnes', 'elab'], ['collecte', 'Collecte', 'elab'], ['conso', 'Consolidation', 'elab'], ['arb', 'Validation', 'elab']] },
+          { key: 'g-plan', label: 'Budgets annuels', kids: [['bud', 'Budget d’exploitation', 'elab'], ['perso', 'Masse salariale', 'elab'], ['inv', 'Plan d’investissement', 'elab'], ['bkdec', 'Plan de trésorerie', 'elab'], ['scen', 'Simulations', 'elab'], ['revis', 'Révisions', 'elab'], ['clot', 'Report et clôture', 'elab']] },
+          { key: 'g-suivi', label: 'Exécution', kids: [['engage', 'Engagements', 'ecr'], ['real', 'Charges réalisées', 'ecr'], ['decaiss', 'Décaissements', 'ecr'], ['encaiss', 'Encaissements', 'ecr']] },
+          { key: 'g-rapports', label: 'Analyses', kids: [['ddir', 'Tableau de bord par direction', 'ana'], ['ecarts', 'Analyse des écarts', 'ana'], ['roll', 'Prévisions glissantes', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['alertes', 'Alertes', 'ana'], ['rapports', 'Rapports et exports', 'ana']] },
+          { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['orga', 'Organisation', 'prm'], ['roles', 'Groupes de rôles', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['notifcfg', 'Notifications et échéances', 'prm'], ['ctrl', 'Alertes et dépassements', 'prm']] }
         ],
         priv: [['export', 'Exporter des données', 'Peut exporter les budgets et les analyses en CSV, Excel et PDF', 2], ['tous_centres', 'Tous les centres', 'Voit les budgets de tous les centres de responsabilité (sinon : son propre centre)', 3],
           ['sensible', 'Données sensibles', 'Accès aux charges de personnel et à la trésorerie', 3], ['audit', 'Journal d’audit', 'Consulter l’historique des actions', 3], ['delegation', 'Délégation', 'Peut déléguer ses validations à un autre utilisateur', 3], ['suppr_def', 'Suppression définitive', 'Peut supprimer sans archivage', 4],
