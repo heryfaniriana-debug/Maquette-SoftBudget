@@ -5138,6 +5138,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
             <div><label for="src-fdev">Devise de l’accord <em>*</em></label><select id="src-fdev" class="field"><option>MGA</option><option>UC</option><option>EUR</option><option>USD</option></select></div>
             <div><label for="src-fmt">Montant de l’accord</label><input id="src-fmt" class="field" type="text" inputmode="numeric" placeholder="Ex. 270 000"></div>
             <div class="hint" id="src-fhint" style="margin:0;align-self:end"></div>
+            <div><label for="src-fn1">Plan financier — niveau 1 <em>*</em></label><select id="src-fn1" class="field"></select></div>
+            <div id="src-fn1w" hidden><label for="src-fn1n">Nouveau niveau 1 <em>*</em></label><input id="src-fn1n" class="field" type="text" placeholder="Ex. Cofinancement bilatéral"></div>
             <div><label for="src-fd1">Date de signature</label><input id="src-fd1" class="field" type="date"></div>
             <div><label for="src-fd2">Date de clôture</label><input id="src-fd2" class="field" type="date"></div>
             <div class="full hint" style="margin:0">Pour un prêt ou un don : bailleur autre que l’État, N° d’accord, montant et dates sont obligatoires. La contrepartie nationale et les taxes se rattachent à l’État.</div>
@@ -5147,7 +5149,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         </div></div>
         
         <div class="card" style="margin-bottom:14px"><h2 style="margin:0;font-size:14px;font-weight:600;padding:12px 16px;border-bottom:1px solid #E9EBF0">Sources de financement <small style="font-weight:400;color:#5B606D">chaque prêt ou don correspond à un accord ; la contrepartie et les taxes se rattachent à l’État</small></h2><div class="scroll"><table style="min-width:1000px">
-          <thead><tr><th>Code</th><th>Source</th><th>Bailleur</th><th>Type</th><th>N° d’accord</th><th class="num">Montant de l’accord</th><th>Signature → clôture</th><th>Actions</th></tr></thead><tbody id="src-b"></tbody></table></div></div>
+          <thead><tr><th>Code</th><th>Source</th><th>Bailleur</th><th>Type</th><th>Plan financier (niv. 1)</th><th>N° d’accord</th><th class="num">Montant de l’accord</th><th>Signature → clôture</th><th>Actions</th></tr></thead><tbody id="src-b"></tbody></table></div></div>
         
       </section>
 
@@ -15553,7 +15555,7 @@ var EXEC_REC = [
   function srcRender() {
     document.getElementById('src-b').innerHTML = CAD.src.map(function (x) {
       var used = srcUsed(x.code), pend = SRC_DEL === x.code, b = bailOf(x.bail), m = srcMga(x);
-      return '<tr><td class="name">' + x.code + '</td><td>' + escH(x.lib) + '</td><td>' + (b ? escH(b.nom) : '—') + '</td><td>' + escH(x.type) + '</td><td>' + (x.ref ? escH(x.ref) : '—') + '</td><td class="num">' + (x.mt ? fmt(x.mt) + ' ' + x.dev + (x.dev !== 'MGA' && m ? '<div class="hint" style="margin:0">≈ ' + fmt(Math.round(m)) + ' MGA</div>' : '') : '—') + '</td><td>' + (x.d1 || x.d2 ? (x.d1 ? isoToFr(x.d1) : '…') + ' → ' + (x.d2 ? isoToFr(x.d2) : '…') : '—') + '</td><td style="white-space:nowrap"><button class="btn small" data-src-edit="' + x.code + '">Modifier</button> <button class="btn small" data-src-del="' + x.code + '"' + (used ? ' disabled title="Source utilisée par le PTBA ou le PAD"' : '') + '>' + (pend ? 'Confirmer la suppression' : 'Supprimer') + '</button></td></tr>';
+      return '<tr><td class="name">' + x.code + '</td><td>' + escH(x.lib) + '</td><td>' + (b ? escH(b.nom) : '—') + '</td><td>' + escH(x.type) + '</td><td>' + (x.n1 ? escH(x.n1) : '—') + '</td><td>' + (x.ref ? escH(x.ref) : '—') + '</td><td class="num">' + (x.mt ? fmt(x.mt) + ' ' + x.dev + (x.dev !== 'MGA' && m ? '<div class="hint" style="margin:0">≈ ' + fmt(Math.round(m)) + ' MGA</div>' : '') : '—') + '</td><td>' + (x.d1 || x.d2 ? (x.d1 ? isoToFr(x.d1) : '…') + ' → ' + (x.d2 ? isoToFr(x.d2) : '…') : '—') + '</td><td style="white-space:nowrap"><button class="btn small" data-src-edit="' + x.code + '">Modifier</button> <button class="btn small" data-src-del="' + x.code + '"' + (used ? ' disabled title="Source utilisée par le PTBA ou le PAD"' : '') + '>' + (pend ? 'Confirmer la suppression' : 'Supprimer') + '</button></td></tr>';
     }).join('');
   }
   /* ----- Taux de change ----- */
@@ -15598,6 +15600,15 @@ var EXEC_REC = [
     var X = { '01': { bail: 'FAD', ref: 'FAD-2025/MG-014-P', mt: 170000, d1: '2025-03-10', d2: '2028-12-31' }, '02': { bail: 'FAD', ref: 'FAD-2025/MG-014-D', mt: 270000, d1: '2025-03-10', d2: '2028-12-31' }, '03': { bail: 'ETAT', ref: '', mt: 300000000, d1: '', d2: '' }, '04': { bail: 'ETAT', ref: '', mt: 0, d1: '', d2: '' }, '05': { bail: 'ETAT', ref: '', mt: 0, d1: '', d2: '' } };
     CAD.src.forEach(function (x) { Object.assign(x, X[x.code] || { bail: 'ETAT', ref: '', mt: 0, d1: '', d2: '' }); });
   })();
+  /* Plan financier : chaque source est rattachée, à sa création, à un nœud de niveau 1 */
+  CAD.fin1 = ['Prêts', 'Dons', 'Contrepartie de l’État', 'Taxes'];
+  (function () { var M = { 'Prêt': 'Prêts', 'Don': 'Dons', 'Contrepartie nationale': 'Contrepartie de l’État', 'Taxe (ligne pour ordre)': 'Taxes' }; CAD.src.forEach(function (x) { if (!x.n1) x.n1 = M[x.type] || CAD.fin1[0]; }); })();
+  function srcN1Opts(cur) {
+    var s = document.getElementById('src-fn1'), l = CAD.fin1.slice(); if (cur && l.indexOf(cur) < 0) l.push(cur);
+    s.innerHTML = l.map(function (n) { return '<option>' + escH(n) + '</option>'; }).join('') + '<option value="__new">+ Nouveau niveau 1…</option>';
+    s.value = cur || l[0]; document.getElementById('src-fn1w').hidden = true; document.getElementById('src-fn1n').value = '';
+  }
+  var SRC_N1DEF = { 'Prêt': 'Prêts', 'Don': 'Dons', 'Contrepartie nationale': 'Contrepartie de l’État', 'Taxe (ligne pour ordre)': 'Taxes' };
   var SRC_EDIT = null, SRC_DEL = null, BAIL_EDIT = null, BAIL_DEL = null;
   function bailOf(code) { return CAD.bail.filter(function (b) { return b.code === code; })[0]; }
   function srcIsState(x) { var b = bailOf(x.bail); return !!b && b.type === 'État'; }
@@ -15638,6 +15649,7 @@ var EXEC_REC = [
     d.value = x ? x.dev : 'MGA'; t.disabled = d.disabled = !!used;
     document.getElementById('src-fl').value = x ? x.lib : ''; document.getElementById('src-fref').value = x && x.ref ? x.ref : '';
     document.getElementById('src-fmt').value = x && x.mt ? fmt(x.mt) : ''; document.getElementById('src-fd1').value = x && x.d1 ? x.d1 : ''; document.getElementById('src-fd2').value = x && x.d2 ? x.d2 : '';
+    srcN1Opts(x ? x.n1 : SRC_N1DEF[t.value]);
     var er = document.getElementById('src-ferr'); er.textContent = used ? 'Source déjà utilisée : le type et la devise ne se modifient plus.' : ''; er.style.color = used ? '#5B606D' : '';
     srcHint(); document.getElementById('src-form').hidden = false; document.getElementById('src-msg').hidden = true; srcRender();
     document.getElementById('src-fl').focus();
@@ -15649,8 +15661,10 @@ var EXEC_REC = [
   document.getElementById('src-ftype').addEventListener('change', function () {
     var t = this.value, st = t === 'Contrepartie nationale' || t === 'Taxe (ligne pour ordre)'; srcBailOpts(t);
     if (st && !SRC_EDIT) document.getElementById('src-fdev').value = 'MGA'; srcHint();
+    if (!SRC_EDIT && document.getElementById('src-fn1').value !== '__new') srcN1Opts(SRC_N1DEF[t]);
     document.getElementById('src-ferr').textContent = document.getElementById('src-fbail').options.length ? '' : 'Aucun bailleur compatible : créez d’abord, dans le menu Bailleurs, un bailleur ' + (st ? 'de type État.' : 'autre que l’État.'); document.getElementById('src-ferr').style.color = '';
   });
+  document.getElementById('src-fn1').addEventListener('change', function () { var w = document.getElementById('src-fn1w'); w.hidden = this.value !== '__new'; if (!w.hidden) document.getElementById('src-fn1n').focus(); });
   ['src-fmt', 'src-fdev'].forEach(function (id) { document.getElementById(id).addEventListener('input', srcHint); document.getElementById(id).addEventListener('change', srcHint); });
   document.getElementById('bail-fsave').addEventListener('click', function () {
     var err = document.getElementById('bail-ferr'), code = document.getElementById('bail-fc').value.trim().toUpperCase(), nom = document.getElementById('bail-fn').value.trim(), type = document.getElementById('bail-ftype').value;
@@ -15680,9 +15694,13 @@ var EXEC_REC = [
     if (CAD.src.some(function (z) { return z !== x && z.lib.toLowerCase() === lib.toLowerCase(); })) { err.textContent = 'Une source porte déjà ce libellé.'; return; }
     var cand = { mt: mt, dev: dev }, mga = srcMga(cand), al = x ? srcAlloc(x.code) : 0;
     if (mt && dev !== 'MGA' && mga == null) { err.textContent = 'Aucun taux de change ' + dev + ' : ajoutez-le d’abord dans Taux de change.'; return; }
+    var n1 = document.getElementById('src-fn1').value;
+    if (n1 === '__new') { n1 = document.getElementById('src-fn1n').value.trim(); if (!n1) { err.textContent = 'Saisissez le nom du nouveau niveau 1 du plan financier.'; return; } if (CAD.fin1.some(function (z) { return z.toLowerCase() === n1.toLowerCase(); })) { err.textContent = 'Ce niveau 1 existe déjà : choisissez-le dans la liste.'; return; } }
+    if (!n1) { err.textContent = 'Rattachez la source à un niveau 1 du plan financier.'; return; }
     err.textContent = '';
-    if (x) { Object.assign(x, { lib: lib, bail: bail, ref: ref, mt: mt, d1: d1, d2: d2 }); if (!document.getElementById('src-ftype').disabled) { x.type = type; x.dev = dev; } auditAdd('Configuration', 'Sources de financement', 'Source ' + x.code + ' modifiée : ' + lib); var chg = al > 0 && mga != null && Math.abs(mga - al) > 1; bkMsg('src-msg', 'Source ' + x.code + ' modifiée.' + (chg ? ' Le PAD n’est plus aligné sur cet accord : créez une nouvelle version (avenant).' : ''), chg ? 'warn' : 'ok'); }
-    else { CAD.src.push({ code: code, lib: lib, type: type, dev: dev, bail: bail, ref: ref, mt: mt, d1: d1, d2: d2 }); auditAdd('Configuration', 'Sources de financement', 'Source ' + code + ' créée : ' + lib + ' (' + type + ', ' + dev + ')'); bkMsg('src-msg', 'Source ' + code + ' créée. Elle est disponible dans le PAD et dans le PTBA.', 'ok'); }
+    if (CAD.fin1.indexOf(n1) < 0) CAD.fin1.push(n1);
+    if (x) { Object.assign(x, { n1: n1, lib: lib, bail: bail, ref: ref, mt: mt, d1: d1, d2: d2 }); if (!document.getElementById('src-ftype').disabled) { x.type = type; x.dev = dev; } auditAdd('Configuration', 'Sources de financement', 'Source ' + x.code + ' modifiée : ' + lib); var chg = al > 0 && mga != null && Math.abs(mga - al) > 1; bkMsg('src-msg', 'Source ' + x.code + ' modifiée.' + (chg ? ' Le PAD n’est plus aligné sur cet accord : créez une nouvelle version (avenant).' : ''), chg ? 'warn' : 'ok'); }
+    else { CAD.src.push({ n1: n1, code: code, lib: lib, type: type, dev: dev, bail: bail, ref: ref, mt: mt, d1: d1, d2: d2 }); auditAdd('Configuration', 'Sources de financement', 'Source ' + code + ' créée : ' + lib + ' (' + type + ', ' + dev + ')'); bkMsg('src-msg', 'Source ' + code + ' créée. Elle est disponible dans le PAD et dans le PTBA.', 'ok'); }
     document.getElementById('src-form').hidden = true; SRC_EDIT = null; srcRender();
   });
   document.getElementById('src-b').addEventListener('click', function (e) {
