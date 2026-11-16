@@ -24390,9 +24390,14 @@ function pcRenderEnv(){
     .kpi .v, .dp-tile .v, .co-kpis .v { font-size: 18px; overflow-wrap: anywhere; }
     .kpi .v small, .kpi .v .u, .dp-tile .u { font-size: 11px; white-space: nowrap; }
     .sb-fp-head .actions { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; justify-content: flex-start !important; }
-    .sb-fp-head .actions .bv-bar { display: flex; flex-wrap: nowrap; gap: 8px; width: 100%; }
-    .sb-fp-head .actions .bv-bar .btn { flex: 1 1 0; min-width: 0; width: auto; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sb-fp-head .actions .bv-bar .btn.primary { flex: 2.2 1 0; }
+    .sb-fp-head .actions .bv-bar { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+    .sb-fp-head .actions .bv-bar .btn { flex: 1 1 calc(50% - 8px); min-width: 0; width: auto; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-fp-head .actions .bv-bar .btn.primary { flex: 1 1 100%; order: 9; }
+    .row-toolbar > .btn, .actionbar .btn { flex: 1 1 calc(50% - 8px); min-width: 0; min-height: 44px; width: auto; }
+    .row-toolbar > :not(.btn) { flex: 1 1 100%; }
+    .form-foot { display: flex; flex-wrap: wrap; gap: 8px; }
+    .form-foot .btn { flex: 1 1 calc(50% - 8px); min-width: 0; width: auto; margin: 0; white-space: normal; }
+    .form-foot .btn.primary:last-child:nth-child(odd) { flex-basis: 100%; }
     .sb-fp-head .actions .bv-bar .btn { font-size: 14px; }
     .sb-fp-head .actions .ex-sel { width: 100%; justify-content: space-between; }
     .dp-chart div:has(> svg) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
