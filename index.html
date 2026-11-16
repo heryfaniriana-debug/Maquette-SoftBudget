@@ -15107,6 +15107,7 @@ var EXEC_REC = [
   }
   function prmTabs(name, vn) {
     document.querySelectorAll('.prm-tabs').forEach(function (e) { e.remove(); });
+    return; /* les onglets font doublon avec le menu latéral */
     if (typeof activeCode !== 'function' || activeCode() !== 'prj') return;
     var s = PRM_SECT.filter(function (q) { return q.m.some(function (e) { return e[0] === name; }); })[0], v = document.getElementById('v-' + vn);
     if (!s || !v) return;
