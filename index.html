@@ -4843,7 +4843,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <div class="pager"><span>Les colonnes teintées en bleu sont des prévisions : elles ne remplacent pas les réalisations.</span><div class="actions"><button class="btn small" id="pv-rev">Créer une révision</button><button class="btn primary small" id="pv-save">Enregistrer cette prévision</button></div></div>
         </div>
 
-        <div class="panel" id="pv-res-panel" style="margin-bottom:12px">
+        <div id="pv-tg" style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px"><button class="btn small" id="pv-t1" type="button">Résultat prévisionnel et scénarios</button><button class="btn small" id="pv-t2" type="button">Historique des prévisions enregistrées</button></div>
+        <div class="panel" id="pv-res-panel" hidden style="margin-bottom:12px">
           <h2>Résultat prévisionnel et scénarios <small>Recettes moins dépenses, comparé au résultat budgété</small></h2>
           <div class="body">
             <div class="fgrid" style="margin-bottom:12px">
@@ -4873,7 +4874,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="pv-hist-panel" hidden>
           <h2>Historique des prévisions enregistrées</h2>
           <div class="scroll">
             <table style="min-width:860px">
@@ -5855,11 +5856,12 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
       
 <!-- ===== Entreprise : budget d'investissement ===== -->
       <section class="view" id="v-inv">
-        <div class="head"><div><h1>Budget d’investissement</h1><p>Plan des acquisitions et des investissements : chaque projet a un responsable, une période et un montant, dans l’enveloppe des lignes d’investissement du budget général.</p></div>
+        <div class="head"><div><h1>Plan d’investissement</h1><p>Plan des acquisitions et des investissements : chaque projet a un responsable, une période et un montant, dans l’enveloppe des lignes d’investissement du budget général.</p></div>
           <div class="actions"><button class="btn" id="inv-exp">Exporter</button><button class="btn primary" id="inv-new">+ Nouvel investissement</button></div></div>
         <div class="callout" id="inv-mode" style="margin-bottom:12px;background:var(--info-bg);color:#2E427B"></div>
         <div class="callout" id="inv-msg" hidden style="margin-bottom:12px"></div>
         <div class="kpis" id="inv-k"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px"><button class="btn small" id="inv-b1" type="button">Lignes d’investissement du budget</button><button class="btn small" id="inv-b2" type="button">Calendrier prévisionnel</button></div>
         <div class="panel" id="inv-form" hidden style="margin-bottom:14px"><h2><span id="inv-ft">Nouvel investissement</span> <small id="inv-no"></small></h2><div class="body">
           <div class="fgrid">
             <div class="full"><label for="inv-des">Désignation <em>*</em></label><input id="inv-des" class="field" type="text" placeholder="Ex. Renouvellement des postes de travail"></div>
@@ -5878,13 +5880,13 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div class="panel" id="inv-sub" hidden style="margin-bottom:14px"><h2><span id="inv-st">Action</span></h2><div class="body"><div class="fgrid" id="inv-sf"></div><div class="err" id="inv-serr"></div><div class="form-foot" style="margin-top:4px;padding-top:12px"><button class="btn" id="inv-sno">Annuler</button><button class="btn primary" id="inv-sok">Confirmer</button></div></div></div>
         <div class="card" style="margin-bottom:14px"><div class="scroll"><table style="min-width:1250px">
           <thead><tr><th>Code</th><th>Investissement</th><th>Ligne et entité</th><th>Responsable</th><th>Période</th><th class="num">Montant prévisionnel</th><th class="num">Engagé lié</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="inv-b"></tbody></table></div><div class="pager"><span id="inv-n"></span><span>Montants en MGA</span></div></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px">
-          <div class="panel"><h2>Lignes d’investissement <small>enveloppe, planification et exécution</small></h2><div class="body" style="padding:0"><div class="scroll"><table style="min-width:760px"><thead><tr><th>Ligne</th><th class="num">Budget révisé</th><th class="num">Planifié</th><th class="num">Non planifié</th><th class="num">Engagé</th><th class="num">Réalisé</th><th class="num">Taux de réalisation</th></tr></thead><tbody id="inv-l"></tbody><tfoot id="inv-lf"></tfoot></table></div></div></div>
-          <div class="panel"><h2>Calendrier prévisionnel <small>besoins de décaissement par trimestre, hors investissements proposés</small></h2><div class="body" style="padding:0"><label class="chk" style="padding:10px 14px 0"><input type="checkbox" id="inv-link" checked> Alimenter l’échéancier des investissements des nouveaux plans de trésorerie</label><div class="scroll"><table style="min-width:560px"><thead><tr><th>Catégorie</th><th class="num">T1</th><th class="num">T2</th><th class="num">T3</th><th class="num">T4</th><th class="num">Total</th></tr></thead><tbody id="inv-c"></tbody><tfoot id="inv-cf"></tfoot></table></div></div></div>
-        </div>
+        <div id="inv-extra" hidden style="display:none"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px">
+          <div class="panel" id="inv-p1"><h2>Lignes d’investissement <small>enveloppe, planification et exécution</small></h2><div class="body" style="padding:0"><div class="scroll"><table style="min-width:760px"><thead><tr><th>Ligne</th><th class="num">Budget révisé</th><th class="num">Planifié</th><th class="num">Non planifié</th><th class="num">Engagé</th><th class="num">Réalisé</th><th class="num">Taux de réalisation</th></tr></thead><tbody id="inv-l"></tbody><tfoot id="inv-lf"></tfoot></table></div></div></div>
+          <div class="panel" id="inv-p2"><h2>Calendrier prévisionnel <small>besoins de décaissement par trimestre, hors investissements proposés</small></h2><div class="body" style="padding:0"><label class="chk" style="padding:10px 14px 0"><input type="checkbox" id="inv-link" checked> Alimenter l’échéancier des investissements des nouveaux plans de trésorerie</label><div class="scroll"><table style="min-width:560px"><thead><tr><th>Catégorie</th><th class="num">T1</th><th class="num">T2</th><th class="num">T3</th><th class="num">T4</th><th class="num">Total</th></tr></thead><tbody id="inv-c"></tbody><tfoot id="inv-cf"></tfoot></table></div></div></div>
+        </div></div>
       </section>
 
-      
+
 <!-- ===== Projet : budget initial du projet (PAD) ===== -->
       <section class="view" id="v-pad">
         <div class="head"><div><h1>Plan de financement (PAD)</h1><p>Référentiel financier approuvé lors de la conception du projet : composantes, enveloppes par exercice et répartition par source de financement</p></div>
@@ -19052,6 +19054,16 @@ var EXEC_REC = [
     guModal(c ? 'Modifier le centre' : 'Nouveau centre de responsabilité', f, 560);
   }
   document.getElementById('orga-new').addEventListener('click', function () { orgaOpen(null); });
+  /* Prévisions de fin de période : le tableau principal seul ; scénarios et historique s'affichent à la demande, un à la fois */
+  [['pv-t1', 'pv-res-panel', 'pv-hist-panel'], ['pv-t2', 'pv-hist-panel', 'pv-res-panel']].forEach(function (x) { document.getElementById(x[0]).addEventListener('click', function () { var a = document.getElementById(x[1]), o = document.getElementById(x[2]); o.hidden = true; a.hidden = !a.hidden; if (!a.hidden) a.scrollIntoView({ block: 'nearest' }); }); });
+  /* Plan d'investissement : un seul tableau dans la page ; les deux autres s'ouvrent dans une fenêtre */
+  function invModal(pid, title) {
+    var src = document.getElementById(pid); if (!src) return; var body = src.querySelector('.body').cloneNode(true), w = cvEl('div');
+    var lk = body.querySelector('#inv-link'), lo = document.getElementById('inv-link'); if (lk && lo) { lk.removeAttribute('id'); lk.checked = lo.checked; lk.addEventListener('change', function () { lo.checked = lk.checked; lo.dispatchEvent(new Event('change', { bubbles: true })); }); }
+    w.appendChild(body); guModal(title, w, 820);
+  }
+  document.getElementById('inv-b1').addEventListener('click', function () { invModal('inv-p1', 'Lignes d’investissement : enveloppe, planification et exécution'); });
+  document.getElementById('inv-b2').addEventListener('click', function () { invModal('inv-p2', 'Calendrier prévisionnel : besoins de décaissement par trimestre'); });
   /* ----- Entreprise : cadrage budgétaire (objectifs de chiffre d'affaires et de marge, hypothèses, enveloppes par direction) ----- */
   var CADR = {
     '2026': { st: 'Validé', hyp: { infl: 6, sal: 3.5, eur: 4900, usd: 4500 }, ca: [{ lib: 'Licences et abonnements', unit: 'contrats', n1: 2800000000, vol: 1250, prix: 2300000, marge: 62 }, { lib: 'Services et intégration', unit: 'projets', n1: 1900000000, vol: 380, prix: 5000000, marge: 38 }, { lib: 'Maintenance et support', unit: 'contrats', n1: 1100000000, vol: 820, prix: 1380000, marge: 55 }], env: { 'Direction Générale': 420000000, 'Direction Financière': 480000000, 'Direction Commerciale': 720000000, 'IT & Digital': 1500000000, 'Ressources Humaines': 380000000 } },
@@ -19402,7 +19414,8 @@ var EXEC_REC = [
     [['roll', 'Prévisions glissantes'], ['prev', 'Prévisions de fin de période'], ['dispo', 'Disponibilités']],
     [['bkdec', 'Plan de trésorerie'], ['bkdvr', 'Décaissement vs relevé']],
     [['revis', 'Révisions'], ['trev', 'Types de révision']],
-    [['clot', 'Report et clôture'], ['rclot', 'Règles de clôture']]
+    [['clot', 'Report et clôture'], ['rclot', 'Règles de clôture']],
+    [['notifcfg', 'Notifications'], ['echeanc', 'Échéances']]
   ];
   function entTabs(name, vn) {
     document.querySelectorAll('.ent-tabs').forEach(function (e) { e.remove(); });
@@ -19571,6 +19584,7 @@ var EXEC_REC = [
   function ncSplit(name) {
     var prj = activeCode() === 'prj', cards = document.querySelectorAll('#v-notifcfg > .card'), h1 = document.querySelector('#v-notifcfg .head h1'), p = document.querySelector('#v-notifcfg .head p');
     if (cards.length < 2) return;
+    if (activeCode() === 'ent') { var ec = name === 'echeanc'; cards[0].style.display = ec ? 'none' : ''; cards[1].style.display = ec ? '' : 'none'; var nb0 = document.getElementById('npr-body'); if (nb0) nb0.hidden = true; if (h1) h1.textContent = ec ? 'Échéances' : 'Notifications'; if (p) p.textContent = ec ? 'Délais standard, rappels avant échéance et escalades en cas de retard' : 'Événements notifiés et destinataires'; return; }
     cards[0].style.display = prj ? 'none' : ''; cards[1].style.display = prj && name === 'notifcfg' ? 'none' : ''; var nb = document.getElementById('npr-body'); nb.hidden = !(prj && name === 'notifcfg'); if (!nb.hidden) nprRender();
     if (h1) h1.textContent = !prj ? 'Notifications et échéances' : (name === 'echeanc' ? 'Échéances' : 'Notifications');
     if (p) p.textContent = !prj ? 'Événements notifiés, destinataires, délais standard, rappels et escalades' : (name === 'echeanc' ? 'Délais standard, rappels avant échéance et escalades en cas de retard' : 'Créez les règles : quand un événement se produit, qui est prévenu, pour faire quoi et par quel canal');
