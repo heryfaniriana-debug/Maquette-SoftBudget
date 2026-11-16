@@ -2015,6 +2015,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="ptba" title="PTBA — Projets et programmes">PTBA</button>
           <button data-go="pta" title="PTA — Plan de travail annuel (indicateurs)">PTA</button>
           <button data-go="ppm" title="Plan de passation des marchés (PPM)">PPM</button>
+          <button data-go="ppmk" title="PPM : marchés du plan" style="display:none">PPM — Marchés du plan</button>
           <button data-go="pad" title="Budget initial du projet (PAD)">Budget initial du projet (PAD)</button>
           <button data-go="avini" title="Avance initiale et compte spécial du projet">Avance initiale</button>
           <button data-go="resu" title="Cadre de résultats">Cadre de résultats</button>
@@ -6813,6 +6814,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     pubtab: ['Compte administratif', 'Tableau de restitution'],
     pubclot: ['Compte administratif', 'Clôture'],
     ppm: ['Élaboration', 'PPM — Plan de passation des marchés'],
+    ppmk: ['Plans annuels', 'PPM — Marchés du plan'],
     pad: ['Cadre du projet', 'Plan de financement (PAD)'],
     resu: ['Cadre du projet', 'Cadre de résultats'],
     avini: ['Cadre du projet', 'Avance et paiement direct'],
@@ -6848,7 +6850,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     'nav-budgets': ['list', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss', 'sxeng', 'sxliq', 'sxpay', 'sxenc', 'sxphy', 'trpos'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
-    'nav-plan': ['ptba', 'pta', 'ppm', 'pdec', 'revpl', 'rep'],
+    'nav-plan': ['ptba', 'pta', 'ppm', 'ppmk', 'pdec', 'revpl', 'rep'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
     'nav-rapports': ['ansit', 'anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'usr', 'roles', 'echeanc', 'alrt', 'plana', 'sites', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
@@ -6856,7 +6858,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
   var MENU_OF = { create: 'list', detail: 'bud', saisie: 'bud', valid: 'arb' };
   var LABELLED = ['soon', 'params', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl', 'appr'];
-  var VIEWALIAS = { echeanc: 'notifcfg', ansit: 'ana', anfin: 'ana', aneng: 'ana', anrea: 'ana', andec: 'ana', anphy: 'ana', anfp: 'ana', anplu: 'ana', anale: 'ana', anver: 'ana', sxphy: 'sx', sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
+  var VIEWALIAS = { echeanc: 'notifcfg', ansit: 'ana', anfin: 'ana', aneng: 'ana', anrea: 'ana', andec: 'ana', anphy: 'ana', anfp: 'ana', anplu: 'ana', anale: 'ana', anver: 'ana', sxphy: 'sx', sxeng: 'sx', sxliq: 'sx', sxpay: 'sx', sxenc: 'sx', pta: 'ptba', ppmk: 'ppm', engage: 'real', decaiss: 'real', encaiss: 'real', valid: 'arb' };
   function show(name, label) {
     window.__curView = name; var vn = VIEWALIAS[name] || name;
     views.forEach(function (v) {
@@ -6927,7 +6929,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'pubpay' && typeof ppyRender === 'function') ppyRender();
     if (name === 'pubtab' && typeof ptbRender === 'function') ptbRender();
     if (name === 'pubclot' && typeof pclRender === 'function') pclRender();
-    if (name === 'ppm' && typeof ppmRender === 'function') ppmRender();
+    if ((name === 'ppm' || name === 'ppmk') && typeof ppmRender === 'function') ppmRender();
     if (name === 'pad' && typeof padRender === 'function') padRender();
     if (name === 'inv' && typeof invRender === 'function') invRender();
     if (name === 'pdec' && typeof pdcRender === 'function') pdcRender();
@@ -15032,6 +15034,7 @@ var EXEC_REC = [
     });
     var gS = document.getElementById('g-suivi'), gT = document.getElementById('g-treso');
     nav.insertBefore(gS, gT);
+    var pkb = document.querySelector('.sub button[data-go="ppmk"]'); if (pkb) pkb.style.display = code === 'prj' ? '' : 'none';
     document.getElementById('g-pcadre').style.display = code === 'prj' ? '' : 'none';
     document.getElementById('g-plan').style.display = code === 'prj' ? '' : 'none';
     if (code !== 'prj') return;
@@ -15044,7 +15047,7 @@ var EXEC_REC = [
     put('g-pcadre', [['bailleurs'], ['sources'], ['taux'], ['pad', 'Plan de financement (PAD)', 'Plan de financement du projet (PAD)'], ['list', 'Cadre budgétaire', 'Cadre budgétaire : nature, devise, périodicité, structure et circuit de validation'], ['avini','Avance et paiement direct', 'Avance initiale, compte spécial et paiement direct du bailleur'], ['resu']]);
     put('g-params', [['sites', 'Sites', 'Sites : centres de saisie du projet'], ['roles', 'Groupes de rôles', 'Groupes de rôles'], ['usr', 'Utilisateurs et droits', 'Utilisateurs et droits'], ['notifcfg', 'Notifications', 'Notifications'], ['echeanc', 'Échéances', 'Échéances'], ['alrt', 'Alertes et dépassements', 'Alertes et dépassements']]);
     put('g-budgets', [['camp'], ['collecte'], ['arb', 'Validation'], ['bud']]);
-    put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM', 'Plan de passation des marchés (PPM)'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
+    put('g-plan', [['ptba'], ['pta'], ['ppm', 'PPM — Besoins identifiés', 'Plan de passation des marchés : besoins identifiés dans le PTBA'], ['ppmk', 'PPM — Marchés du plan', 'Plan de passation des marchés : marchés planifiés'], ['pdec', 'Plan de décaissement', 'Plan de décaissement et de réapprovisionnement du compte spécial']]);
     if (revCA) put('g-cadm', [['dpeng'], ['dpliq'], ['dpord'], ['dppay'], ['dptab'], ['dpclot'], ['cadint']]);
     put('g-plan', [['revpl', 'R\u00e9visions', 'R\u00e9visions des plans : circuit et approbation du bailleur']]);
     put('g-plan', [['rep', 'Report et cl\u00f4ture', 'Report et cl\u00f4ture de l\u2019exercice']]);
@@ -16693,7 +16696,9 @@ var EXEC_REC = [
     if (d1 < ex + '-01-05') { d1 = ex + '-01-05'; d2 = ppmAddDays(d1, du[0]); d3 = ppmAddDays(d2, du[1]); } return [d1, d2, d3];
   }
   function ppmRender() { ppmRender0(); ppmDirect(); }
-  function ppmDirect() { exFill('ppm-exa'); var rows = bvList(), one = rows.length === 1, body = document.getElementById('ppm-lots'), lc = body && body.closest('.card'); if (lc) lc.hidden = one; if (one && (document.getElementById('ppm-det').hidden || PPMG.lot !== rows[0])) { document.getElementById('ppm-det').hidden = true; PPMG.lot = rows[0]; PPMG.g = null; PPMG.msg = null; ppmPaint(); document.getElementById('ppm-det').hidden = false; } }
+  /* Projet : deux écrans, « Besoins identifiés » (bs) et « Marchés du plan » (mk) ; autres profils : un seul écran avec les deux blocs */
+  function ppmPart() { return activeCode() !== 'prj' ? '' : (window.__curView === 'ppmk' ? 'mk' : 'bs'); }
+  function ppmDirect() { exFill('ppm-exa'); var rows = bvList(), one = rows.length === 1, body = document.getElementById('ppm-lots'), lc = body && body.closest('.card'); if (lc) lc.hidden = one; if (one && (document.getElementById('ppm-det').hidden || PPMG.lot !== rows[0] || PPMG.part !== ppmPart())) { PPMG.part = ppmPart(); document.getElementById('ppm-det').hidden = true; PPMG.lot = rows[0]; PPMG.g = null; PPMG.msg = null; ppmPaint(); document.getElementById('ppm-det').hidden = false; } }
   function ppmRender0() {
     var body = document.getElementById('ppm-lots'); body.innerHTML = ''; var rows = bvList();
     if (!rows.length) { var t0 = cvEl('tr'), c0 = cell(t0, 'Aucun lot de collecte validé pour le moment.'); c0.colSpan = 6; c0.style.textAlign = 'left'; body.appendChild(t0); return; }
@@ -16729,7 +16734,7 @@ var EXEC_REC = [
   }
   function ppmPaint() {
     var r = PPMG.lot; if (!r) return; var c = cvCamp(r), body = document.getElementById('ppm-det-body'); body.innerHTML = '';
-    document.getElementById('ppm-det-title').textContent = 'PPM ' + c.ex + ' — ' + c.code;
+    document.getElementById('ppm-det-title').textContent = 'PPM ' + c.ex + (ppmPart() === 'mk' ? ' — Marchés du plan' : ppmPart() === 'bs' ? ' — Besoins identifiés' : ' — ' + c.code);
     var mg = cvEl('div', 'callout'); mg.id = 'ppm-dmsg'; mg.hidden = true; mg.style.marginBottom = '12px'; body.appendChild(mg);
     var acts = ppmLotActs(r), items = ppmLotItems(r), cost = acts.reduce(function (s, a) { return s + a.cost; }, 0), prog = acts.reduce(function (s, a) { return s + ppmActTotal(a.key); }, 0), p = cost ? Math.round(100 * prog / cost) : 0;
     body.appendChild(dpTiles([['Marchés au plan', String(items.length), 'brand'], ['Couverture du PTBA', p + ' %', p >= 100 ? 'ok' : 'warn'], ['Reste à programmer', fmt(Math.max(cost - prog, 0)) + ' MGA', 'info']], { cols: 3 }));
@@ -16740,7 +16745,8 @@ var EXEC_REC = [
       var nm = cvEl('div'); nm.appendChild(cvEl('b', null, a.code + ' — ' + a.lib)); nm.appendChild(cvEl('div', 'hint', a.perim));
       return [nm, badge(ppmCatOf(a), 'b-neutral'), fmt(a.cost), fmt(tot), fmt(Math.max(rest, 0)), bt, bt2];
     });
-    block('Besoins identifiés dans le PTBA', dpMini(['Ligne du PTBA', 'Besoin', 'Coût au PTBA', 'Programmé', 'Reste', 'Couverture', ''], needs, [2, 3, 4], 'Aucune ligne dans ce lot.'));
+    var part = ppmPart();
+    if (part !== 'mk') block('Besoins identifiés dans le PTBA', dpMini(['Ligne du PTBA', 'Besoin', 'Coût au PTBA', 'Programmé', 'Reste', 'Couverture', ''], needs, [2, 3, 4], 'Aucune ligne dans ce lot.'));
     /* Marchés du plan : planification pure, sans suivi d'exécution */
     var mk = items.map(function (x) {
       var cm = cvEl('div'); cm.appendChild(cvEl('b', null, x.cat)); cm.appendChild(cvEl('div', 'hint', x.met));
@@ -16753,7 +16759,7 @@ var EXEC_REC = [
       bt.appendChild(bm); bt.appendChild(b);
       return [x.ref, x.des, cm, fmt(x.est), pmc, isoToFr(x.d1) + ' · ' + isoToFr(x.d2) + ' · ' + isoToFr(x.d3), bt];
     });
-    block('Marchés du plan', dpMini(['Référence', 'Désignation', 'Catégorie · méthode', 'Estimatif', 'Paiement', 'Lancement · attribution · signature', ''], mk, [3], 'Aucun marché planifié : commencez par une ligne du PTBA ci-dessus.'));
+    if (part !== 'bs') block('Marchés du plan', dpMini(['Référence', 'Désignation', 'Catégorie · méthode', 'Estimatif', 'Paiement', 'Lancement · attribution · signature', ''], mk, [3], 'Aucun marché planifié : commencez par une ligne de l’écran « PPM — Besoins identifiés ».'));
     if (PPMG.msg) bkMsg('ppm-dmsg', PPMG.msg[0], PPMG.msg[1]);
   }
   function cegPpmOpts() {
@@ -18633,7 +18639,7 @@ var EXEC_REC = [
   var GU_TREE = [
     { key: 'g-pcadre', label: 'Cadre du projet', kids: [['bailleurs', 'Bailleurs', 'taux'], ['sources', 'Sources de financement', 'taux'], ['taux', 'Taux de change', 'taux'], ['pad', 'Plan de financement (PAD)', 'cadre'], ['list', 'Cadre budgétaire', 'cadre'], ['avini', 'Avance et paiement direct', 'cadre'], ['resu', 'Cadre de résultats', 'cadre']] },
     { key: 'g-budgets', label: 'Élaboration', kids: [['camp', 'Campagnes', 'elab'], ['collecte', 'Collecte', 'elab'], ['arb', 'Validation', 'elab'], ['bud', 'Budgets (saisie directe)', 'elab']] },
-    { key: 'g-plan', label: 'Plans annuels', kids: [['ptba', 'PTBA', 'plan'], ['pta', 'PTA', 'plan'], ['ppm', 'PPM', 'plan'], ['pdec', 'Plan de décaissement', 'plan'], ['revpl', 'Révisions', 'plan'], ['rep', 'Report et clôture', 'plan']] },
+    { key: 'g-plan', label: 'Plans annuels', kids: [['ptba', 'PTBA', 'plan'], ['pta', 'PTA', 'plan'], ['ppm', 'PPM — Besoins identifiés', 'plan'], ['ppmk', 'PPM — Marchés du plan', 'plan'], ['pdec', 'Plan de décaissement', 'plan'], ['revpl', 'Révisions', 'plan'], ['rep', 'Report et clôture', 'plan']] },
     { key: 'g-cadm', label: 'Compte administratif', kids: [['dpeng', 'Engagements', 'adm'], ['dpliq', 'Liquidations', 'adm'], ['dpord', 'Ordonnancement', 'adm'], ['dppay', 'Paiements', 'adm'], ['dptab', 'Tableau de restitution', 'adm'], ['dpclot', 'Clôture de l’exercice', 'adm'], ['cadint', 'Interface comptable', 'adm']] },
     { key: 'g-suivi', label: 'Exécution', kids: [['sxeng', 'Engagements', 'ecr'], ['sxliq', 'Liquidations', 'ecr'], ['sxpay', 'Paiements', 'ecr'], ['sxenc', 'Encaissements', 'ecr'], ['sxphy', 'Avancement physique', 'ecr']] },
     { key: 'g-rapports', label: 'Analyses', kids: [['anfin', 'Vue d’ensemble', 'ana'], ['aneng', 'Engagements et PPM', 'ana'], ['anrea', 'Réalisations et PTBA', 'ana'], ['andec', 'Décaissements et plan', 'ana'], ['anphy', 'Physique et PTA', 'ana'], ['anfp', 'Finances et physique', 'ana'], ['ansit', 'Par site', 'ana'], ['anplu', 'Pluriannuel', 'ana'], ['anale', 'Alertes', 'ana']] },
