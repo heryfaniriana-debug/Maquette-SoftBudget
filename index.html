@@ -12073,41 +12073,62 @@ function fmAxes() {
     });
   }
   function cvTotal(r) { return cvSum(cvPerims(r), 'dem'); }
+  /* Points à vérifier avant de valider : bloquants (ko) ou à surveiller (warn) */
+  function cvIssues(r) {
+    var out = [], pn = cvPending(r);
+    if (pn.length) out.push({ pt: 'Activités proposées à traiter', cst: pl(pn.length, 'activité') + ' proposée' + (pn.length > 1 ? 's' : '') + ' à la collecte : à accepter, fusionner ou rejeter.', sev: 'ko', pend: true });
+    cvPerims(r).forEach(function (x) {
+      var n = x.p.p;
+      if (x.p.env != null && x.dem > x.p.env) out.push({ pt: 'Dépassement du maximum', cst: n + ' : ' + fmt(x.dem) + ' MGA demandés pour ' + fmt(x.p.env) + ' autorisés (+' + fmt(x.dem - x.p.env) + ' MGA).', sev: 'ko', perim: n });
+      var tg = tgtInds(x.p), worst = tg.filter(function (z) { return z.pos && z.pos.st === 'Non atteignable'; })[0], cond = tg.filter(function (z) { return z.pos && z.pos.st === 'Atteignable sous conditions'; })[0], unc = tg.filter(function (z) { return covOf(x.p, z).rate < 1; })[0];
+      if (worst) out.push({ pt: 'Objectif non atteignable', cst: n + ' : « ' + worst.lib + ' » ne peut pas être atteint avec les travaux prévus.', sev: 'ko', perim: n });
+      else if (cond) out.push({ pt: 'Objectif sous conditions', cst: n + ' : « ' + cond.lib + ' » n’est atteignable que sous conditions.', sev: 'warn', perim: n });
+      else if (unc) out.push({ pt: 'Objectif non couvert', cst: n + ' : « ' + unc.lib + ' » n’est pas couvert en totalité par les travaux planifiés (' + Math.round(covOf(x.p, unc).rate * 100) + ' %).', sev: 'warn', perim: n });
+      var add = x.lines.filter(function (z) { return z.added; }); if (add.length) out.push({ pt: 'Lignes hors plan', cst: n + ' : ' + pl(add.length, 'ligne') + ' ajoutée' + (add.length > 1 ? 's' : '') + ' en cours de collecte (' + fmt(cvSum(add, 'dem')) + ' MGA).', sev: 'warn', perim: n });
+      if (!(x.p.inds || []).length && x.dem > 0) out.push({ pt: 'Aucun indicateur', cst: n + ' : ' + fmt(x.dem) + ' MGA demandés sans indicateur rattaché.', sev: 'warn', perim: n });
+      var v = x.ref ? Math.round((x.dem - x.ref) / x.ref * 100) : null; if (v != null && Math.abs(v) >= 15) out.push({ pt: 'Écart avec la référence', cst: n + ' : ' + (v > 0 ? '+' : '') + v + ' % par rapport au budget de référence (' + fmt(x.ref) + ' MGA).', sev: 'warn', perim: n });
+    });
+    return out;
+  }
   function cvBadge(st) { return badge(st, st === 'Validée' ? 'b-ok' : (st === 'En validation' ? 'b-info' : (st === 'Correction demandée' || st === 'Corrigée' ? 'b-warn' : 'b-neutral'))); }
   function cvEl(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
   function cvKpi(label, v) { var k = cvEl('div', 'co-kpi'); k.appendChild(cvEl('div', 'l', label)); var d = cvEl('div', 'v'); if (typeof v === 'string') d.textContent = v; else d.appendChild(v); k.appendChild(d); return k; }
   /* Contenu commun : synthèse, graphique simple, périmètres dépliables, et (en consultation) historique */
   function cvRender(root, r, withHist) {
     root.innerHTML = '';
-    var c = cvCamp(r), pe = cvPerims(r), tot = cvSum(pe, 'dem');
-    var tsd = 0; pe.forEach(function (x) { if (!(x.p.inds || []).length && x.dem > 0) tsd++; });
-    var k = cvEl('div', 'co-kpis');
-    k.appendChild(cvKpi('Campagne', c ? c.code + ' — ' + c.lib : r.camp));
-    k.appendChild(cvKpi('Montant consolidé', fmt(tot) + ' MGA'));
-    var vb = cvEl('div'); vb.appendChild(cvBadge(r.st)); vb.appendChild(document.createTextNode(' ' + (r.st === 'En validation' ? r.step + ' · ' + r.validator : r.validator)));
-    k.appendChild(cvKpi('Validation', vb)); var pnd = cvPending(r); if (pnd.length) k.appendChild(cvKpi('Activités proposées', pl(pnd.length, 'à traiter')));
-    root.appendChild(k);
-    /* graphique : barre du demandé par périmètre, repère = référence */
-    var ch = cvEl('section', 'co-blk'); ch.appendChild(cvEl('div', 'kb-h', 'Répartition du montant demandé par périmètre'));
-    var mx = Math.max.apply(null, pe.map(function (x) { return Math.max(x.dem, x.ref, (x.p.env || 0)); }).concat([1]));
-    pe.forEach(function (x) {
-      var row = cvEl('div', 'cv-chart-row');
-      row.appendChild(cvEl('div', 'n', x.p.p));
-      var tr = cvEl('div', 'cv-bar'); var f = cvEl('div', 'cv-fill'); f.style.width = (100 * x.dem / mx) + '%';
-      if (x.p.env != null && x.dem > x.p.env) f.classList.add('over');
-      tr.appendChild(f);
-      if (x.ref) { var m = cvEl('div', 'cv-mark'); m.style.left = (100 * x.ref / mx) + '%'; m.title = 'Référence : ' + fmt(x.ref); tr.appendChild(m); }
-      row.appendChild(tr);
-      var v = x.ref ? Math.round((x.dem - x.ref) / x.ref * 100) : null;
-      row.appendChild(cvEl('div', 'a', fmt(x.dem) + (v != null ? ' (' + (v > 0 ? '+' : '') + v + ' %)' : '')));
-      ch.appendChild(row);
-    });
-    ch.appendChild(cvEl('div', 'hint', 'Barre : montant demandé · trait : budget de référence · rouge : au-dessus du maximum du périmètre.'));
-    root.appendChild(ch);
+    var c = cvCamp(r), pe = cvPerims(r), tot = cvSum(pe, 'dem'), iss = cvIssues(r), nKo = iss.filter(function (z) { return z.sev === 'ko'; }).length, nWa = iss.length - nKo, perDet = {}, detSec;
+    /* 1. En bref : le verdict, puis les chiffres qui comptent */
+    var envT = pe.reduce(function (s, x) { return s + (x.p.env != null ? x.p.env : 0); }, 0), hasEnv = pe.some(function (x) { return x.p.env != null; });
+    var br = cvEl('div', 'callout'); br.style.cssText = 'margin-bottom:14px;display:block';
+    var vb = badge(nKo ? 'À corriger avant validation' : (nWa ? 'À examiner' : 'Prête à valider'), nKo ? 'b-ko' : (nWa ? 'b-warn' : 'b-ok')); vb.style.marginRight = '8px'; br.appendChild(vb);
+    br.appendChild(document.createTextNode(fmt(tot) + ' MGA demandés' + (hasEnv ? ' pour un maximum de ' + fmt(envT) + ' MGA' : '') + ' par ' + pl(pe.length, 'périmètre') + '. ' + (iss.length ? (nKo ? pl(nKo, 'point bloquant') + (nWa ? ' et ' + nWa + ' à surveiller' : '') + '.' : pl(nWa, 'point') + ' à surveiller, aucun bloquant.') : 'Aucun point à vérifier.') + (r.st === 'En validation' ? ' Étape : ' + r.step + ' · ' + r.validator + '.' : ' Statut : ' + r.st + '.')));
+    root.appendChild(br);
+    /* 2. Décision, en haut de l'écran de détail */
+    if (withHist && r.st === 'En validation') {
+      var db = cvEl('div'); db.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:14px';
+      cvActions(r).filter(function (a) { return a[0] === 'Valider' || /^Demander une correction/.test(a[0]); }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] ? ' ' + a[1] : ''), a[0]); b.type = 'button'; b.addEventListener('click', a[2]); db.appendChild(b); });
+      root.appendChild(db);
+    }
+    /* 3. Points à vérifier : un seul tableau */
+    var pv = cvEl('section', 'co-blk'); pv.appendChild(cvEl('div', 'kb-h', 'Points à vérifier'));
+    if (!iss.length) pv.appendChild(cvEl('div', 'hint', 'Rien à signaler : budget dans les maximums, objectifs couverts, aucune activité à traiter.'));
+    else {
+      var sc0 = cvEl('div', 'scroll'), tb0 = cvEl('table'); tb0.style.minWidth = '720px';
+      tb0.innerHTML = '<thead><tr><th>Point</th><th>Constat</th><th>Gravité</th><th></th></tr></thead>'; var tbd0 = cvEl('tbody');
+      iss.forEach(function (z) {
+        var tr = cvEl('tr'); tr.appendChild(cvEl('td', 'name', z.pt)); tr.appendChild(cvEl('td', null, z.cst));
+        var g = cvEl('td'); g.appendChild(badge(z.sev === 'ko' ? 'Bloquant' : 'À surveiller', z.sev === 'ko' ? 'b-ko' : 'b-warn')); tr.appendChild(g);
+        var a = cvEl('td'); a.style.whiteSpace = 'nowrap'; var bb = cvEl('button', 'btn small', z.pend ? 'Traiter' : 'Voir'); bb.type = 'button';
+        bb.addEventListener('click', function () { if (z.pend) { propOpen(r); return; } var d0 = perDet[z.perim]; if (!d0) return; detSec.open = true; d0.open = true; d0.scrollIntoView({ block: 'center' }); });
+        a.appendChild(bb); tr.appendChild(a); tbd0.appendChild(tr);
+      });
+      tb0.appendChild(tbd0); sc0.appendChild(tb0); pv.appendChild(sc0);
+    }
+    root.appendChild(pv);
     /* périmètres dépliables, avec leurs lignes */
-    var bl = cvEl('section', 'co-blk'); bl.appendChild(cvEl('div', 'kb-h', 'Périmètres : objectif, indicateurs et lignes — cliquez pour dérouler'));
+    var bl = cvEl('details', 'co-blk'); detSec = bl; var bls = cvEl('summary', 'kb-h', 'Détail par périmètre : objectif, indicateurs et lignes'); bls.style.cursor = 'pointer'; bl.appendChild(bls);
     pe.forEach(function (x) {
-      var d = cvEl('details', 'val-cfg'); var s = cvEl('summary', 'cv-sum');
+      var d = cvEl('details', 'val-cfg'); perDet[x.p.p] = d; var s = cvEl('summary', 'cv-sum');
       var nmd = cvEl('div'); nmd.appendChild(cvEl('b', null, x.p.p));
       var tg = tgtInds(x.p), nI = (x.p.inds || []).length, bI;
       var worst = tg.filter(function (z) { return z.pos && z.pos.st === 'Non atteignable'; })[0], cond = tg.filter(function (z) { return z.pos && z.pos.st === 'Atteignable sous conditions'; })[0], unc = tg.filter(function (z) { return covOf(x.p, z).rate < 1; })[0];
@@ -12128,7 +12149,7 @@ function fmAxes() {
     });
     root.appendChild(bl);
     if (withHist) {
-      var hs = cvEl('section', 'co-blk'); hs.appendChild(cvEl('div', 'kb-h', 'Historique de la validation'));
+      var hs = cvEl('details', 'co-blk cv-hist'); var hsm = cvEl('summary', 'kb-h', 'Historique de la validation'); hsm.style.cursor = 'pointer'; hs.appendChild(hsm);
       r.hist.forEach(function (h) { var row = cvEl('div', 'list-row'); var l = cvEl('div'); l.appendChild(cvEl('b', null, h.t)); l.appendChild(cvEl('div', 'hby', h.by)); row.appendChild(l); row.appendChild(cvEl('span', 'when', h.on)); hs.appendChild(row); });
       root.appendChild(hs);
     }
@@ -12162,6 +12183,7 @@ function fmAxes() {
   function cvAfter(msg) {
     var p = document.getElementById('cv-dec'); if (p && !p.hidden) { var cl = document.getElementById('cv-dec-close'); if (cl) cl.click(); }
     renderValCfg(); if (typeof renderTasks === 'function') renderTasks(); cvSay('tk-msg', msg);
+    if (cvViewCur && !document.getElementById('cv-view').hidden) { cvDetail(cvViewCur); cvSay('cv-msg', msg); }
   }
   var cvCur = null;
   function cvOpenDecision(id) {
@@ -12170,8 +12192,14 @@ function fmAxes() {
     document.getElementById('cv-dec-title').textContent = 'Valider la campagne consolidée — ' + (c ? c.code : r.camp);
     var bar = document.getElementById('cv-dec-bar'); bar.innerHTML = '';
     var can = r.st === 'En validation';
-    [['Valider', 'primary', function () {
-        var pn = cvPending(r); if (pn.length) { cvAsk({ title: 'Validation impossible', ok: 'Fermer', required: false, placeholder: pl(pn.length, 'activité') + ' proposée' + (pn.length > 1 ? 's' : '') + ' à la collecte reste à traiter : acceptez, fusionnez ou rejetez ' + (pn.length > 1 ? 'chacune' : 'cette activité') + ' avant de valider.' }, function () {}); return; } cvAsk({ title: 'Valider la campagne consolidée', ok: 'Valider', required: false, placeholder: 'Commentaire de validation' }, function (com) {
+    cvActions(r).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] ? ' ' + a[1] : ''), a[0]); b.type = 'button'; b.disabled = !can; b.addEventListener('click', a[2]); bar.appendChild(b); });
+    cvRender(document.getElementById('cv-dec-body'), r, false);
+    document.getElementById('cv-dec').hidden = false;
+  }
+  function cvActions(r) {
+    var c = cvCamp(r);
+    return [['Valider', 'primary', function () {
+        var bk = cvIssues(r).filter(function (z) { return z.sev === 'ko'; }); if (bk.length) { cvAsk({ title: 'Validation impossible', ok: 'Fermer', required: false, placeholder: 'À régler avant de valider :\n' + bk.map(function (z) { return '• ' + z.pt + ' — ' + z.cst; }).join('\n') }, function () {}); return; } cvAsk({ title: 'Valider la campagne consolidée', ok: 'Valider', required: false, placeholder: 'Commentaire de validation' }, function (com) {
           r.st = 'Validée'; r.step = 'Terminée'; r.hist.unshift({ t: 'Validée' + (com ? ' — ' + com : ''), by: ME, on: nowStr() }); cvAfter('Campagne ' + r.camp + ' validée.'); });
       }],
      ['Nouvelles activités' + (cvPending(r).length ? ' (' + cvPending(r).length + ')' : ''), '', function () { propOpen(r); }],
@@ -12201,9 +12229,12 @@ function fmAxes() {
           var p = c.perims.filter(function (x) { return x.p === per; })[0]; if (p) { p.st = 'Retournée'; p.motif = com; }
           r.st = 'Correction demandée'; r.step = 'En attente du contributeur'; r.hist.unshift({ t: 'Correction demandée à ' + ((p && p.who) || 'contributeur') + ' (' + per + ') — ' + com, by: ME, on: nowStr() });
           cvAfter('Demande de correction envoyée pour « ' + per + ' ».'); });
-      }]].forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] ? ' ' + a[1] : ''), a[0]); b.type = 'button'; b.disabled = !can; b.addEventListener('click', a[2]); bar.appendChild(b); });
-    cvRender(document.getElementById('cv-dec-body'), r, false);
-    document.getElementById('cv-dec').hidden = false;
+      }]];
+  }
+  var cvViewCur = null;
+  function cvDetail(r) {
+    cvViewCur = r; document.getElementById('cv-view-title').textContent = 'Campagne consolidée — ' + (cvCamp(r) ? cvCamp(r).code : r.camp);
+    var body = document.getElementById('cv-view-body'); cvRender(body, r, true); bvPreviewBlock(body, r); document.getElementById('cv-view').hidden = false;
   }
   document.getElementById('cv-dec-close').addEventListener('click', function () { document.getElementById('cv-dec').hidden = true; });
   document.getElementById('cv-view-close').addEventListener('click', function () { document.getElementById('cv-view').hidden = true; });
@@ -12710,7 +12741,7 @@ function fmAxes() {
       cell(tr, r.hist.length ? r.hist[0].on : '—');
       var act = cell(tr, '');
       var b1 = cvEl('button', 'btn small', 'Consulter'); b1.type = 'button';
-      b1.addEventListener('click', function () { document.getElementById('cv-view-title').textContent = 'Campagne consolidée — ' + (c ? c.code : r.camp); cvRender(document.getElementById('cv-view-body'), r, true); bvPreviewBlock(document.getElementById('cv-view-body'), r); document.getElementById('cv-view').hidden = false; });
+      b1.addEventListener('click', function () { cvDetail(r); });
       var b2 = cvEl('button', 'btn small', 'Relancer'); b2.type = 'button'; b2.disabled = r.st !== 'En validation'; if (b2.disabled) b2.title = 'Seule une validation en cours peut être relancée.';
       b2.addEventListener('click', function () { r.hist.unshift({ t: 'Relance envoyée à ' + r.validator, by: ME, on: nowStr() }); renderValCfg(); cvSay('cv-msg', 'Relance envoyée à ' + r.validator + ' pour ' + r.camp + '.'); });
       act.appendChild(b1); act.appendChild(b2);
@@ -12731,11 +12762,11 @@ function fmAxes() {
   }
   /* Dans le détail de la campagne : bascule Aperçu du PTBA / Aperçu du PTA */
   function bvPreviewBlock(root, r) {
-    var box = cvEl('div'); box.style.marginTop = '18px';
+    var box = cvEl('details', 'co-blk'), bsm = cvEl('summary', 'kb-h', 'Aperçu du PTBA et du PTA'); bsm.style.cursor = 'pointer'; box.appendChild(bsm);
     var seg = cvEl('div', 'seg'), host = cvEl('div'); host.style.marginTop = '12px';
     function show(k) { host.innerHTML = ''; host.appendChild(bvPreview(r, k)); seg.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.dataset.k === k); }); }
     [['ptba', 'Aperçu du PTBA'], ['pta', 'Aperçu du PTA']].forEach(function (x) { var b = cvEl('button', null, x[1]); b.type = 'button'; b.dataset.k = x[0]; b.addEventListener('click', function () { show(x[0]); }); seg.appendChild(b); });
-    box.appendChild(seg); box.appendChild(host); root.appendChild(box); show('ptba');
+    seg.style.marginTop = '12px'; box.appendChild(seg); box.appendChild(host); var hh = root.querySelector('.cv-hist'); if (hh) root.insertBefore(box, hh); else root.appendChild(box); show('ptba');
   }
   function renderArb() {
     renderValCfg();
