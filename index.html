@@ -2019,6 +2019,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="perso" title="Charges de personnel : effectifs, recrutements et masse salariale" style="display:none">Charges de personnel</button>
           <button data-go="cles" title="Clés de répartition des charges communes" style="display:none">Clés de répartition</button>
           <button data-go="conso" title="Consolidation des budgets des directions" style="display:none">Consolidation</button>
+          <button data-go="scen" title="Scénarios : prudent, central, optimiste" style="display:none">Scénarios</button>
           <button data-go="camp" title="Campagnes budgétaires">Campagnes</button>
           <button data-go="collecte" title="Collecte et consolidation">Collecte</button>
           <button data-go="arb" title="Valider les données collectées">Validation</button>
@@ -2137,6 +2138,7 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
           <button data-go="dispo">Disponibilités</button>
           <button data-go="alertes" title="Dépassements et alertes">Alertes</button>
           <button data-go="prev" title="Prévisions de fin de période">Prévisions</button>
+          <button data-go="roll" title="Prévisions glissantes sur 12 mois" style="display:none">Prévisions glissantes</button>
                     <button data-go="cash" title="Résultat prévisionnel et plan de trésorerie">Résultat et trésorerie</button>
           <button data-go="bkdvr" title="Budget de décaissement comparé au relevé bancaire">Décaissement vs relevé</button>
           <button data-go="pluri" title="Suivi budgétaire pluriannuel">Suivi pluriannuel</button>
@@ -5622,6 +5624,18 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
         <div id="conso-body"></div>
       </section>
 
+      <section class="view" id="v-scen">
+        <div class="head"><div><h1>Scénarios</h1><p>Testez le budget face à plusieurs hypothèses : volumes et prix de vente, taux de marge, salaires, inflation. Le scénario central reprend le cadrage ; chacun donne son résultat prévisionnel.</p></div>
+          <div class="actions"><button class="btn primary" id="scen-new">+ Nouveau scénario</button></div></div>
+        <div class="callout" id="scen-msg" hidden style="margin-bottom:12px"></div>
+        <div id="scen-body"></div>
+      </section>
+
+      <section class="view" id="v-roll">
+        <div class="head"><div><h1>Prévisions glissantes</h1><p>Le réalisé jusqu’à l’arrêté, puis une prévision sur les 12 mois suivants, direction par direction, comparée au budget. Elle se recale à chaque arrêté.</p></div></div>
+        <div id="roll-body"></div>
+      </section>
+
       <section class="view" id="v-orga">
         <div class="head"><div><h1>Organisation</h1><p>L’organigramme de l’entreprise : directions, services et centres de responsabilité. Chaque ligne de budget et chaque utilisateur se rattache à un centre.</p></div>
           <div class="actions"><button class="btn primary" id="orga-new">+ Nouveau centre</button></div></div>
@@ -6875,6 +6889,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     perso: ['Élaboration', 'Charges de personnel'],
     cles: ['Élaboration', 'Clés de répartition'],
     conso: ['Élaboration', 'Consolidation'],
+    scen: ['Élaboration', 'Scénarios'],
+    roll: ['Analyses', 'Prévisions glissantes'],
     usr: ['Paramètres', 'Utilisateurs et droits'],
     roles: ['Paramètres', 'Groupes de rôles'],
     echeanc: ['Paramètres', 'Échéances'],
@@ -6898,12 +6914,12 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
   var homeSvg = '<svg class="ico" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>';
 
   var NAVGROUPS = {
-    'nav-budgets': ['list', 'cadr', 'perso', 'cles', 'conso', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
+    'nav-budgets': ['list', 'cadr', 'perso', 'cles', 'conso', 'scen', 'create', 'bud', 'detail', 'saisie', 'valid', 'camp', 'collecte', 'arb', 'ptba', 'pta', 'ppm', 'pad', 'avini', 'inv', 'pubdot', 'pubpep', 'pubrect', 'revis'],
     'nav-suivi': ['appr', 'dprap', 'real', 'engage', 'decaiss', 'encaiss', 'sxeng', 'sxliq', 'sxpay', 'sxenc', 'sxphy', 'trpos'],
     'nav-cadm': ['dpeng', 'dpliq', 'dpord', 'dppay', 'dptab', 'dpclot', 'dprap', 'cadint', 'pubcred', 'pubeng', 'publiq', 'pubord', 'pubpay', 'pubtab', 'pubclot', 'pubrec'],
     'nav-plan': ['ptba', 'pta', 'ppm', 'ppmk', 'pdec', 'revpl', 'rep'],
     'nav-treso': ['bkacc', 'bkdec', 'dfon', 'bkrel', 'bkrap'],
-    'nav-rapports': ['ansit', 'anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
+    'nav-rapports': ['ansit', 'anfin', 'aneng', 'anrea', 'andec', 'anphy', 'anfp', 'anplu', 'anale', 'anver', 'synth', 'ecarts', 'dispo', 'alertes', 'prev', 'roll', 'bkdvr', 'cadm', 'cash', 'pluri', 'vcmp', 'compare', 'rapports', 'exports'],
     'nav-params': ['params', 'usr', 'roles', 'echeanc', 'alrt', 'plana', 'sites', 'orga', 'regime', 'circuits', 'bailleurs', 'sources', 'taux', 'struct', 'corresp', 'parcours', 'trev', 'droits', 'audit', 'notifcfg', 'rclot', 'interfaces', 'ctrl', 'ctpl']
   };
   var GROUPBOX = { 'nav-pcadre': 'g-pcadre', 'nav-budgets': 'g-budgets', 'nav-plan': 'g-plan', 'nav-cadm': 'g-cadm', 'nav-suivi': 'g-suivi', 'nav-treso': 'g-treso', 'nav-rapports': 'g-rapports', 'nav-params': 'g-params' };
@@ -6955,6 +6971,8 @@ body.sb-auth{ height:auto; min-height:100%; background:#F5F7F9; }
     if (name === 'perso' && typeof persRender === 'function') persRender();
     if (name === 'cles' && typeof clesRender === 'function') clesRender();
     if (name === 'conso' && typeof consoRender === 'function') consoRender();
+    if (name === 'scen' && typeof scenRender === 'function') scenRender();
+    if (name === 'roll' && typeof rollRender === 'function') rollRender();
     if (name === 'camp' && typeof renderCamps === 'function') renderCamps();
     if (name === 'usr' && typeof guRender === 'function') guRender();
     if (name === 'roles' && typeof roRender === 'function') roRender();
@@ -15213,7 +15231,7 @@ var EXEC_REC = [
     regSetVis('.sub button[data-go="regime"]', typeof ACC === 'undefined' || ACC === 'admin');
     regSetVis('.sub button[data-go="circuits"]', circ && adv);
     regSetVis('.sub button[data-go="sources"], .sub button[data-go="bailleurs"], .sub button[data-go="taux"]', code === 'prj' || (cfg.regime === 'projet' && cfg.mods.multi));
-    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="cadr"]', code === 'ent'); regSetVis('.sub button[data-go="perso"]', code === 'ent'); regSetVis('.sub button[data-go="cles"], .sub button[data-go="conso"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
+    regSetVis('.sub button[data-go="avini"]', code === 'prj' && cfg.regime === 'projet' && cfg.mods.treso); regSetVis('.sub button[data-go="rep"]', code === 'prj'); regSetVis('.sub button[data-go="revpl"]', code === 'prj'); regSetVis('.sub button[data-go="plana"]', false); regSetVis('.sub button[data-go="sites"]', code === 'prj'); regSetVis('#g-params .sub button[data-go="audit"]', code === 'pub'); regSetVis('.sub button[data-go="usr"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="roles"]', code === 'prj' || code === 'ent'); regSetVis('.sub button[data-go="echeanc"]', code === 'prj'); regSetVis('.sub button[data-go="alrt"]', code === 'prj'); regSetVis('.sub button[data-go="resu"]', code !== 'ent'); regSetVis('.sub button[data-go="orga"]', code === 'ent'); regSetVis('.sub button[data-go="cadr"]', code === 'ent'); regSetVis('.sub button[data-go="perso"]', code === 'ent'); regSetVis('.sub button[data-go="cles"], .sub button[data-go="conso"], .sub button[data-go="scen"], .sub button[data-go="roll"]', code === 'ent'); regSetVis('.sub button[data-go="ansit"]', code === 'prj');
     if (code === 'prj') regSetVis('#g-rapports .sub button:not(.anp)', false);
     prmMenu(code); if (typeof siteCtxSync === 'function') siteCtxSync();
     regSetVis('#g-params .sub button[data-go="corresp"], #g-params .sub button[data-go="interfaces"]', code === 'pub'); if (code === 'prj') regSetVis('#g-params .sub button[data-go="ctpl"]', false); /* projet : la pièce justificative se règle à la création de la campagne */
@@ -19204,6 +19222,82 @@ var EXEC_REC = [
     blk('Conditions pour passer à l’arbitrage', dpMini(['Condition', 'État', 'Détail'], ck, [], ''), ok ? 'Toutes les conditions sont réunies : le budget peut être transmis à l’arbitrage depuis la collecte.' : 'Traitez les points « À traiter » avant de transmettre le budget à l’arbitrage.');
   }
   document.getElementById('conso-go').addEventListener('click', function () { show('collecte'); });
+  /* ----- Entreprise : scénarios (volumes, prix, marge, salaires, inflation) ----- */
+  var SCEN = { '2027': { ret: 'central', seq: 3, list: [
+    { id: 'central', nom: 'Central (cadrage)', dv: 0, dp: 0, dm: 0, dsal: 0, dinfl: 0, fixe: true },
+    { id: 'prudent', nom: 'Prudent', dv: -10, dp: -3, dm: -2, dsal: 1, dinfl: 3 },
+    { id: 'optimiste', nom: 'Optimiste', dv: 8, dp: 2, dm: 1.5, dsal: 0, dinfl: -1 }] } };
+  var SCENV = { ex: '2027' };
+  function scenOf(ex) { if (!SCEN[ex]) SCEN[ex] = { ret: 'central', seq: 1, list: [{ id: 'central', nom: 'Central (cadrage)', dv: 0, dp: 0, dm: 0, dsal: 0, dinfl: 0, fixe: true }] }; return SCEN[ex]; }
+  /* base du budget : demandes des directions, charges de personnel et charges communes de l'exercice */
+  function entSynth(ex) { var cp = camps.filter(function (k) { return k.prof === 'Entreprise' && k.ex === ex && k.st !== 'Annulée'; })[0], dm = 0; cadrDirs().forEach(function (d) { var p = cp ? cp.perims.filter(function (x) { return x.p === d.nom; })[0] : null; dm += p ? p.amt || 0 : 0; }); var cc = 0; clesOf(ex).pools.forEach(function (p) { cc += p.mt; }); return { dm: dm, pers: persTot(ex).tot, cc: cc }; }
+  function scenCalc(ex, s) {
+    var c = cadrOf(ex), S = entSynth(ex), ca = 0, mg = 0; c.ca.forEach(function (l) { var v = (l.vol || 0) * (1 + s.dv / 100) * (l.prix || 0) * (1 + s.dp / 100); ca += v; mg += v * Math.max(0, Math.min(100, (l.marge || 0) + s.dm)) / 100; });
+    var pers = S.pers * (1 + s.dsal / 100), aut = Math.max(S.dm - S.pers, 0) * (1 + s.dinfl / 100), cc = S.cc * (1 + s.dinfl / 100); ca = Math.round(ca); mg = Math.round(mg); pers = Math.round(pers); aut = Math.round(aut); cc = Math.round(cc);
+    return { ca: ca, mg: mg, pers: pers, aut: aut, cc: cc, res: mg - pers - aut - cc };
+  }
+  function scenMsg(t, k) { bkMsg('scen-msg', t, k || 'ok'); }
+  function scenRender() {
+    guUse(activeCode()); var ex = SCENV.ex, D = scenOf(ex), b = document.getElementById('scen-body'); b.innerHTML = '';
+    var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Exercice')); bar.appendChild(guSel(['2026', '2027', '2028'].map(function (y) { return [y, y]; }), ex, function (v) { SCENV.ex = v; scenRender(); }, 'Exercice')); bar.appendChild(cvEl('span', 'hint', 'Scénario retenu : ' + (D.list.filter(function (s) { return s.id === D.ret; })[0] || D.list[0]).nom)); b.appendChild(bar);
+    var R = D.list.map(function (s) { return scenCalc(ex, s); }), ce = R[0];
+    b.appendChild(dpTiles(D.list.slice(0, 4).map(function (s, i) { var r = R[i]; return [s.nom, fmt(r.res) + ' MGA', r.res >= 0 ? 'ok' : 'warn', 'résultat prévisionnel' + (i ? ' (' + (r.res - ce.res >= 0 ? '+' : '') + fmt(r.res - ce.res) + ' par rapport au central)' : '')]; }), { cols: Math.min(D.list.length, 4) }));
+    var head = ['Hypothèses et résultats'].concat(D.list.map(function (s) { return s.nom + (s.id === D.ret ? ' ✔ retenu' : ''); }));
+    function row(l, f) { return [l].concat(D.list.map(function (s, i) { return f(s, R[i], i); })); }
+    function pc(v) { return (v > 0 ? '+' : '') + cadrDec(v) + ' %'; }
+    var rows = [
+      row('Volumes de vente', function (s) { return pc(s.dv); }), row('Prix de vente', function (s) { return pc(s.dp); }), row('Taux de marge (points)', function (s) { return (s.dm > 0 ? '+' : '') + cadrDec(s.dm); }), row('Salaires (écart au cadrage)', function (s) { return pc(s.dsal); }), row('Inflation sur les autres charges', function (s) { return pc(s.dinfl); }),
+      row('Chiffre d’affaires', function (s, r) { return fmt(r.ca); }), row('Marge', function (s, r) { return fmt(r.mg) + ' (' + (r.ca ? cadrDec(r.mg / r.ca * 100) : '0') + ' %)'; }), row('Charges de personnel', function (s, r) { return fmt(r.pers); }), row('Autres charges et investissements', function (s, r) { return fmt(r.aut); }), row('Charges communes', function (s, r) { return fmt(r.cc); }),
+      row('Résultat prévisionnel', function (s, r) { return badge(fmt(r.res), r.res >= 0 ? 'b-ok' : 'b-ko'); }), row('Écart au scénario central', function (s, r, i) { return i ? (r.res - ce.res >= 0 ? '+' : '') + fmt(r.res - ce.res) : '—'; })
+    ];
+    var act = ['Actions'].concat(D.list.map(function (s) { var a = cvEl('div'); a.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap'; var bm = cvEl('button', 'btn small', 'Modifier'), br = cvEl('button', 'btn small', s.id === D.ret ? 'Retenu' : 'Retenir'), bd = cvEl('button', 'btn small gu-del', 'Supprimer'); bm.type = br.type = bd.type = 'button'; bm.disabled = !!s.fixe; br.disabled = s.id === D.ret; bd.disabled = !!s.fixe || s.id === D.ret; if (s.fixe) bm.title = 'Le scénario central reprend le cadrage : modifiez-le dans Cadrage.';
+      bm.addEventListener('click', function () { scenOpen(D, s); }); br.addEventListener('click', function () { D.ret = s.id; auditAdd('Configuration', 'Scénarios ' + ex, 'Scénario retenu : ' + s.nom); scenMsg('Scénario « ' + s.nom + ' » retenu comme référence du budget ' + ex + '.'); scenRender(); }); bd.addEventListener('click', function () { dirConfirm('Supprimer le scénario', 'Supprimer « ' + s.nom + ' » ?', 'Supprimer', function () { D.list.splice(D.list.indexOf(s), 1); auditAdd('Configuration', 'Scénarios ' + ex, 'Scénario supprimé : ' + s.nom); scenRender(); }); }); a.appendChild(bm); a.appendChild(br); a.appendChild(bd); return a; }));
+    rows.push(act);
+    var tbl = dpMini(head, rows, D.list.map(function (s, i) { return i + 1; }), ''); tbl.querySelectorAll('tbody tr').forEach(function (tr, i) { if (i === 10) tr.style.fontWeight = '700'; });
+    var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', 'Comparaison des scénarios — exercice ' + ex)); var hh = cvEl('div', 'hint', 'Chaque scénario part du cadrage, des demandes des directions et des charges communes, puis applique ses propres hypothèses.'); hh.style.marginBottom = '8px'; x.appendChild(hh); x.appendChild(tbl); b.appendChild(x);
+  }
+  function scenOpen(D, s) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), nm = cvEl('input', 'field'), ins = {}; nm.type = 'text'; nm.value = s ? s.nom : '';
+    var d1 = guField('Nom du scénario', nm, true); d1.className = 'full'; g.appendChild(d1);
+    [['dv', 'Volumes de vente (%)'], ['dp', 'Prix de vente (%)'], ['dm', 'Taux de marge (points)'], ['dsal', 'Salaires, écart au cadrage (%)'], ['dinfl', 'Inflation sur les autres charges (%)']].forEach(function (x) { var i = cvEl('input', 'field'); i.type = 'text'; i.setAttribute('inputmode', 'decimal'); i.value = cadrDec(s ? s[x[0]] : 0); ins[x[0]] = i; g.appendChild(guField(x[1], i, true)); }); f.appendChild(g);
+    var err = cvEl('div', 'err'); f.appendChild(err); var ft = cvEl('div', 'form-foot'); ft.style.cssText = 'margin-top:14px;padding-top:12px'; var bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', s ? 'Enregistrer' : 'Créer le scénario'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft); bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () { var n = nm.value.trim(), v = {}; Object.keys(ins).forEach(function (k) { v[k] = cadrNum(ins[k].value); }); if (n.length < 3) { err.textContent = 'Donnez un nom au scénario.'; return; } if (D.list.some(function (x) { return x !== s && x.nom.toLowerCase() === n.toLowerCase(); })) { err.textContent = 'Un scénario porte déjà ce nom.'; return; } if (v.dv < -100 || v.dp < -100 || Math.abs(v.dm) > 100 || v.dsal < -100 || v.dinfl < -100) { err.textContent = 'Les variations doivent rester plausibles (pas en dessous de −100 %).'; return; }
+      if (s) { s.nom = n; for (var k in v) s[k] = v[k]; } else { v.id = 's' + (++D.seq); v.nom = n; D.list.push(v); } auditAdd('Configuration', 'Scénarios ' + SCENV.ex, (s ? 'Scénario modifié : ' : 'Scénario créé : ') + n); guModalClose(); scenMsg('Scénario « ' + n + ' » enregistré.'); scenRender(); });
+    guModal(s ? 'Modifier le scénario' : 'Nouveau scénario', f, 560);
+  }
+  document.getElementById('scen-new').addEventListener('click', function () { scenOpen(scenOf(SCENV.ex), null); });
+  /* ----- Entreprise : prévisions glissantes sur 12 mois ----- */
+  var ROLLW = [.07, .07, .08, .08, .085, .085, .085, .085, .09, .09, .09, .09], ROLLC = { 'Direction Générale': .97, 'Direction Financière': 1.04, 'Direction Commerciale': 1.08, 'IT & Digital': .93, 'Ressources Humaines': .99 };
+  var ROLLV = { arr: 10, meth: 'rythme', g: 3 };
+  var ROLLM = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  function rollAbs(a) { return { y: 2026 + Math.floor((a - 1) / 12), m: ((a - 1) % 12) + 1 }; }
+  function rollBud(d, a) { var p = rollAbs(a); return (cadrOf(String(p.y)).env[d] || 0) * ROLLW[p.m - 1]; }
+  function rollReal(d, a, i) { var p = rollAbs(a); return Math.round(rollBud(d, a) * (ROLLC[d] || 1) * (1 + 0.06 * Math.sin(p.m * 1.7 + i))); }
+  function rollRender() {
+    guUse(activeCode()); var arr = ROLLV.arr, dirs = cadrDirs(), b = document.getElementById('roll-body'); b.innerHTML = '';
+    var bar = cvEl('div'); bar.style.cssText = 'display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px'; bar.appendChild(cvEl('b', null, 'Arrêté au')); bar.appendChild(guSel([6, 7, 8, 9, 10, 11].map(function (m) { return [String(m), 'fin ' + ROLLM[m - 1] + ' 2026']; }), String(arr), function (v) { ROLLV.arr = parseInt(v, 10); rollRender(); }, 'Arrêté'));
+    bar.appendChild(cvEl('b', null, 'Méthode')); bar.appendChild(guSel([['rythme', 'Rythme des 3 derniers mois'], ['conso', 'Budget × taux de consommation observé'], ['budget', 'Budget prévu']], ROLLV.meth, function (v) { ROLLV.meth = v; rollRender(); }, 'Méthode'));
+    bar.appendChild(cvEl('b', null, 'Croissance annuelle')); var gi = cvEl('input', 'field'); gi.type = 'text'; gi.setAttribute('inputmode', 'decimal'); gi.value = cadrDec(ROLLV.g); gi.style.width = '80px'; gi.addEventListener('change', function () { var v = cadrNum(gi.value); ROLLV.g = Math.max(-50, Math.min(100, v)); rollRender(); }); bar.appendChild(gi); bar.appendChild(cvEl('span', 'hint', '% (méthode du rythme)')); b.appendChild(bar);
+    var per = {}, tot = { real: 0, bud26: 0, fc26: 0, f12: 0, b12: 0 }, mReal = [], mFc = [], mBud = [], N = 12 + arr;
+    for (var a = 1; a <= N; a++) { mReal[a] = 0; mFc[a] = 0; mBud[a] = 0; }
+    dirs.forEach(function (d, i) {
+      var real = 0, bud = 0, b26 = 0, last3 = 0, ytdB = 0; for (var m = 1; m <= arr; m++) { var r = rollReal(d.nom, m, i); real += r; ytdB += rollBud(d.nom, m); mReal[m] += r; if (m > arr - 3) last3 += r; }
+      for (var m2 = 1; m2 <= 12; m2++) b26 += rollBud(d.nom, m2); var cf = ytdB ? real / ytdB : 1, f12 = 0, b12 = 0, fc26 = real;
+      for (var k = 1; k <= 12; k++) { var ab = arr + k, bm = rollBud(d.nom, ab), v = ROLLV.meth === 'rythme' ? last3 / 3 * (1 + ROLLV.g / 100 * k / 12) : (ROLLV.meth === 'conso' ? bm * cf : bm); v = Math.round(v); f12 += v; b12 += bm; mFc[ab] += v; if (ab <= 12) fc26 += v; }
+      for (var q = 1; q <= N; q++) mBud[q] += rollBud(d.nom, q);
+      per[d.nom] = { real: real, b26: b26, fc26: fc26, f12: f12, b12: b12 }; tot.real += real; tot.bud26 += b26; tot.fc26 += fc26; tot.f12 += f12; tot.b12 += b12;
+    });
+    var e26 = tot.fc26 - tot.bud26, e12 = tot.f12 - tot.b12;
+    b.appendChild(dpTiles([['Réalisé à fin ' + ROLLM[arr - 1], fmt(tot.real) + ' MGA', 'brand', tot.bud26 ? cadrDec(tot.real / tot.bud26 * 100) + ' % du budget 2026' : ''], ['Prévision fin 2026', fmt(tot.fc26) + ' MGA', e26 > 0 ? 'warn' : 'ok', (e26 >= 0 ? '+' : '') + fmt(e26) + ' par rapport au budget 2026'], ['Prévision sur 12 mois', fmt(tot.f12) + ' MGA', 'info', 'de ' + ROLLM[arr % 12] + ' ' + rollAbs(arr + 1).y + ' à ' + ROLLM[(arr + 11) % 12] + ' ' + rollAbs(arr + 12).y], ['Écart à 12 mois', (e12 >= 0 ? '+' : '') + fmt(e12) + ' MGA', e12 > 0 ? 'warn' : 'ok', 'par rapport au budget de la même période']], { cols: 4 }));
+    var lab = []; for (var z = 1; z <= N; z++) { var p = rollAbs(z); lab.push(ROLLM[p.m - 1] + ' ' + String(p.y).slice(2)); }
+    var s1 = [], s2 = [], s3 = []; for (var u = 1; u <= N; u++) { s1.push(u <= arr ? mReal[u] : null); s2.push(u === arr ? mReal[u] : (u > arr ? mFc[u] : null)); s3.push(mBud[u]); }
+    var cardx = cvEl('div', 'card'); cardx.style.padding = '14px 16px'; cardx.appendChild(anaChart([{ name: 'Budget', color: DPC.grey, dash: true, data: s3 }, { name: 'Réalisé', color: DPC.ok, data: s1 }, { name: 'Prévision glissante', color: DPC.warn, dash: true, data: s2 }], arr - 1, null, lab));
+    function blk(t, node, hint) { var x = cvEl('section', 'co-blk'); x.appendChild(cvEl('div', 'kb-h', t)); if (hint) { var hh = cvEl('div', 'hint', hint); hh.style.marginBottom = '8px'; x.appendChild(hh); } x.appendChild(node); b.appendChild(x); }
+    blk('Dépenses mensuelles : réalisé, prévision et budget', cardx, 'Les montants sont les dépenses mensuelles de toutes les directions (MGA). La zone grisée est la prévision.');
+    var rows = dirs.map(function (d) { var x = per[d.nom], e1 = x.fc26 - x.b26, e2 = x.f12 - x.b12; return [d.nom, fmt(x.real), fmt(x.b26), fmt(x.fc26), x.b26 ? badge((e1 >= 0 ? '+' : '') + cadrDec(e1 / x.b26 * 100) + ' %', e1 > x.b26 * .03 ? 'b-ko' : (e1 > 0 ? 'b-warn' : 'b-ok')) : '—', fmt(x.f12), fmt(x.b12), x.b12 ? badge((e2 >= 0 ? '+' : '') + cadrDec(e2 / x.b12 * 100) + ' %', e2 > x.b12 * .03 ? 'b-ko' : (e2 > 0 ? 'b-warn' : 'b-ok')) : '—']; });
+    rows.push(['Total', fmt(tot.real), fmt(tot.bud26), fmt(tot.fc26), tot.bud26 ? badge((e26 >= 0 ? '+' : '') + cadrDec(e26 / tot.bud26 * 100) + ' %', e26 > 0 ? 'b-warn' : 'b-ok') : '—', fmt(tot.f12), fmt(tot.b12), tot.b12 ? badge((e12 >= 0 ? '+' : '') + cadrDec(e12 / tot.b12 * 100) + ' %', e12 > 0 ? 'b-warn' : 'b-ok') : '—']);
+    blk('Par direction', dpMini(['Direction', 'Réalisé à l’arrêté', 'Budget 2026', 'Prévision fin 2026', 'Écart', 'Prévision 12 mois', 'Budget 12 mois', 'Écart'], rows, [1, 2, 3, 5, 6], 'Aucune direction.'), 'Écart : prévision moins budget. Vert : dans le budget ; orange : léger dépassement ; rouge : dépassement de plus de 3 %.');
+  }
   (function () {
     var R = RIGHTS0.ROLES2, M = RIGHTS0.RM, U = RIGHTS0.USERS;
     ['Directeur général', 'DAF', 'Contrôleur de gestion', 'Responsable de centre', 'Comptable', 'Auditeur interne'].forEach(function (r) { if (R.indexOf(r) < 0) R.push(r); M[r] = M[r] || {}; });
@@ -19220,10 +19314,10 @@ var EXEC_REC = [
         roles: RIGHTS0.ROLES2, rm: RIGHTS0.RM, users: RIGHTS0.USERS.filter(function (u) { return u.profs.indexOf('Entreprise') >= 0; }), act: RIGHTS0.ACTIONS, adm: 'Administration', cadmap: {}, word: { S: 'Centre', s: 'centre', p: 'centres', all: 'Tous les centres' },
         lv: { 'Administrateur': 4, 'Directeur général': 3, 'DAF': 3, 'Contrôleur de gestion': 3, 'Valideur': 3, 'Contrôleur': 2, 'Comptable': 2, 'Préparateur': 2, 'Auditeur interne': 2, 'Responsable de centre': 1, 'Lecteur': 0 },
         tree: [
-          { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['cadr', 'Cadrage', 'elab'], ['perso', 'Charges de personnel', 'elab'], ['cles', 'Clés de répartition', 'elab'], ['conso', 'Consolidation', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
+          { key: 'g-budgets', label: 'Élaboration', kids: [['list', 'Paramétrage', 'elab'], ['cadr', 'Cadrage', 'elab'], ['perso', 'Charges de personnel', 'elab'], ['cles', 'Clés de répartition', 'elab'], ['conso', 'Consolidation', 'elab'], ['scen', 'Scénarios', 'elab'], ['bud', 'Budgets', 'elab'], ['inv', 'Budget d’investissement', 'elab'], ['revis', 'Révisions', 'elab']] },
           { key: 'g-suivi', label: 'Exécution', kids: [['appr', 'Budgets verrouillés', 'ecr'], ['engage', 'Engagements', 'ecr'], ['real', 'Réalisations', 'ecr'], ['decaiss', 'Paiements comptabilisés', 'ecr'], ['encaiss', 'Recettes comptabilisées', 'ecr']] },
           { key: 'g-treso', label: 'Trésorerie', kids: [['bkdec', 'Plan de trésorerie', 'ecr']] },
-          { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
+          { key: 'g-rapports', label: 'Analyses', kids: [['ecarts', 'Écarts commentés', 'ana'], ['dispo', 'Disponibilités', 'ana'], ['alertes', 'Alertes', 'ana'], ['prev', 'Prévisions', 'ana'], ['roll', 'Prévisions glissantes', 'ana'], ['cash', 'Résultat et trésorerie', 'ana'], ['pluri', 'Suivi pluriannuel', 'ana'], ['vcmp', 'Comparaison de versions', 'ana'], ['rapports', 'États à éditer', 'ana'], ['exports', 'Exports', 'ana']] },
           { key: 'g-params', label: 'Paramètres', kids: [['regime', 'Général', 'prm'], ['orga', 'Organisation', 'prm'], ['roles', 'Groupes de rôles', 'prm'], ['usr', 'Utilisateurs et droits', 'prm'], ['ctrl', 'Contrôles et seuils', 'prm'], ['trev', 'Types de révision', 'prm'], ['rclot', 'Règles de clôture', 'prm'], ['notifcfg', 'Notifications', 'prm']] }
         ],
         priv: [['export', 'Exporter des données', 'Peut exporter les budgets et les analyses en CSV, Excel et PDF', 2], ['tous_centres', 'Tous les centres', 'Voit les budgets de tous les centres de responsabilité (sinon : son propre centre)', 3],
