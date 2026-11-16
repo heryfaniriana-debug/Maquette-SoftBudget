@@ -12102,13 +12102,15 @@ function fmAxes() {
     var br = cvEl('div', 'callout'); br.style.cssText = 'margin-bottom:14px;display:block';
     var vb = badge(nKo ? 'À corriger avant validation' : (nWa ? 'À examiner' : 'Prête à valider'), nKo ? 'b-ko' : (nWa ? 'b-warn' : 'b-ok')); vb.style.marginRight = '8px'; br.appendChild(vb);
     br.appendChild(document.createTextNode(fmt(tot) + ' MGA demandés' + (hasEnv ? ' pour un maximum de ' + fmt(envT) + ' MGA' : '') + ' par ' + pl(pe.length, 'périmètre') + '. ' + (iss.length ? (nKo ? pl(nKo, 'point bloquant') + (nWa ? ' et ' + nWa + ' à surveiller' : '') + '.' : pl(nWa, 'point') + ' à surveiller, aucun bloquant.') : 'Aucun point à vérifier.') + (r.st === 'En validation' ? ' Étape : ' + r.step + ' · ' + r.validator + '.' : ' Statut : ' + r.st + '.')));
-    root.appendChild(br);
-    /* 2. Décision, en haut de l'écran de détail */
-    if (withHist && r.st === 'En validation') {
-      var db = cvEl('div'); db.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:14px';
-      cvActions(r).filter(function (a) { return a[0] === 'Valider' || /^Demander une correction/.test(a[0]); }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] ? ' ' + a[1] : ''), a[0]); b.type = 'button'; b.addEventListener('click', a[2]); db.appendChild(b); });
-      root.appendChild(db);
+    /* Écran de détail : d'abord la décision et les plans à valider (PTBA, PTA, plan de décaissement), le reste en dessous */
+    if (withHist) {
+      var db = cvEl('div'); db.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:14px';
+      var dl = cvEl('div'); dl.appendChild(badge(nKo ? 'À corriger avant validation' : (nWa ? 'À examiner' : 'Prête à valider'), nKo ? 'b-ko' : (nWa ? 'b-warn' : 'b-ok'))); dl.appendChild(document.createTextNode(' ' + fmt(tot) + ' MGA · ' + (nKo ? pl(nKo, 'point bloquant') : (nWa ? pl(nWa, 'point') + ' à surveiller' : 'rien à signaler')) + (r.st === 'En validation' ? '' : ' · ' + r.st))); db.appendChild(dl);
+      var dr = cvEl('div'); dr.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap'; db.appendChild(dr);
+      if (r.st === 'En validation') cvActions(r).filter(function (a) { return a[0] === 'Valider' || /^Demander une correction/.test(a[0]); }).forEach(function (a) { var b = cvEl('button', 'btn' + (a[1] ? ' ' + a[1] : ''), a[0]); b.type = 'button'; b.addEventListener('click', a[2]); dr.appendChild(b); });
+      root.appendChild(db); var slot = cvEl('div', 'cv-prev-slot'); root.appendChild(slot);
     }
+    root.appendChild(br);
     /* 3. Points à vérifier : un seul tableau */
     var pv = cvEl('section', 'co-blk'); pv.appendChild(cvEl('div', 'kb-h', 'Points à vérifier'));
     if (!iss.length) pv.appendChild(cvEl('div', 'hint', 'Rien à signaler : budget dans les maximums, objectifs couverts, aucune activité à traiter.'));
@@ -12760,13 +12762,28 @@ function fmAxes() {
     sc.appendChild(tb); w.appendChild(sc);
     return w;
   }
-  /* Dans le détail de la campagne : bascule Aperçu du PTBA / Aperçu du PTA */
+  /* Aperçu du plan de décaissement : décaissements mensuels déduits du PTBA, puis fonds et solde du compte spécial */
+  function bvPreviewDec(r) {
+    var tv = bvPtba(r), tr = tv.rows.filter(function (x) { return x.k === 'tot'; })[0], w = cvEl('div'), c = bvData(r).c;
+    var out = tr ? tr.c.slice(tv.numFrom + 1) : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], tot = bvSum(out), s = 0, cum = out.map(function (v) { s += v; return s; }), nz = function (v) { return v ? fmt(v) : '—'; };
+    var MH = ['MGA'].concat(BVMOIS, ['Total']), NUM = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    var rows = [['Décaissements prévus (PTBA)'].concat(out.map(nz), [fmt(tot)]), ['Cumul'].concat(cum.map(nz), [''])], sim = null, sum = 'Plan de décaissement : ' + fmt(tot) + ' MGA à décaisser sur l’exercice ' + c.ex + ', déduits du PTBA.';
+    try {
+      sim = pdcSim({ out: out, ex: c.ex }); var reqM = {}; sim.req.forEach(function (q) { reqM[q.m] = q; });
+      rows.push(['Fonds prévus (avance et réapprovisionnements)'].concat(sim.inflow.map(nz), [fmt(bvSum(sim.inflow))]), ['Solde prévu du compte spécial'].concat(sim.bal.map(nz), ['']), ['Demande à déposer'].concat(sim.bal.map(function (v, m) { return reqM[m] ? badge(fmt(reqM[m].mt), 'b-warn') : '—'; }), ['']));
+      var neg = []; for (var i = sim.s; i < 12; i++) if (sim.bal[i] < 0) neg.push(PDC_MOIS[i]);
+      sum += neg.length ? ' Le solde du compte spécial serait négatif en ' + neg.join(', ') + '.' : (sim.req.length ? ' ' + pl(sim.req.length, 'demande') + ' de réapprovisionnement à déposer.' : ' L’avance initiale suffit.');
+    } catch (e) { sim = null; }
+    var cb = cvEl('div', 'callout', sum); cb.style.marginBottom = '12px'; w.appendChild(cb); w.appendChild(dpMini(MH, rows, NUM, '')); return w;
+  }
+  /* Détail de la campagne : en premier, les plans que l'on valide (PTBA, PTA, plan de décaissement) */
   function bvPreviewBlock(root, r) {
-    var box = cvEl('details', 'co-blk'), bsm = cvEl('summary', 'kb-h', 'Aperçu du PTBA et du PTA'); bsm.style.cursor = 'pointer'; box.appendChild(bsm);
+    var box = cvEl('section', 'co-blk'); box.appendChild(cvEl('div', 'kb-h', 'Plans à valider'));
     var seg = cvEl('div', 'seg'), host = cvEl('div'); host.style.marginTop = '12px';
-    function show(k) { host.innerHTML = ''; host.appendChild(bvPreview(r, k)); seg.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.dataset.k === k); }); }
-    [['ptba', 'Aperçu du PTBA'], ['pta', 'Aperçu du PTA']].forEach(function (x) { var b = cvEl('button', null, x[1]); b.type = 'button'; b.dataset.k = x[0]; b.addEventListener('click', function () { show(x[0]); }); seg.appendChild(b); });
-    seg.style.marginTop = '12px'; box.appendChild(seg); box.appendChild(host); var hh = root.querySelector('.cv-hist'); if (hh) root.insertBefore(box, hh); else root.appendChild(box); show('ptba');
+    var kinds = [['ptba', 'PTBA'], ['pta', 'PTA']]; if (typeof REG !== 'undefined' && REG.prj && REG.prj.mods.treso) kinds.push(['dec', 'Plan de décaissement']);
+    function show(k) { host.innerHTML = ''; host.appendChild(k === 'dec' ? bvPreviewDec(r) : bvPreview(r, k)); seg.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.dataset.k === k); }); }
+    kinds.forEach(function (x) { var b = cvEl('button', null, x[1]); b.type = 'button'; b.dataset.k = x[0]; b.addEventListener('click', function () { show(x[0]); }); seg.appendChild(b); });
+    box.appendChild(seg); box.appendChild(host); var sl = root.querySelector('.cv-prev-slot'); if (sl) sl.appendChild(box); else root.appendChild(box); show('ptba');
   }
   function renderArb() {
     renderValCfg();
