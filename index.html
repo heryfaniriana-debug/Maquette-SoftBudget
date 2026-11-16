@@ -23963,8 +23963,7 @@ var EXEC_REC = [
     var comp = cvEl('input', 'field'); comp.type = 'text'; comp.readOnly = true; comp.value = it.p.p; fld('Composante', comp);
     var code = cvEl('input', 'field'); code.type = 'text'; code.value = propNextCode(it.p.p, r); fld('Code de l’activité *', code);
     var lib = cvEl('input', 'field'); lib.type = 'text'; lib.value = it.l.lib || it.l.l; fld('Libellé de l’activité *', lib, true);
-    var sn = cvEl('select', 'field'); Object.keys(NATL).forEach(function (k) { var o = cvEl('option', null, NATL[k]); o.value = k; sn.appendChild(o); }); sn.value = NATL[it.l.nat] ? it.l.nat : '62'; fld('Nature de dépense *', sn);
-    var sf = cvEl('select', 'field'); Object.keys(fin).forEach(function (k) { var o = cvEl('option', null, k); o.value = k; sf.appendChild(o); }); sf.value = (it.l.axv && it.l.axv.Financier) || sf.options[0].value; fld('Source de financement *', sf);
+    var sn = { value: NATL[it.l.nat] ? it.l.nat : '62' }, sf = { value: (it.l.axv && it.l.axv.Financier) || Object.keys(fin)[0] || 'Budget de l’État' }; /* nature et financement : repris de la proposition, rattachés ensuite dans le PTBA */
     f.appendChild(g); var err = cvEl('div', 'err'); f.appendChild(err);
     var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', 'Créer l’activité'); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
     bc.addEventListener('click', guModalClose);
@@ -23979,16 +23978,29 @@ var EXEC_REC = [
     });
     guModal('Créer l’activité au plan analytique', f, 600, true); lib.focus();
   }
+  /* Petite fenêtre de décision (au-dessus de la liste des propositions) */
+  function propDecide(title, okLbl, fields, onOk) {
+    var f = cvEl('div'), g = cvEl('div', 'fgrid'), els = {};
+    fields.forEach(function (x) { var d = cvEl('div', 'full'); d.appendChild(cvEl('label', null, x.lab)); var el = x.opts ? cvEl('select', 'field') : cvEl('textarea', 'field'); if (x.opts) x.opts.forEach(function (o) { var op = cvEl('option', null, o); op.value = o; el.appendChild(op); }); else { el.rows = 3; el.placeholder = x.ph || ''; } d.appendChild(el); g.appendChild(d); els[x.k] = el; });
+    f.appendChild(g); var err = cvEl('div', 'err'); f.appendChild(err);
+    var ft = cvEl('div', 'form-foot'), bc = cvEl('button', 'btn', 'Annuler'), bo = cvEl('button', 'btn primary', okLbl); bc.type = bo.type = 'button'; ft.appendChild(bc); ft.appendChild(bo); f.appendChild(ft);
+    bc.addEventListener('click', guModalClose);
+    bo.addEventListener('click', function () { var v = {}; for (var i = 0; i < fields.length; i++) { var x = fields[i]; v[x.k] = els[x.k].value.trim(); if (x.req && !v[x.k]) { err.textContent = 'Le champ « ' + x.lab.replace(' *', '') + ' » est obligatoire.'; return; } } guModalClose(); guModalClose(); onOk(v); });
+    guModal(title, f, 560, true);
+  }
   function propReject(it) {
-    cvAsk({ title: 'Rejeter l’activité « ' + (it.l.lib || it.l.l) + ' »', ok: 'Rejeter', required: true, cLabel: 'Motif du rejet', placeholder: 'Pourquoi cette activité n’entre-t-elle pas au plan ?' }, function (m) {
-      it.l.prop = { st: 'Rejetée', motif: m, by: ME, on: nowStr() }; it.p.st = 'Retournée'; var r = it.r; r.st = 'Correction demandée'; r.step = 'Correction demandée au contributeur'; r.hist.unshift({ t: 'Activité « ' + (it.l.lib || it.l.l) + ' » rejetée — ' + m, by: ME, on: nowStr() });
+    propDecide('Rejeter l’activité « ' + (it.l.lib || it.l.l) + ' »', 'Rejeter', [{ k: 'm', lab: 'Motif du rejet *', ph: 'Pourquoi cette activité n’entre-t-elle pas au plan ?', req: true }], function (v) {
+      var m = v.m; it.l.prop = { st: 'Rejetée', motif: m, by: ME, on: nowStr() }; it.p.st = 'Retournée'; var r = it.r; r.st = 'Correction demandée'; r.step = 'Correction demandée au contributeur'; r.hist.unshift({ t: 'Activité « ' + (it.l.lib || it.l.l) + ' » rejetée — ' + m, by: ME, on: nowStr() });
       propPaint(); cvAfter('Activité rejetée : la ligne revient au contributeur en correction.');
     });
   }
   function propMerge(it) {
-    var plan = PLAN[it.p.p] || [], opts = plan.map(function (l) { return l.c + ' — ' + l.l; }); if (!opts.length) return;
-    cvAsk({ title: 'Fusionner « ' + (it.l.lib || it.l.l) + ' » avec une activité du plan', ok: 'Fusionner', required: false, optLabel: 'Activité existante', options: opts, placeholder: 'Commentaire (facultatif)' }, function (m, opt) {
-      var code = opt.split(' — ')[0], pl0 = plan.filter(function (l) { return l.c === code; })[0], arr = propSrc(it.p), ex = arr.filter(function (l) { return l.c === code && l !== it.l && l.dem != null; })[0];
+    var seen = {}, plan = []; (PLAN[it.p.p] || []).forEach(function (l) { if (!seen[l.c]) { seen[l.c] = 1; plan.push({ c: l.c, l: l.l }); } });
+    propSrc(it.p).forEach(function (l) { if (l !== it.l && !l.added && l.dem != null && !seen[l.c]) { seen[l.c] = 1; plan.push({ c: l.c, l: l.lib || l.l }); } });
+    var opts = plan.map(function (l) { return l.c + ' — ' + l.l; });
+    if (!opts.length) { propDecide('Aucune activité existante dans ' + it.p.p + ' : utilisez « Créer au plan »', 'Fermer', [], function () { propPaint(); }); return; }
+    propDecide('Fusionner « ' + (it.l.lib || it.l.l) + ' » avec une activité du plan', 'Fusionner', [{ k: 'opt', lab: 'Activité existante du plan *', opts: opts }, { k: 'm', lab: 'Commentaire (facultatif)', ph: 'Pourquoi cette fusion' }], function (v) {
+      var opt = v.opt, m = v.m, code = opt.split(' — ')[0], pl0 = plan.filter(function (l) { return l.c === code; })[0], arr = propSrc(it.p), ex = arr.filter(function (l) { return l.c === code && l !== it.l && l.dem != null; })[0];
       if (ex) { ex.m = (ex.dem || 0) + (it.l.dem || 0); ex.q = null; ex.p = null; ex.dem = ex.m; ex.just = (ex.just ? ex.just + ' ; ' : '') + 'Fusion de « ' + (it.l.lib || it.l.l) + ' »'; arr.splice(arr.indexOf(it.l), 1); }
       else { it.l.c = code; it.l.l = pl0.l; it.l.lib = pl0.l; it.l.prop = { st: 'Fusionnée', into: code, by: ME, on: nowStr() }; }
       it.r.hist.unshift({ t: 'Activité « ' + (it.l.lib || it.l.l) + ' » fusionnée avec ' + opt + (m ? ' — ' + m : ''), by: ME, on: nowStr() }); propPaint(); cvAfter('Activité fusionnée avec ' + opt + '.');
